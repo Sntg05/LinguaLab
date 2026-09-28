@@ -145,6 +145,12 @@ fiable del sitio.
   lingüístico.
 - No hay lematización: no hay léxico.
 
+## Guía de contribución
+
+Cómo alimentar la bibliografía y cómo ampliar el sitio, con las convenciones, los
+invariantes que el compilador protege y las trampas que ya costaron tiempo:
+[`docs/GUIDE.md`](docs/GUIDE.md).
+
 ## Licencias
 
 El código es libre — ver [`LICENSE`](LICENSE). Los datos conservan la licencia de
