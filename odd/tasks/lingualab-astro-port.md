@@ -369,3 +369,16 @@ The statistics on the page are derived from the data, so they cannot go stale.
 
 The masthead advertised eight destinations and only four existed. All eight now
 resolve.
+
+## WU-8 — Audit and publish (in progress)
+
+### Audit
+
+- `legacy/` is not served: Astro copies only `public/`, so the reference tree
+  never reaches `dist/`.
+- Added `404.astro`. GitHub Pages serves `404.html` for unknown paths, so the
+  page has to stand alone; it uses the Spanish copy and offers the English entry
+  point.
+- Sitemap covers all 16 routes (8 pages x 2 locales).
+- README rewritten for the repository front page, including a "known limits"
+  section that states plainly where the tools are approximate.
