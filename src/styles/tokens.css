@@ -1,0 +1,193 @@
+/* ============================================================
+   LinguaLab — Design tokens
+   Single source of truth for colour, type, space and motion.
+   Colours are authored in OKLCH for perceptual uniformity.
+   ============================================================ */
+
+@layer tokens, base, layout, components, utilities;
+
+@layer tokens {
+  :root {
+    color-scheme: light;
+
+    /* ---- Type families ----
+       Noto Sans carries the IPA blocks (Latin Ext + IPA Extensions +
+       Spacing Modifiers + Greek) so phonetic symbols never fall back
+       to tofu. It is loaded per-subset and fetched only when needed. */
+    --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system,
+      "Segoe UI", sans-serif;
+    --font-display: "Newsreader Variable", ui-serif, Georgia, serif;
+    --font-ipa: "Noto IPA", var(--font-sans);
+    --font-mono: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo,
+      Consolas, monospace;
+
+    /* ---- Modular type scale (1.25 major third, fluid) ---- */
+    --step--2: clamp(0.72rem, 0.70rem + 0.10vw, 0.78rem);
+    --step--1: clamp(0.86rem, 0.83rem + 0.15vw, 0.94rem);
+    --step-0: clamp(1rem, 0.97rem + 0.16vw, 1.09rem);
+    --step-1: clamp(1.2rem, 1.13rem + 0.35vw, 1.4rem);
+    --step-2: clamp(1.44rem, 1.32rem + 0.60vw, 1.8rem);
+    --step-3: clamp(1.73rem, 1.53rem + 0.99vw, 2.31rem);
+    --step-4: clamp(2.07rem, 1.77rem + 1.52vw, 2.96rem);
+    --step-5: clamp(2.49rem, 2.04rem + 2.24vw, 3.8rem);
+    --step-6: clamp(2.99rem, 2.36rem + 3.15vw, 4.87rem);
+
+    --leading-tight: 1.08;
+    --leading-snug: 1.25;
+    --leading-normal: 1.65;
+    --leading-relaxed: 1.75;
+    --tracking-tight: -0.03em;
+    --tracking-normal: 0;
+    --tracking-wide: 0.08em;
+
+    /* ---- Space (4px base) ---- */
+    --space-3xs: 0.25rem;
+    --space-2xs: 0.5rem;
+    --space-xs: 0.75rem;
+    --space-s: 1rem;
+    --space-m: 1.5rem;
+    --space-l: 2rem;
+    --space-xl: 3rem;
+    --space-2xl: 4rem;
+    --space-3xl: 6rem;
+    --space-4xl: 8rem;
+
+    /* Section rhythm — generous, this is the "quiet" in minimalist */
+    --section-y: clamp(4rem, 8vw, 7.5rem);
+
+    /* ---- Radii ---- */
+    --radius-xs: 4px;
+    --radius-s: 8px;
+    --radius-m: 12px;
+    --radius-l: 18px;
+    --radius-pill: 999px;
+
+    /* ---- Layout ---- */
+    --measure: 68ch;
+    --page-max: 1200px;
+    --prose-max: 46rem;
+    --gutter: clamp(1.25rem, 4vw, 2.5rem);
+
+    /* ---- Motion ---- */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --dur-fast: 120ms;
+    --dur-base: 220ms;
+    --dur-slow: 420ms;
+
+    /* ---- Semantic colour: light ---- */
+    --bg: oklch(99% 0.003 250);
+    --bg-sunken: oklch(97.2% 0.005 250);
+    --surface: oklch(100% 0 0);
+    --surface-raised: oklch(100% 0 0);
+
+    --ink: oklch(24% 0.028 255);
+    --ink-muted: oklch(52% 0.02 255);
+    --ink-faint: oklch(66% 0.015 255);
+    --ink-inverse: oklch(99% 0.003 250);
+
+    --line: oklch(91.5% 0.006 255);
+    --line-strong: oklch(85% 0.01 255);
+
+    --accent: oklch(52% 0.09 205);
+    --accent-hover: oklch(46% 0.1 205);
+    --accent-ink: oklch(100% 0 0);
+    --accent-wash: oklch(95.5% 0.025 205);
+    --accent-line: oklch(80% 0.06 205);
+
+    /* Single warm highlight, used sparingly for phonetic emphasis */
+    --mark: oklch(62% 0.11 78);
+    --mark-wash: oklch(96% 0.03 78);
+
+    --ok: oklch(52% 0.11 155);
+    --ok-wash: oklch(95.5% 0.04 155);
+    --warn: oklch(55% 0.15 25);
+    --warn-wash: oklch(96% 0.035 25);
+
+    --focus-ring: var(--accent);
+
+    --shadow-s: 0 1px 2px oklch(24% 0.028 255 / 0.06);
+    --shadow-m: 0 2px 4px oklch(24% 0.028 255 / 0.05),
+      0 8px 20px -12px oklch(24% 0.028 255 / 0.18);
+    --shadow-l: 0 4px 8px oklch(24% 0.028 255 / 0.05),
+      0 24px 48px -24px oklch(24% 0.028 255 / 0.28);
+  }
+
+  /* ---- Semantic colour: dark ---- */
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --bg: oklch(17% 0.018 255);
+    --bg-sunken: oklch(14% 0.016 255);
+    --surface: oklch(20.5% 0.02 255);
+    --surface-raised: oklch(24% 0.022 255);
+
+    --ink: oklch(94% 0.008 250);
+    --ink-muted: oklch(74% 0.014 250);
+    --ink-faint: oklch(58% 0.016 250);
+    --ink-inverse: oklch(17% 0.018 255);
+
+    --line: oklch(30% 0.02 255);
+    --line-strong: oklch(40% 0.024 255);
+
+    --accent: oklch(76% 0.11 200);
+    --accent-hover: oklch(84% 0.1 200);
+    --accent-ink: oklch(16% 0.02 255);
+    --accent-wash: oklch(27% 0.035 210);
+    --accent-line: oklch(42% 0.05 205);
+
+    --mark: oklch(80% 0.11 80);
+    --mark-wash: oklch(28% 0.04 75);
+
+    --ok: oklch(76% 0.13 160);
+    --ok-wash: oklch(26% 0.04 160);
+    --warn: oklch(74% 0.13 25);
+    --warn-wash: oklch(27% 0.05 25);
+
+    --shadow-s: 0 1px 2px oklch(0% 0 0 / 0.4);
+    --shadow-m: 0 2px 4px oklch(0% 0 0 / 0.3),
+      0 8px 20px -12px oklch(0% 0 0 / 0.6);
+    --shadow-l: 0 4px 8px oklch(0% 0 0 / 0.35),
+      0 24px 48px -24px oklch(0% 0 0 / 0.7);
+  }
+}
+
+/* Honour the OS preference when the user has not chosen explicitly. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+
+    --bg: oklch(17% 0.018 255);
+    --bg-sunken: oklch(14% 0.016 255);
+    --surface: oklch(20.5% 0.02 255);
+    --surface-raised: oklch(24% 0.022 255);
+
+    --ink: oklch(94% 0.008 250);
+    --ink-muted: oklch(74% 0.014 250);
+    --ink-faint: oklch(58% 0.016 250);
+    --ink-inverse: oklch(17% 0.018 255);
+
+    --line: oklch(30% 0.02 255);
+    --line-strong: oklch(40% 0.024 255);
+
+    --accent: oklch(76% 0.11 200);
+    --accent-hover: oklch(84% 0.1 200);
+    --accent-ink: oklch(16% 0.02 255);
+    --accent-wash: oklch(27% 0.035 210);
+    --accent-line: oklch(42% 0.05 205);
+
+    --mark: oklch(80% 0.11 80);
+    --mark-wash: oklch(28% 0.04 75);
+
+    --ok: oklch(76% 0.13 160);
+    --ok-wash: oklch(26% 0.04 160);
+    --warn: oklch(74% 0.13 25);
+    --warn-wash: oklch(27% 0.05 25);
+
+    --shadow-s: 0 1px 2px oklch(0% 0 0 / 0.4);
+    --shadow-m: 0 2px 4px oklch(0% 0 0 / 0.3),
+      0 8px 20px -12px oklch(0% 0 0 / 0.6);
+    --shadow-l: 0 4px 8px oklch(0% 0 0 / 0.35),
+      0 24px 48px -24px oklch(0% 0 0 / 0.7);
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "lingualab",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Plataforma de analisis linguistico que corre enteramente en el navegador: fonetica AFI, arboles sintacticos, analisis de corpus y bibliografia.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint:css": "stylelint \"src/**/*.{css,astro}\"",
+    "verify": "npm run check && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.3.0",
+    "@fontsource/noto-sans": "^5.3.0",
+    "astro": "^7.3.5",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}

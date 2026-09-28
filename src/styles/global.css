@@ -1,0 +1,11 @@
+/* ============================================================
+   LinguaLab — Global stylesheet entry point.
+   Font faces are imported by the base layout so Astro bundles and
+   fingerprints the woff2 assets.
+   ============================================================ */
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./layout.css";
+@import "./components.css";
+@import "./utilities.css";

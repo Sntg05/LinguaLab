@@ -1,0 +1,164 @@
+---
+/**
+ * Phoneme of the day.
+ * The first entry is rendered at build time so the section is never empty;
+ * a small inline script advances it to the entry for the current day.
+ */
+import { PHONEMES, markContext, type PhonemeOfDay } from "../data/phoneme-of-day";
+import type { Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+  /** Pre-selected entry (defaults to the first). */
+  entry?: PhonemeOfDay;
+  heading: string;
+  /** Inline JSON payload consumed by the client-side daily rotation. */
+  payload?: string;
+}
+
+const { locale, entry = PHONEMES[0]!, heading, payload } = Astro.props;
+
+const ctx = locale === "es" ? entry.ctx_es : entry.ctx_en;
+const why = locale === "es" ? entry.why_es : entry.why_en;
+const ipa = locale === "es" ? entry.ipa_es : entry.ipa_en;
+const name = locale === "es" ? entry.name_es : entry.name_en;
+const related = locale === "es" ? entry.rel_es : entry.rel_en;
+---
+
+<section class="section section--sunken" aria-labelledby="phoneme-heading" data-phoneme>
+  <div class="shell">
+    <div class="u-section-head u-section-head--center">
+      <span class="eyebrow">{heading}</span>
+    </div>
+
+    <div class="phoneme">
+      <p class="phoneme__glyph ipa-display" data-phoneme-symbol aria-hidden="true">{entry.symbol}</p>
+
+      <p class="phoneme__ipa ipa" data-phoneme-ipa>{ipa}</p>
+      <p class="phoneme__name" data-phoneme-name>{name}</p>
+
+      <div class="phoneme__body">
+        <div>
+          <h2 class="phoneme__label" id="phoneme-heading">{locale === "es" ? "En contexto" : "In context"}</h2>
+          <p class="phoneme__text" data-phoneme-ctx>
+            {markContext(ctx).map((part) => (part.hit ? <em>{part.word}</em> : part.word))}
+          </p>
+        </div>
+        <div>
+          <h2 class="phoneme__label">
+            {locale === "es" ? "Por qué importa" : "Why it matters"}
+          </h2>
+          <p class="phoneme__text" data-phoneme-why>{why}</p>
+        </div>
+      </div>
+
+      {
+        related.length > 0 && (
+          <ul class="phoneme__related" data-phoneme-related>
+            {related.map((term) => (
+              <li>
+                <a class="badge" href={`/glosario`}>{term}</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </div>
+
+  {
+    payload && (
+      <script is:inline type="application/json" data-phoneme-data set:html={payload} />
+    )
+  }
+
+  <script>
+    import { rotatePhoneme } from "../scripts/home/phoneme";
+
+    rotatePhoneme();
+  </script>
+</section>
+
+<style>
+  .phoneme {
+    max-width: 46rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .phoneme__glyph {
+    margin: 0;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .phoneme__ipa {
+    margin: var(--space-s) 0 0;
+    font-size: var(--step-1);
+    color: var(--mark);
+  }
+
+  .phoneme__name {
+    margin: var(--space-3xs) 0 0;
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    color: var(--ink);
+  }
+
+  .phoneme__body {
+    display: grid;
+    gap: var(--space-m);
+    margin-block-start: var(--space-xl);
+    text-align: start;
+  }
+
+  @media (width >= 48rem) {
+    .phoneme__body {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-xl);
+    }
+  }
+
+  .phoneme__label {
+    font-family: var(--font-sans);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .phoneme__text {
+    margin: 0;
+    color: var(--ink-muted);
+    line-height: var(--leading-relaxed);
+  }
+
+  .phoneme__text em {
+    font-style: normal;
+    color: var(--ink);
+    background: var(--mark-wash);
+    padding: 0.05em 0.3em;
+    border-radius: var(--radius-xs);
+  }
+
+  .phoneme__related {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2xs);
+    list-style: none;
+    margin: var(--space-l) 0 0;
+    padding: 0;
+  }
+
+  .phoneme__related .badge {
+    text-decoration: none;
+  }
+
+  .phoneme__related .badge:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+</style>

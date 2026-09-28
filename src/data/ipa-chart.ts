@@ -1,0 +1,1229 @@
+/* ============================================================
+   LinguaLab — IPA chart data
+   Ported from legacy/data/. Data is verbatim; the `window.X =`
+   global assignment became a typed ES module export.
+   ============================================================ */
+
+
+/** Articulatory description of a single phonetic symbol. */
+export interface IpaSymbol {
+  /** The IPA glyph itself, e.g. "θ". May be a multi-character sequence. */
+  ipa: string;
+  es: string;
+  en: string;
+  place_es: string;
+  place_en: string;
+  manner_es: string;
+  manner_en: string;
+  /** "sorda" | "sonora" | "n/a" */
+  voicing: string;
+}
+
+export interface IpaCategory {
+  id: string;
+  name_es: string;
+  name_en: string;
+  note_es: string;
+  note_en: string;
+  symbols: IpaSymbol[];
+}
+
+export interface IpaChart {
+  version: string;
+  license: string;
+  categories: IpaCategory[];
+  examples: Record<string, unknown>;
+}
+
+export const IPA_CHART: IpaChart = {
+  "version": "1.0",
+  "license": "CC BY 4.0",
+  "categories": [
+    {
+      "id": "pulmonics",
+      "name_es": "Oclusivas y fricativas pulmonares",
+      "name_en": "Pulmonic obstruents",
+      "note_es": "Consonantes producidas con aire pulmonar egresivo.",
+      "note_en": "Consonants produced with egressive pulmonic air.",
+      "symbols": [
+        {
+          "ipa": "p",
+          "es": "oclusiva bilabial sorda",
+          "en": "voiceless bilabial stop",
+          "place_es": "Bilabial",
+          "place_en": "Bilabial",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "b",
+          "es": "oclusiva bilabial sonora",
+          "en": "voiced bilabial stop",
+          "place_es": "Bilabial",
+          "place_en": "Bilabial",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "t",
+          "es": "oclusiva alveolar sorda",
+          "en": "voiceless alveolar stop",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "d",
+          "es": "oclusiva alveolar sonora",
+          "en": "voiced alveolar stop",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ʈ",
+          "es": "oclusiva retrofleja sorda",
+          "en": "voiceless retroflex stop",
+          "place_es": "Retrofleja",
+          "place_en": "Retroflex",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ɖ",
+          "es": "oclusiva retrofleja sonora",
+          "en": "voiced retroflex stop",
+          "place_es": "Retrofleja",
+          "place_en": "Retroflex",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "c",
+          "es": "oclusiva palatal sorda",
+          "en": "voiceless palatal stop",
+          "place_es": "Palatal",
+          "place_en": "Palatal",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ɟ",
+          "es": "oclusiva palatal sonora",
+          "en": "voiced palatal stop",
+          "place_es": "Palatal",
+          "place_en": "Palatal",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "k",
+          "es": "oclusiva velar sorda",
+          "en": "voiceless velar stop",
+          "place_es": "Velar",
+          "place_en": "Velar",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ɡ",
+          "es": "oclusiva velar sonora",
+          "en": "voiced velar stop",
+          "place_es": "Velar",
+          "place_en": "Velar",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "q",
+          "es": "oclusiva uvular sorda",
+          "en": "voiceless uvular stop",
+          "place_es": "Uvular",
+          "place_en": "Uvular",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ɢ",
+          "es": "oclusiva uvular sonora",
+          "en": "voiced uvular stop",
+          "place_es": "Uvular",
+          "place_en": "Uvular",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ʔ",
+          "es": "oclusiva glotal sorda",
+          "en": "voiceless glottal stop",
+          "place_es": "Glotal",
+          "place_en": "Glottal",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "m",
+          "es": "nasal bilabial",
+          "en": "bilabial nasal",
+          "place_es": "Bilabial",
+          "place_en": "Bilabial",
+          "manner_es": "Nasal",
+          "manner_en": "Nasal",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɱ",
+          "es": "nasal labiodental",
+          "en": "labiodental nasal",
+          "place_es": "Labiodental",
+          "place_en": "Labiodental",
+          "manner_es": "Nasal",
+          "manner_en": "Nasal",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "n",
+          "es": "nasal alveolar",
+          "en": "alveolar nasal",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Nasal",
+          "manner_en": "Nasal",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɳ",
+          "es": "nasal retrofleja",
+          "en": "retroflex nasal",
+          "place_es": "Retrofleja",
+          "place_en": "Retroflex",
+          "manner_es": "Nasal",
+          "manner_en": "Nasal",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɲ",
+          "es": "nasal palatal",
+          "en": "palatal nasal",
+          "place_es": "Palatal",
+          "place_en": "Palatal",
+          "manner_es": "Nasal",
+          "manner_en": "Nasal",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ŋ",
+          "es": "nasal velar",
+          "en": "velar nasal",
+          "place_es": "Velar",
+          "place_en": "Velar",
+          "manner_es": "Nasal",
+          "manner_en": "Nasal",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɴ",
+          "es": "nasal uvular",
+          "en": "uvular nasal",
+          "place_es": "Uvular",
+          "place_en": "Uvular",
+          "manner_es": "Nasal",
+          "manner_en": "Nasal",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ʙ",
+          "es": "vibrante bilabial",
+          "en": "bilabial trill",
+          "place_es": "Bilabial",
+          "place_en": "Bilabial",
+          "manner_es": "Vibrante",
+          "manner_en": "Trill",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "r",
+          "es": "vibrante alveolar",
+          "en": "alveolar trill",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Vibrante",
+          "manner_en": "Trill",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ʀ",
+          "es": "vibrante uvular",
+          "en": "uvular trill",
+          "place_es": "Uvular",
+          "place_en": "Uvular",
+          "manner_es": "Vibrante",
+          "manner_en": "Trill",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɾ",
+          "es": "vibrante simple alveolar",
+          "en": "alveolar tap",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Vibrante simple",
+          "manner_en": "Tap",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɽ",
+          "es": "vibrante simple retrofleja",
+          "en": "retroflex flap",
+          "place_es": "Retrofleja",
+          "place_en": "Retroflex",
+          "manner_es": "Vibrante simple",
+          "manner_en": "Tap",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɸ",
+          "es": "fricativa bilabial sorda",
+          "en": "voiceless bilabial fricative",
+          "place_es": "Bilabial",
+          "place_en": "Bilabial",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "β",
+          "es": "fricativa bilabial sonora",
+          "en": "voiced bilabial fricative",
+          "place_es": "Bilabial",
+          "place_en": "Bilabial",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "f",
+          "es": "fricativa labiodental sorda",
+          "en": "voiceless labiodental fricative",
+          "place_es": "Labiodental",
+          "place_en": "Labiodental",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "v",
+          "es": "fricativa labiodental sonora",
+          "en": "voiced labiodental fricative",
+          "place_es": "Labiodental",
+          "place_en": "Labiodental",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "θ",
+          "es": "fricativa dental sorda",
+          "en": "voiceless dental fricative",
+          "place_es": "Dental",
+          "place_en": "Dental",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ð",
+          "es": "fricativa dental sonora",
+          "en": "voiced dental fricative",
+          "place_es": "Dental",
+          "place_en": "Dental",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "s",
+          "es": "fricativa alveolar sorda",
+          "en": "voiceless alveolar fricative",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "z",
+          "es": "fricativa alveolar sonora",
+          "en": "voiced alveolar fricative",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ʃ",
+          "es": "fricativa post-alveolar sorda",
+          "en": "voiceless postalveolar fricative",
+          "place_es": "Post-alveolar",
+          "place_en": "Postalveolar",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ʒ",
+          "es": "fricativa post-alveolar sonora",
+          "en": "voiced postalveolar fricative",
+          "place_es": "Post-alveolar",
+          "place_en": "Postalveolar",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ʂ",
+          "es": "fricativa retrofleja sorda",
+          "en": "voiceless retroflex fricative",
+          "place_es": "Retrofleja",
+          "place_en": "Retroflex",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ʐ",
+          "es": "fricativa retrofleja sonora",
+          "en": "voiced retroflex fricative",
+          "place_es": "Retrofleja",
+          "place_en": "Retroflex",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ç",
+          "es": "fricativa palatal sorda",
+          "en": "voiceless palatal fricative",
+          "place_es": "Palatal",
+          "place_en": "Palatal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ʝ",
+          "es": "fricativa palatal sonora",
+          "en": "voiced palatal fricative",
+          "place_es": "Palatal",
+          "place_en": "Palatal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "x",
+          "es": "fricativa velar sorda",
+          "en": "voiceless velar fricative",
+          "place_es": "Velar",
+          "place_en": "Velar",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ɣ",
+          "es": "fricativa velar sonora",
+          "en": "voiced velar fricative",
+          "place_es": "Velar",
+          "place_en": "Velar",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "χ",
+          "es": "fricativa uvular sorda",
+          "en": "voiceless uvular fricative",
+          "place_es": "Uvular",
+          "place_en": "Uvular",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ʁ",
+          "es": "fricativa uvular sonora",
+          "en": "voiced uvular fricative",
+          "place_es": "Uvular",
+          "place_en": "Uvular",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ħ",
+          "es": "fricativa faríngea sorda",
+          "en": "voiceless pharyngeal fricative",
+          "place_es": "Faríngea",
+          "place_en": "Pharyngeal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ʕ",
+          "es": "fricativa faríngea sonora",
+          "en": "voiced pharyngeal fricative",
+          "place_es": "Faríngea",
+          "place_en": "Pharyngeal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "h",
+          "es": "fricativa glotal sorda",
+          "en": "voiceless glottal fricative",
+          "place_es": "Glotal",
+          "place_en": "Glottal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ɦ",
+          "es": "fricativa glotal sonora",
+          "en": "voiced glottal fricative",
+          "place_es": "Glotal",
+          "place_en": "Glottal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "t͡s",
+          "es": "africada alveolar sorda",
+          "en": "voiceless alveolar affricate",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Africada",
+          "manner_en": "Affricate",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "t͡ʃ",
+          "es": "africada post-alveolar sorda",
+          "en": "voiceless postalveolar affricate",
+          "place_es": "Post-alveolar",
+          "place_en": "Postalveolar",
+          "manner_es": "Africada",
+          "manner_en": "Affricate",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "d͡ʒ",
+          "es": "africada post-alveolar sonora",
+          "en": "voiced postalveolar affricate",
+          "place_es": "Post-alveolar",
+          "place_en": "Postalveolar",
+          "manner_es": "Africada",
+          "manner_en": "Affricate",
+          "voicing": "sonora"
+        }
+      ]
+    },
+    {
+      "id": "vowels",
+      "name_es": "Vocales",
+      "name_en": "Vowels",
+      "note_es": "Según altura y apertura de la lengua y avance labial.",
+      "note_en": "By tongue height/backness and lip rounding.",
+      "symbols": [
+        {
+          "ipa": "i",
+          "es": "vocal cerrada anterior sin redondeo",
+          "en": "close front unrounded vowel",
+          "place_es": "Anterior",
+          "place_en": "Front",
+          "manner_es": "Cerrada",
+          "manner_en": "Close",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "y",
+          "es": "vocal cerrada anterior redondeada",
+          "en": "close front rounded vowel",
+          "place_es": "Anterior",
+          "place_en": "Front",
+          "manner_es": "Cerrada",
+          "manner_en": "Close",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɨ",
+          "es": "vocal cerrada central sin redondeo",
+          "en": "close central unrounded vowel",
+          "place_es": "Central",
+          "place_en": "Central",
+          "manner_es": "Cerrada",
+          "manner_en": "Close",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ʉ",
+          "es": "vocal cerrada central redondeada",
+          "en": "close central rounded vowel",
+          "place_es": "Central",
+          "place_en": "Central",
+          "manner_es": "Cerrada",
+          "manner_en": "Close",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɯ",
+          "es": "vocal cerrada posterior sin redondeo",
+          "en": "close back unrounded vowel",
+          "place_es": "Posterior",
+          "place_en": "Back",
+          "manner_es": "Cerrada",
+          "manner_en": "Close",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "u",
+          "es": "vocal cerrada posterior redondeada",
+          "en": "close back rounded vowel",
+          "place_es": "Posterior",
+          "place_en": "Back",
+          "manner_es": "Cerrada",
+          "manner_en": "Close",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "e",
+          "es": "vocal semicerrada anterior sin redondeo",
+          "en": "close-mid front unrounded vowel",
+          "place_es": "Anterior",
+          "place_en": "Front",
+          "manner_es": "Semicerrada",
+          "manner_en": "Close-mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ø",
+          "es": "vocal semicerrada anterior redondeada",
+          "en": "close-mid front rounded vowel",
+          "place_es": "Anterior",
+          "place_en": "Front",
+          "manner_es": "Semicerrada",
+          "manner_en": "Close-mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɘ",
+          "es": "vocal semicerrada central sin redondeo",
+          "en": "close-mid central unrounded vowel",
+          "place_es": "Central",
+          "place_en": "Central",
+          "manner_es": "Semicerrada",
+          "manner_en": "Close-mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɤ",
+          "es": "vocal semicerrada posterior sin redondeo",
+          "en": "close-mid back unrounded vowel",
+          "place_es": "Posterior",
+          "place_en": "Back",
+          "manner_es": "Semicerrada",
+          "manner_en": "Close-mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "o",
+          "es": "vocal semicerrada posterior redondeada",
+          "en": "close-mid back rounded vowel",
+          "place_es": "Posterior",
+          "place_en": "Back",
+          "manner_es": "Semicerrada",
+          "manner_en": "Close-mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɛ",
+          "es": "vocal semiabierta anterior sin redondeo",
+          "en": "open-mid front unrounded vowel",
+          "place_es": "Anterior",
+          "place_en": "Front",
+          "manner_es": "Semiabierta",
+          "manner_en": "Open-mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "œ",
+          "es": "vocal semiabierta anterior redondeada",
+          "en": "open-mid front rounded vowel",
+          "place_es": "Anterior",
+          "place_en": "Front",
+          "manner_es": "Semiabierta",
+          "manner_en": "Open-mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɜ",
+          "es": "vocal semiabierta central sin redondeo",
+          "en": "open-mid central unrounded vowel",
+          "place_es": "Central",
+          "place_en": "Central",
+          "manner_es": "Semiabierta",
+          "manner_en": "Open-mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ʌ",
+          "es": "vocal semiabierta posterior sin redondeo",
+          "en": "open-mid back unrounded vowel",
+          "place_es": "Posterior",
+          "place_en": "Back",
+          "manner_es": "Semiabierta",
+          "manner_en": "Open-mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɔ",
+          "es": "vocal semiabierta posterior redondeada",
+          "en": "open-mid back rounded vowel",
+          "place_es": "Posterior",
+          "place_en": "Back",
+          "manner_es": "Semiabierta",
+          "manner_en": "Open-mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "a",
+          "es": "vocal abierta anterior sin redondeo",
+          "en": "open front unrounded vowel",
+          "place_es": "Anterior",
+          "place_en": "Front",
+          "manner_es": "Abierta",
+          "manner_en": "Open",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɶ",
+          "es": "vocal abierta anterior redondeada",
+          "en": "open front rounded vowel",
+          "place_es": "Anterior",
+          "place_en": "Front",
+          "manner_es": "Abierta",
+          "manner_en": "Open",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɑ",
+          "es": "vocal abierta posterior sin redondeo",
+          "en": "open back unrounded vowel",
+          "place_es": "Posterior",
+          "place_en": "Back",
+          "manner_es": "Abierta",
+          "manner_en": "Open",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɒ",
+          "es": "vocal abierta posterior redondeada",
+          "en": "open back rounded vowel",
+          "place_es": "Posterior",
+          "place_en": "Back",
+          "manner_es": "Abierta",
+          "manner_en": "Open",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ə",
+          "es": "vocal neutra (schwa)",
+          "en": "mid central vowel (schwa)",
+          "place_es": "Central",
+          "place_en": "Central",
+          "manner_es": "Neutra",
+          "manner_en": "Mid",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɪ",
+          "es": "vocal casi cerrada anterior sin redondeo",
+          "en": "near-close near-front unrounded vowel",
+          "place_es": "Anterior",
+          "place_en": "Front",
+          "manner_es": "Casi cerrada",
+          "manner_en": "Near-close",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "æ",
+          "es": "vocal casi abierta anterior sin redondeo",
+          "en": "near-open front unrounded vowel",
+          "place_es": "Anterior",
+          "place_en": "Front",
+          "manner_es": "Casi abierta",
+          "manner_en": "Near-open",
+          "voicing": "sonora"
+        }
+      ]
+    },
+    {
+      "id": "other",
+      "name_es": "Otros símbolos",
+      "name_en": "Other symbols",
+      "note_es": "Africadas, clics y otros segmentos del AFI.",
+      "note_en": "Affricates, clicks and other IPA segments.",
+      "symbols": [
+        {
+          "ipa": "ʍ",
+          "es": "fricativa labiovelar sorda",
+          "en": "voiceless labial-velar fricative",
+          "place_es": "Labiovelar",
+          "place_en": "Labial-velar",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "w",
+          "es": "aproximante labiovelar sonora",
+          "en": "voiced labial-velar approximant",
+          "place_es": "Labiovelar",
+          "place_en": "Labial-velar",
+          "manner_es": "Aproximante",
+          "manner_en": "Approximant",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "j",
+          "es": "aproximante palatal sonora",
+          "en": "voiced palatal approximant",
+          "place_es": "Palatal",
+          "place_en": "Palatal",
+          "manner_es": "Aproximante",
+          "manner_en": "Approximant",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "l",
+          "es": "aproximante lateral alveolar sonora",
+          "en": "voiced alveolar lateral approximant",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Aproximante lateral",
+          "manner_en": "Lateral approximant",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɥ",
+          "es": "aproximante labiopalatal sonora",
+          "en": "voiced labial-palatal approximant",
+          "place_es": "Labiopalatal",
+          "place_en": "Labial-palatal",
+          "manner_es": "Aproximante",
+          "manner_en": "Approximant",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ʜ",
+          "es": "fricativa epiglotal sorda",
+          "en": "voiceless epiglottal fricative",
+          "place_es": "Epiglotal",
+          "place_en": "Epiglottal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ʢ",
+          "es": "fricativa epiglotal sonora",
+          "en": "voiced epiglottal fricative",
+          "place_es": "Epiglotal",
+          "place_en": "Epiglottal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ʡ",
+          "es": "oclusiva epiglotal",
+          "en": "epiglottal stop",
+          "place_es": "Epiglotal",
+          "place_en": "Epiglottal",
+          "manner_es": "Oclusiva",
+          "manner_en": "Stop",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ɕ",
+          "es": "fricativa alveolopalatal sorda",
+          "en": "voiceless alveolo-palatal fricative",
+          "place_es": "Alveolopalatal",
+          "place_en": "Alveolo-palatal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ʑ",
+          "es": "fricativa alveolopalatal sonora",
+          "en": "voiced alveolo-palatal fricative",
+          "place_es": "Alveolopalatal",
+          "place_en": "Alveolo-palatal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɬ",
+          "es": "fricativa lateral alveolar sorda",
+          "en": "voiceless alveolar lateral fricative",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Lateral",
+          "manner_en": "Lateral",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "ɮ",
+          "es": "fricativa lateral alveolar sonora",
+          "en": "voiced alveolar lateral fricative",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Lateral",
+          "manner_en": "Lateral",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "‼",
+          "es": "clic retroflejo",
+          "en": "retroflex click",
+          "place_es": "Retrofleja",
+          "place_en": "Retroflex",
+          "manner_es": "Clic",
+          "manner_en": "Click",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ǀ",
+          "es": "clic dental",
+          "en": "dental click",
+          "place_es": "Dental",
+          "place_en": "Dental",
+          "manner_es": "Clic",
+          "manner_en": "Click",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ǁ",
+          "es": "clic lateral alveolar",
+          "en": "alveolar lateral click",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Clic",
+          "manner_en": "Click",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ǂ",
+          "es": "clic palatal",
+          "en": "palatal click",
+          "place_es": "Palatal",
+          "place_en": "Palatal",
+          "manner_es": "Clic",
+          "manner_en": "Click",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ǃ",
+          "es": "clic alveolar",
+          "en": "alveolar click",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Clic",
+          "manner_en": "Click",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɺ",
+          "es": "aproximante lateral alveolar",
+          "en": "alveolar lateral approximant",
+          "place_es": "Alveolar",
+          "place_en": "Alveolar",
+          "manner_es": "Lateral",
+          "manner_en": "Lateral",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "ɧ",
+          "es": "fricativa simultánea velar y palatal",
+          "en": "simultaneous velar and palatal fricative",
+          "place_es": "Velopalatal",
+          "place_en": "Velopalatal",
+          "manner_es": "Fricativa",
+          "manner_en": "Fricative",
+          "voicing": "sorda"
+        }
+      ]
+    },
+    {
+      "id": "diacritics",
+      "name_es": "Diacríticos",
+      "name_en": "Diacritics",
+      "note_es": "Se colocan junto al símbolo para afinar la descripción.",
+      "note_en": "Placed next to a symbol to refine the description.",
+      "symbols": [
+        {
+          "ipa": "ʰ",
+          "es": "aspirada",
+          "en": "aspirated",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "—"
+        },
+        {
+          "ipa": "ʷ",
+          "es": "labializada",
+          "en": "labialized",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "—"
+        },
+        {
+          "ipa": "ʲ",
+          "es": "palatalizada",
+          "en": "palatalized",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "—"
+        },
+        {
+          "ipa": "ˠ",
+          "es": "velarizada",
+          "en": "velarized",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "—"
+        },
+        {
+          "ipa": "ˤ",
+          "es": "faríngea",
+          "en": "epiglottalized",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "—"
+        },
+        {
+          "ipa": "̃",
+          "es": "nasalizada",
+          "en": "nasalized",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "—"
+        },
+        {
+          "ipa": "̥",
+          "es": "silbada (sorda)",
+          "en": "voiceless",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "sorda"
+        },
+        {
+          "ipa": "̬",
+          "es": "sonorizada",
+          "en": "voiced",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "sonora"
+        },
+        {
+          "ipa": "̪",
+          "es": "dental",
+          "en": "dental",
+          "place_es": "Dental",
+          "place_en": "Dental",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "—"
+        },
+        {
+          "ipa": "̺",
+          "es": "apical",
+          "en": "apical",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "—"
+        },
+        {
+          "ipa": "̻",
+          "es": "laminal",
+          "en": "laminal",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Diacrítico",
+          "manner_en": "Diacritic",
+          "voicing": "—"
+        },
+        {
+          "ipa": "̻ː",
+          "es": "larga",
+          "en": "long",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Suprasegmental",
+          "manner_en": "Suprasegmental",
+          "voicing": "—"
+        },
+        {
+          "ipa": "ˈ",
+          "es": "sílaba tónica principal",
+          "en": "primary stress",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Suprasegmental",
+          "manner_en": "Suprasegmental",
+          "voicing": "—"
+        },
+        {
+          "ipa": "ˌ",
+          "es": "sílaba tónica secundaria",
+          "en": "secondary stress",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Suprasegmental",
+          "manner_en": "Suprasegmental",
+          "voicing": "—"
+        },
+        {
+          "ipa": ".",
+          "es": "frontera silábica",
+          "en": "syllable break",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Suprasegmental",
+          "manner_en": "Suprasegmental",
+          "voicing": "—"
+        },
+        {
+          "ipa": "‿",
+          "es": "enlace (sin frontera)",
+          "en": "linking (no boundary)",
+          "place_es": "—",
+          "place_en": "—",
+          "manner_es": "Suprasegmental",
+          "manner_en": "Suprasegmental",
+          "voicing": "—"
+        }
+      ]
+    }
+  ],
+  "examples": {
+    "es": [
+      {
+        "word": "casa",
+        "ipa": "ˈkasa"
+      },
+      {
+        "word": "cielo",
+        "ipa": "ˈθjelo"
+      },
+      {
+        "word": "zapato",
+        "ipa": "θaˈpato"
+      },
+      {
+        "word": "perro",
+        "ipa": "ˈpero"
+      },
+      {
+        "word": "caro",
+        "ipa": "ˈkaɾo"
+      },
+      {
+        "word": "amigo",
+        "ipa": "aˈmiɣo"
+      },
+      {
+        "word": "niño",
+        "ipa": "ˈniɲo"
+      },
+      {
+        "word": "playa",
+        "ipa": "ˈplaʝa"
+      }
+    ],
+    "en": [
+      {
+        "word": "think",
+        "ipa": "θɪŋk"
+      },
+      {
+        "word": "cat",
+        "ipa": "kæt"
+      },
+      {
+        "word": "she",
+        "ipa": "ʃiː"
+      },
+      {
+        "word": "measure",
+        "ipa": "ˈmɛʒə"
+      },
+      {
+        "word": "about",
+        "ipa": "əˈbaʊt"
+      },
+      {
+        "word": "sing",
+        "ipa": "sɪŋ"
+      },
+      {
+        "word": "church",
+        "ipa": "tʃɜːtʃ"
+      },
+      {
+        "word": "red",
+        "ipa": "ɹɛd"
+      }
+    ]
+  }
+};

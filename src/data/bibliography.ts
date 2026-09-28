@@ -1,0 +1,231 @@
+/* ============================================================
+   LinguaLab — bibliography
+   Ported from legacy/data/. Data is verbatim; the `window.X =`
+   global assignment became a typed ES module export.
+   ============================================================ */
+
+
+export interface BibliographyEntry {
+  id: string;
+  title_es: string;
+  title_en: string;
+  author: string;
+  year: number;
+  topic: string;
+  topic_en: string;
+  type: string;
+  type_en: string;
+  lang: string;
+  license: string;
+  file: string | null;
+  url: string | null;
+  note_es: string;
+  note_en: string;
+}
+
+export const BIBLIOGRAPHY: readonly BibliographyEntry[] = [
+  {
+    "id": "bilabial-glottal",
+    "title_es": "Una aproximación experimental a la oclusiva glotal",
+    "title_en": "An experimental approach to the glottal stop",
+    "author": "Martínez del Río, A.",
+    "year": 2021,
+    "topic": "Fonética",
+    "topic_en": "Phonetics",
+    "type": "Artículo",
+    "type_en": "Article",
+    "lang": "ES",
+    "license": "CC BY 4.0",
+    "file": null,
+    "url": "https://revistas.ucm.es/index.php/rev_CMYL/article/view/78941",
+    "note_es": "Producción y percepción de la oclusiva glotal en español mexicano.",
+    "note_en": "Production and perception of the glottal stop in Mexican Spanish."
+  },
+  {
+    "id": "ud-spanish",
+    "title_es": "Universal Dependencies: análisis morfosintáctico multilingüe",
+    "title_en": "Universal Dependencies: multilingual morphosyntax analysis",
+    "author": "Nivre, J. et al.",
+    "year": 2020,
+    "topic": "Sintaxis",
+    "topic_en": "Syntax",
+    "type": "Artículo",
+    "type_en": "Article",
+    "lang": "EN",
+    "license": "CC BY-SA 4.0",
+    "file": null,
+    "url": "https://universaldependencies.org/",
+    "note_es": "Esquema de anotación de dependencias usado por ArborLab para relaciones UD.",
+    "note_en": "Dependency annotation scheme used by ArborLab for UD relations."
+  },
+  {
+    "id": "corpus-statistics",
+    "title_es": "Statistical Methods for Corpus Linguistics",
+    "title_en": "Statistical Methods for Corpus Linguistics",
+    "author": "Szpakowicz, S.",
+    "year": 2019,
+    "topic": "Corpus",
+    "topic_en": "Corpora",
+    "type": "Libro",
+    "type_en": "Book",
+    "lang": "EN",
+    "license": "Consulta",
+    "file": null,
+    "url": "https://doi.org/10.1075/tsl.114",
+    "note_es": "Métodos estadísticos aplicados a frecuencia, asociación y keyness.",
+    "note_en": "Statistical methods applied to frequency, association and keyness."
+  },
+  {
+    "id": "ipa-handbook",
+    "title_es": "Handbook of the International Phonetic Association",
+    "title_en": "Handbook of the International Phonetic Association",
+    "author": "International Phonetic Association",
+    "year": 1999,
+    "topic": "Fonética",
+    "topic_en": "Phonetics",
+    "type": "Referencia",
+    "type_en": "Reference",
+    "lang": "EN",
+    "license": "CC BY-NC-SA",
+    "file": "ipa-handbook.pdf",
+    "url": "https://www.internationalphoneticassociation.org/IPAcharts/IPA_chart_orig/IPA_charts_E.html",
+    "note_es": "Referencia canónica del AFI: valoración, tabla y guía de uso.",
+    "note_en": "Canonical IPA reference: values, chart and usage guide."
+  },
+  {
+    "id": "es-phonology",
+    "title_es": "Fonología y fonética del español",
+    "title_en": "Spanish phonology and phonetics",
+    "author": "Hualde, J. I.",
+    "year": 2014,
+    "topic": "Fonética",
+    "topic_en": "Phonetics",
+    "type": "Libro",
+    "type_en": "Book",
+    "lang": "ES",
+    "license": "Consulta",
+    "file": null,
+    "url": "https://doi.org/10.4324/9781315847573",
+    "note_es": "Sistema fonológico del español con transcripciones AFI.",
+    "note_en": "The Spanish phonological system with IPA transcriptions."
+  },
+  {
+    "id": "constituency-tests",
+    "title_es": "Pruebas de constituyente y estructura jerárquica",
+    "title_en": "Constituency tests and hierarchical structure",
+    "author": "Carnie, A.",
+    "year": 2013,
+    "topic": "Sintaxis",
+    "topic_en": "Syntax",
+    "type": "Capítulo",
+    "type_en": "Chapter",
+    "lang": "EN",
+    "license": "Consulta",
+    "file": null,
+    "url": "https://mitpress.mit.edu/9780262528870/syntax/",
+    "note_es": "Sustitución, movimiento, coordinación y elipsis para detectar constituyentes.",
+    "note_en": "Substitution, movement, coordination and ellipsis tests for constituents."
+  },
+  {
+    "id": "treebanks",
+    "title_es": "Treebanks: construcción y uso",
+    "title_en": "Treebanks: construction and use",
+    "author": "Abeillé, A. & Bamman, D. (eds.)",
+    "year": 2022,
+    "topic": "Corpus",
+    "topic_en": "Corpora",
+    "type": "Colección",
+    "type_en": "Collection",
+    "lang": "EN",
+    "license": "CC BY",
+    "file": null,
+    "url": "https://universaldependencies.org/treebanks/",
+    "note_es": "Cómo se construyen los treebanks que alimentan los analizadores.",
+    "note_en": "How the treebanks that power parsers are built."
+  },
+  {
+    "id": "zipf",
+    "title_es": "La diversidad léxica y la ley de Zipf en corpus",
+    "title_en": "Lexical diversity and Zipf's law in corpora",
+    "author": "Tuldavilla, M.",
+    "year": 2018,
+    "topic": "Corpus",
+    "topic_en": "Corpora",
+    "type": "Artículo",
+    "type_en": "Article",
+    "lang": "ES",
+    "license": "CC BY-NC-SA 4.0",
+    "file": "zipf-diversidad.pdf",
+    "url": "https://rla.junin.edu.ar/",
+    "note_es": "Relación entre rango y frecuencia y medidas de diversidad (TTR, Hapax).",
+    "note_en": "Rank–frequency relation and diversity measures (TTR, hapax)."
+  },
+  {
+    "id": "readability",
+    "title_es": "Índices de legibilidad aplicados al español",
+    "title_en": "Readability indices applied to Spanish",
+    "author": "Gutiérrez Ordóñez, S.",
+    "year": 2016,
+    "topic": "Métodos",
+    "topic_en": "Methods",
+    "type": "Artículo",
+    "type_en": "Article",
+    "lang": "ES",
+    "license": "CC BY",
+    "file": null,
+    "url": "https://www.revistasinvestigacion.filo.unam.mx/",
+    "note_es": "Flesch-Szablí y variantes adaptadas al español.",
+    "note_en": "Flesch-Szablí and variants adapted to Spanish."
+  },
+  {
+    "id": "semantics-lf",
+    "title_es": "Lógica formal y estructura de significado",
+    "title_en": "Formal logic and meaning structure",
+    "author": "Heim, I. & Kratzer, A.",
+    "year": 1998,
+    "topic": "Semántica",
+    "topic_en": "Semantics",
+    "type": "Libro",
+    "type_en": "Book",
+    "lang": "EN",
+    "license": "Consulta",
+    "file": null,
+    "url": "https://mitpress.mit.edu/9780262540995/semantics-in-generative-grammar/",
+    "note_es": "Tipos e,t y elevación de cuantificadores: base de los árboles LF de ArborLab.",
+    "note_en": "Types e,t and quantifier raising: the basis of ArborLab's LF trees."
+  },
+  {
+    "id": "minimalism",
+    "title_es": "El programa minimalista",
+    "title_en": "The Minimalist Program",
+    "author": "Chomsky, N.",
+    "year": 1995,
+    "topic": "Sintaxis",
+    "topic_en": "Syntax",
+    "type": "Libro",
+    "type_en": "Book",
+    "lang": "EN",
+    "license": "Consulta",
+    "file": null,
+    "url": "https://mitpress.mit.edu/9780262528863/the-minimalist-program/",
+    "note_es": "Merge, copias y fases: marco de los árboles minimalistas.",
+    "note_en": "Merge, copies and phases: the frame for minimalist trees."
+  },
+  {
+    "id": "dependency-syntax",
+    "title_es": "Elementos de sintaxis estructural",
+    "title_en": "Elements of structural syntax",
+    "author": "Tesnière, L.",
+    "year": 1959,
+    "topic": "Sintaxis",
+    "topic_en": "Syntax",
+    "type": "Libro",
+    "type_en": "Book",
+    "lang": "FR",
+    "license": "Dominio público",
+    "file": "tesniere-1959.pdf",
+    "url": "https://fr.wikisource.org/wiki/%C3%89l%C3%A9ments_de_syntaxe_structurale",
+    "note_es": "Obra fundacional del análisis de dependencias (valencia, nociones de nodo).",
+    "note_en": "Foundational work on dependency analysis (valency, node notions)."
+  }
+];

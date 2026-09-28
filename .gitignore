@@ -1,7 +1,21 @@
-# LinguaLab
-.DS_Store
-Thumbs.db
-*.log
+# Dependencies
 node_modules/
+
+# Build output
+dist/
+.astro/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editors / OS
 .vscode/
 .idea/
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example

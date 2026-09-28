@@ -1,0 +1,106 @@
+---
+/**
+ * Base layout: document shell, fonts, styles and SEO head.
+ * Locale is resolved at build time — there is no runtime i18n engine.
+ */
+import "../styles/fonts.css";
+import "../styles/global.css";
+
+import Masthead from "../components/Masthead.astro";
+import Footer from "../components/Footer.astro";
+import { DEFAULT_LOCALE, LOCALES, htmlLang, localePath, t, type Locale } from "../i18n";
+
+interface Props {
+  locale?: Locale;
+  title: string;
+  description: string;
+  /** Route path in the default locale, e.g. "/tools". Used to build language alternates. */
+  path?: string;
+  /** Suppress indexing for utility pages if ever needed. */
+  noindex?: boolean;
+}
+
+const {
+  locale = DEFAULT_LOCALE,
+  title,
+  description,
+  path = "/",
+  noindex = false,
+} = Astro.props;
+
+const siteName = "LinguaLab";
+const fullTitle = path === "/" ? `${siteName} — ${title}` : `${title} · ${siteName}`;
+const canonical = new URL(localePath(locale, path), Astro.site ?? "https://lingualab.pages.dev");
+---
+
+<!doctype html>
+<html lang={htmlLang(locale)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical.href} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    {/* Language alternates point at the same route in every locale. */}
+    {LOCALES.map((l) => (
+      <link
+        rel="alternate"
+        hreflang={l === DEFAULT_LOCALE ? "x-default" : l}
+        href={new URL(localePath(l, path), Astro.site ?? "https://lingualab.pages.dev").href}
+      />
+    ))}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta property="og:locale" content={htmlLang(locale)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <meta name="theme-color" content="#fcfdfe" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0d1620" media="(prefers-color-scheme: dark)" />
+
+    {/* Applied before first paint so an explicit theme choice never flashes.
+        Kept inline and tiny on purpose: it cannot be deferred. */}
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem("lingualab-theme");
+          if (stored === "light" || stored === "dark") {
+            document.documentElement.dataset.theme = stored;
+          }
+        } catch {
+          /* Private mode: fall back to the OS preference. */
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">{t(locale, "skip")}</a>
+
+    <Masthead locale={locale} path={path} />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <Footer locale={locale} />
+
+    <script>
+      import { initThemeToggle } from "../scripts/core/theme";
+      import { initNavDisclosure } from "../scripts/core/nav";
+      import { initMasthead } from "../scripts/core/masthead";
+
+      initThemeToggle();
+      initNavDisclosure();
+      initMasthead();
+    </script>
+  </body>
+</html>

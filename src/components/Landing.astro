@@ -1,0 +1,458 @@
+---
+/**
+ * Landing page. Locale-agnostic: both / and /en/ render this component
+ * with a different locale, so the markup exists in exactly one place.
+ */
+import { IPA_CHART } from "../data/ipa-chart";
+import { PHONEMES } from "../data/phoneme-of-day";
+import { TREE_EXAMPLES } from "../data/trees/examples";
+import { t, type Locale, type MessageKey } from "../i18n";
+import PhonemeOfDay from "./PhonemeOfDay.astro";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const es = locale === "es";
+
+/** Hero copy, per locale. */
+const hero = es
+  ? {
+      eyebrow: "Fonética · Sintaxis · Corpus",
+      title: "Analiza el lenguaje, en el navegador.",
+      lede: "Alfabeto fonético con audio, árboles sintácticos editables y análisis de corpus. Todo se procesa en tu dispositivo: nada se envía a ningún servidor.",
+      primary: "Empezar a analizar",
+      secondary: "Ver las herramientas",
+    }
+  : {
+      eyebrow: "Phonetics · Syntax · Corpus",
+      title: "Analyse language, in the browser.",
+      lede: "A phonetic alphabet with audio, editable syntactic trees and corpus analysis. Everything is processed on your device: nothing is sent to a server.",
+      primary: "Start analysing",
+      secondary: "See the tools",
+    };
+
+interface Tool {
+  path: string;
+  name: string;
+  blurb: string;
+  /** A real notation sample — the product's own visual language. */
+  sample: string;
+  sampleClass?: string;
+}
+
+const tools: Tool[] = es
+  ? [
+      {
+        path: "/fono",
+        name: "FonoLab",
+        blurb:
+          "Alfabeto Fonético Internacional con descripción articulatoria, audio y transcriptor de grafemas a AFI para español e inglés.",
+        sample: "θ ʃ ɾ ŋ ə ː",
+        sampleClass: "ipa",
+      },
+      {
+        path: "/arboles",
+        name: "ArborLab",
+        blurb:
+          "23 tipos de árbol —dependencia, constituyentes, X-bar, movimiento y estructuras de datos— con exportación a SVG, Newick, CoNLL-U y más.",
+        sample: "S → NP VP",
+        sampleClass: "mono",
+      },
+      {
+        path: "/tools",
+        name: "Estación textual",
+        blurb:
+          "Frecuencia, concordancia KWIC, n-gramas, estadísticas, legibilidad y exportación. Pega un texto y obtén resultados reproducibles.",
+        sample: "la de · 142 · log-Dice",
+        sampleClass: "mono",
+      },
+    ]
+  : [
+      {
+        path: "/fono",
+        name: "FonoLab",
+        blurb:
+          "The International Phonetic Alphabet with articulatory description, audio, and a grapheme-to-IPA transcriber for Spanish and English.",
+        sample: "θ ʃ ɾ ŋ ə ː",
+        sampleClass: "ipa",
+      },
+      {
+        path: "/arboles",
+        name: "ArborLab",
+        blurb:
+          "23 tree types —dependency, constituency, X-bar, movement and data structures— with export to SVG, Newick, CoNLL-U and more.",
+        sample: "S → NP VP",
+        sampleClass: "mono",
+      },
+      {
+        path: "/tools",
+        name: "Text station",
+        blurb:
+          "Frequency, KWIC concordance, n-grams, statistics, readability and export. Paste a text and get reproducible results.",
+        sample: "la de · 142 · log-Dice",
+        sampleClass: "mono",
+      },
+    ];
+
+/* Counts come from the data, never from a literal. The legacy landing
+   advertised "170 IPA symbols" while shipping 104; deriving these keeps
+   the page from ever repeating that class of error. */
+const ipaCount = IPA_CHART.categories.reduce((n, c) => n + c.symbols.length, 0);
+const treeCount = Object.keys(TREE_EXAMPLES).length;
+
+const trust: { label: string; value: string }[] = es
+  ? [
+      { label: "Símbolos AFI", value: String(ipaCount) },
+      { label: "Tipos de árbol", value: String(treeCount) },
+      { label: "Envío de datos", value: "Ninguno" },
+      { label: "Cookies", value: "Ninguna" },
+    ]
+  : [
+      { label: "IPA symbols", value: String(ipaCount) },
+      { label: "Tree types", value: String(treeCount) },
+      { label: "Data sent", value: "None" },
+      { label: "Cookies", value: "None" },
+    ];
+
+const notes: { headingKey: MessageKey; body: string }[] = [
+  {
+    headingKey: "hero.trust1",
+    body: es
+      ? "El texto que escribes se procesa con JavaScript en tu pestaña. No hay servidor de análisis, ni analítica, ni telemetría."
+      : "The text you type is processed with JavaScript in your tab. There is no analysis server, no analytics and no telemetry.",
+  },
+  {
+    headingKey: "hero.trust3",
+    body: es
+      ? "Todo el código es libre y auditable. Cada recurso externo declara su licencia, y el audio que no se puede verificar cae a la voz del sistema."
+      : "All code is free and auditable. Every external resource declares its licence, and audio that cannot be verified falls back to the system voice.",
+  },
+];
+
+const payload = JSON.stringify({ entries: PHONEMES, locale });
+---
+
+<section class="section hero">
+  <div class="shell hero__grid">
+    <div class="hero__copy">
+      <span class="eyebrow">{hero.eyebrow}</span>
+      <h1 class="hero__title">{hero.title}</h1>
+      <p class="u-lead">{hero.lede}</p>
+
+      <div class="cluster hero__actions">
+        <a class="btn btn--primary btn--lg" href="/tools">
+          {hero.primary}
+          <span class="btn__arrow" aria-hidden="true">→</span>
+        </a>
+        <a class="btn btn--lg" href="#herramientas">{hero.secondary}</a>
+      </div>
+    </div>
+
+    {/* The notation is the product's own visual language — no stock
+        illustration needed. */}
+    <div class="hero__specimen" aria-hidden="true">
+      <div class="specimen">
+        <span class="specimen__glyph ipa-display">θ</span>
+        <span class="specimen__meta mono">/θ/ · dental</span>
+      </div>
+      <div class="specimen specimen--sm">
+        <span class="specimen__glyph ipa-display">ŋ</span>
+        <span class="specimen__meta mono">/ŋ/ · velar nasal</span>
+      </div>
+      <div class="specimen specimen--tree">
+        <svg viewBox="0 0 160 96" role="presentation">
+          <path d="M80 18 L40 52" stroke="currentColor" stroke-width="1.5" fill="none" opacity=".5"></path>
+          <path d="M80 18 L120 52" stroke="currentColor" stroke-width="1.5" fill="none" opacity=".5"></path>
+          <path d="M40 52 L20 84" stroke="currentColor" stroke-width="1.5" fill="none" opacity=".5"></path>
+          <path d="M40 52 L62 84" stroke="currentColor" stroke-width="1.5" fill="none" opacity=".5"></path>
+          <text x="80" y="12" text-anchor="middle" class="specimen__node">S</text>
+          <text x="40" y="46" text-anchor="middle" class="specimen__node">NP</text>
+          <text x="120" y="46" text-anchor="middle" class="specimen__node">VP</text>
+          <text x="20" y="92" text-anchor="middle" class="specimen__leaf">el</text>
+          <text x="62" y="92" text-anchor="middle" class="specimen__leaf">gato</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="herramientas" aria-labelledby="tools-heading">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{es ? "Herramientas" : "Tools"}</span>
+      <h2 id="tools-heading">
+        {es ? "Tres laboratorios, una sola pestaña" : "Three labs, one single tab"}
+      </h2>
+    </div>
+
+    <ul class="tool-list" role="list">
+      {
+        tools.map((tool, index) => (
+          <li>
+            <a class="tool" href={tool.path}>
+              <span class="tool__index mono" aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span class="tool__body">
+                <span class="tool__name">{tool.name}</span>
+                <span class="tool__blurb">{tool.blurb}</span>
+              </span>
+              <span class={`tool__sample ${tool.sampleClass ?? ""}`} aria-hidden="true">
+                {tool.sample}
+              </span>
+              <span class="btn__arrow" aria-hidden="true">
+                →
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<PhonemeOfDay
+  locale={locale}
+  heading={es ? "Fonema del día" : "Phoneme of the day"}
+  payload={payload}
+/>
+
+<section class="section" aria-labelledby="trust-heading">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{es ? "Privacidad" : "Privacy"}</span>
+      <h2 id="trust-heading">
+        {es ? "Tus textos no salen de tu dispositivo" : "Your texts never leave your device"}
+      </h2>
+    </div>
+
+    <dl class="stats">
+      {
+        trust.map((item) => (
+          <div class="stat">
+            <dt class="stat__label">{item.label}</dt>
+            <dd class="stat__value">{item.value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+
+    <div class="notes">
+      {
+        notes.map((note) => (
+          <div class="note">
+            <h3 class="note__title">{t(locale, note.headingKey)}</h3>
+            <p class="note__body">{note.body}</p>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ---- Hero ---- */
+  .hero {
+    padding-block-start: clamp(3rem, 7vw, 6rem);
+  }
+
+  .hero__grid {
+    display: grid;
+    gap: var(--space-2xl);
+    align-items: center;
+  }
+
+  @media (width >= 60rem) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    }
+  }
+
+  .hero__title {
+    font-size: var(--step-6);
+    max-width: 16ch;
+  }
+
+  .hero__actions {
+    margin-block-start: var(--space-l);
+  }
+
+  /* ---- Specimen: the notation itself as artwork ---- */
+  .hero__specimen {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .specimen {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding: var(--space-m) var(--space-l);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+  }
+
+  .specimen--sm {
+    background: var(--bg-sunken);
+  }
+
+  .specimen--tree {
+    display: block;
+    padding: var(--space-m);
+    color: var(--ink-faint);
+  }
+
+  .specimen--tree svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .specimen__glyph {
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .specimen__meta {
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  .specimen__node {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 650;
+    fill: var(--ink);
+  }
+
+  .specimen__leaf {
+    font-family: var(--font-serif, Georgia, serif);
+    font-size: 13px;
+    fill: var(--ink-muted);
+  }
+
+  /* ---- Tool list ---- */
+  .tool-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--line);
+  }
+
+  .tool {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--space-m);
+    padding-block: var(--space-l);
+    border-block-end: 1px solid var(--line);
+    text-decoration: none;
+    transition: padding-inline var(--dur-base) var(--ease-out);
+  }
+
+  .tool:hover {
+    padding-inline-start: var(--space-2xs);
+    text-decoration: none;
+  }
+
+  @media (width < 46rem) {
+    .tool {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+
+    .tool__sample {
+      display: none;
+    }
+  }
+
+  .tool__index {
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  .tool__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    min-width: 0;
+  }
+
+  .tool__name {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    color: var(--ink);
+  }
+
+  .tool__blurb {
+    max-width: 52ch;
+    font-size: var(--step--1);
+    line-height: var(--leading-relaxed);
+    color: var(--ink-muted);
+  }
+
+  .tool__sample {
+    font-size: var(--step-1);
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  .tool:hover .tool__name {
+    color: var(--accent);
+  }
+
+  .tool:hover .btn__arrow {
+    transform: translateX(3px);
+  }
+
+  /* ---- Stats ---- */
+  .stats {
+    display: grid;
+    gap: var(--space-m);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    margin: 0 0 var(--space-2xl);
+  }
+
+  .stat {
+    padding: var(--space-m);
+    background: var(--bg-sunken);
+    border-radius: var(--radius-m);
+  }
+
+  .stat__label {
+    font-size: var(--step--2);
+    font-family: var(--font-mono);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .stat__value {
+    margin: var(--space-3xs) 0 0;
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    color: var(--ink);
+  }
+
+  /* ---- Notes ---- */
+  .notes {
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+
+  .note__title {
+    font-size: var(--step-0);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .note__body {
+    margin: 0;
+    max-width: 48ch;
+    color: var(--ink-muted);
+    line-height: var(--leading-relaxed);
+  }
+</style>

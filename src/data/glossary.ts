@@ -1,0 +1,197 @@
+/* ============================================================
+   LinguaLab — bilingual glossary
+   Ported from legacy/data/. Data is verbatim; the `window.X =`
+   global assignment became a typed ES module export.
+   ============================================================ */
+
+
+export interface GlossaryEntry {
+  id: string;
+  term_es: string;
+  term_en: string;
+  field_es: string;
+  field_en: string;
+  def_es: string;
+  def_en: string;
+  ex_es: string;
+  ex_en: string;
+}
+
+export const GLOSSARY: readonly GlossaryEntry[] = [
+  {
+    "id": "afi",
+    "term_es": "AFI (IPA)",
+    "term_en": "IPA",
+    "field_es": "Fonética",
+    "field_en": "Phonetics",
+    "def_es": "Alfabeto Fonético Internacional: conjunto de símbolos estándar para representar los sonidos de todas las lenguas.",
+    "def_en": "International Phonetic Alphabet: standard symbol set for representing the sounds of all languages.",
+    "ex_es": "La transcripción de «casa» es /ˈkasa/ en AFI.",
+    "ex_en": "The transcription of «casa» is /ˈkasa/ in IPA."
+  },
+  {
+    "id": "fonema",
+    "term_es": "Fonema",
+    "term_en": "Phoneme",
+    "field_es": "Fonología",
+    "field_en": "Phonology",
+    "def_es": "Unidad mínima de sonido capaz de diferenciar significado dentro de una lengua.",
+    "def_en": "Smallest sound unit able to distinguish meaning within a language.",
+    "ex_es": "/p/ y /b/ contrastan: «pato» vs «bato».",
+    "ex_en": "/p/ and /b/ contrast: «pat» vs «bat»."
+  },
+  {
+    "id": "alofono",
+    "term_es": "Alofono",
+    "term_en": "Allophone",
+    "field_es": "Fonología",
+    "field_en": "Phonology",
+    "def_es": "Variante de un fonema que no cambia el significado.",
+    "def_en": "Variant of a phoneme that does not change meaning.",
+    "ex_es": "La «s» aspirada es un alofono de /s/ en some dialects.",
+    "ex_en": "Aspired «s» is an allophone of /s/ in some dialects."
+  },
+  {
+    "id": "token",
+    "term_es": "Token",
+    "term_en": "Token",
+    "field_es": "Corpus",
+    "field_en": "Corpora",
+    "def_es": "Unidad mínima de segmentación de un texto: palabra, puntuación o signo.",
+    "def_en": "Smallest segmentation unit of a text: word, punctuation or sign.",
+    "ex_es": "«No voy.» genera 3 tokens.",
+    "ex_en": "«I'm not going.» yields 4 tokens."
+  },
+  {
+    "id": "lematizacion",
+    "term_es": "Lematización",
+    "term_en": "Lemmatization",
+    "field_es": "Corpus",
+    "field_en": "Corpora",
+    "def_es": "Reducción de una forma a su lemma o forma base del diccionario.",
+    "def_en": "Reduction of a word form to its dictionary base form.",
+    "ex_es": "«corrieron» → lemma «correr».",
+    "ex_en": "«ran» → lemma «run»."
+  },
+  {
+    "id": "kwic",
+    "term_es": "Concordancia KWIC",
+    "term_en": "KWIC concordance",
+    "field_es": "Corpus",
+    "field_en": "Corpora",
+    "def_es": "Lista de ocurrencias de un nodo con su contexto izquierdo y derecho, centrada en la palabra clave.",
+    "def_en": "List of node occurrences with left and right context, centred on the keyword.",
+    "ex_es": "«el gato —saltó— la cerca».",
+    "ex_en": "«the cat —jumped— the fence»."
+  },
+  {
+    "id": "colocacion",
+    "term_es": "Colocación",
+    "term_en": "Collocation",
+    "field_es": "Corpus",
+    "field_en": "Corpora",
+    "def_es": "Unidad léxica formada por dos o más palabras que coocurren más de lo esperado por azar.",
+    "def_en": "Lexical unit of two or more words co-occurring more than chance allows.",
+    "ex_es": "«hacer una pregunta», no *«cometer una pregunta».",
+    "ex_en": "«strong tea», not *«powerful tea»."
+  },
+  {
+    "id": "keyness",
+    "term_es": "Keyness",
+    "term_en": "Keyness",
+    "field_es": "Corpus",
+    "field_en": "Corpora",
+    "def_es": "Frecuencia de una palabra en un corpus comparada con la de un corpus de referencia.",
+    "def_en": "Word frequency in a corpus compared with a reference corpus.",
+    "ex_es": "«crisis» es palabra clave en prensa económica.",
+    "ex_en": "«crisis» is a key word in financial press."
+  },
+  {
+    "id": "logdice",
+    "term_es": "log-Dice",
+    "term_en": "log-Dice",
+    "field_es": "Corpus",
+    "field_en": "Corpora",
+    "def_es": "Medida de asociación independiente del tamaño, comparable entre corpus.",
+    "def_en": "Size-independent association measure, comparable across corpora.",
+    "ex_es": "Permite comparar «macho»/«hembra» entre corpus pequeños y grandes.",
+    "ex_en": "Allows comparing pairs across small and large corpora."
+  },
+  {
+    "id": "ttr",
+    "term_es": "TTR (razón tipo/token)",
+    "term_en": "TTR (type/token ratio)",
+    "field_es": "Corpus",
+    "field_en": "Corpora",
+    "def_es": "Número de tipos dividido entre tokens: mide diversidad léxica.",
+    "def_en": "Number of types divided by tokens: measures lexical diversity.",
+    "ex_es": "TTR alta = léxico más variado.",
+    "ex_en": "High TTR = more varied vocabulary."
+  },
+  {
+    "id": "hapax",
+    "term_es": "Hapax légeno",
+    "term_en": "Hapax legomenon",
+    "field_es": "Corpus",
+    "field_en": "Corpora",
+    "def_es": "Palabra que aparece una sola vez en un corpus.",
+    "def_en": "Word that appears only once in a corpus.",
+    "ex_es": "Suelen superar el 50% de los tipos.",
+    "ex_en": "Often over 50% of all types."
+  },
+  {
+    "id": "proyectividad",
+    "term_es": "Proyectividad",
+    "term_en": "Projectivity",
+    "field_es": "Sintaxis",
+    "field_en": "Syntax",
+    "def_es": "Propiedad de un árbol de dependencia cuyos arcos no se cruzan al dibujarlos sobre la frase.",
+    "def_en": "Property of a dependency tree whose arcs do not cross when drawn over the sentence.",
+    "ex_es": "Las lenguas de orden libre generan más arcos cruzados.",
+    "ex_en": "Free-word-order languages yield more crossing arcs."
+  },
+  {
+    "id": "comandoc",
+    "term_es": "c-comando",
+    "term_en": "c-command",
+    "field_es": "Sintaxis",
+    "field_en": "Syntax",
+    "def_es": "Relación entre nodos: un nodo c-comanda a su hermana y todo lo que esta contiene.",
+    "def_en": "Node relation: a node c-commands its sister and everything she contains.",
+    "ex_es": "El antecedente de un reflexivo debe c-comandarlo.",
+    "ex_en": "A reflexive's antecedent must c-command it."
+  },
+  {
+    "id": "constituyente",
+    "term_es": "Constituyente",
+    "term_en": "Constituent",
+    "field_es": "Sintaxis",
+    "field_en": "Syntax",
+    "def_es": "Conjunto de palabras que funciona como unidad en la estructura.",
+    "def_en": "Set of words that works as a unit in the structure.",
+    "ex_es": "«el viejo gato» es un SN: puede sustituirse por «él».",
+    "ex_en": "«the old cat» is an NP: replaceable by «it»."
+  },
+  {
+    "id": "merge",
+    "term_es": "Merge",
+    "term_en": "Merge",
+    "field_es": "Sintaxis",
+    "field_en": "Syntax",
+    "def_es": "Operación que combina dos objetos sintácticos en uno nuevo.",
+    "def_en": "Operation that combines two syntactic objects into a new one.",
+    "ex_es": "Merge externo añade material; interno produce movimiento.",
+    "ex_en": "External Merge adds material; internal Merge produces movement."
+  },
+  {
+    "id": "dispersion",
+    "term_es": "Dispersión",
+    "term_en": "Dispersion",
+    "field_es": "Corpus",
+    "field_en": "Corpora",
+    "def_es": "Distribución de un término a lo largo de las partes de un corpus.",
+    "def_en": "Distribution of a term across the parts of a corpus.",
+    "ex_es": "Dos términos con la misma frecuencia pueden dispersarse distinto.",
+    "ex_en": "Two terms with the same frequency may disperse differently."
+  }
+];

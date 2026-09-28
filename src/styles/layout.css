@@ -1,0 +1,269 @@
+/* ============================================================
+   LinguaLab — Layout layer
+   Page shell, containers and section rhythm.
+   ============================================================ */
+
+@layer layout {
+  .shell {
+    width: 100%;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .prose {
+    max-width: var(--prose-max);
+  }
+
+  .section {
+    padding-block: var(--section-y);
+  }
+
+  .section--sunken {
+    background: var(--bg-sunken);
+  }
+
+  /* Horizontal rule that stops at the measure instead of the full bleed. */
+  .rule {
+    height: 1px;
+    border: 0;
+    margin: 0;
+    background: var(--line);
+  }
+
+  /* ---- Auto-fitting card grid. No breakpoint soup. ---- */
+  .grid {
+    display: grid;
+    gap: var(--space-m);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+  }
+
+  .grid--wide {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  }
+
+  .stack > * + * {
+    margin-block-start: var(--space-s);
+  }
+
+  .cluster {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    align-items: center;
+  }
+
+  /* ---- Masthead ---- */
+  .masthead {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in oklab, var(--bg) 82%, transparent);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
+    border-bottom: 1px solid transparent;
+    transition: border-color var(--dur-base) ease;
+  }
+
+  @media (width < 60rem) {
+    .masthead {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: var(--bg);
+    }
+  }
+
+  .masthead[data-stuck="true"] {
+    border-bottom-color: var(--line);
+  }
+
+  .masthead__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    min-height: 4.25rem;
+  }
+
+  /* ---- Primary navigation ---- */
+  .nav {
+    margin-inline-start: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+  }
+
+  .nav__link {
+    padding: 0.4rem 0.6rem;
+    font-size: var(--step--1);
+    font-weight: 500;
+    color: var(--ink-muted);
+    text-decoration: none;
+    border-radius: var(--radius-s);
+    transition:
+      color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease;
+  }
+
+  .nav__link:hover {
+    color: var(--ink);
+    background: var(--bg-sunken);
+  }
+
+  .nav__link[aria-current="page"] {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .nav__toggle {
+    display: none;
+    margin-inline-start: auto;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    color: var(--ink);
+  }
+
+  .nav__toggle-lines,
+  .nav__toggle-lines::before,
+  .nav__toggle-lines::after {
+    display: block;
+    width: 1rem;
+    height: 1.5px;
+    background: currentColor;
+    transition: transform var(--dur-base) var(--ease-out);
+  }
+
+  .nav__toggle-lines {
+    position: relative;
+    margin-inline: auto;
+  }
+
+  .nav__toggle-lines::before,
+  .nav__toggle-lines::after {
+    content: "";
+    position: absolute;
+    left: 0;
+  }
+
+  .nav__toggle-lines::before {
+    top: -5px;
+  }
+  .nav__toggle-lines::after {
+    top: 5px;
+  }
+
+  .nav__toggle[aria-expanded="true"] .nav__toggle-lines {
+    background: transparent;
+  }
+
+  .nav__toggle[aria-expanded="true"] .nav__toggle-lines::before {
+    transform: translateY(5px) rotate(45deg);
+  }
+
+  .nav__toggle[aria-expanded="true"] .nav__toggle-lines::after {
+    transform: translateY(-5px) rotate(-45deg);
+  }
+
+  /* Mobile: nav becomes a disclosure panel under the masthead. */
+  @media (width < 64rem) {
+    .nav {
+      position: absolute;
+      inset-inline: 0;
+      top: 100%;
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-3xs);
+      padding: var(--space-s) var(--gutter) var(--space-m);
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--shadow-m);
+    }
+
+    .nav:not([data-open="true"]) {
+      display: none;
+    }
+
+    .nav__link {
+      padding: 0.6rem 0.5rem;
+      font-size: var(--step-0);
+    }
+
+    .nav__toggle {
+      display: grid;
+      place-items: center;
+    }
+
+    /* The controls row sits at the end of the panel on small screens. */
+    .nav__controls {
+      margin-block-start: var(--space-2xs);
+      padding-block-start: var(--space-s);
+      border-block-start: 1px solid var(--line);
+    }
+  }
+
+  @media (width >= 64rem) {
+    .nav__controls {
+      margin-inline-start: var(--space-2xs);
+      padding-inline-start: var(--space-s);
+      border-inline-start: 1px solid var(--line);
+    }
+  }
+
+  /* ---- Footer ---- */
+  .footer {
+    margin-block-start: var(--space-3xl);
+    padding-block: var(--space-2xl) var(--space-xl);
+    border-block-start: 1px solid var(--line);
+    background: var(--bg-sunken);
+  }
+
+  .footer__grid {
+    display: grid;
+    gap: var(--space-xl);
+    grid-template-columns: minmax(0, 1.4fr) repeat(auto-fit, minmax(9rem, 1fr));
+  }
+
+  .footer__col h2 {
+    font-family: var(--font-sans);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-block-end: var(--space-s);
+  }
+
+  .footer__col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+
+  .footer__col a {
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+    text-decoration: none;
+  }
+
+  .footer__col a:hover {
+    color: var(--accent);
+  }
+
+  .footer__base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-s);
+    margin-block-start: var(--space-xl);
+    padding-block-start: var(--space-m);
+    border-block-start: 1px solid var(--line);
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+  }
+}
