@@ -1,0 +1,839 @@
+---
+/**
+ * Text Station: corpus analysis in the browser.
+ *
+ * The page is a shell with a tabbed results panel. All analysis runs
+ * client-side, so the results are built as DOM rather than injected as HTML
+ * strings — the original assembled escaped markup by hand, which is the one
+ * pattern most likely to become an injection hole.
+ */
+import { MAX_TEXT_BYTES, ALLOWED_EXT } from "../scripts/core/guardrails";
+import type { Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const es = locale === "es";
+
+const tabs = [
+  { id: "freq", label: es ? "Frecuencia" : "Frequency" },
+  { id: "colloc", label: es ? "Colocaciones" : "Collocations" },
+  { id: "kwic", label: es ? "Concordancia" : "Concordance" },
+  { id: "stats", label: es ? "Estadísticas" : "Statistics" },
+  { id: "read", label: es ? "Legibilidad" : "Readability" },
+];
+
+/* Long enough to contain repeated bigrams, so the collocation measures have
+   something to measure rather than showing an empty panel. */
+const SAMPLE = es
+  ? [
+      "La lingüística de corpus estudia el lenguaje a partir de datos reales.",
+      "Un corpus de textos auténticos permite medir frecuencias, colocaciones y dispersiones.",
+      "La frecuencia de una palabra no depende solo de su importancia: el tamaño del corpus también cuenta.",
+      "El análisis de corpus trabaja con textos reales, y por eso el análisis de corpus exige cuidado al elegir los textos.",
+      "Las medidas de asociación como log-Dice buscan comparabilidad entre corpus de distinto tamaño.",
+      "Las medidas de asociación permiten distinguir una colocación real de dos palabras frecuentes que solo coinciden.",
+      "El análisis de concordancias muestra cada ocurrencia de un nodo con su contexto inmediato.",
+      "La ley de Zipf describe cómo decae la frecuencia de las palabras según su rango.",
+      "La diversidad léxica mide cuántas palabras distintas usa un texto, y la diversidad léxica depende de su longitud.",
+      "Los índices de legibilidad estiman la dificultad de un texto a partir de sus sílabas y sus oraciones.",
+      "Un corpus de referencia permite comparar la frecuencia de una palabra con su frecuencia esperada.",
+      "En resumen, el análisis de corpus combina frecuencia, dispersión, colocación y legibilidad.",
+    ].join(" ")
+  : [
+      "Corpus linguistics studies language from real data.",
+      "A corpus of authentic texts makes it possible to measure frequencies, collocations and dispersions.",
+      "The frequency of a word does not depend only on its importance: the size of the corpus also counts.",
+      "Corpus analysis works with real texts, and that is why corpus analysis demands care when choosing the texts.",
+      "Association measures such as log-Dice aim for comparability between corpora of different sizes.",
+      "Association measures distinguish a real collocation from two frequent words that merely coincide.",
+      "Concordance analysis shows every occurrence of a node with its immediate context.",
+      "Zipf's law describes how word frequency falls as rank increases.",
+      "Lexical diversity measures how many distinct words a text uses, and lexical diversity depends on its length.",
+      "Readability indices estimate the difficulty of a text from its syllables and its sentences.",
+      "A reference corpus makes it possible to compare a word's frequency with its expected frequency.",
+      "In summary, corpus analysis combines frequency, dispersion, collocation and readability.",
+    ].join(" ");
+---
+
+<section class="section">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{es ? "Estación textual" : "Text station"}</span>
+      <h1>{es ? "Analiza un corpus en tu navegador" : "Analyse a corpus in your browser"}</h1>
+      <p class="u-lead">
+        {
+          es
+            ? "Frecuencia, dispersión, colocaciones con medidas de asociación, concordancias, estadísticas léxicas y legibilidad. Nada de lo que pegues sale de tu dispositivo."
+            : "Frequency, dispersion, collocations with association measures, concordances, lexical statistics and readability. Nothing you paste leaves your device."
+        }
+      </p>
+    </div>
+
+    <div class="station">
+      <!-- ---------------- Input ---------------- -->
+      <div class="station__input">
+        <div class="field">
+          <label class="field__label" for="corpus" data-input-label>
+            {es ? "Texto de entrada" : "Input text"}
+          </label>
+          <textarea
+            id="corpus"
+            data-corpus
+            rows="8"
+            spellcheck="false"
+            placeholder={es ? "Pega aquí tu texto…" : "Paste your text here…"}
+          ></textarea>
+          <p class="faint mono" style="font-size: var(--step--2)" data-counter></p>
+        </div>
+
+        <div class="cluster">
+          <label class="field field--inline">
+            <span class="field__label">{es ? "Idioma" : "Language"}</span>
+            <select data-lang>
+              <option value="es">{es ? "Español" : "Spanish"}</option>
+              <option value="en">{es ? "Inglés" : "English"}</option>
+            </select>
+          </label>
+
+          <label class="field field--inline">
+            <span class="field__label">{es ? "Vacías" : "Stopwords"}</span>
+            <select data-stopwords>
+              <option value="es">{es ? "Español" : "Spanish"}</option>
+              <option value="en">{es ? "Inglés" : "English"}</option>
+              <option value="both">{es ? "Ambos" : "Both"}</option>
+              <option value="none">{es ? "Ninguna" : "None"}</option>
+            </select>
+          </label>
+
+          <label class="field field--inline">
+            <span class="field__label">{es ? "Ventana" : "Window"}</span>
+            <input type="number" data-window min="1" max="20" value="5" style="width: 5rem" />
+          </label>
+
+          <label class="field field--inline">
+            <span class="field__label">{es ? "Palabra clave" : "Keyword"}</span>
+            <input
+              type="text"
+              data-keyword
+              placeholder={es ? "nodo…" : "node…"}
+              autocomplete="off"
+              style="width: 9rem"
+            />
+          </label>
+        </div>
+
+        <div class="cluster">
+          <button class="btn btn--primary" type="button" data-analyse>
+            {es ? "Analizar" : "Analyse"}
+          </button>
+          <button class="btn" type="button" data-sample>
+            {es ? "Texto de ejemplo" : "Sample text"}
+          </button>
+          <button class="btn btn--quiet" type="button" data-clear>
+            {es ? "Limpiar" : "Clear"}
+          </button>
+          <label class="btn btn--quiet" style="cursor: pointer">
+            {es ? "Subir archivo" : "Upload file"}
+            <input type="file" data-upload accept={ALLOWED_EXT.join(",")} hidden />
+          </label>
+        </div>
+
+        <p class="faint" style="font-size: var(--step--2)">
+          {
+            es
+              ? `Máximo ${MAX_TEXT_BYTES / 1024} KB. Extensiones admitidas: ${ALLOWED_EXT.join(", ")}.`
+              : `Maximum ${MAX_TEXT_BYTES / 1024} KB. Accepted extensions: ${ALLOWED_EXT.join(", ")}.`
+          }
+        </p>
+
+        <p class="station__error" data-error role="alert"></p>
+      </div>
+
+      <!-- ---------------- Results ---------------- -->
+      <div class="station__results">
+        <div class="tabs" role="tablist" aria-label={es ? "Herramientas" : "Tools"}>
+          {
+            tabs.map((tab, index) => (
+              <button
+                class="tabs__tab"
+                type="button"
+                role="tab"
+                data-tab={tab.id}
+                aria-selected={index === 0 ? "true" : "false"}
+              >
+                {tab.label}
+              </button>
+            ))
+          }
+        </div>
+
+        <div class="panel" data-panel aria-live="polite">
+          <p class="faint" data-empty>
+            {es ? "Pega un texto y pulsa «Analizar»." : "Paste a text and press “Analyse”."}
+          </p>
+        </div>
+
+        <div class="cluster" style="margin-block-start: var(--space-s)">
+          <button class="btn btn--sm" type="button" data-export disabled>
+            {es ? "Exportar resultados (JSON)" : "Export results (JSON)"}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline type="application/json" data-sample-text set:html={JSON.stringify(SAMPLE)} />
+
+<p class="u-visually-hidden" role="status" aria-live="polite" data-live-region></p>
+
+<script>
+  import { frequency, kwic, ngrams, statistics, type Collocation } from "../scripts/tools/analysis";
+  import { readability, type ReadabilityResult } from "../scripts/tools/readability";
+  import { tokenizeDetailed, type StopwordMode, type Token } from "../scripts/tools/tokenize";
+  import { download } from "../scripts/trees/export";
+  import { byteLength, validateFile, validateText } from "../scripts/core/guardrails";
+  import { safeInitAll } from "../scripts/core/safe";
+  import type { Locale } from "../i18n";
+
+  const locale = (document.documentElement.lang === "en" ? "en" : "es") as Locale;
+  const es = locale === "es";
+
+  let tokens: Token[] = [];
+  let sentences = 0;
+  let activeTab = "freq";
+  let hasResults = false;
+
+  const $ = <T extends Element>(s: string): T | null => document.querySelector<T>(s);
+
+  /* ---------------- Small DOM helpers ---------------- */
+
+  function el<K extends keyof HTMLElementTagNameMap>(
+    tag: K,
+    className?: string,
+    text?: string,
+  ): HTMLElementTagNameMap[K] {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function table(headers: string[], rows: (string | Node)[][]): HTMLTableElement {
+    const head = el("thead");
+    const headRow = el("tr");
+    for (const header of headers) {
+      const th = el("th", undefined, header);
+      th.scope = "col";
+      headRow.append(th);
+    }
+    head.append(headRow);
+
+    const body = el("tbody");
+    for (const row of rows) {
+      const tr = el("tr");
+      for (const cell of row) {
+        const td = el("td");
+        if (typeof cell === "string") td.textContent = cell;
+        else td.append(cell);
+        tr.append(td);
+      }
+      body.append(tr);
+    }
+
+    const element = el("table");
+    element.className = "tbl";
+    element.append(head, body);
+    return element;
+  }
+
+  /** A bar, drawn with a width percentage on an inner span. */
+  function bar(value: number, max: number): HTMLElement {
+    const wrap = el("span", "bar");
+    const fill = el("span");
+    fill.style.width = `${max > 0 ? (value / max) * 100 : 0}%`;
+    wrap.append(fill);
+    return wrap;
+  }
+
+  function definitionList(pairs: [string, string][]): HTMLElement {
+    const list = el("dl", "stats");
+    for (const [term, value] of pairs) {
+      const group = el("div");
+      group.append(el("dt", undefined, term), el("dd", undefined, value));
+      list.append(group);
+    }
+    return list;
+  }
+
+  function note(text: string): HTMLElement {
+    return el("p", "faint", text);
+  }
+
+  /* ---------------- Panels ---------------- */
+
+  function stopwordMode(): StopwordMode {
+    return ($<HTMLSelectElement>("[data-stopwords]")?.value ?? "es") as StopwordMode;
+  }
+
+  function lang(): "es" | "en" {
+    return $<HTMLSelectElement>("[data-lang]")?.value === "en" ? "en" : "es";
+  }
+
+  function renderFrequency(): void {
+    const entries = frequency(tokens, { stopwords: stopwordMode() }).slice(0, 50);
+    if (entries.length === 0) {
+      return void ($("[data-panel]")?.replaceChildren(note(es ? "Sin palabras." : "No words.")));
+    }
+
+    const max = entries[0]?.count ?? 1;
+    const rows = entries.map((entry) => [
+      String(entry.rank),
+      entry.display,
+      String(entry.count),
+      entry.relative.toFixed(4),
+      entry.dispersion.toFixed(2),
+      bar(entry.count, max),
+    ]);
+
+    $("[data-panel]")?.replaceChildren(
+      table(
+        [
+          "#",
+          es ? "Palabra" : "Word",
+          es ? "Frec." : "Freq.",
+          es ? "Relativa" : "Relative",
+          es ? "Dispersión" : "Dispersion",
+          "",
+        ],
+        rows,
+      ),
+      note(
+        es
+          ? "La dispersión es la proporción de segmentos del texto que contienen la palabra: un recuento alto en un solo tramo da una dispersión baja."
+          : "Dispersion is the share of text segments containing the word: a high count in one stretch gives a low dispersion.",
+      ),
+      note(
+        es
+          ? "Las palabras se agrupan ignorando acentos y mayúsculas; se muestra la grafía más frecuente."
+          : "Words are grouped ignoring accents and case; the most frequent spelling is shown.",
+      ),
+    );
+  }
+
+  function renderCollocations(): void {
+    const bigrams = ngrams(tokens, 2, { stopwords: stopwordMode(), minCount: 2, limit: 25 });
+    if (bigrams.length === 0) {
+      // Association measures need repeated pairs, so a short text can
+      // legitimately produce nothing. Say why rather than showing a blank.
+      return void $("[data-panel]")?.replaceChildren(
+        note(
+          es
+            ? "Ningún bigrama se repite al menos dos veces. Las medidas de asociación necesitan pares repetidos: prueba con un texto más largo."
+            : "No bigram repeats at least twice. Association measures need repeated pairs: try a longer text.",
+        ),
+      );
+    }
+
+    const rows = bigrams.map((gram: Collocation) => [
+      gram.display,
+      String(gram.count),
+      gram.logDice.toFixed(2),
+      gram.pmi.toFixed(2),
+      gram.tScore.toFixed(2),
+      gram.logLikelihood.toFixed(1),
+    ]);
+
+    const trigrams = ngrams(tokens, 3, { stopwords: stopwordMode(), minCount: 2, limit: 10 });
+    const trigramList = el("div", "chips");
+    for (const gram of trigrams) {
+      const chip = el("span", "chip");
+      chip.append(el("code", undefined, gram.display), el("b", undefined, String(gram.count)));
+      trigramList.append(chip);
+    }
+
+    $("[data-panel]")?.replaceChildren(
+      table(
+        ["Bigrama", es ? "Frec." : "Freq.", "log-Dice", "PMI", "t-score", "G²"],
+        rows,
+      ),
+      note(
+        es
+          ? "log-Dice va de 0 a 14 y favorece las colocaciones frecuentes; PMI favorece las raras; t-score las muy frecuentes; G² es la medida de significación habitual."
+          : "log-Dice runs 0 to 14 and favours frequent collocations; PMI favours rare ones; t-score very frequent ones; G² is the usual significance measure.",
+      ),
+      el("h3", "eyebrow", "Trigramas"),
+      trigrams.length > 0 ? trigramList : note(es ? "Sin trigramas repetidos." : "No repeated trigrams."),
+    );
+  }
+
+  function renderKwic(): void {
+    const keywordInput = $<HTMLInputElement>("[data-keyword]");
+    const keyword = keywordInput?.value ?? "";
+    if (!keyword.trim()) {
+      return void $("[data-panel]")?.replaceChildren(
+        note(es ? "Escribe una palabra clave arriba." : "Type a keyword above."),
+      );
+    }
+
+    const window = Number($<HTMLInputElement>("[data-window]")?.value ?? 5);
+    const lines = kwic(tokens, keyword, { window });
+
+    if (lines.length === 0) {
+      return void $("[data-panel]")?.replaceChildren(
+        note(es ? "Sin coincidencias." : "No matches."),
+      );
+    }
+
+    const rows = lines.slice(0, 100).map((line) => [
+      line.left,
+      line.node,
+      line.right,
+    ]);
+
+    const nodeCell = (value: string): HTMLElement => el("strong", "node", value);
+    const styled = rows.map(([left, node, right]) => [
+      el("span", "faint", left ?? ""),
+      nodeCell(node ?? ""),
+      el("span", "faint", right ?? ""),
+    ]);
+
+    $("[data-panel]")?.replaceChildren(
+      table([es ? "Izquierda" : "Left", es ? "Nodo" : "Node", es ? "Derecha" : "Right"], styled),
+      note(
+        `${lines.length} ${es ? "concordancias" : "concordances"}${
+          lines.length > 100 ? (es ? " (primeras 100)" : " (first 100)") : ""
+        }`,
+      ),
+    );
+  }
+
+  function renderStats(): void {
+    const stats = statistics(tokens, { stopwords: stopwordMode(), sentences });
+    $("[data-panel]")?.replaceChildren(
+      definitionList([
+        [es ? "Palabras (tokens)" : "Tokens", String(stats.tokens)],
+        [es ? "Formas (types)" : "Types", String(stats.types)],
+        ["TTR", stats.ttr.toFixed(4)],
+        ["MSTTR", stats.msttr.toFixed(4)],
+        [es ? "Hapax" : "Hapax", `${stats.hapax} (${(stats.hapaxRatio * 100).toFixed(1)} %)`],
+        [es ? "Dis legomena" : "Dis legomena", String(stats.dislegomena)],
+        [es ? "Entropía (bits)" : "Entropy (bits)", stats.entropy.toFixed(3)],
+        [es ? "Pendiente de Zipf" : "Zipf slope", stats.zipfSlope.toFixed(3)],
+        [es ? "Oraciones" : "Sentences", String(stats.sentences)],
+        [es ? "Palabras por oración" : "Words per sentence", stats.avgWordsPerSentence.toFixed(2)],
+        [es ? "Letras por palabra" : "Letters per word", stats.avgWordLength.toFixed(2)],
+        [es ? "Palabra más larga" : "Longest word", stats.longestWord],
+      ]),
+      note(
+        es
+          ? "El TTR depende de la longitud del texto, así que para comparar textos de distinto tamaño usa el MSTTR o la entropía. La pendiente de Zipf se acerca a −1 en lenguaje natural."
+          : "Raw TTR depends on text length, so use MSTTR or entropy to compare texts of different sizes. The Zipf slope approaches −1 in natural language.",
+      ),
+    );
+  }
+
+  function renderReadability(): void {
+    const text = $<HTMLTextAreaElement>("[data-corpus]")?.value ?? "";
+    const result: ReadabilityResult = readability(text, lang());
+    const { counts } = result;
+
+    const rows: [string, string][] = [
+      [es ? "Oraciones" : "Sentences", String(counts.sentences)],
+      [es ? "Palabras" : "Words", String(counts.words)],
+      [es ? "Sílabas" : "Syllables", String(counts.syllables)],
+      [es ? "Sílabas por palabra" : "Syllables per word", counts.syllablesPerWord.toFixed(2)],
+      [es ? "Palabras por oración" : "Words per sentence", counts.wordsPerSentence.toFixed(2)],
+    ];
+
+    const spanish = [
+      ["Fernández-Huerta", result.spanish.fernandezHuerta],
+      ["Szigriszt-Pazos", result.spanish.szigrisztPazos],
+      ["Gutiérrez de Polini", result.spanish.gutierrezDePolini],
+      ["INFLESZ", result.spanish.inflesz],
+    ] as const;
+
+    const english = [
+      ["Flesch Reading Ease", result.english.fleschReadingEase],
+      ["Flesch–Kincaid", result.english.fleschKincaidGrade],
+      ["Gunning Fog", result.english.gunningFog],
+      ["SMOG", result.english.smog],
+      ["ARI", result.english.ari],
+      ["Coleman–Liau", result.english.colemanLiau],
+    ] as const;
+
+    for (const [label, index] of spanish) {
+      rows.push([label, `${index.score.toFixed(1)} · ${index.band[locale]}`]);
+    }
+    for (const [label, index] of english) {
+      rows.push([label, `${index.score.toFixed(1)} · ${index.band[locale]}`]);
+    }
+
+    $("[data-panel]")?.replaceChildren(
+      definitionList(rows),
+      note(
+        es
+          ? "Las sílabas del español se cuentan con reglas de diptongo e hiato; las del inglés son una aproximación declarada."
+          : "Spanish syllables use diphthong and hiatus rules; English syllables are a stated approximation.",
+      ),
+    );
+  }
+
+  function render(): void {
+    const empty = $<HTMLElement>("[data-empty]");
+    if (tokens.length === 0) {
+      hasResults = false;
+      $("[data-export]")?.setAttribute("disabled", "true");
+      return;
+    }
+    empty?.remove();
+    hasResults = true;
+    $("[data-export]")?.removeAttribute("disabled");
+
+    switch (activeTab) {
+      case "colloc":
+        renderCollocations();
+        break;
+      case "kwic":
+        renderKwic();
+        break;
+      case "stats":
+        renderStats();
+        break;
+      case "read":
+        renderReadability();
+        break;
+      default:
+        renderFrequency();
+    }
+  }
+
+  /* ---------------- Input ---------------- */
+
+  function analyse(): void {
+    const input = $<HTMLTextAreaElement>("[data-corpus]");
+    const error = $<HTMLElement>("[data-error]");
+    if (!input) return;
+    if (error) error.textContent = "";
+
+    const text = input.value;
+    const check = validateText(text);
+    if (!check.ok) {
+      if (error) {
+        error.textContent = es
+          ? `El texto supera el límite de 100 KB (${(byteLength(text) / 1024).toFixed(1)} KB).`
+          : `The text exceeds the 100 KB limit (${(byteLength(text) / 1024).toFixed(1)} KB).`;
+      }
+      return;
+    }
+
+    const detailed = tokenizeDetailed(text);
+    tokens = detailed.tokens;
+    sentences = detailed.sentences.length;
+    render();
+  }
+
+  /* ---------------- Export ---------------- */
+
+  function exportResults(): void {
+    if (!hasResults) return;
+    const text = $<HTMLTextAreaElement>("[data-corpus]")?.value ?? "";
+    const mode = stopwordMode();
+
+    download(
+      "lingualab-analisis.json",
+      JSON.stringify(
+        {
+          tool: "LinguaLab text station",
+          generated: new Date().toISOString(),
+          lang: locale,
+          stopwords: mode,
+          statistics: statistics(tokens, { stopwords: mode, sentences }),
+          frequency: frequency(tokens, { stopwords: mode }).slice(0, 200),
+          bigrams: ngrams(tokens, 2, { stopwords: mode, minCount: 2, limit: 100 }),
+          trigrams: ngrams(tokens, 3, { stopwords: mode, minCount: 2, limit: 100 }),
+          readability: readability(text, lang()),
+        },
+        null,
+        2,
+      ),
+      "application/json;charset=utf-8",
+    );
+  }
+
+  safeInitAll({
+    "text station": () => {
+      const root = $<HTMLElement>(".station");
+      if (!root) return;
+
+      root.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const tab = target.closest<HTMLButtonElement>("[data-tab]");
+        if (tab?.dataset["tab"]) {
+          activeTab = tab.dataset["tab"];
+          for (const other of root.querySelectorAll<HTMLButtonElement>("[data-tab]")) {
+            other.setAttribute("aria-selected", other === tab ? "true" : "false");
+          }
+          render();
+          return;
+        }
+
+        if (target.closest("[data-analyse]")) return analyse();
+
+        if (target.closest("[data-sample]")) {
+          const input = $<HTMLTextAreaElement>("[data-corpus]");
+          if (input) input.value = sampleText();
+          analyse();
+          return;
+        }
+
+        if (target.closest("[data-clear]")) {
+          const input = $<HTMLTextAreaElement>("[data-corpus]");
+          if (input) input.value = "";
+          tokens = [];
+          sentences = 0;
+          hasResults = false;
+          const panel = $("[data-panel]");
+          panel?.replaceChildren(note(es ? "Pega un texto y pulsa «Analizar»." : "Paste a text and press “Analyse”."));
+          $("[data-export]")?.setAttribute("disabled", "true");
+          updateCounter();
+          return;
+        }
+
+        if (target.closest("[data-export]")) exportResults();
+      });
+
+      // Re-render on option changes so the effect is visible immediately.
+      for (const selector of ["[data-stopwords]", "[data-lang]", "[data-window]"]) {
+        $(selector)?.addEventListener("change", () => {
+          if (tokens.length > 0) render();
+        });
+      }
+
+      const input = $<HTMLTextAreaElement>("[data-corpus]");
+      input?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+          event.preventDefault();
+          analyse();
+        }
+      });
+      input?.addEventListener("input", updateCounter);
+
+      // The concordance follows the keyword as it is typed, so the panel is
+      // useful without pressing anything.
+      $<HTMLInputElement>("[data-keyword]")?.addEventListener("input", () => {
+        if (tokens.length > 0 && activeTab === "kwic") renderKwic();
+      });
+
+      $<HTMLInputElement>("[data-upload]")?.addEventListener("change", (event) => {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (!file) return;
+
+        const error = $<HTMLElement>("[data-error]");
+        const check = validateFile(file);
+        if (!check.ok) {
+          if (error) {
+            error.textContent =
+              check.messageKey === "guardrail.err.ext"
+                ? es
+                  ? "Extensión no permitida."
+                  : "Extension not allowed."
+                : es
+                  ? "El archivo supera el límite de 100 KB."
+                  : "The file exceeds the 100 KB limit.";
+          }
+          (event.target as HTMLInputElement).value = "";
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          if (input) input.value = String(reader.result ?? "");
+          analyse();
+          (event.target as HTMLInputElement).value = "";
+        });
+        reader.addEventListener("error", () => {
+          if (error) error.textContent = es ? "No se pudo leer el archivo." : "Could not read the file.";
+        });
+        reader.readAsText(file, "utf-8");
+      });
+
+      updateCounter();
+    },
+  });
+
+  /** The sample text ships as a JSON data block, read once on demand. */
+  function sampleText(): string {
+    const holder = $<HTMLScriptElement>("[data-sample-text]");
+    if (!holder?.textContent) return "";
+    try {
+      return JSON.parse(holder.textContent) as string;
+    } catch {
+      return "";
+    }
+  }
+
+  function updateCounter(): void {
+    const input = $<HTMLTextAreaElement>("[data-corpus]");
+    const counter = $<HTMLElement>("[data-counter]");
+    if (!input || !counter) return;
+    const size = byteLength(input.value);
+    counter.textContent = `${(size / 1024).toFixed(1)} KB · ${input.value.trim() === "" ? 0 : input.value.trim().split(/\s+/).length} ${
+      es ? "palabras" : "words"
+    }`;
+  }
+</script>
+
+<style>
+  .station {
+    display: grid;
+    gap: var(--space-l);
+    align-items: start;
+  }
+
+  @media (width >= 68rem) {
+    .station {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    }
+  }
+
+  .station__input,
+  .station__results {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    min-width: 0;
+  }
+
+  .station__error {
+    margin: 0;
+    min-height: 1.4em;
+    font-size: var(--step--1);
+    color: var(--warn);
+  }
+
+  .field__label {
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .field--inline {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .field--inline select,
+  .field--inline input {
+    width: auto;
+  }
+
+  /* ---- Tabs ---- */
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    border-block-end: 1px solid var(--line);
+  }
+
+  .tabs__tab {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+    background: none;
+    border: 0;
+    border-block-end: 2px solid transparent;
+    transition:
+      color var(--dur-fast) ease,
+      border-color var(--dur-fast) ease;
+  }
+
+  .tabs__tab:hover {
+    color: var(--ink);
+  }
+
+  .tabs__tab[aria-selected="true"] {
+    color: var(--accent);
+    border-block-end-color: var(--accent);
+    font-weight: 600;
+  }
+
+  .panel {
+    min-height: 16rem;
+  }
+
+  /* ---- Tables ---- */
+  .panel :global(.tbl) {
+    font-size: var(--step--1);
+  }
+
+  .panel :global(.bar) {
+    display: block;
+    width: 6rem;
+    height: 0.5rem;
+    background: var(--bg-sunken);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+  }
+
+  .panel :global(.bar > span) {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .panel :global(.node) {
+    color: var(--accent);
+  }
+
+  .panel :global(.chips) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+
+  .panel :global(.chip) {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.2rem 0.5rem;
+    font-size: var(--step--2);
+    background: var(--bg-sunken);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+  }
+
+  .panel :global(.stats) {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin: 0;
+  }
+
+  .panel :global(.stats > div) {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-block: 0.35rem;
+    border-block-end: 1px solid var(--line);
+    font-size: var(--step--1);
+  }
+
+  .panel :global(.stats dt) {
+    color: var(--ink-faint);
+  }
+
+  .panel :global(.stats dd) {
+    margin: 0;
+    text-align: end;
+    font-weight: 550;
+  }
+</style>

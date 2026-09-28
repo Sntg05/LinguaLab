@@ -264,3 +264,74 @@ runtime, so it never carries those attributes.
 The payload budget now charges each page only for what it loads. Counting every
 file in `dist/assets` as shared made the figure grow with the site rather than
 with the page. ArborLab is 31.3 KB gz including its own scripts.
+
+## WU-5 — Text Station (complete)
+
+Corpus analysis: tokenisation, frequency with dispersion, collocations with
+association measures, concordance, lexical statistics and readability.
+
+### Modules
+
+| Module | What it owns |
+|---|---|
+| `tokenize.ts` | sentence segmentation, tokenisation with offsets, stopwords, normalisation |
+| `analysis.ts` | frequency, dispersion, collocation measures, KWIC, lexical statistics |
+| `readability.ts` | Spanish and English syllabification and readability indices |
+
+`tokenize.ts` is the single source of truth for what a token and a sentence
+are. `readability.ts` imports the canonical splitter rather than keeping its
+own, so the two cannot drift — a readability score is only as good as its
+sentence count.
+
+### Delivered the features the landing page advertised
+
+The original advertised **log-Dice** and **dispersion** and computed neither.
+Both are implemented, along with PMI, t-score and log-likelihood, because a
+frequency list cannot separate a real collocation from two common words that
+happen to co-occur.
+
+### Bugs found and fixed
+
+- **Accented Spanish stopwords never matched.** Tokens are matched on their
+  accent-folded form, so `más`, `sí`, `qué`, `él`, `tú`, `mí`, `está` could
+  never match and were never removed. The lookup sets are now folded.
+- **log-Dice was missing its standard offset.** The published measure is
+  `14 + log2(2·O11/(f1+f2))`, which is why it ranges 0-14. Without the offset
+  it returned 0 at *maximum* association, reading as no association at all.
+- **INFLESZ contradicted its own definition.** INFLESZ *is* the Szigriszt-Pazos
+  score read against Spanish bands; the implementation used a rescaling that
+  put ordinary prose at 9.7 ("very difficult") while reporting Szigriszt-Pazos
+  56.5 for the same text.
+- **The frequency table printed folded keys.** Counting folds accents so
+  variants group, but displaying the key printed `tamano` for `tamaño` and
+  `analisis` for `análisis` — misspellings to a Spanish reader. Entries now
+  carry the most frequent surface spelling.
+- **A sentence split on `p.ej.`.** The abbreviation scan only looked backwards,
+  so the first dot of `p.ej.` saw just `"p"` and broke the sentence. It now
+  scans the whole dotted token in both directions.
+- **Stopword lists were concatenated into one set**, so Spanish analysis removed
+  English stopwords and vice versa. They are separate, with an explicit "both"
+  option.
+- **`etc.` was always treated as mid-sentence**, silently merging sentences. It
+  may end one; titles such as `Dr.` may not.
+- **A duplicate entry** in the English stopword list.
+
+### Improvements over the original
+
+- Tokens carry character offsets, so KWIC highlights the exact match instead of
+  rebuilding the line from split words. Punctuation no longer becomes a context
+  word.
+- **MSTTR** alongside raw TTR, which is length-dependent and cannot be compared
+  across texts of different sizes.
+- **Entropy** and a **Zipf slope** fitted by least squares.
+- A real Spanish syllabifier using vowel-strength rules, so `aire` is 2 and
+  `poeta` is 3 rather than counting vowel groups.
+- The results panel builds DOM rather than assembling escaped HTML strings.
+
+### Verified end-to-end
+
+Run over the built-in sample: 182 tokens, 70 types, TTR 0.693, MSTTR 0.700,
+entropy 5.87 bits. Top collocations `diversidad léxica` and
+`medidas asociación` both reach log-Dice 14.00. Dispersion separates `corpus`
+(0.60) from `asociación` (0.10). Readability reports Fernández-Huerta 60.6
+("Normal") and INFLESZ 56.5 ("Medio").
