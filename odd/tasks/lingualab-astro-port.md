@@ -34,7 +34,7 @@ and no build, no tests, no type checking and no version control.
 Each closes with a work-unit commit on the feature branch.
 
 1. **Foundation** — git, Astro scaffold, tokens, shell, i18n, landing.
-2. **Core** — guardrails, security panel, input limits, error boundaries.
+2. **Core** — guardrails, security panel, input limits, error boundaries. **(done)**
 3. **FonoLab** — IPA chart, audio, transcriber.
 4. **ArborLab** — parsers, layout, render, checks, solvers, export.
 5. **Text station** — tokenize, frequency, KWIC, stats, n-grams, readability.
@@ -47,8 +47,8 @@ Each closes with a work-unit commit on the feature branch.
 | Check | Result |
 |---|---|
 | `astro check` | 0 errors, 0 warnings, 0 hints |
-| `vitest run` | 44 passing |
-| `astro build` | 2 pages (es, en) |
+| `vitest run` | 102 passing across 6 files |
+| `astro build` | 4 pages (es/en x home, security) |
 | Page payload | 15.0 KB gz (4.9 HTML + 3.1 JS + 7.0 CSS) |
 | `dist/` size | 540 KB (was 2.4 MB before the font-face fix) |
 
@@ -73,3 +73,47 @@ Each closes with a work-unit commit on the feature branch.
 - The git author is a placeholder (`LinguaLab Port`) because no git identity
   was configured in this environment. Amend before publishing.
 - `SITE.repository` in `src/config/site.ts` is a placeholder.
+
+## WU-2 — Core runtime (complete)
+
+Added: input guardrails with byte-exact limits, live security checks, panel
+renderers with no `innerHTML`, a `safeInit` boundary so one failing widget
+cannot take down a page, a hash-based CSP, a post-build verifier and CI.
+
+### CSP
+
+Astro 7's `security.csp` generates the policy with a hash per inline script and
+style, which is required here because GitHub Pages cannot set response
+headers. `unsafe-inline` is gone from both `script-src` and `style-src`.
+
+The anti-flash theme script must stay inline (it runs before first paint), so
+its hash is derived at build time from the same constant that is emitted
+(`src/lib/anti-flash.ts`), and the two cannot drift.
+
+### Post-build verification
+
+`scripts/verify-build.mjs` fails the build on an unhashed inline script,
+`unsafe-inline` returning to the policy, a third-party subresource, a
+duplicate `<h1>`, a missing `lang` or description, or a page exceeding its
+60 KB gzipped budget. It was checked against deliberate regressions
+(unhashed script, remote `<script src>`, second `<h1>`) and catches all three.
+
+### Incident: unreadable working directory
+
+The original path `/home/santi/Documentos/Opencode projects/LinguaLab` became
+unreadable mid-session: directory listings intermittently showed a partial
+tree while `open()` returned ENOENT for files that `ls` and `stat` reported as
+present. `git` reported "not a repository" despite `.git` being listed.
+
+This was a btrfs-level fault on that path, not a file-level one: every file
+outside it read normally, and `cp -a` of the tree produced 14,095 files that
+were all readable elsewhere.
+
+Recovery: copied the tree to `/home/santi/LinguaLab`, which passed 12/12
+consecutive read probes and a full-integrity check, and `git fsck` clean.
+Both commits and all uncommitted work were preserved. The work continued there.
+
+Note for the maintainer: the repository now lives at `/home/santi/LinguaLab`.
+The untouched original site is at `/home/santi/Documentos/LinguaLab`, and the
+problematic directory still exists and should be removed once its contents are
+confirmed redundant.

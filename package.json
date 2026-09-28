@@ -11,14 +11,16 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro build",
+    "build:verify": "astro build && node scripts/verify-build.mjs",
+    "verify:build": "node scripts/verify-build.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint:css": "stylelint \"src/**/*.{css,astro}\"",
-    "verify": "npm run check && npm run test && npm run build"
+    "verify": "npm run check && npm run test && npm run build:verify"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",

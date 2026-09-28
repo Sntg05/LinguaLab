@@ -1,0 +1,296 @@
+---
+/**
+ * Security page. The panels below are filled in at runtime by reading the
+ * live DOM, so the page proves the claims instead of asserting them.
+ */
+import { GUARDRAILS, REVIEW_DATE } from "../data/guardrails";
+import { MAX_TEXT_BYTES, ALLOWED_EXT } from "../scripts/core/guardrails";
+import { t, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const es = locale === "es";
+
+const policies: { heading: string; body: string }[] = es
+  ? [
+      {
+        heading: "Qué se ejecuta aquí",
+        body: `Todo el análisis ocurre en JavaScript dentro de tu pestaña. No hay servidor que reciba el texto que escribes, ni punto de entrada al que enviarlo. Abrir esta página sin conexión sigue funcionando.`,
+      },
+      {
+        heading: "Qué se guarda",
+        body: `Solo dos preferencias: el idioma (${"lingualab-lang"}) y el tema (${"lingualab-theme"}). Se pueden borrar con el botón de esta página, que solo elimina esas dos claves y nunca vacía el almacenamiento del navegador entero.`,
+      },
+      {
+        heading: "Qué carga la página",
+        body: "Un único origen. No hay peticiones a Google Fonts, ni analítica, ni CDN externo. Las fuentes están servidas desde este mismo sitio, de modo que no existe una dependencia de terceros a la que haya que verificarle una huella de integridad.",
+      },
+      {
+        heading: "Límites de entrada",
+        body: `Los textos se miden en bytes UTF-8 y se rechazan por encima de ${MAX_TEXT_BYTES / 1024} KB. Los archivos se aceptan solo con estas extensiones: ${ALLOWED_EXT.join(", ")}.`,
+      },
+      {
+        heading: "Política de seguridad de contenido",
+        body: "La CSP se genera en la compilación con una huella por script, de modo que no hace falta 'unsafe-inline'. Los estilos se permiten solo por huella o con 'self'.",
+      },
+    ]
+  : [
+      {
+        heading: "What runs here",
+        body: `All analysis runs as JavaScript inside your tab. There is no server receiving the text you type, and no endpoint to send it to. This page keeps working offline.`,
+      },
+      {
+        heading: "What is stored",
+        body: `Two preferences only: language (${"lingualab-lang"}) and theme (${"lingualab-theme"}). The button on this page removes exactly those two keys, and never clears the browser's whole storage.`,
+      },
+      {
+        heading: "What this page loads",
+        body: "A single origin. No Google Fonts request, no analytics, no external CDN. Fonts are served from this site, so there is no third-party dependency requiring an integrity hash.",
+      },
+      {
+        heading: "Input limits",
+        body: `Texts are measured in UTF-8 bytes and rejected above ${MAX_TEXT_BYTES / 1024} KB. Files are accepted only with these extensions: ${ALLOWED_EXT.join(", ")}.`,
+      },
+      {
+        heading: "Content Security Policy",
+        body: "The CSP is generated at build time with a hash per script, so 'unsafe-inline' is not needed. Styles are allowed only by hash or from 'self'.",
+      },
+    ];
+---
+
+<section class="section">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{t(locale, "sec.eyebrow")}</span>
+      <h1>{t(locale, "sec.title")}</h1>
+      <p class="u-lead">{t(locale, "sec.intro")}</p>
+    </div>
+
+    <div class="panels">
+      <section class="panel" aria-labelledby="checks-heading">
+        <div class="panel__head">
+          <h2 class="panel__title" id="checks-heading">{t(locale, "sec.panel")}</h2>
+          <span class="badge badge--accent">runtime</span>
+        </div>
+        <div data-security-panel>
+          <p class="u-faint u-mono" style="font-size: var(--step--2)">
+            {es ? "Ejecutando comprobaciones…" : "Running checks…"}
+          </p>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="guardrails-heading">
+        <div class="panel__head">
+          <h2 class="panel__title" id="guardrails-heading">{t(locale, "sec.guardrails")}</h2>
+          <span class="badge badge--ok" data-guardrail-count>
+            {GUARDRAILS.length}/{GUARDRAILS.length}
+          </span>
+        </div>
+        <div data-guardrails-panel>
+          <p class="u-faint u-mono" style="font-size: var(--step--2)">
+            {es ? "Cargando…" : "Loading…"}
+          </p>
+        </div>
+      </section>
+    </div>
+
+    <div class="cluster" style="margin-block-start: var(--space-l)">
+      <button class="btn" type="button" data-wipe>{t(locale, "sec.wipe")}</button>
+      <span class="u-faint u-mono" style="font-size: var(--step--2)">
+        {es ? `Última revisión: ${REVIEW_DATE}` : `Last review: ${REVIEW_DATE}`}
+      </span>
+    </div>
+  </div>
+</section>
+
+<section class="section section--sunken">
+  <div class="shell">
+    <div class="u-section-head">
+      <h2>{es ? "La política, en detalle" : "The policy, in detail"}</h2>
+    </div>
+
+    <div class="policies">
+      {
+        policies.map((policy) => (
+          <article class="policy">
+            <h3 class="policy__title">{policy.heading}</h3>
+            <p class="policy__body">{policy.body}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<p class="u-visually-hidden" role="status" aria-live="polite" data-live-region></p>
+
+<script>
+  import { initWipeButtons, renderGuardrailPanel, renderSecurityPanel } from "../scripts/core/panels";
+  import { safeInit, safeInitAll } from "../scripts/core/safe";
+  import { t, type Locale } from "../i18n";
+
+  const locale = (document.documentElement.lang === "en" ? "en" : "es") as Locale;
+  // Only the dynamic message keys are needed at runtime; the static copy was
+  // already rendered by Astro.
+  const tRuntime = (key: string): string => t(locale, key as Parameters<typeof t>[1]);
+
+  safeInitAll({
+    "security panel": () => {
+      for (const node of document.querySelectorAll<HTMLElement>("[data-security-panel]")) {
+        renderSecurityPanel(node, tRuntime, locale);
+      }
+    },
+    "guardrail panel": () => {
+      for (const node of document.querySelectorAll<HTMLElement>("[data-guardrails-panel]")) {
+        const result = renderGuardrailPanel(node, tRuntime, locale);
+        const counter = document.querySelector<HTMLElement>("[data-guardrail-count]");
+        if (counter) counter.textContent = `${result.passed}/${result.total}`;
+      }
+    },
+    "wipe buttons": () => initWipeButtons(tRuntime),
+  });
+
+  void safeInit;
+</script>
+
+<style>
+  .panels {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  @media (width >= 60rem) {
+    .panels {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .panel {
+    padding: var(--space-m);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+  }
+
+  .panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+    margin-block-end: var(--space-m);
+  }
+
+  .panel__title {
+    font-family: var(--font-sans);
+    font-size: var(--step-1);
+    font-weight: 650;
+    margin: 0;
+  }
+
+  /* Live check list */
+  .check-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .check-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--space-2xs) var(--space-s);
+    padding-block: var(--space-2xs);
+    border-block-end: 1px solid var(--line);
+    font-size: var(--step--1);
+  }
+
+  .check-item:last-child {
+    border-block-end: 0;
+  }
+
+  .check-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--ok);
+    align-self: center;
+  }
+
+  .check-item.is-warn .check-dot {
+    background: var(--warn);
+  }
+
+  .check-label {
+    font-weight: 550;
+  }
+
+  .check-detail {
+    grid-column: 2 / -1;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  .check-state {
+    color: var(--ok);
+    font-weight: 700;
+  }
+
+  .check-item.is-warn .check-state {
+    color: var(--warn);
+  }
+
+  .check-summary {
+    margin: var(--space-m) 0 0;
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  /* Guardrail cards */
+  .guardrail-grid {
+    display: grid;
+    gap: var(--space-s);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+
+  .guardrail-card {
+    padding: var(--space-s);
+    gap: var(--space-3xs);
+  }
+
+  .guardrail-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .guardrail-state {
+    color: var(--ok);
+    font-weight: 700;
+  }
+
+  /* Policies */
+  .policies {
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  }
+
+  .policy__title {
+    font-size: var(--step-0);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .policy__body {
+    margin: 0;
+    max-width: 52ch;
+    color: var(--ink-muted);
+    line-height: var(--leading-relaxed);
+  }
+</style>

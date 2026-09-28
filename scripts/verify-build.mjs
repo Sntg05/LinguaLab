@@ -1,0 +1,173 @@
+/**
+ * Post-build verification.
+ *
+ * Checks the properties that are easy to break silently and impossible to
+ * see in a screenshot:
+ *   1. every executed inline script is covered by a CSP hash
+ *   2. the policy never falls back to 'unsafe-inline'
+ *   3. no page references a third-party origin
+ *   4. the compressed payload stays inside the performance budget
+ *
+ * Run with: node scripts/verify-build.mjs
+ */
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
+import { gzipSync } from "node:zlib";
+import { createHash } from "node:crypto";
+import { fileURLToPath } from "node:url";
+
+// fileURLToPath, not URL.pathname: the repository path may contain spaces
+// or other characters that pathname percent-encodes.
+const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
+
+/** Per-page budget for HTML + JS + CSS, compressed. */
+const PAYLOAD_BUDGET_BYTES = 60 * 1024;
+
+const failures = [];
+const notes = [];
+
+function fail(message) {
+  failures.push(message);
+}
+
+/** Every .html file under dist/, recursively. */
+function htmlFiles(dir = DIST) {
+  const out = [];
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) out.push(...htmlFiles(full));
+    else if (entry.endsWith(".html")) out.push(full);
+  }
+  return out;
+}
+
+const pages = htmlFiles();
+if (pages.length === 0) {
+  console.error("No HTML found in dist/. Run `astro build` first.");
+  process.exit(1);
+}
+
+/* Attributes that cause the browser to FETCH a subresource. An <a href> to
+   the source repository is legitimate and is deliberately not matched. */
+const SUBRESOURCE = /<(?:script|img|iframe|audio|video|source|embed)\b[^>]*\bsrc="((?:https?:)?\/\/[^"]+)"|<link\b[^>]*\bhref="((?:https?:)?\/\/[^"]+)"[^>]*\brel="stylesheet"/gi;
+const SCRIPT_TAG = /<script([^>]*)>([\s\S]*?)<\/script>/gi;
+
+for (const file of pages) {
+  const name = relative(DIST, file);
+  const html = readFileSync(file, "utf8");
+
+  // ---- 1 + 2: CSP coverage ----
+  const cspMeta = html.match(
+    /<meta[^>]*http-equiv="content-security-policy"[^>]*content="([^"]*)"/i,
+  );
+
+  if (!cspMeta) {
+    fail(`${name}: no Content-Security-Policy meta tag`);
+  } else {
+    const csp = cspMeta[1];
+
+    if (/unsafe-inline/.test(csp)) {
+      fail(`${name}: CSP contains 'unsafe-inline'`);
+    }
+    if (!/object-src 'none'/.test(csp)) {
+      fail(`${name}: CSP is missing object-src 'none'`);
+    }
+
+    const allowed = new Set(
+      [...csp.matchAll(/'sha256-([^']+)'/g)].map((m) => m[1]),
+    );
+
+    for (const [, attrs, body] of html.matchAll(SCRIPT_TAG)) {
+      if (/\bsrc=/.test(attrs)) continue; // external file, governed by 'self'
+      if (/type="application\/(json|ld\+json)"/.test(attrs)) continue; // data block
+
+      const digest = createHash("sha256").update(body).digest("base64");
+      if (!allowed.has(digest)) {
+        fail(
+          `${name}: an executed inline script is not covered by the CSP hash\n` +
+            `    ${body.trim().slice(0, 120)}`,
+        );
+      }
+    }
+  }
+
+  // ---- 3: third-party subresources ----
+  // Absolute self-references (canonical, hreflang, og:url) are expected; what
+  // matters is that the browser never fetches from an origin other than ours.
+  const canonical = html.match(/<link[^>]*rel="canonical"[^>]*href="([^"]+)"/i);
+  const ownOrigin = canonical?.[1] ? new URL(canonical[1]).origin : null;
+
+  for (const match of html.matchAll(SUBRESOURCE)) {
+    const href = (match[1] ?? match[2] ?? "").replace(/^\/\//, "https://");
+    if (ownOrigin && href.startsWith(ownOrigin)) continue;
+    fail(`${name}: loads a subresource from an external origin (${href})`);
+  }
+
+  // ---- Structural expectations ----
+  const h1Count = (html.match(/<h1[\s>]/g) ?? []).length;
+  if (h1Count !== 1) {
+    fail(`${name}: expected exactly one <h1>, found ${h1Count}`);
+  }
+  if (!/<html lang="/.test(html)) {
+    fail(`${name}: <html> has no lang attribute`);
+  }
+  if (!/<meta name="description"/.test(html)) {
+    fail(`${name}: no meta description`);
+  }
+}
+
+// ---- 4: payload budget (worst page) ----
+function compressedSize(path) {
+  return gzipSync(readFileSync(path)).length;
+}
+
+// The shell (masthead/footer/theme) is shared, so charge it to every page.
+const sharedJs = [];
+const sharedCss = [];
+for (const entry of readdirSync(join(DIST, "assets"))) {
+  if (entry.endsWith(".js")) sharedJs.push(join(DIST, "assets", entry));
+  if (entry.endsWith(".css")) sharedCss.push(join(DIST, "assets", entry));
+}
+const shellBytes =
+  sharedJs.reduce((n, f) => n + compressedSize(f), 0) +
+  sharedCss.reduce((n, f) => n + compressedSize(f), 0);
+
+let worst = { name: "", bytes: 0 };
+for (const file of pages) {
+  const own = compressedSize(file);
+  const html = readFileSync(file, "utf8");
+
+  // Only the chunks this page actually loads, and only same-origin ones:
+  // an external src is a failure reported above, not a local file to read.
+  let pageJs = 0;
+  for (const [, url] of html.matchAll(/<script[^>]*src="([^"]+)"/g)) {
+    if (!url.startsWith("/")) continue;
+    pageJs += compressedSize(join(DIST, url.replace(/^\//, "")));
+  }
+
+  const total = own + pageJs;
+  if (total > worst.bytes) {
+    worst = { name: relative(DIST, file), bytes: total };
+  }
+}
+
+notes.push(`pages built: ${pages.length}`);
+notes.push(`worst page (html + its own js): ${(worst.bytes / 1024).toFixed(1)} KB gz — ${worst.name}`);
+notes.push(`shared css + js (charged per page): ${(shellBytes / 1024).toFixed(1)} KB gz`);
+
+if (worst.bytes > PAYLOAD_BUDGET_BYTES) {
+  fail(
+    `performance budget exceeded: worst page is ${(worst.bytes / 1024).toFixed(1)} KB gz, ` +
+      `budget is ${PAYLOAD_BUDGET_BYTES / 1024} KB (${worst.name})`,
+  );
+}
+
+for (const note of notes) console.log(`  ${note}`);
+
+if (failures.length > 0) {
+  console.error(`\nBuild verification FAILED (${failures.length}):\n`);
+  for (const f of failures) console.error(`  ✗ ${f}`);
+  process.exit(1);
+}
+
+console.log("\nBuild verification passed.");

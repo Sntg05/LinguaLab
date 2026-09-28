@@ -6,6 +6,9 @@
 import "../styles/fonts.css";
 import "../styles/global.css";
 
+import { createHash } from "node:crypto";
+import { ANTI_FLASH_SOURCE } from "../lib/anti-flash";
+
 import Masthead from "../components/Masthead.astro";
 import Footer from "../components/Footer.astro";
 import { DEFAULT_LOCALE, LOCALES, htmlLang, localePath, t, type Locale } from "../i18n";
@@ -31,6 +34,14 @@ const {
 const siteName = "LinguaLab";
 const fullTitle = path === "/" ? `${siteName} — ${title}` : `${title} · ${siteName}`;
 const canonical = new URL(localePath(locale, path), Astro.site ?? "https://lingualab.pages.dev");
+
+/* The anti-flash script has to be inline (it runs before first paint), so
+   the CSP needs its hash. Hashing the exact constant we emit keeps the two
+   from drifting apart. */
+const antiFlashHash: `sha256-${string}` = `sha256-${createHash("sha256")
+  .update(ANTI_FLASH_SOURCE)
+  .digest("base64")}`;
+Astro.csp?.insertScriptHash({ hash: antiFlashHash, kind: "default" });
 ---
 
 <!doctype html>
@@ -67,19 +78,9 @@ const canonical = new URL(localePath(locale, path), Astro.site ?? "https://lingu
     <meta name="theme-color" content="#0d1620" media="(prefers-color-scheme: dark)" />
 
     {/* Applied before first paint so an explicit theme choice never flashes.
-        Kept inline and tiny on purpose: it cannot be deferred. */}
-    <script is:inline>
-      (() => {
-        try {
-          const stored = localStorage.getItem("lingualab-theme");
-          if (stored === "light" || stored === "dark") {
-            document.documentElement.dataset.theme = stored;
-          }
-        } catch {
-          /* Private mode: fall back to the OS preference. */
-        }
-      })();
-    </script>
+        Kept inline and tiny on purpose: it cannot be deferred. Its hash is
+        registered with the CSP above. */}
+    <script is:inline set:html={ANTI_FLASH_SOURCE} />
   </head>
 
   <body>
