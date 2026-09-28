@@ -1,0 +1,290 @@
+---
+/**
+ * Bibliography: a filterable resource list with licence and source links.
+ *
+ * The licence is shown on every record because the project promises that
+ * every downloadable resource declares one.
+ */
+import { BIBLIOGRAPHY } from "../data/bibliography";
+import { facetCounts, facetValues } from "../scripts/tools/catalogue";
+import type { Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const es = locale === "es";
+
+const title = (entry: (typeof BIBLIOGRAPHY)[number]) => (es ? entry.title_es : entry.title_en);
+const topic = (entry: (typeof BIBLIOGRAPHY)[number]) => (es ? entry.topic : entry.topic_en);
+const type = (entry: (typeof BIBLIOGRAPHY)[number]) => (es ? entry.type : entry.type_en);
+const note = (entry: (typeof BIBLIOGRAPHY)[number]) => (es ? entry.note_es : entry.note_en);
+
+const topics = facetValues(BIBLIOGRAPHY, topic);
+const counts = facetCounts(BIBLIOGRAPHY, topic);
+
+/** Newest first, which is how a reading list is normally scanned. */
+const sorted = [...BIBLIOGRAPHY].sort((a, b) => b.year - a.year);
+---
+
+<section class="section">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{es ? "Bibliografía" : "Bibliography"}</span>
+      <h1>{es ? "Recursos para investigar" : "Resources for research"}</h1>
+      <p class="u-lead">
+        {
+          es
+            ? "Artículos, libros, corpus y guías con su licencia y su enlace de origen. Filtra por tema o busca por autor, título o año."
+            : "Articles, books, corpora and guides with their licence and source link. Filter by topic or search by author, title or year."
+        }
+      </p>
+    </div>
+
+    <div class="catalogue" data-catalogue>
+      <div class="catalogue__controls">
+        <label class="field">
+          <span class="u-visually-hidden">{es ? "Buscar" : "Search"}</span>
+          <input
+            type="search"
+            data-query
+            placeholder={es ? "Buscar por autor, título o año…" : "Search by author, title or year…"}
+            autocomplete="off"
+          />
+        </label>
+
+        <div class="segmented segmented--wrap" role="group" aria-label={es ? "Tema" : "Topic"}>
+          <button class="segmented__btn" type="button" data-facet="" aria-pressed="true">
+            {es ? "Todos" : "All"} · {BIBLIOGRAPHY.length}
+          </button>
+          {
+            topics.map((name) => (
+              <button class="segmented__btn" type="button" data-facet={name} aria-pressed="false">
+                {name} · {counts.get(name.toLowerCase()) ?? 0}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <p class="catalogue__count faint mono" data-count aria-live="polite"></p>
+
+      <ul class="refs" role="list" data-list>
+        {
+          sorted.map((entry) => (
+            <li
+              class="ref"
+              data-record
+              data-facet-value={topic(entry)}
+              data-search={`${title(entry)} ${entry.author} ${entry.year} ${topic(entry)} ${type(entry)} ${note(entry)}`}
+            >
+              <div class="ref__head">
+                <h2 class="ref__title">{title(entry)}</h2>
+                <span class="badge">{type(entry)}</span>
+              </div>
+
+              <p class="ref__meta">
+                <span class="ref__author">{entry.author}</span>
+                <span class="ref__year mono">{entry.year}</span>
+                <span class="badge badge--accent">{topic(entry)}</span>
+                <span class="badge">{entry.lang}</span>
+              </p>
+
+              {note(entry) && <p class="ref__note">{note(entry)}</p>}
+
+              <p class="ref__foot">
+                <span class="badge badge--ok" title={es ? "Licencia" : "Licence"}>
+                  {entry.license}
+                </span>
+                {
+                  entry.url && (
+                    <a class="ref__link" href={entry.url} rel="noopener noreferrer">
+                      {es ? "Abrir enlace" : "Open link"} <span aria-hidden="true">↗</span>
+                    </a>
+                  )
+                }
+                {
+                  entry.file && (
+                    <a class="ref__link" href={entry.file} download>
+                      {es ? "Descargar" : "Download"} <span aria-hidden="true">↓</span>
+                    </a>
+                  )
+                }
+                {!entry.url && !entry.file && (
+                  <span class="faint">{es ? "Sin enlace público" : "No public link"}</span>
+                )}
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="catalogue__empty faint" data-empty hidden>
+        {es ? "Ningún recurso coincide con la búsqueda." : "No resource matches the search."}
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { filterCatalogue } from "../scripts/tools/catalogue";
+  import { safeInitAll } from "../scripts/core/safe";
+  import type { Locale } from "../i18n";
+
+  const locale = (document.documentElement.lang === "en" ? "en" : "es") as Locale;
+
+  safeInitAll({
+    "bibliography filter": () => {
+      const root = document.querySelector<HTMLElement>("[data-catalogue]");
+      const list = root?.querySelector<HTMLElement>("[data-list]");
+      if (!root || !list) return;
+
+      const records = [...list.querySelectorAll<HTMLElement>("[data-record]")].map((element) => ({
+        element,
+        facet: element.dataset["facetValue"] ?? "",
+        search: element.dataset["search"] ?? "",
+      }));
+
+      const query = root.querySelector<HTMLInputElement>("[data-query]");
+      const count = root.querySelector<HTMLElement>("[data-count]");
+      const empty = root.querySelector<HTMLElement>("[data-empty]");
+      let facet = "";
+
+      const apply = (): void => {
+        const visible = filterCatalogue(records, {
+          query: query?.value ?? "",
+          facet,
+          fields: (record) => [record.search],
+          facetValue: (record) => record.facet,
+        });
+
+        const shown = new Set(visible.map((record) => record.element));
+        for (const record of records) {
+          record.element.toggleAttribute("hidden", !shown.has(record.element));
+        }
+
+        if (count) {
+          count.textContent =
+            locale === "es"
+              ? `${visible.length} de ${records.length} recursos`
+              : `${visible.length} of ${records.length} resources`;
+        }
+        empty?.toggleAttribute("hidden", visible.length > 0);
+      };
+
+      root.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const button = target.closest<HTMLButtonElement>("[data-facet]");
+        if (!button) return;
+
+        facet = button.dataset["facet"] ?? "";
+        for (const other of root.querySelectorAll<HTMLButtonElement>("[data-facet]")) {
+          other.setAttribute("aria-pressed", other === button ? "true" : "false");
+        }
+        apply();
+      });
+
+      query?.addEventListener("input", apply);
+      apply();
+    },
+  });
+</script>
+
+<style>
+  .catalogue__controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    margin-block-end: var(--space-s);
+  }
+
+  .segmented--wrap {
+    flex-wrap: wrap;
+  }
+
+  .catalogue__count {
+    margin-block-end: var(--space-s);
+    font-size: var(--step--2);
+  }
+
+  .catalogue__empty {
+    margin-block-start: var(--space-l);
+    text-align: center;
+  }
+
+  .refs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+  }
+
+  .ref {
+    padding: var(--space-m);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+  }
+
+  .ref__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .ref__title {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    margin: 0;
+  }
+
+  .ref__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step--1);
+  }
+
+  .ref__author {
+    font-weight: 600;
+  }
+
+  .ref__year {
+    color: var(--ink-faint);
+  }
+
+  .ref__note {
+    margin: 0 0 var(--space-2xs);
+    max-width: 68ch;
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+    line-height: var(--leading-relaxed);
+  }
+
+  .ref__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--1);
+  }
+
+  .ref__link {
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .ref__link:hover {
+    text-decoration: underline;
+  }
+</style>

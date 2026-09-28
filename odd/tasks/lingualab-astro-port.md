@@ -335,3 +335,37 @@ entropy 5.87 bits. Top collocations `diversidad léxica` and
 `medidas asociación` both reach log-Dice 14.00. Dispersion separates `corpus`
 (0.60) from `asociación` (0.10). Readability reports Fernández-Huerta 60.6
 ("Normal") and INFLESZ 56.5 ("Medio").
+
+## WU-6 + WU-7 — Glossary, bibliography and about (complete)
+
+Three content pages, plus the last four broken navigation links.
+
+### Glossary and bibliography
+
+Both are server-rendered lists with a client-side search and facet filter, so
+the content is complete and indexable without JavaScript. The matching rules
+live in `src/scripts/tools/catalogue.ts` rather than in the pages, so the two
+catalogues cannot drift and the rules are covered by tests.
+
+Search folds accents, so `analisis` finds `análisis`, and requires every
+whitespace-separated term to match somewhere in the record. Facet values keep
+the data file's own grouping order rather than an imposed alphabetical one.
+
+The bibliography shows the licence on every record, because the project
+promises that every resource declares one, and marks records with no public
+link rather than rendering a dead link.
+
+### About
+
+What the project is, who it is for, how to start, licences and a FAQ. The FAQ
+answers the awkward questions on purpose: the sentence mode is heuristic, the
+IPA transcription is approximate and does not mark English vowel tenseness, and
+none of the association measures is "the correct one". A page that oversold
+the tools would be the least trustworthy part of the site.
+
+The statistics on the page are derived from the data, so they cannot go stale.
+
+### Fixed: the navigation
+
+The masthead advertised eight destinations and only four existed. All eight now
+resolve.

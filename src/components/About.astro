@@ -1,0 +1,403 @@
+---
+/**
+ * About: what the project is, who it is for, its licences and its limits.
+ *
+ * The FAQ answers are written to be accurate about the tools' limitations —
+ * the transcriber is approximate and the trees are didactic — because a
+ * page that oversells them would be the least trustworthy part of the site.
+ */
+import { SITE } from "../config/site";
+import { sampleCount } from "../scripts/fono/audio";
+import { IPA_CHART } from "../data/ipa-chart";
+import { TREE_TYPES } from "../data/trees/types";
+import { GLOSSARY } from "../data/glossary";
+import { BIBLIOGRAPHY } from "../data/bibliography";
+import type { Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const es = locale === "es";
+
+const ipaCount = IPA_CHART.categories.reduce((n, c) => n + c.symbols.length, 0);
+
+const audiences: { heading: string; body: string }[] = es
+  ? [
+      {
+        heading: "Estudiantes",
+        body: "Para practicar la transcripción, ver dónde se articula cada sonido y comprobar por qué una oración se analiza como se analiza.",
+      },
+      {
+        heading: "Docentes",
+        body: "Para preparar ejemplos en clase sin depender de una conexión ni de una licencia de software.",
+      },
+      {
+        heading: "Investigación",
+        body: "Para obtener recuentos reproducibles sobre un texto propio y exportarlos, sabiendo exactamente qué fórmula se aplicó.",
+      },
+    ]
+  : [
+      {
+        heading: "Students",
+        body: "To practise transcription, see where each sound is articulated, and check why a sentence parses the way it does.",
+      },
+      {
+        heading: "Teachers",
+        body: "To prepare examples for class without depending on a connection or on a software licence.",
+      },
+      {
+        heading: "Research",
+        body: "To get reproducible counts over your own text and export them, knowing exactly which formula was applied.",
+      },
+    ];
+
+const steps: { heading: string; body: string; href: string; label: string }[] = es
+  ? [
+      { heading: "Empieza por el sonido", body: "Abre FonoLab, pulsa un símbolo y mira el corte sagital.", href: "/fono", label: "FonoLab" },
+      { heading: "Sigue con la estructura", body: "Dibuja un árbol, cárgalo de ejemplo y lee las comprobaciones.", href: "/arboles", label: "ArborLab" },
+      { heading: "Termina con el texto", body: "Pega un corpus y exporta el análisis en JSON.", href: "/tools", label: "Estación textual" },
+    ]
+  : [
+      { heading: "Start with sound", body: "Open FonoLab, press a symbol and look at the sagittal section.", href: "/fono", label: "FonoLab" },
+      { heading: "Continue with structure", body: "Draw a tree, load an example and read the checks.", href: "/arboles", label: "ArborLab" },
+      { heading: "Finish with text", body: "Paste a corpus and export the analysis as JSON.", href: "/tools", label: "Text station" },
+    ];
+
+const faq: { q: string; a: string }[] = es
+  ? [
+      {
+        q: "¿Se envía lo que escribo a algún servidor?",
+        a: "No. Todo el análisis ocurre en JavaScript dentro de tu pestaña. No hay servidor que reciba el texto ni punto de entrada al que enviarlo. Puedes comprobarlo en la página de seguridad, que lee el DOM en vivo, y desconectando la red después de cargar la página.",
+      },
+      {
+        q: "¿Los árboles son correctos?",
+        a: "El dibujo es exacto: si escribes una estructura, se dibuja tal cual. Lo que es heurístico es el modo «Frase», que adivina las categorías con una lista cerrada de palabras y reglas simples. Los tipos de estructura de datos (BST, AVL, rojo-negro, heap, trie, Huffman) sí son algoritmos reales y están cubiertos por pruebas.",
+      },
+      {
+        q: "¿La transcripción AFI es exacta?",
+        a: "No, y la interfaz lo dice. Es una transcripción grafema a fonema con reglas ordenadas: sirve para practicar, no sustituye a un transcriptor morfológico ni a un diccionario de pronunciación. Por ejemplo, el inglés no marca la tensión vocálica y el español no distingue seseo de distinción.",
+      },
+      {
+        q: "¿Qué significan log-Dice, PMI y G²?",
+        a: "Son medidas de asociación: indican si dos palabras aparecen juntas más de lo que cabría esperar por azar. log-Dice va de 0 a 14 y favorece los pares frecuentes; PMI favorece los raros; t-score los muy frecuentes; G² es la medida de significación habitual. Ninguna es «la correcta»: se miran juntas.",
+      },
+      {
+        q: "¿De dónde sale el audio?",
+        a: `De grabaciones con licencia libre de Wikimedia Commons, casi todas CC BY-SA 3.0. ${sampleCount()} símbolos tienen grabación; para el resto se usa la voz del sistema, que pronuncia una palabra que contiene el sonido. La atribución de cada archivo está en audio/ATTRIBUTION.md.`,
+      },
+      {
+        q: "¿Puedo citarlo?",
+        a: "Sí. El código es libre y los datos bibliográficos conservan la licencia de su fuente, indicada en cada ficha. Si usas una grabación de audio, cita su origen y su licencia tal como aparecen en la tabla de atribución.",
+      },
+      {
+        q: "¿Por qué español por defecto?",
+        a: "El proyecto nació para materiales de lingüística hispánica, así que el español es el idioma por defecto y vive en la raíz del sitio. El inglés está en /en/ y cada página declara su idioma con hreflang, de modo que los buscadores indexan las dos versiones.",
+      },
+    ]
+  : [
+      {
+        q: "Is what I type sent to a server?",
+        a: "No. All analysis runs as JavaScript inside your tab. There is no server receiving the text and no endpoint to send it to. You can check this on the security page, which reads the live DOM, and by disconnecting the network after the page loads.",
+      },
+      {
+        q: "Are the trees correct?",
+        a: "The drawing is exact: whatever structure you write is drawn as written. What is heuristic is the “Sentence” mode, which guesses categories from a closed word list and simple rules. The data-structure types (BST, AVL, red-black, heap, trie, Huffman) are real algorithms covered by tests.",
+      },
+      {
+        q: "Is the IPA transcription exact?",
+        a: "No, and the interface says so. It is a grapheme-to-phoneme transcription with ordered rules: it is for practice, and it does not replace a morphological transcriber or a pronunciation dictionary. English vowel tenseness is not marked, for instance.",
+      },
+      {
+        q: "What do log-Dice, PMI and G² mean?",
+        a: "They are association measures: they say whether two words appear together more than chance would predict. log-Dice runs 0 to 14 and favours frequent pairs; PMI favours rare ones; t-score very frequent ones; G² is the usual significance measure. None is “the right one”: they are read together.",
+      },
+      {
+        q: "Where does the audio come from?",
+        a: `Free-licensed recordings from Wikimedia Commons, mostly CC BY-SA 3.0. ${sampleCount()} symbols have a recording; the rest use the system voice, which speaks a word containing the sound. Each file's attribution is in audio/ATTRIBUTION.md.`,
+      },
+      {
+        q: "May I cite it?",
+        a: "Yes. The code is free and the bibliographic data keeps the licence of its source, stated on each record. If you use an audio recording, cite its origin and licence as they appear in the attribution table.",
+      },
+      {
+        q: "Why is Spanish the default?",
+        a: "The project began for Hispanic linguistics materials, so Spanish is the default and lives at the site root. English is under /en/ and every page declares its language with hreflang, so search engines index both.",
+      },
+    ];
+
+const numbers: [string, string][] = es
+  ? [
+      ["Símbolos AFI", String(ipaCount)],
+      ["Tipos de árbol", String(TREE_TYPES.length)],
+      ["Términos en el glosario", String(GLOSSARY.length)],
+      ["Recursos bibliográficos", String(BIBLIOGRAPHY.length)],
+      ["Grabaciones con licencia", String(sampleCount())],
+      ["Cookies", "0"],
+    ]
+  : [
+      ["IPA symbols", String(ipaCount)],
+      ["Tree types", String(TREE_TYPES.length)],
+      ["Glossary terms", String(GLOSSARY.length)],
+      ["Bibliographic resources", String(BIBLIOGRAPHY.length)],
+      ["Licensed recordings", String(sampleCount())],
+      ["Cookies", "0"],
+    ];
+---
+
+<section class="section">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{es ? "Acerca de" : "About"}</span>
+      <h1>{es ? "Un laboratorio que cabe en tu navegador" : "A laboratory that fits in your browser"}</h1>
+      <p class="u-lead">
+        {
+          es
+            ? "LinguaLab reúne herramientas de fonética, sintaxis y análisis de corpus en una página estática. No hay cuentas, no hay servidor de análisis y no hay telemetría: el programa se descarga una vez y trabaja con lo que tú le des."
+            : "LinguaLab gathers phonetics, syntax and corpus analysis tools into a static site. There are no accounts, no analysis server and no telemetry: the program downloads once and works with whatever you give it."
+        }
+      </p>
+    </div>
+
+    <dl class="facts">
+      {
+        numbers.map(([label, value]) => (
+          <div class="fact">
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))
+      }
+    </dl>
+  </div>
+</section>
+
+<section class="section section--sunken">
+  <div class="shell">
+    <div class="u-section-head">
+      <h2>{es ? "Para quién" : "Who it is for"}</h2>
+    </div>
+
+    <div class="cards">
+      {
+        audiences.map((audience) => (
+          <article class="card">
+            <h3 class="card__title">{audience.heading}</h3>
+            <p class="card__body">{audience.body}</p>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="u-section-head">
+      <h2>{es ? "Cómo empezar" : "How to start"}</h2>
+    </div>
+
+    <ol class="steps">
+      {
+        steps.map((step) => (
+          <li class="step">
+            <h3 class="step__title">{step.heading}</h3>
+            <p class="step__body">{step.body}</p>
+            <a class="btn btn--sm" href={step.href}>
+              {step.label} <span class="btn__arrow" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<section class="section section--sunken">
+  <div class="shell">
+    <div class="u-section-head">
+      <h2>{es ? "Preguntas frecuentes" : "Frequently asked questions"}</h2>
+      <p class="muted">
+        {
+          es
+            ? "Incluidas las respuestas incómodas: dónde son aproximadas estas herramientas."
+            : "Including the awkward answers: where these tools are approximate."
+        }
+      </p>
+    </div>
+
+    <div class="faq">
+      {
+        faq.map((item) => (
+          <details class="qa">
+            <summary class="qa__q">{item.q}</summary>
+            <p class="qa__a">{item.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="shell">
+    <div class="u-section-head">
+      <h2>{es ? "Licencias" : "Licences"}</h2>
+    </div>
+
+    <div class="prose">
+      <p>
+        {
+          es
+            ? "El código de LinguaLab es libre. Los datos que incorpora conservan la licencia de su fuente original, indicada en cada ficha: los recursos bibliográficos muestran su licencia en la propia tarjeta y las grabaciones de audio la suya en la tabla de atribución."
+            : "LinguaLab's code is free. The data it includes keeps the licence of its original source, stated on each record: bibliographic resources show their licence on the card and audio recordings show theirs in the attribution table."
+        }
+      </p>
+      <p>
+        {
+          es
+            ? "Ninguna grabación se reproduce sin una licencia verificada: si un archivo no está en el manifiesto, el reproductor usa la voz del sistema en su lugar. La compilación falla si un archivo se publica sin su fila de atribución."
+            : "No recording is played without a verified licence: if a file is not in the manifest, the player uses the system voice instead. The build fails if a file ships without its attribution row."
+        }
+      </p>
+    </div>
+
+    <div class="cluster" style="margin-block-start: var(--space-m)">
+      <a class="btn" href="/audio/ATTRIBUTION.md">
+        {es ? "Tabla de atribución de audio" : "Audio attribution table"}
+      </a>
+      <a class="btn" href={SITE.repository} rel="noopener noreferrer">
+        {es ? "Código fuente" : "Source code"}
+      </a>
+      <a class="btn" href="/seguridad">
+        {es ? "Seguridad y guardrails" : "Security and guardrails"}
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="section section--sunken">
+  <div class="shell">
+    <div class="u-section-head">
+      <h2>{es ? "Contacto" : "Contact"}</h2>
+      <p class="muted">
+        {
+          es
+            ? "Para informar de un error, proponer un término o pedir una función, abre una incidencia en el repositorio. Es la vía que deja rastro y permite seguimiento."
+            : "To report a bug, suggest a term or request a feature, open an issue in the repository. That is the channel that leaves a trail and allows follow-up."
+        }
+      </p>
+    </div>
+
+    <a class="btn btn--primary" href={SITE.repository} rel="noopener noreferrer">
+      {es ? "Abrir una incidencia" : "Open an issue"}
+      <span class="btn__arrow" aria-hidden="true">→</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .facts {
+    display: grid;
+    gap: var(--space-s);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+    margin: 0;
+  }
+
+  .fact {
+    padding: var(--space-m);
+    background: var(--bg-sunken);
+    border-radius: var(--radius-m);
+  }
+
+  .fact dt {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .fact dd {
+    margin: var(--space-3xs) 0 0;
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    color: var(--ink);
+  }
+
+  .cards {
+    display: grid;
+    gap: var(--space-m);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-m);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    counter-reset: step;
+  }
+
+  .step {
+    padding: var(--space-m);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    counter-increment: step;
+  }
+
+  .step__title {
+    font-size: var(--step-0);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .step__title::before {
+    content: counter(step) ". ";
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+  }
+
+  .step__body {
+    margin: 0 0 var(--space-s);
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+    line-height: var(--leading-relaxed);
+  }
+
+  /* ---- FAQ ---- */
+  .faq {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    max-width: 72ch;
+  }
+
+  .qa {
+    padding: var(--space-s) 0;
+    border-block-end: 1px solid var(--line);
+  }
+
+  .qa__q {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: var(--step-0);
+    list-style-position: outside;
+  }
+
+  .qa__q::marker {
+    color: var(--accent);
+  }
+
+  .qa__a {
+    margin: var(--space-2xs) 0 0;
+    padding-inline-start: var(--space-s);
+    color: var(--ink-muted);
+    line-height: var(--leading-relaxed);
+    font-size: var(--step--1);
+  }
+</style>

@@ -1,0 +1,230 @@
+---
+/**
+ * Glossary: a filterable bilingual term list.
+ *
+ * Every record is server-rendered, so the page is complete without
+ * JavaScript and the terms are indexable. The script only hides and shows
+ * what is already there.
+ */
+import { GLOSSARY } from "../data/glossary";
+import { facetCounts, facetValues } from "../scripts/tools/catalogue";
+import type { Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const es = locale === "es";
+
+const term = (entry: (typeof GLOSSARY)[number]) => (es ? entry.term_es : entry.term_en);
+const field = (entry: (typeof GLOSSARY)[number]) => (es ? entry.field_es : entry.field_en);
+const definition = (entry: (typeof GLOSSARY)[number]) => (es ? entry.def_es : entry.def_en);
+const example = (entry: (typeof GLOSSARY)[number]) => (es ? entry.ex_es : entry.ex_en);
+
+const fields = facetValues(GLOSSARY, field);
+const counts = facetCounts(GLOSSARY, field);
+---
+
+<section class="section">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{es ? "Glosario" : "Glossary"}</span>
+      <h1>{es ? "Términos de lingüística" : "Linguistics terms"}</h1>
+      <p class="u-lead">
+        {
+          es
+            ? "Definiciones breves con un ejemplo de uso, agrupadas por campo. La búsqueda ignora acentos y mayúsculas."
+            : "Short definitions with an example of use, grouped by field. Search ignores accents and case."
+        }
+      </p>
+    </div>
+
+    <div class="catalogue" data-catalogue>
+      <div class="catalogue__controls">
+        <label class="field">
+          <span class="u-visually-hidden">{es ? "Buscar" : "Search"}</span>
+          <input
+            type="search"
+            data-query
+            placeholder={es ? "Buscar un término o una definición…" : "Search a term or a definition…"}
+            autocomplete="off"
+          />
+        </label>
+
+        <div class="segmented segmented--wrap" role="group" aria-label={es ? "Campo" : "Field"}>
+          <button class="segmented__btn" type="button" data-facet="" aria-pressed="true">
+            {es ? "Todos" : "All"} · {GLOSSARY.length}
+          </button>
+          {
+            fields.map((name) => (
+              <button class="segmented__btn" type="button" data-facet={name} aria-pressed="false">
+                {name} · {counts.get(name.toLowerCase()) ?? 0}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      <p class="catalogue__count faint mono" data-count aria-live="polite"></p>
+
+      <ul class="terms" role="list" data-list>
+        {
+          GLOSSARY.map((entry) => (
+            <li
+              class="term"
+              data-record
+              data-facet-value={field(entry)}
+              data-search={`${term(entry)} ${field(entry)} ${definition(entry)} ${example(entry)}`}
+            >
+              <div class="term__head">
+                <h2 class="term__name">{term(entry)}</h2>
+                <span class="badge">{field(entry)}</span>
+              </div>
+              <p class="term__def">{definition(entry)}</p>
+              {example(entry) && <p class="term__ex">{example(entry)}</p>}
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="catalogue__empty faint" data-empty hidden>
+        {es ? "Ningún término coincide con la búsqueda." : "No term matches the search."}
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { filterCatalogue } from "../scripts/tools/catalogue";
+  import { safeInitAll } from "../scripts/core/safe";
+  import type { Locale } from "../i18n";
+
+  const locale = (document.documentElement.lang === "en" ? "en" : "es") as Locale;
+
+  safeInitAll({
+    "glossary filter": () => {
+      const root = document.querySelector<HTMLElement>("[data-catalogue]");
+      const list = root?.querySelector<HTMLElement>("[data-list]");
+      if (!root || !list) return;
+
+      const records = [...list.querySelectorAll<HTMLElement>("[data-record]")].map((element) => ({
+        element,
+        facet: element.dataset["facetValue"] ?? "",
+        search: element.dataset["search"] ?? "",
+      }));
+
+      const query = root.querySelector<HTMLInputElement>("[data-query]");
+      const count = root.querySelector<HTMLElement>("[data-count]");
+      const empty = root.querySelector<HTMLElement>("[data-empty]");
+      let facet = "";
+
+      const apply = (): void => {
+        const visible = filterCatalogue(records, {
+          query: query?.value ?? "",
+          facet,
+          fields: (record) => [record.search],
+          facetValue: (record) => record.facet,
+        });
+
+        const shown = new Set(visible.map((record) => record.element));
+        for (const record of records) {
+          record.element.toggleAttribute("hidden", !shown.has(record.element));
+        }
+
+        if (count) {
+          count.textContent =
+            locale === "es"
+              ? `${visible.length} de ${records.length} términos`
+              : `${visible.length} of ${records.length} terms`;
+        }
+        empty?.toggleAttribute("hidden", visible.length > 0);
+      };
+
+      root.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const button = target.closest<HTMLButtonElement>("[data-facet]");
+        if (!button) return;
+
+        facet = button.dataset["facet"] ?? "";
+        for (const other of root.querySelectorAll<HTMLButtonElement>("[data-facet]")) {
+          other.setAttribute("aria-pressed", other === button ? "true" : "false");
+        }
+        apply();
+      });
+
+      query?.addEventListener("input", apply);
+      apply();
+    },
+  });
+</script>
+
+<style>
+  .catalogue__controls {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    margin-block-end: var(--space-s);
+  }
+
+  .segmented--wrap {
+    flex-wrap: wrap;
+  }
+
+  .catalogue__count {
+    margin-block-end: var(--space-s);
+    font-size: var(--step--2);
+  }
+
+  .catalogue__empty {
+    margin-block-start: var(--space-l);
+    text-align: center;
+  }
+
+  .terms {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-m);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+
+  .term {
+    padding: var(--space-m);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+  }
+
+  .term__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .term__name {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    margin: 0;
+  }
+
+  .term__def {
+    margin: 0;
+    color: var(--ink-muted);
+    line-height: var(--leading-relaxed);
+    font-size: var(--step--1);
+  }
+
+  .term__ex {
+    margin: var(--space-2xs) 0 0;
+    padding-inline-start: var(--space-s);
+    border-inline-start: 2px solid var(--accent-line);
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+</style>
