@@ -149,43 +149,35 @@ if (existsSync(manifestPath)) {
 }
 
 // ---- 5: payload budget (worst page) ----
+// Charge each page only what IT loads: its own HTML, the scripts it
+// references, and the stylesheets it links. Counting every file in
+// dist/assets as shared made the figure grow with the site instead of with
+// the page, which is the opposite of what a budget should measure.
 function compressedSize(path) {
   return gzipSync(readFileSync(path)).length;
 }
 
-// The shell (masthead/footer/theme) is shared, so charge it to every page.
-const sharedJs = [];
-const sharedCss = [];
-for (const entry of readdirSync(join(DIST, "assets"))) {
-  if (entry.endsWith(".js")) sharedJs.push(join(DIST, "assets", entry));
-  if (entry.endsWith(".css")) sharedCss.push(join(DIST, "assets", entry));
-}
-const shellBytes =
-  sharedJs.reduce((n, f) => n + compressedSize(f), 0) +
-  sharedCss.reduce((n, f) => n + compressedSize(f), 0);
-
 let worst = { name: "", bytes: 0 };
 for (const file of pages) {
-  const own = compressedSize(file);
   const html = readFileSync(file, "utf8");
+  let total = compressedSize(file);
 
-  // Only the chunks this page actually loads, and only same-origin ones:
-  // an external src is a failure reported above, not a local file to read.
-  let pageJs = 0;
   for (const [, url] of html.matchAll(/<script[^>]*src="([^"]+)"/g)) {
     if (!url.startsWith("/")) continue;
-    pageJs += compressedSize(join(DIST, url.replace(/^\//, "")));
+    const asset = join(DIST, url.replace(/^\//, ""));
+    if (existsSync(asset)) total += compressedSize(asset);
   }
 
-  const total = own + pageJs;
-  if (total > worst.bytes) {
-    worst = { name: relative(DIST, file), bytes: total };
+  for (const [, url] of html.matchAll(/<link[^>]*rel="stylesheet"[^>]*href="([^"]+)"/g)) {
+    if (!url.startsWith("/")) continue;
+    const asset = join(DIST, url.replace(/^\//, ""));
+    if (existsSync(asset)) total += compressedSize(asset);
   }
+
+  if (total > worst.bytes) worst = { name: relative(DIST, file), bytes: total };
 }
 
-notes.push(`pages built: ${pages.length}`);
-notes.push(`worst page (html + its own js): ${(worst.bytes / 1024).toFixed(1)} KB gz — ${worst.name}`);
-notes.push(`shared css + js (charged per page): ${(shellBytes / 1024).toFixed(1)} KB gz`);
+notes.push(`worst page (html + its scripts + its stylesheets): ${(worst.bytes / 1024).toFixed(1)} KB gz — ${worst.name}`);
 
 if (worst.bytes > PAYLOAD_BUDGET_BYTES) {
   fail(

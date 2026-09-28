@@ -193,3 +193,74 @@ Astro renders scoped-style markers as VALUELESS attributes
 (`data-astro-cid-xxx`), which is valid HTML but invalid XML. The FonoLab page
 carries 88 of them. Any SVG that ArborLab offers for download must strip these,
 or the exported file will not open in Illustrator, Inkscape or rsvg.
+
+## WU-4 — ArborLab (complete)
+
+The tree workbench: 23 tree types, four input formats, six export formats.
+
+### Modules
+
+| Module | What it owns |
+|---|---|
+| `parse.ts` | brackets/Penn, dependency/CoNLL-U, indented outline, sentence heuristic |
+| `layout.ts` | Reingold–Tilford placement, forest support, metrics |
+| `render.ts` | label notation, node boxes, elbow connectors, movement arrows |
+| `checks.ts` | dependency, constituency and movement validation |
+| `solvers.ts` | BST, AVL, red-black, heap, trie, expression, Huffman |
+| `export.ts` | SVG, PNG, JSON, Newick, CoNLL-U, Brat |
+| `pipeline.ts` | one entry point that picks the parser per tree type |
+
+The layout returns a separate `LayoutNode` graph instead of mutating the tree
+with `_`-prefixed fields, so a tree can be laid out repeatedly without stale
+coordinates and the renderer never reads underscore fields.
+
+### Bugs found and fixed
+
+- **Infinite loop on a mismatched bracket.** `[S (x)]` hung forever: the
+  loose-text reader stopped on the bracket without consuming it, so the parse
+  loop never advanced. Present in the legacy code too. Now a positioned
+  `ParseError`. A hang is far worse than an error.
+- **The `_i` index notation was destroyed.** `leaf()` replaced every
+  underscore with a space, so `el_i` became the two words "el i" — even though
+  `_i` is the documented index marker. A trailing `_x` or `_{x}` is now kept
+  for the renderer, while a longer run like `_city` is still a word separator.
+- **X-bar projection check never fired.** `/^([A-Z]+)P?$/` is greedy, so `NP`
+  yielded the category "NP" and every projection matched its own label. The
+  category is now the label minus its trailing P or prime.
+- **The projection check then over-corrected**, flagging a bare `N` as its own
+  missing head. Only labels ending in P or a prime are projections now.
+- **`badProjections` searched `JSON.stringify(subtree)`** for the category
+  name, so a word containing those letters satisfied the check by accident. It
+  walks real labels now.
+- **Movement c-command was backwards.** The original asked whether the landing
+  site sits inside the trace, which is never true for real movement. It now
+  asks whether the trace is dominated by the landing site's parent.
+- **`DP^` (triangle) and `X^max` (superscript) were conflated.** Every
+  non-braced caret was treated as a triangle, silently eating the bare
+  superscript form. Only a trailing caret marks a triangle.
+- **Two red-black tree bugs** in the solvers (found by the delegated port): the
+  build returned the logger object instead of its lines, and the LR/RL cases
+  omitted the outer rotation, leaving the tree structurally broken.
+- **A `[NP [N (x)]]` input used to hang** for the same reason as the first bug.
+
+### Verified visually
+
+The tree SVG is built at runtime, so it cannot be extracted from `dist`. It was
+rendered through a minimal DOM shim and rasterised, then inspected across eight
+cases: constituency, X-bar, movement with an arrow, the full notation, boxes and
+triangles, dependency, outline and a deep chain. All eight draw correctly.
+
+### XML validity
+
+`svgString()` resolves every CSS custom property to a concrete value and
+`renderTree` gives every attribute a value, so the exported file is valid XML
+that opens in Illustrator, Inkscape and rsvg. This is the issue first seen in
+WU-3, where Astro's valueless `data-astro-cid-*` attributes made an
+Astro-rendered SVG unreadable to XML tools. The ArborLab drawing is built at
+runtime, so it never carries those attributes.
+
+### Build verifier
+
+The payload budget now charges each page only for what it loads. Counting every
+file in `dist/assets` as shared made the figure grow with the site rather than
+with the page. ArborLab is 31.3 KB gz including its own scripts.

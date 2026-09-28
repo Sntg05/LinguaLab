@@ -1,0 +1,731 @@
+---
+/**
+ * ArborLab: the tree drawing workbench.
+ *
+ * The page is a shell. Everything below the type list is built by the
+ * controller from the type registry, because the input affordances differ
+ * per type (notation, outline, number sequence or word list).
+ */
+import { TREE_GROUPS } from "../data/trees/types";
+import type { Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const es = locale === "es";
+---
+
+<section class="section">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">ArborLab</span>
+      <h1>{es ? "Dibuja y analiza árboles" : "Draw and analyse trees"}</h1>
+      <p class="u-lead">
+        {
+          es
+            ? "Veintitrés tipos de árbol: dependencia, constituyentes, teoría sintáctica, otros formalismos y estructuras de datos. Todo se calcula en tu navegador."
+            : "Twenty-three tree types: dependency, constituency, syntactic theory, other formalisms and data structures. Everything is computed in your browser."
+        }
+      </p>
+    </div>
+
+    <div class="lab">
+      <!-- ---------------- Type navigation ---------------- -->
+      <nav class="types" aria-label={es ? "Tipos de árbol" : "Tree types"}>
+        {
+          TREE_GROUPS.map((group) => (
+            <div class="types__group">
+              <h2 class="types__heading">{es ? group.name_es : group.name_en}</h2>
+              <ul class="types__list" role="list">
+                {group.types.map((type) => (
+                  <li>
+                    <button
+                      class="types__item"
+                      type="button"
+                      data-tree-type={type.id}
+                      aria-pressed="false"
+                    >
+                      {es ? type.name_es : type.name_en}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </nav>
+
+      <!-- ---------------- Workbench ---------------- -->
+      <div class="bench">
+        <header class="bench__head">
+          <h2 class="bench__title" data-bench-title></h2>
+          <p class="bench__blurb" data-bench-blurb></p>
+        </header>
+
+        <div class="bench__modes cluster" data-bench-modes hidden>
+          <div class="segmented" role="group" aria-label={es ? "Modo de entrada" : "Input mode"}>
+            <button class="segmented__btn" type="button" data-mode="easy" aria-pressed="false">
+              {es ? "Frase" : "Sentence"}
+            </button>
+            <button class="segmented__btn" type="button" data-mode="text" aria-pressed="true">
+              {es ? "Formato texto" : "Text format"}
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="tree-input" data-bench-label>
+            {es ? "Entrada" : "Input"}
+          </label>
+          <textarea id="tree-input" data-tree-input rows="5" spellcheck="false"></textarea>
+          <p class="bench__hint faint mono" data-bench-hint></p>
+        </div>
+
+        <div class="cluster">
+          <button class="btn btn--primary" type="button" data-tree-draw>
+            {es ? "Dibujar árbol" : "Draw tree"}
+          </button>
+          <button class="btn" type="button" data-tree-clear>
+            {es ? "Limpiar" : "Clear"}
+          </button>
+          <label class="field field--inline">
+            <span class="u-visually-hidden">{es ? "Cargar ejemplo" : "Load example"}</span>
+            <select data-tree-example>
+              <option value="">{es ? "Cargar ejemplo…" : "Load example…"}</option>
+            </select>
+          </label>
+        </div>
+
+        <p class="bench__error" data-tree-error role="alert"></p>
+
+        <!-- ---------------- Canvas ---------------- -->
+        <figure class="canvas">
+          <div class="canvas__frame" data-canvas-frame>
+            <div class="canvas__inner" data-canvas-inner>
+              <p class="canvas__empty faint" data-canvas-empty>
+                {es ? "Elige un tipo y pulsa «Dibujar árbol»." : "Pick a type and press “Draw tree”."}
+              </p>
+            </div>
+          </div>
+
+          <div class="canvas__bar cluster">
+            <button class="icon-btn" type="button" data-zoom="out" aria-label={es ? "Alejar" : "Zoom out"}>−</button>
+            <span class="canvas__zoom mono" data-zoom-value aria-live="polite">100 %</span>
+            <button class="icon-btn" type="button" data-zoom="in" aria-label={es ? "Acercar" : "Zoom in"}>+</button>
+            <button class="btn btn--sm" type="button" data-zoom="fit">{es ? "Ajustar" : "Fit"}</button>
+            <button class="btn btn--sm" type="button" data-zoom="actual">{es ? "Tamaño real" : "Actual size"}</button>
+          </div>
+        </figure>
+
+        <!-- ---------------- Checks ---------------- -->
+        <section class="checks" aria-labelledby="checks-heading">
+          <h2 class="checks__title" id="checks-heading">{es ? "Comprobaciones" : "Checks"}</h2>
+          <ul class="checks__list" data-checks-list role="list"></ul>
+        </section>
+
+        <!-- ---------------- Export ---------------- -->
+        <section class="exports" aria-labelledby="exports-heading">
+          <h2 class="checks__title" id="exports-heading">{es ? "Exportar" : "Export"}</h2>
+          <div class="cluster">
+            <button class="btn btn--sm" type="button" data-export="svg" disabled>{es ? "Guardar SVG" : "Save SVG"}</button>
+            <button class="btn btn--sm" type="button" data-export="png" disabled>{es ? "Guardar PNG" : "Save PNG"}</button>
+            <button class="btn btn--sm" type="button" data-export="copy" disabled>{es ? "Copiar SVG" : "Copy SVG"}</button>
+          </div>
+          <div class="cluster" style="margin-block-start: var(--space-2xs)">
+            <button class="btn btn--sm" type="button" data-script="json" disabled>JSON</button>
+            <button class="btn btn--sm" type="button" data-script="newick" disabled>Newick</button>
+            <button class="btn btn--sm" type="button" data-script="conllu" disabled>CoNLL-U</button>
+            <button class="btn btn--sm" type="button" data-script="brat" disabled>Brat</button>
+          </div>
+          <p class="faint" style="font-size: var(--step--2); margin-block-start: var(--space-2xs)">
+            {
+              es
+                ? "El SVG se guarda con los colores resueltos y sin atributos vacíos, para que sea XML válido y se abra en Illustrator, Inkscape o rsvg."
+                : "The SVG is saved with resolved colours and no empty attributes, so it is valid XML and opens in Illustrator, Inkscape or rsvg."
+            }
+          </p>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p class="u-visually-hidden" role="status" aria-live="polite" data-live-region></p>
+
+<script>
+  import { buildFromSentence, buildTree, ParseError } from "../scripts/trees/pipeline";
+  import { layoutTree } from "../scripts/trees/layout";
+  import { renderTree, type MovementArrow } from "../scripts/trees/render";
+  import { runChecks } from "../scripts/trees/checks";
+  import {
+    copySVG,
+    downloadScript,
+    savePNG,
+    saveSVG,
+    suggestName,
+    type ScriptKind,
+  } from "../scripts/trees/export";
+  import { safeInitAll } from "../scripts/core/safe";
+  import { treeType, type TreeType } from "../data/trees/types";
+  import { TREE_EXAMPLES } from "../data/trees/examples";
+  import type { Locale } from "../i18n";
+  import type { TreeNode } from "../scripts/trees/parse";
+
+  const locale = (document.documentElement.lang === "en" ? "en" : "es") as Locale;
+  const es = locale === "es";
+
+  let currentType: TreeType | null = null;
+  let currentTree: TreeNode | null = null;
+  let currentSvg: SVGSVGElement | null = null;
+  let currentArrows: MovementArrow[] = [];
+  let inputMode: "easy" | "text" = "text";
+  let zoom = 1;
+
+  const $ = <T extends Element>(selector: string): T | null =>
+    document.querySelector<T>(selector);
+
+  /* ---------------- Zoom ---------------- */
+  function applyZoom(): void {
+    const inner = $<HTMLElement>("[data-canvas-inner]");
+    const label = $<HTMLElement>("[data-zoom-value]");
+    if (inner) {
+      inner.style.transform = `scale(${zoom})`;
+      inner.style.transformOrigin = "top left";
+    }
+    if (label) label.textContent = `${Math.round(zoom * 100)} %`;
+  }
+
+  function setZoom(next: number): void {
+    zoom = Math.min(3, Math.max(0.2, next));
+    applyZoom();
+  }
+
+  function fitZoom(): void {
+    const frame = $<HTMLElement>("[data-canvas-frame]");
+    if (!frame || !currentSvg) return;
+    const width = Number(currentSvg.getAttribute("width")) || 800;
+    const available = frame.clientWidth - 32;
+    setZoom(Math.min(1, available / width));
+  }
+
+  /* ---------------- Render ---------------- */
+  function draw(tree: TreeNode, arrows: MovementArrow[]): void {
+    const host = $<HTMLElement>("[data-canvas-inner]");
+    const empty = $<HTMLElement>("[data-canvas-empty]");
+    if (!host) return;
+
+    const layout = layoutTree(tree);
+    const { svg } = renderTree(layout, {
+      arrows,
+      alt: es ? "Árbol generado" : "Generated tree",
+    });
+
+    host.replaceChildren(svg);
+    if (empty) empty.remove();
+
+    currentTree = tree;
+    currentSvg = svg;
+    currentArrows = arrows;
+    zoom = 1;
+    applyZoom();
+
+    for (const button of document.querySelectorAll<HTMLButtonElement>("[data-export], [data-script]")) {
+      button.disabled = false;
+    }
+  }
+
+  function renderChecks(tree: TreeNode, type: TreeType): void {
+    const list = $<HTMLElement>("[data-checks-list]");
+    if (!list) return;
+
+    const results = runChecks(tree, {
+      locale,
+      xbar: type.opts?.xbar === true,
+      directives: currentArrows,
+    });
+
+    list.replaceChildren(
+      ...results.map((result) => {
+        const item = document.createElement("li");
+        item.className = `check check--${result.level}`;
+        const dot = document.createElement("span");
+        dot.className = "check__dot";
+        dot.setAttribute("aria-hidden", "true");
+        const text = document.createElement("span");
+        text.textContent = result.message;
+        item.append(dot, text);
+        return item;
+      }),
+    );
+  }
+
+  /* ---------------- Type selection ---------------- */
+  function selectType(id: string): void {
+    const type = treeType(id);
+    if (!type) return;
+    currentType = type;
+
+    for (const button of document.querySelectorAll<HTMLButtonElement>("[data-tree-type]")) {
+      button.setAttribute("aria-pressed", button.dataset["treeType"] === id ? "true" : "false");
+    }
+
+    const set = (selector: string, text: string): void => {
+      const el = $(selector);
+      if (el) el.textContent = text;
+    };
+    set("[data-bench-title]", es ? type.name_es : type.name_en);
+    set("[data-bench-blurb]", es ? type.blurb_es : type.blurb_en);
+    set("[data-bench-hint]", es ? type.hint_es : type.hint_en);
+
+    // Only the linguistic types can be driven from a plain sentence.
+    const modes = $<HTMLElement>("[data-bench-modes]");
+    const canUseSentence = type.mode === "bracket";
+    if (modes) modes.toggleAttribute("hidden", !canUseSentence);
+    if (!canUseSentence) inputMode = "text";
+
+    // Populate the example list for this type.
+    const select = $<HTMLSelectElement>("[data-tree-example]");
+    if (select) {
+      const examples = TREE_EXAMPLES[type.id] ?? [];
+      select.replaceChildren(
+        new Option(es ? "Cargar ejemplo…" : "Load example…", ""),
+        ...examples.map((example, index) => {
+          const name = es ? example.name_es : example.name_en;
+          return new Option(name || `#${index + 1}`, String(index));
+        }),
+      );
+      select.disabled = examples.length === 0;
+    }
+
+    const input = $<HTMLTextAreaElement>("[data-tree-input]");
+    if (input) input.value = "";
+
+    set("[data-tree-error]", "");
+    $<HTMLElement>("[data-canvas-empty]")?.remove();
+    const host = $<HTMLElement>("[data-canvas-inner]");
+    if (host) {
+      const placeholder = document.createElement("p");
+      placeholder.className = "canvas__empty faint";
+      placeholder.dataset["canvasEmpty"] = "true";
+      placeholder.textContent = es ? "Elige un ejemplo y pulsa «Dibujar árbol»." : "Pick an example and press “Draw tree”.";
+      host.replaceChildren(placeholder);
+    }
+    currentSvg = null;
+    currentTree = null;
+    for (const button of document.querySelectorAll<HTMLButtonElement>("[data-export], [data-script]")) {
+      button.disabled = true;
+    }
+  }
+
+  function loadExample(index: number): void {
+    if (!currentType) return;
+    const examples = TREE_EXAMPLES[currentType.id] ?? [];
+    const example = examples[index];
+    if (!example) return;
+
+    const input = $<HTMLTextAreaElement>("[data-tree-input]");
+    // `numeric` only marks that the type expects a number sequence; the
+    // sequence itself is always in `text`.
+    if (input) input.value = example.text;
+  }
+
+  function drawCurrent(): void {
+    const input = $<HTMLTextAreaElement>("[data-tree-input]");
+    const error = $<HTMLElement>("[data-tree-error]");
+    if (!currentType || !input) return;
+
+    if (error) error.textContent = "";
+
+    const value = input.value.trim();
+    if (!value) {
+      if (error) error.textContent = es ? "Escribe algo primero." : "Type something first.";
+      return;
+    }
+
+    try {
+      const tree =
+        inputMode === "easy" && currentType.mode === "bracket"
+          ? buildFromSentence(value)
+          : buildTree(currentType.id, value).tree;
+
+      draw(tree, []);
+      renderChecks(tree, currentType);
+    } catch (thrown) {
+      const message =
+        thrown instanceof ParseError
+          ? thrown.userMessage
+          : thrown instanceof Error
+            ? thrown.message
+            : String(thrown);
+      if (error) error.textContent = message;
+    }
+  }
+
+  safeInitAll({
+    "tree workbench": () => {
+      const root = $<HTMLElement>(".bench");
+      if (!root) return;
+
+      root.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const typeButton = target.closest<HTMLButtonElement>("[data-tree-type]");
+        if (typeButton?.dataset["treeType"]) {
+          selectType(typeButton.dataset["treeType"]);
+          return;
+        }
+
+        const modeButton = target.closest<HTMLButtonElement>("[data-mode]");
+        if (modeButton?.dataset["mode"]) {
+          inputMode = modeButton.dataset["mode"] === "easy" ? "easy" : "text";
+          for (const other of document.querySelectorAll<HTMLButtonElement>("[data-mode]")) {
+            other.setAttribute("aria-pressed", other === modeButton ? "true" : "false");
+          }
+          return;
+        }
+
+        if (target.closest("[data-tree-draw]")) {
+          drawCurrent();
+          return;
+        }
+
+        if (target.closest("[data-tree-clear]")) {
+          const input = $<HTMLTextAreaElement>("[data-tree-input]");
+          if (input) input.value = "";
+          const error = $<HTMLElement>("[data-tree-error]");
+          if (error) error.textContent = "";
+        }
+      });
+
+      $<HTMLSelectElement>("[data-tree-example]")?.addEventListener("change", (event) => {
+        const value = (event.target as HTMLSelectElement).value;
+        if (value !== "") loadExample(Number(value));
+      });
+
+      // Ctrl/Cmd + Enter draws, matching the FonoLab transcriber.
+      $<HTMLTextAreaElement>("[data-tree-input]")?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+          event.preventDefault();
+          drawCurrent();
+        }
+      });
+
+      // Default to a linguistic type with examples available.
+      selectType("constituency");
+      loadExample(0);
+    },
+
+    "canvas controls": () => {
+      const frame = $<HTMLElement>("[data-canvas-frame]");
+      if (!frame) return;
+
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const button = target.closest<HTMLButtonElement>("[data-zoom]");
+        if (!button) return;
+
+        switch (button.dataset["zoom"]) {
+          case "in":
+            setZoom(zoom * 1.2);
+            break;
+          case "out":
+            setZoom(zoom / 1.2);
+            break;
+          case "fit":
+            fitZoom();
+            break;
+          default:
+            setZoom(1);
+        }
+      });
+
+      // Drag to pan when the drawing is larger than the frame.
+      let dragging = false;
+      let startX = 0;
+      let startY = 0;
+      let startLeft = 0;
+      let startTop = 0;
+
+      frame.addEventListener("pointerdown", (event) => {
+        dragging = true;
+        startX = event.clientX;
+        startY = event.clientY;
+        startLeft = frame.scrollLeft;
+        startTop = frame.scrollTop;
+        frame.setPointerCapture(event.pointerId);
+      });
+
+      frame.addEventListener("pointermove", (event) => {
+        if (!dragging) return;
+        frame.scrollLeft = startLeft - (event.clientX - startX);
+        frame.scrollTop = startTop - (event.clientY - startY);
+      });
+
+      const endDrag = (): void => {
+        dragging = false;
+      };
+      frame.addEventListener("pointerup", endDrag);
+      frame.addEventListener("pointercancel", endDrag);
+    },
+
+    "exports": () => {
+      document.addEventListener("click", async (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const exportButton = target.closest<HTMLButtonElement>("[data-export]");
+        const scriptButton = target.closest<HTMLButtonElement>("[data-script]");
+
+        if (exportButton && currentSvg && currentTree) {
+          const name = suggestName(currentTree);
+          switch (exportButton.dataset["export"]) {
+            case "svg":
+              saveSVG(currentSvg, name);
+              break;
+            case "png":
+              savePNG(currentSvg, name);
+              break;
+            case "copy": {
+              const status = $<HTMLElement>("[data-live-region]");
+              try {
+                await copySVG(currentSvg);
+                if (status) status.textContent = es ? "SVG copiado." : "SVG copied.";
+              } catch {
+                if (status) {
+                  status.textContent = es
+                    ? "No se pudo copiar al portapapeles."
+                    : "Could not copy to the clipboard.";
+                }
+              }
+              break;
+            }
+            default:
+              break;
+          }
+          return;
+        }
+
+        if (scriptButton && currentTree && currentType) {
+          downloadScript(currentTree, {
+            scriptKind: (scriptButton.dataset["script"] ?? "json") as ScriptKind,
+            name: suggestName(currentTree),
+            kind: currentType.id,
+            lang: locale,
+          });
+        }
+      });
+    },
+  });
+</script>
+
+<style>
+  .lab {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  @media (width >= 70rem) {
+    .lab {
+      grid-template-columns: minmax(14rem, 18rem) minmax(0, 1fr);
+    }
+  }
+
+  /* ---- Type navigation ---- */
+  .types {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
+  .types__heading {
+    font-family: var(--font-sans);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .types__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .types__item {
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    text-align: start;
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-s);
+    transition:
+      color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease;
+  }
+
+  .types__item:hover {
+    color: var(--ink);
+    background: var(--bg-sunken);
+  }
+
+  .types__item[aria-pressed="true"] {
+    color: var(--accent);
+    background: var(--accent-wash);
+    border-color: var(--accent-line);
+    font-weight: 600;
+  }
+
+  /* ---- Bench ---- */
+  .bench {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+    min-width: 0;
+  }
+
+  .bench__title {
+    font-size: var(--step-2);
+    margin-block-end: var(--space-3xs);
+  }
+
+  .bench__blurb {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--ink-muted);
+    font-size: var(--step--1);
+    line-height: var(--leading-relaxed);
+  }
+
+  .bench__hint {
+    margin: 0;
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  .bench__error {
+    margin: 0;
+    min-height: 1.4em;
+    font-size: var(--step--1);
+    color: var(--warn);
+  }
+
+  .field--inline {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .field__label {
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  /* ---- Canvas ---- */
+  .canvas {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .canvas__frame {
+    overflow: auto;
+    max-height: 32rem;
+    padding: var(--space-s);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .canvas__frame:active {
+    cursor: grabbing;
+  }
+
+  .canvas__inner {
+    width: max-content;
+  }
+
+  .canvas__empty {
+    margin: 0;
+    padding: var(--space-xl) 0;
+    text-align: center;
+  }
+
+  .canvas__bar {
+    justify-content: flex-end;
+  }
+
+  .canvas__zoom {
+    min-width: 4rem;
+    text-align: center;
+    font-size: var(--step--2);
+    color: var(--ink-muted);
+  }
+
+  /* ---- Checks ---- */
+  .checks__title {
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: 650;
+    margin-block-end: var(--space-2xs);
+  }
+
+  .checks__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+
+  .check {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: var(--space-2xs);
+    padding: 0.35rem 0;
+    font-size: var(--step--1);
+    border-block-end: 1px solid var(--line);
+  }
+
+  .check__dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    align-self: center;
+    background: var(--ok);
+  }
+
+  .check--note .check__dot {
+    background: var(--mark);
+  }
+
+  .check--error .check__dot {
+    background: var(--warn);
+  }
+
+  .check--note {
+    color: var(--ink-muted);
+  }
+
+  .check--error {
+    color: var(--warn);
+  }
+</style>
