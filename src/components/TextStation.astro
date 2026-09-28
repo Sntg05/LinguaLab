@@ -72,7 +72,7 @@ const SAMPLE = es
       </p>
     </div>
 
-    <div class="station">
+    <div class="station" data-station="true">
       <!-- ---------------- Input ---------------- -->
       <div class="station__input">
         <div class="field">
@@ -566,7 +566,7 @@ const SAMPLE = es
 
   safeInitAll({
     "text station": () => {
-      const root = $<HTMLElement>(".station");
+      const root = $<HTMLElement>("[data-station]");
       if (!root) return;
 
       root.addEventListener("click", (event) => {

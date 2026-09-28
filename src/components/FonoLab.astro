@@ -57,7 +57,7 @@ const articulatoryRows = (symbol: typeof first) => [
 
     <div class="lab">
       <!-- ---------------- Chart ---------------- -->
-      <div class="lab__chart">
+      <div class="lab__chart" data-ipachart="true">
         <div class="lab__controls">
           <label class="field">
             <span class="u-visually-hidden">{t(locale, "ipa.search")}</span>
@@ -302,7 +302,7 @@ const articulatoryRows = (symbol: typeof first) => [
 
   safeInitAll({
     "ipa chart": () => {
-      const chart = document.querySelector<HTMLElement>(".lab__chart");
+      const chart = document.querySelector<HTMLElement>("[data-ipachart]");
       if (!chart || !root) return;
 
       const buttons = [...document.querySelectorAll<HTMLButtonElement>("[data-symbol]")];

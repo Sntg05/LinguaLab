@@ -159,7 +159,110 @@ if (existsSync(manifestPath)) {
   }
 }
 
-// ---- 5: payload budget (worst page) ----
+// ---- 5: delegated-interaction wiring ----
+// A delegated listener only fires when its root CONTAINS the elements it
+// delegates for. ArborLab shipped with the listener on ".bench" while the tree
+// type buttons sat in a sibling <nav>, so every type button silently did
+// nothing and the page stayed on its default type. Nothing failed: the page
+// built, the tests passed, and the only symptom was a control that never
+// responded.
+//
+// This walks the real HTML nesting and asserts containment.
+const DELEGATION = {
+  "arboles/index.html": {
+    root: "data-arborlab",
+    hooks: [
+      "data-tree-type",
+      "data-tree-draw",
+      "data-tree-clear",
+      "data-tree-input",
+      "data-tree-example",
+      "data-mode",
+      "data-export",
+      "data-script",
+    ],
+  },
+  "fono/index.html": {
+    root: "data-ipachart",
+    hooks: ["data-symbol", "data-ipa-filter"],
+  },
+  "tools/index.html": {
+    root: "data-station",
+    hooks: ["data-tab", "data-analyse", "data-sample", "data-clear", "data-export"],
+  },
+  "glosario/index.html": {
+    root: "data-catalogue",
+    hooks: ["data-facet"],
+  },
+  "bibliografia/index.html": {
+    root: "data-catalogue",
+    hooks: ["data-facet"],
+  },
+};
+
+/** Attribute names on every open element, tracked as a stack while parsing. */
+function attributesWithAncestors(html) {
+  const VOID = new Set(["meta","link","img","br","hr","input","source","area","base","col","embed","param","track","wbr"]);
+  const found = new Map();
+  const stack = [];
+  const tag = /<(\/?)([a-zA-Z][\w:-]*)([^>]*?)(\/?)>/g;
+
+  let match;
+  while ((match = tag.exec(html)) !== null) {
+    const [, closing, name, rawAttrs, selfClosing] = match;
+    const lower = name.toLowerCase();
+
+    if (closing === "/") {
+      for (let i = stack.length - 1; i >= 0; i -= 1) {
+        if (stack[i].name === lower) {
+          stack.length = i;
+          break;
+        }
+      }
+      continue;
+    }
+
+    const attrs = [...rawAttrs.matchAll(/([a-zA-Z][\w:.-]*)(?==|\s|$)/g)].map((m) => m[1]);
+    for (const attr of attrs) {
+      if (!attr.startsWith("data-")) continue;
+      if (!found.has(attr)) found.set(attr, []);
+      found.get(attr).push(stack.map((frame) => frame.attrs).flat());
+    }
+
+    if (!selfClosing && !VOID.has(lower)) stack.push({ name: lower, attrs });
+  }
+
+  return found;
+}
+
+for (const [page, spec] of Object.entries(DELEGATION)) {
+  const file = join(DIST, page);
+  if (!existsSync(file)) continue;
+
+  const found = attributesWithAncestors(readFileSync(file, "utf8"));
+  const roots = found.get(spec.root) ?? [];
+
+  if (roots.length === 0) {
+    fail(`${page}: delegation root [${spec.root}] is missing from the HTML`);
+    continue;
+  }
+
+  for (const hook of spec.hooks) {
+    const occurrences = found.get(hook) ?? [];
+    if (occurrences.length === 0) {
+      fail(`${page}: [${hook}] is handled by a delegated listener but absent from the HTML`);
+      continue;
+    }
+    const inside = occurrences.some((ancestors) => ancestors.includes(spec.root));
+    if (!inside) {
+      fail(
+        `${page}: [${hook}] is NOT inside [${spec.root}], so the delegated listener can never fire for it`,
+      );
+    }
+  }
+}
+
+// ---- 6: payload budget (worst page) ----
 // Charge each page only what IT loads: its own HTML, the scripts it
 // references, and the stylesheets it links. Counting every file in
 // dist/assets as shared made the figure grow with the site instead of with

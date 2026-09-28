@@ -31,7 +31,7 @@ const es = locale === "es";
       </p>
     </div>
 
-    <div class="lab">
+    <div class="lab" data-arborlab="true">
       <!-- ---------------- Type navigation ---------------- -->
       <nav class="types" aria-label={es ? "Tipos de árbol" : "Tree types"}>
         {
@@ -365,7 +365,11 @@ const es = locale === "es";
 
   safeInitAll({
     "tree workbench": () => {
-      const root = $<HTMLElement>(".bench");
+      // The delegation root must CONTAIN every element it delegates for.
+      // It was previously ".bench", which is a SIBLING of the type list, so
+      // clicking a tree type matched nothing and the page stayed on the
+      // default type for ever.
+      const root = $<HTMLElement>("[data-arborlab]");
       if (!root) return;
 
       root.addEventListener("click", (event) => {
