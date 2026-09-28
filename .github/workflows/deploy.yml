@@ -33,12 +33,16 @@ jobs:
       - run: npm ci
 
       # The site is fully static, so the build must pass the same gate as CI.
-      - run: npm run verify
+      - run: npm run check
+      - run: npm run test
 
-      # Astro reads this to build canonical and hreflang URLs.
-      - name: Build with the real site URL
+      # A project repository is served from a SUBPATH, so every root-absolute
+      # URL needs that prefix. Vercel serves from the domain root and leaves
+      # SITE_BASE unset, which is why this is set here and not in the source.
+      - name: Build for the Pages subpath
         env:
-          SITE_URL: ${{ vars.SITE_URL || 'https://lingualab.pages.dev' }}
+          SITE_URL: ${{ vars.SITE_URL || 'https://sntg05.github.io' }}
+          SITE_BASE: /LinguaLab
         run: npm run build
 
       - run: npm run verify:build

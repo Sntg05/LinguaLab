@@ -3,11 +3,26 @@ import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 
 /**
- * SITE_URL is the ORIGIN only (https://sntg05.github.io).
- * SITE_BASE is the subpath a project repository is served from
- * ("/LinguaLab"), and is "/" for a user page, a custom domain, or local dev.
+ * Two deployment targets build from this one repository, and they differ in
+ * where the site lives:
+ *
+ *   Vercel         https://<project>.vercel.app/        base "/"
+ *   GitHub Pages   https://<user>.github.io/LinguaLab/  base "/LinguaLab"
+ *
+ * SITE_URL is the ORIGIN only; SITE_BASE is the subpath, and is "/" for a
+ * domain root, a user page, or local development.
+ *
+ * Neither is set on Vercel, so the production URL is read from the variables
+ * Vercel injects. Without this the canonical and hreflang links would point at
+ * a placeholder domain.
  */
-const SITE = process.env.SITE_URL ?? "https://lingualab.pages.dev";
+const vercelHost =
+  process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL ?? "";
+
+const SITE =
+  process.env.SITE_URL ??
+  (vercelHost ? `https://${vercelHost}` : "https://lingualab.pages.dev");
+
 const BASE = process.env.SITE_BASE ?? "/";
 
 export default defineConfig({
