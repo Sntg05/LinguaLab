@@ -6,7 +6,7 @@
    ============================================================ */
 
 import { markContext, phonemeForDate, type PhonemeOfDay } from "../../data/phoneme-of-day";
-import type { Locale } from "../../i18n";
+import { localePath, type Locale } from "../../i18n";
 
 /** The locale-specific view of one phoneme entry. */
 interface PhonemeView {
@@ -94,7 +94,7 @@ export function rotatePhoneme(): void {
         const li = document.createElement("li");
         const a = document.createElement("a");
         a.className = "badge";
-        a.href = "/glosario";
+        a.href = localePath(locale, "/glosario");
         a.textContent = term;
         li.append(a);
         return li;

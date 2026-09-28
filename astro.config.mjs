@@ -2,10 +2,17 @@
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 
+/**
+ * SITE_URL is the ORIGIN only (https://sntg05.github.io).
+ * SITE_BASE is the subpath a project repository is served from
+ * ("/LinguaLab"), and is "/" for a user page, a custom domain, or local dev.
+ */
 const SITE = process.env.SITE_URL ?? "https://lingualab.pages.dev";
+const BASE = process.env.SITE_BASE ?? "/";
 
 export default defineConfig({
   site: SITE,
+  base: BASE,
   output: "static",
   trailingSlash: "ignore",
   build: {

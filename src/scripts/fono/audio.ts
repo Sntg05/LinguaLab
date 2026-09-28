@@ -14,6 +14,7 @@
    ============================================================ */
 
 import { carrierFor } from "../../data/ipa-carriers";
+import { withBase } from "../../lib/paths";
 import type { Locale } from "../../i18n";
 import samples from "../../data/ipa-samples.json";
 
@@ -26,8 +27,8 @@ export interface PlayResult {
   detail: string;
 }
 
-/** Base path of the bundled samples, relative to the site root. */
-export const SAMPLE_BASE = "/audio/ipa/";
+/** Base path of the bundled samples, carrying the deployment base. */
+export const SAMPLE_BASE = withBase("/audio/ipa/");
 
 const MANIFEST: Readonly<Record<string, string>> = samples;
 

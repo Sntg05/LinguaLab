@@ -5,7 +5,7 @@
  * a small inline script advances it to the entry for the current day.
  */
 import { PHONEMES, markContext, type PhonemeOfDay } from "../data/phoneme-of-day";
-import type { Locale } from "../i18n";
+import { localePath, type Locale } from "../i18n";
 
 interface Props {
   locale: Locale;
@@ -57,7 +57,7 @@ const related = locale === "es" ? entry.rel_es : entry.rel_en;
           <ul class="phoneme__related" data-phoneme-related>
             {related.map((term) => (
               <li>
-                <a class="badge" href={`/glosario`}>{term}</a>
+                <a class="badge" href={localePath(locale, "/glosario")}>{term}</a>
               </li>
             ))}
           </ul>

@@ -20,6 +20,17 @@ import { fileURLToPath } from "node:url";
 // or other characters that pathname percent-encodes.
 const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
 
+/* A project repository is served from a subpath, so built asset URLs are
+   prefixed with the base. Strip it before resolving against dist/. */
+const BASE = (process.env.SITE_BASE ?? "/").replace(/\/+$/, "");
+
+/** Turn a built URL into a path under dist/, or null when it is external. */
+function assetPath(url) {
+  if (!url.startsWith("/")) return null;
+  const withoutBase = BASE !== "" && url.startsWith(BASE) ? url.slice(BASE.length) : url;
+  return join(DIST, withoutBase.replace(/^\//, ""));
+}
+
 /** Per-page budget for HTML + JS + CSS, compressed. */
 const PAYLOAD_BUDGET_BYTES = 60 * 1024;
 
@@ -163,15 +174,13 @@ for (const file of pages) {
   let total = compressedSize(file);
 
   for (const [, url] of html.matchAll(/<script[^>]*src="([^"]+)"/g)) {
-    if (!url.startsWith("/")) continue;
-    const asset = join(DIST, url.replace(/^\//, ""));
-    if (existsSync(asset)) total += compressedSize(asset);
+    const asset = assetPath(url);
+    if (asset && existsSync(asset)) total += compressedSize(asset);
   }
 
   for (const [, url] of html.matchAll(/<link[^>]*rel="stylesheet"[^>]*href="([^"]+)"/g)) {
-    if (!url.startsWith("/")) continue;
-    const asset = join(DIST, url.replace(/^\//, ""));
-    if (existsSync(asset)) total += compressedSize(asset);
+    const asset = assetPath(url);
+    if (asset && existsSync(asset)) total += compressedSize(asset);
   }
 
   if (total > worst.bytes) worst = { name: relative(DIST, file), bytes: total };

@@ -9,6 +9,7 @@
 
 import { es } from "./messages/es";
 import { en } from "./messages/en";
+import { withBase } from "../lib/paths";
 
 export const LOCALES = ["es", "en"] as const;
 export type Locale = (typeof LOCALES)[number];
@@ -48,16 +49,23 @@ export function t(locale: Locale, key: MessageKey): string {
 }
 
 /**
- * Build a locale-aware href. The default locale lives at the root, so
- * Spanish URLs stay clean and English is prefixed.
+ * Build a locale-aware href, already carrying the deployment base.
+ *
+ * The default locale lives at the root, so Spanish URLs stay clean and
+ * English is prefixed:
  *
  *   localePath("es", "/tools") === "/tools"
  *   localePath("en", "/tools") === "/en/tools"
+ *
+ * Under a subpath base the result is prefixed too, because GitHub Pages
+ * serves a project repository from `/LinguaLab/`:
+ *
+ *   localePath("es", "/tools") === "/LinguaLab/tools"
  */
 export function localePath(locale: Locale, path = "/"): string {
   const clean = path === "/" ? "" : path.replace(/\/+$/, "");
-  if (locale === DEFAULT_LOCALE) return clean || "/";
-  return `/${locale}${clean}`;
+  const localised = locale === DEFAULT_LOCALE ? clean || "/" : `/${locale}${clean}`;
+  return withBase(localised);
 }
 
 /** The hreflang value for a locale: "es" at the root, "en" under /en. */

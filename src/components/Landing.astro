@@ -6,7 +6,7 @@
 import { IPA_CHART } from "../data/ipa-chart";
 import { PHONEMES } from "../data/phoneme-of-day";
 import { TREE_EXAMPLES } from "../data/trees/examples";
-import { t, type Locale, type MessageKey } from "../i18n";
+import { localePath, t, type Locale, type MessageKey } from "../i18n";
 import PhonemeOfDay from "./PhonemeOfDay.astro";
 
 interface Props {
@@ -143,7 +143,7 @@ const payload = JSON.stringify({ entries: PHONEMES, locale });
       <p class="u-lead">{hero.lede}</p>
 
       <div class="cluster hero__actions">
-        <a class="btn btn--primary btn--lg" href="/tools">
+        <a class="btn btn--primary btn--lg" href={localePath(locale, "/tools")}>
           {hero.primary}
           <span class="btn__arrow" aria-hidden="true">→</span>
         </a>
@@ -192,7 +192,7 @@ const payload = JSON.stringify({ entries: PHONEMES, locale });
       {
         tools.map((tool, index) => (
           <li>
-            <a class="tool" href={tool.path}>
+            <a class="tool" href={localePath(locale, tool.path)}>
               <span class="tool__index mono" aria-hidden="true">
                 {String(index + 1).padStart(2, "0")}
               </span>

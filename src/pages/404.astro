@@ -7,6 +7,18 @@
  * and offers both language entry points.
  */
 import Base from "../layouts/Base.astro";
+import { baseRoot, withBase } from "../lib/paths";
+
+/* A 404 page must link to real locations, which under a subpath base means
+   every path needs the prefix. */
+const links = [
+  { href: withBase("/tools"), label: "Estación textual", note: "análisis de corpus" },
+  { href: withBase("/fono"), label: "FonoLab", note: "alfabeto fonético con corte sagital" },
+  { href: withBase("/arboles"), label: "ArborLab", note: "árboles sintácticos y de datos" },
+  { href: withBase("/glosario"), label: "Glosario", note: "términos de lingüística" },
+  { href: withBase("/bibliografia"), label: "Bibliografía", note: "recursos con licencia" },
+  { href: withBase("/seguridad"), label: "Seguridad", note: "verificación en vivo" },
+];
 ---
 
 <Base
@@ -26,19 +38,20 @@ import Base from "../layouts/Base.astro";
       </p>
 
       <ul class="notfound__list" role="list">
-        <li><a href="/tools">Estación textual</a> — análisis de corpus</li>
-        <li><a href="/fono">FonoLab</a> — alfabeto fonético con corte sagital</li>
-        <li><a href="/arboles">ArborLab</a> — árboles sintácticos y de datos</li>
-        <li><a href="/glosario">Glosario</a> — términos de lingüística</li>
-        <li><a href="/bibliografia">Bibliografía</a> — recursos con licencia</li>
-        <li><a href="/seguridad">Seguridad</a> — verificación en vivo</li>
+        {
+          links.map((link) => (
+            <li>
+              <a href={link.href}>{link.label}</a> — {link.note}
+            </li>
+          ))
+        }
       </ul>
 
       <div class="cluster" style="margin-block-start: var(--space-l)">
-        <a class="btn btn--primary" href="/">
+        <a class="btn btn--primary" href={baseRoot()}>
           Volver al inicio <span class="btn__arrow" aria-hidden="true">→</span>
         </a>
-        <a class="btn" href="/en/" hreflang="en" lang="en">English version</a>
+        <a class="btn" href={withBase("/en/")} hreflang="en" lang="en">English version</a>
       </div>
     </div>
   </section>

@@ -12,7 +12,7 @@ import { IPA_CHART } from "../data/ipa-chart";
 import { TREE_TYPES } from "../data/trees/types";
 import { GLOSSARY } from "../data/glossary";
 import { BIBLIOGRAPHY } from "../data/bibliography";
-import type { Locale } from "../i18n";
+import { localePath, type Locale } from "../i18n";
 
 interface Props {
   locale: Locale;
@@ -204,7 +204,7 @@ const numbers: [string, string][] = es
           <li class="step">
             <h3 class="step__title">{step.heading}</h3>
             <p class="step__body">{step.body}</p>
-            <a class="btn btn--sm" href={step.href}>
+            <a class="btn btn--sm" href={localePath(locale, step.href)}>
               {step.label} <span class="btn__arrow" aria-hidden="true">→</span>
             </a>
           </li>
@@ -264,7 +264,7 @@ const numbers: [string, string][] = es
     </div>
 
     <div class="cluster" style="margin-block-start: var(--space-m)">
-      <a class="btn" href="/audio/ATTRIBUTION.md">
+      <a class="btn" href={localePath(locale, "/audio/ATTRIBUTION.md")}>
         {es ? "Tabla de atribución de audio" : "Audio attribution table"}
       </a>
       {
@@ -274,7 +274,7 @@ const numbers: [string, string][] = es
           </a>
         )
       }
-      <a class="btn" href="/seguridad">
+      <a class="btn" href={localePath(locale, "/seguridad")}>
         {es ? "Seguridad y guardrails" : "Security and guardrails"}
       </a>
     </div>
