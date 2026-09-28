@@ -67,8 +67,18 @@ Las traducciones se resuelven **en la compilación**: cada idioma es su propia
 página estática. No hay diccionario en el cliente, ni parpadeo de idioma, y
 desaparece toda la superficie de `innerHTML` que tenía el motor de i18n anterior.
 
-`legacy/` conserva el sitio original en JavaScript sin compilación, como
-referencia del port. Se puede borrar cuando no haga falta.
+Los datos de `src/data/` y los diccionarios de `src/i18n/messages/` se portaron
+desde el sitio original en JavaScript sin compilación. Ese árbol de referencia se
+retiró del repositorio una vez terminado el port, y sigue recuperable desde el
+historial:
+
+```bash
+# ver la última revisión que lo contenía
+git log --oneline --diff-filter=D -- legacy/
+
+# restaurarlo en una carpeta aparte, sin tocar el árbol de trabajo
+git archive <commit> legacy/ | tar -x -C /tmp
+```
 
 ## Decisiones que conviene conocer
 
