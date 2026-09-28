@@ -80,7 +80,13 @@ const groups: FooterGroup[] = [
 
     <div class="footer__base">
       <span>{t(locale, "foot.rights")}</span>
-      <a href={SITE.repository} rel="noopener noreferrer">{t(locale, "foot.source")}</a>
+      {
+        SITE.repository && (
+          <a href={SITE.repository} rel="noopener noreferrer">
+            {t(locale, "foot.source")}
+          </a>
+        )
+      }
     </div>
   </div>
 </footer>

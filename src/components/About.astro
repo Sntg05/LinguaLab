@@ -267,9 +267,13 @@ const numbers: [string, string][] = es
       <a class="btn" href="/audio/ATTRIBUTION.md">
         {es ? "Tabla de atribución de audio" : "Audio attribution table"}
       </a>
-      <a class="btn" href={SITE.repository} rel="noopener noreferrer">
-        {es ? "Código fuente" : "Source code"}
-      </a>
+      {
+        SITE.repository && (
+          <a class="btn" href={SITE.repository} rel="noopener noreferrer">
+            {es ? "Código fuente" : "Source code"}
+          </a>
+        )
+      }
       <a class="btn" href="/seguridad">
         {es ? "Seguridad y guardrails" : "Security and guardrails"}
       </a>
@@ -290,10 +294,20 @@ const numbers: [string, string][] = es
       </p>
     </div>
 
-    <a class="btn btn--primary" href={SITE.repository} rel="noopener noreferrer">
-      {es ? "Abrir una incidencia" : "Open an issue"}
-      <span class="btn__arrow" aria-hidden="true">→</span>
-    </a>
+    {
+      SITE.repository ? (
+        <a class="btn btn--primary" href={SITE.repository} rel="noopener noreferrer">
+          {es ? "Abrir una incidencia" : "Open an issue"}
+          <span class="btn__arrow" aria-hidden="true">→</span>
+        </a>
+      ) : (
+        <p class="muted">
+          {es
+            ? "El repositorio público se anunciará aquí cuando esté disponible."
+            : "The public repository will be announced here once it is available."}
+        </p>
+      )
+    }
   </div>
 </section>
 
