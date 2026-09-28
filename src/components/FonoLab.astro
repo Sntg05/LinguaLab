@@ -1,0 +1,701 @@
+---
+/**
+ * FonoLab: the IPA chart, the articulatory diagram, audio and the
+ * transcriber.
+ *
+ * The whole chart is rendered server-side, so the page is complete and
+ * searchable without JavaScript. The script only adds selection, audio and
+ * the diagram update on top of markup that already works.
+ */
+import VocalTract from "./VocalTract.astro";
+import { IPA_CHART } from "../data/ipa-chart";
+import { articulationFor } from "../data/articulation";
+import { PLACE_LABELS } from "../data/articulation-labels";
+import { t, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const es = locale === "es";
+
+const categories = IPA_CHART.categories;
+
+/* The server-rendered detail must show the SAME symbol the script selects on
+   load, otherwise the diagram visibly jumps. Theta is a good showcase: it is
+   dental, voiceless and common in Spanish. */
+const INITIAL_SYMBOL = "θ";
+const firstEntry =
+  categories
+    .flatMap((category) => category.symbols.map((symbol) => ({ symbol, category })))
+    .find((entry) => entry.symbol.ipa === INITIAL_SYMBOL) ?? null;
+
+const first = firstEntry?.symbol ?? categories[0]!.symbols[0]!;
+const firstCategory = firstEntry?.category ?? categories[0]!;
+
+const placeName = (place: string) =>
+  place in PLACE_LABELS ? PLACE_LABELS[place as keyof typeof PLACE_LABELS][locale] : "—";
+
+/** Label shown under each glyph in the grid. */
+const labelOf = (symbol: { es: string; en: string }) => (es ? symbol.es : symbol.en);
+
+const articulatoryRows = (symbol: typeof first) => [
+  { key: "ipa.place", value: placeName(symbol.place_en) },
+  { key: "ipa.manner", value: symbol.manner_en },
+  { key: "ipa.voicing", value: symbol.voicing },
+];
+---
+
+<section class="section">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">FonoLab</span>
+      <h1>{t(locale, "ipa.title")}</h1>
+      <p class="u-lead">{t(locale, "ipa.sub")}</p>
+    </div>
+
+    <div class="lab">
+      <!-- ---------------- Chart ---------------- -->
+      <div class="lab__chart">
+        <div class="lab__controls">
+          <label class="field">
+            <span class="u-visually-hidden">{t(locale, "ipa.search")}</span>
+            <input
+              type="search"
+              data-ipa-search
+              placeholder={t(locale, "ipa.search")}
+              autocomplete="off"
+            />
+          </label>
+          <div class="segmented" role="group" aria-label={t(locale, "ipa.all")}>
+            <button class="segmented__btn" type="button" data-ipa-filter="all" aria-pressed="true">
+              {t(locale, "ipa.all")}
+            </button>
+            {
+              categories.map((category) => (
+                <button
+                  class="segmented__btn"
+                  type="button"
+                  data-ipa-filter={category.id}
+                  aria-pressed="false"
+                >
+                  {es ? category.name_es : category.name_en}
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        <p class="lab__count faint mono" data-ipa-count></p>
+
+        {
+          categories.map((category) => (
+            <section class="group" data-ipa-group={category.id}>
+              <h2 class="group__title">{es ? category.name_es : category.name_en}</h2>
+              <p class="group__note">{es ? category.note_es : category.note_en}</p>
+              <ul class="symbols" role="list">
+                {category.symbols.map((symbol) => (
+                  <li>
+                    <button
+                      class="symbol"
+                      type="button"
+                      data-symbol={symbol.ipa}
+                      data-category={category.id}
+                      data-place={symbol.place_en}
+                      data-manner={symbol.manner_en}
+                      data-voicing={symbol.voicing}
+                      data-description={labelOf(symbol)}
+                      aria-label={`${symbol.ipa} — ${labelOf(symbol)}`}
+                    >
+                      <span class="symbol__glyph ipa">{symbol.ipa}</span>
+                      <span class="symbol__label">{labelOf(symbol)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+
+      <!-- ---------------- Detail ---------------- -->
+      <aside class="lab__detail" data-ipa-detail aria-live="polite">
+        <div class="detail__head">
+          <p class="detail__glyph ipa-display" data-detail-glyph>{first.ipa}</p>
+          <div class="detail__meta">
+            <p class="detail__name" data-detail-name>{labelOf(first)}</p>
+            <p class="detail__ipa mono" data-detail-ipa>/{first.ipa}/</p>
+          </div>
+        </div>
+
+        <div class="detail__audio cluster">
+          <button class="btn btn--primary" type="button" data-audio-play>
+            <span aria-hidden="true">▶</span>
+            <span data-audio-label>{t(locale, "ipa.play")}</span>
+          </button>
+          <span class="badge" data-audio-tier></span>
+        </div>
+        <p class="detail__tier faint" data-audio-note></p>
+
+        <div class="detail__tract">
+          <VocalTract
+            locale={locale}
+            initial={articulationFor(first, firstCategory.id)}
+            symbol={first.ipa}
+          />
+        </div>
+
+        <dl class="detail__rows" data-detail-rows>
+          {
+            articulatoryRows(first).map((row) => (
+              <div class="detail__row">
+                <dt>{t(locale, row.key as Parameters<typeof t>[1])}</dt>
+                <dd>{row.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------- Transcriber ---------------- -->
+<section class="section section--sunken">
+  <div class="shell">
+    <div class="u-section-head">
+      <h2>{t(locale, "ipa.transcribe")}</h2>
+      <p class="muted">
+        {
+          es
+            ? "Transcripción aproximada, grafema a fonema. No es un transcriptor morfológico: sirve como apoyo didáctico."
+            : "An approximate grapheme-to-phoneme transcription. Not a morphological transcriber: it is a teaching aid."
+        }
+      </p>
+    </div>
+
+    <div class="transcriber">
+      <div class="field">
+        <label for="tx-input">{es ? "Texto" : "Text"}</label>
+        <textarea id="tx-input" data-tx-input rows="3" placeholder={es ? "Escribe una frase…" : "Type a phrase…"}></textarea>
+      </div>
+
+      <div class="cluster">
+        <div class="segmented" role="group" aria-label={es ? "Idioma" : "Language"}>
+          <button class="segmented__btn" type="button" data-tx-lang="es" aria-pressed="true">ES</button>
+          <button class="segmented__btn" type="button" data-tx-lang="en" aria-pressed="false">EN</button>
+        </div>
+        <button class="btn" type="button" data-tx-run>{t(locale, "ipa.transcribe")}</button>
+        <button class="btn btn--quiet" type="button" data-tx-clear>
+          {es ? "Limpiar" : "Clear"}
+        </button>
+      </div>
+
+      <output class="transcriber__out data-surface ipa" data-tx-out aria-live="polite"></output>
+    </div>
+  </div>
+</section>
+
+<p class="u-visually-hidden" role="status" aria-live="polite" data-live-region></p>
+
+<script>
+  import { articulationFor } from "../data/articulation";
+  import type { IpaSymbol } from "../data/ipa-chart";
+  import { PLACE_LABELS } from "../data/articulation-labels";
+  import { play, sampleCount, stop, warmUpVoices } from "../scripts/fono/audio";
+  import { transcribe, type TranscribeLang } from "../scripts/fono/phonetics";
+  import { applyArticulation } from "../scripts/fono/vocal-tract";
+  import { safeInitAll } from "../scripts/core/safe";
+  import type { Locale } from "../i18n";
+
+  const root = document.querySelector<HTMLElement>("[data-ipa-detail]");
+  const locale = (document.documentElement.lang === "en" ? "en" : "es") as Locale;
+  const es = locale === "es";
+
+  const placeName = (place: string): string =>
+    place in PLACE_LABELS ? PLACE_LABELS[place as keyof typeof PLACE_LABELS][locale] : "—";
+
+  /** Rebuild the IpaSymbol the articulation model expects from the button. */
+  function symbolFrom(button: HTMLButtonElement): { symbol: IpaSymbol; categoryId: string } {
+    const ipa = button.dataset["symbol"] ?? "";
+    const place = button.dataset["place"] ?? "—";
+    const manner = button.dataset["manner"] ?? "";
+    const voicing = button.dataset["voicing"] ?? "—";
+    const description = button.dataset["description"] ?? "";
+    const categoryId = button.dataset["category"] ?? "pulmonics";
+
+    return {
+      categoryId,
+      symbol: {
+        ipa,
+        es: es ? description : "",
+        en: es ? "" : description,
+        place_es: place,
+        place_en: place,
+        manner_es: manner,
+        manner_en: manner,
+        voicing,
+      },
+    };
+  }
+
+  function selectSymbol(button: HTMLButtonElement): void {
+    const { symbol, categoryId } = symbolFrom(button);
+
+    for (const el of document.querySelectorAll<HTMLButtonElement>("[data-symbol]")) {
+      el.setAttribute("aria-pressed", el === button ? "true" : "false");
+    }
+
+    const set = (selector: string, text: string): void => {
+      const el = document.querySelector<HTMLElement>(selector);
+      if (el) el.textContent = text;
+    };
+    set("[data-detail-glyph]", symbol.ipa);
+    set("[data-detail-name]", symbol.es || symbol.en);
+    set("[data-detail-ipa]", `/${symbol.ipa}/`);
+
+    // Articulatory rows.
+    const rows = document.querySelector<HTMLElement>("[data-detail-rows]");
+    if (rows) {
+      const values: [string, string][] = [
+        [es ? "Punto de articulación" : "Place of articulation", placeName(symbol.place_en)],
+        [es ? "Modo" : "Manner", symbol.manner_en],
+        [es ? "Sonoridad" : "Voicing", symbol.voicing],
+      ];
+      rows.replaceChildren(
+        ...values.map(([term, description]) => {
+          const row = document.createElement("div");
+          row.className = "detail__row";
+          const dt = document.createElement("dt");
+          dt.textContent = term;
+          const dd = document.createElement("dd");
+          dd.textContent = description;
+          row.append(dt, dd);
+          return row;
+        }),
+      );
+    }
+
+    const tract = document.querySelector<HTMLElement>("[data-vocal-tract]");
+    if (tract) {
+      applyArticulation(tract, articulationFor(symbol, categoryId), {
+        locale,
+        placeText: placeName(symbol.place_en),
+      });
+    }
+
+    // Reset the audio affordance for the newly selected symbol.
+    const tier = document.querySelector<HTMLElement>("[data-audio-tier]");
+    if (tier) {
+      tier.textContent = "";
+      tier.className = "badge";
+    }
+    const note = document.querySelector<HTMLElement>("[data-audio-note]");
+    if (note) note.textContent = "";
+
+    document.querySelector<HTMLElement>(".lab__detail")?.scrollIntoView({
+      block: "nearest",
+      behavior: "smooth",
+    });
+  }
+
+  safeInitAll({
+    "ipa chart": () => {
+      const chart = document.querySelector<HTMLElement>(".lab__chart");
+      if (!chart || !root) return;
+
+      const buttons = [...document.querySelectorAll<HTMLButtonElement>("[data-symbol]")];
+      const groups = [...document.querySelectorAll<HTMLElement>("[data-ipa-group]")];
+      const search = document.querySelector<HTMLInputElement>("[data-ipa-search]");
+      const count = document.querySelector<HTMLElement>("[data-ipa-count]");
+      let categoryFilter = "all";
+
+      const applyFilters = (): void => {
+        const query = (search?.value ?? "").trim().toLowerCase();
+        let visible = 0;
+
+        for (const button of buttons) {
+          const matchesCategory =
+            categoryFilter === "all" || button.dataset["category"] === categoryFilter;
+          const haystack = `${button.dataset["symbol"]} ${button.dataset["description"]} ${button.dataset["place"]} ${button.dataset["manner"]}`.toLowerCase();
+          const matchesQuery = query === "" || haystack.includes(query);
+          const show = matchesCategory && matchesQuery;
+          button.closest("li")?.toggleAttribute("hidden", !show);
+          if (show) visible += 1;
+        }
+
+        for (const group of groups) {
+          const anyVisible = [...group.querySelectorAll<HTMLButtonElement>("[data-symbol]")].some(
+            (b) => !b.closest("li")?.hasAttribute("hidden"),
+          );
+          group.toggleAttribute("hidden", !anyVisible);
+        }
+
+        if (count) {
+          count.textContent = es
+            ? `${visible} de ${buttons.length} símbolos`
+            : `${visible} of ${buttons.length} symbols`;
+        }
+      };
+
+      chart.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const filter = target.closest<HTMLButtonElement>("[data-ipa-filter]");
+        if (filter) {
+          categoryFilter = filter.dataset["ipaFilter"] ?? "all";
+          for (const other of chart.querySelectorAll<HTMLButtonElement>("[data-ipa-filter]")) {
+            other.setAttribute("aria-pressed", other === filter ? "true" : "false");
+          }
+          applyFilters();
+          return;
+        }
+
+        const symbol = target.closest<HTMLButtonElement>("[data-symbol]");
+        if (symbol) selectSymbol(symbol);
+      });
+
+      search?.addEventListener("input", applyFilters);
+      applyFilters();
+
+      // Keyboard: arrows move between symbols in the grid.
+      chart.addEventListener("keydown", (event) => {
+        const key = (event as KeyboardEvent).key;
+        if (!["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"].includes(key)) return;
+        const current = (event.target as Element).closest<HTMLButtonElement>("[data-symbol]");
+        if (!current) return;
+
+        const all = buttons.filter((b) => !b.closest("li")?.hasAttribute("hidden"));
+        const index = all.indexOf(current);
+        if (index < 0) return;
+
+        const step = key === "ArrowRight" || key === "ArrowDown" ? 1 : -1;
+        const next = all[(index + step + all.length) % all.length];
+        event.preventDefault();
+        next?.focus();
+        if (next) selectSymbol(next);
+      });
+
+      // Mark the initial selection.
+      const initial =
+        buttons.find((b) => b.dataset["symbol"] === "θ") ?? buttons[0] ?? null;
+      // Kept in step with INITIAL_SYMBOL in the frontmatter.
+      if (initial) {
+        initial.setAttribute("aria-pressed", "true");
+        selectSymbol(initial);
+      }
+    },
+
+    "audio playback": () => {
+      const button = document.querySelector<HTMLButtonElement>("[data-audio-play]");
+      if (!button) return;
+
+      warmUpVoices();
+
+      button.addEventListener("click", async () => {
+        const selected = document.querySelector<HTMLButtonElement>(
+          '[data-symbol][aria-pressed="true"]',
+        );
+        const symbol = selected?.dataset["symbol"];
+        if (!symbol) return;
+
+        const tierEl = document.querySelector<HTMLElement>("[data-audio-tier]");
+        const noteEl = document.querySelector<HTMLElement>("[data-audio-note]");
+        const labelEl = button.querySelector<HTMLElement>("[data-audio-label]");
+
+        button.disabled = true;
+        if (labelEl) labelEl.textContent = es ? "Reproduciendo…" : "Playing…";
+
+        const result = await play(symbol, { locale });
+
+        button.disabled = false;
+        if (labelEl) labelEl.textContent = es ? "Reproducir" : "Play";
+
+        if (tierEl) {
+          tierEl.className = `badge ${result.tier === "unavailable" ? "badge--warn" : "badge--ok"}`;
+          tierEl.textContent =
+            result.tier === "sample"
+              ? es
+                ? "grabación"
+                : "recording"
+              : result.tier === "speech"
+                ? es
+                  ? "voz sintética"
+                  : "synthetic voice"
+                : es
+                  ? "no disponible"
+                  : "unavailable";
+        }
+
+        if (noteEl) {
+          noteEl.textContent =
+            result.tier === "speech"
+              ? es
+                ? `Sin grabación con licencia: se pronuncia «${result.detail}».`
+                : `No licensed recording: speaking “${result.detail}”.`
+              : result.tier === "unavailable"
+                ? es
+                  ? "No hay grabación ni voz disponible para este símbolo."
+                  : "No recording or voice is available for this symbol."
+                : "";
+        }
+      });
+
+      // Stop cleanly when the page is left.
+      window.addEventListener("pagehide", () => stop());
+    },
+
+    "transcriber": () => {
+      const input = document.querySelector<HTMLTextAreaElement>("[data-tx-input]");
+      const output = document.querySelector<HTMLElement>("[data-tx-out]");
+      const run = document.querySelector<HTMLButtonElement>("[data-tx-run]");
+      const clear = document.querySelector<HTMLButtonElement>("[data-tx-clear]");
+      const langs = [...document.querySelectorAll<HTMLButtonElement>("[data-tx-lang]")];
+      if (!input || !output || !run) return;
+
+      let lang: TranscribeLang = locale === "en" ? "en" : "es";
+
+      const render = (): void => {
+        output.textContent = transcribe(input.value, lang) || "—";
+      };
+
+      run.addEventListener("click", render);
+
+      input.addEventListener("keydown", (event) => {
+        if ((event as KeyboardEvent).key === "Enter" && !(event as KeyboardEvent).shiftKey) {
+          event.preventDefault();
+          render();
+        }
+      });
+
+      clear?.addEventListener("click", () => {
+        input.value = "";
+        output.textContent = "—";
+        input.focus();
+      });
+
+      for (const button of langs) {
+        button.addEventListener("click", () => {
+          lang = button.dataset["txLang"] === "en" ? "en" : "es";
+          for (const other of langs) {
+            other.setAttribute("aria-pressed", other === button ? "true" : "false");
+          }
+          render();
+        });
+      }
+
+      output.textContent = "—";
+
+      // Surface the audio coverage honestly rather than implying the whole
+      // chart is recorded.
+      const coverage = document.querySelector<HTMLElement>("[data-audio-coverage]");
+      if (coverage) {
+        const n = sampleCount();
+        coverage.textContent = es
+          ? `${n} símbolos tienen grabación con licencia; el resto usa la voz del sistema.`
+          : `${n} symbols have a licensed recording; the rest use the system voice.`;
+      }
+    },
+  });
+</script>
+
+<style>
+  .lab {
+    display: grid;
+    gap: var(--space-xl);
+    align-items: start;
+  }
+
+  @media (width >= 68rem) {
+    .lab {
+      grid-template-columns: minmax(0, 1.6fr) minmax(19rem, 1fr);
+    }
+  }
+
+  .lab__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s);
+    align-items: center;
+    margin-block-end: var(--space-s);
+  }
+
+  .lab__controls .field {
+    flex: 1 1 16rem;
+  }
+
+  .lab__count {
+    margin-block-end: var(--space-m);
+    font-size: var(--step--2);
+  }
+
+  /* ---- Chart groups ---- */
+  .group + .group {
+    margin-block-start: var(--space-l);
+  }
+
+  .group__title {
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: 650;
+    margin-block-end: var(--space-3xs);
+  }
+
+  .group__note {
+    margin-block-end: var(--space-s);
+    font-size: var(--step--2);
+    color: var(--ink-faint);
+  }
+
+  .symbols {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2xs);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 7.5rem), 1fr));
+  }
+
+  .symbol {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: var(--space-2xs);
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    transition:
+      border-color var(--dur-fast) ease,
+      background-color var(--dur-fast) ease;
+  }
+
+  .symbol:hover {
+    border-color: var(--accent-line);
+    background: var(--accent-wash);
+  }
+
+  .symbol[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent-wash);
+    box-shadow: inset 0 0 0 1px var(--accent);
+  }
+
+  .symbol__glyph {
+    font-size: var(--step-2);
+    line-height: 1.1;
+    color: var(--ink);
+  }
+
+  .symbol__label {
+    font-size: 0.66rem;
+    line-height: 1.25;
+    color: var(--ink-faint);
+  }
+
+  /* ---- Detail panel ---- */
+  .lab__detail {
+    padding: var(--space-m);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    box-shadow: var(--shadow-s);
+  }
+
+  @media (width >= 68rem) {
+    .lab__detail {
+      position: sticky;
+      top: 5.5rem;
+    }
+  }
+
+  .detail__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    margin-block-end: var(--space-s);
+  }
+
+  .detail__glyph {
+    margin: 0;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .detail__meta {
+    min-width: 0;
+  }
+
+  .detail__name {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    line-height: 1.2;
+  }
+
+  .detail__ipa {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+  }
+
+  .detail__audio {
+    margin-block-end: var(--space-2xs);
+  }
+
+  .detail__tier {
+    margin: 0 0 var(--space-s);
+    font-size: var(--step--2);
+    min-height: 1.2em;
+  }
+
+  .detail__tract {
+    margin-block-end: var(--space-s);
+  }
+
+  .detail__rows {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+
+  .detail__row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-block: 0.3rem;
+    border-block-start: 1px solid var(--line);
+    font-size: var(--step--1);
+  }
+
+  .detail__row dt {
+    color: var(--ink-faint);
+  }
+
+  .detail__row dd {
+    margin: 0;
+    text-align: end;
+    font-weight: 550;
+  }
+
+  /* ---- Transcriber ---- */
+  .transcriber {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    max-width: 48rem;
+  }
+
+  .transcriber__out {
+    min-height: 4rem;
+    margin: 0;
+    font-size: var(--step-1);
+    word-break: break-word;
+  }
+</style>

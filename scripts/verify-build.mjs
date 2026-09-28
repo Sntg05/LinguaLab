@@ -10,7 +10,7 @@
  *
  * Run with: node scripts/verify-build.mjs
  */
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
 import { gzipSync } from "node:zlib";
 import { createHash } from "node:crypto";
@@ -116,7 +116,39 @@ for (const file of pages) {
   }
 }
 
-// ---- 4: payload budget (worst page) ----
+// ---- 4: audio manifest integrity ----
+// The project promises that audio is never played without a verified licence.
+// That promise is only real if every manifest entry resolves to a file that
+// was actually shipped, and if nothing ships that is not in the manifest.
+const manifestPath = "src/data/ipa-samples.json";
+if (existsSync(manifestPath)) {
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const audioDir = join(DIST, "audio", "ipa");
+
+  if (!existsSync(audioDir)) {
+    fail("audio: the manifest exists but dist/audio/ipa was not built");
+  } else {
+    const shipped = new Set(readdirSync(audioDir));
+    const declared = Object.entries(manifest);
+
+    for (const [symbol, file] of declared) {
+      if (!shipped.has(file)) {
+        fail(`audio: manifest lists "${symbol}" -> ${file}, which was not built`);
+      }
+    }
+
+    const declaredFiles = new Set(Object.values(manifest));
+    for (const file of shipped) {
+      if (!declaredFiles.has(file)) {
+        fail(`audio: ${file} ships but has no manifest entry, so it has no attribution`);
+      }
+    }
+
+    notes.push(`audio samples shipped: ${declared.length}`);
+  }
+}
+
+// ---- 5: payload budget (worst page) ----
 function compressedSize(path) {
   return gzipSync(readFileSync(path)).length;
 }

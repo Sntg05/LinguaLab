@@ -191,5 +191,9 @@ export const en = {
   "sec.intro": "These checks run right now in your browser, against this very page. They are not claims: they are the result of reading the live DOM.",
   "sec.stateOk": "pass",
   "sec.stateFail": "review",
-  "sec.stateOn": "on"
+  "sec.stateOn": "on",
+  "ipa.place": "Place of articulation",
+  "ipa.manner": "Manner of articulation",
+  "ipa.voicing": "Voicing",
+  "ipa.coverage": "Audio coverage"
 } as const;

@@ -191,5 +191,9 @@ export const es = {
   "sec.intro": "Estas comprobaciones se ejecutan ahora mismo en tu navegador, contra esta misma página. No son afirmaciones: son el resultado de leer el DOM en vivo.",
   "sec.stateOk": "correcto",
   "sec.stateFail": "revisar",
-  "sec.stateOn": "activa"
+  "sec.stateOn": "activa",
+  "ipa.place": "Punto de articulación",
+  "ipa.manner": "Modo de articulación",
+  "ipa.voicing": "Sonoridad",
+  "ipa.coverage": "Cobertura de audio"
 } as const;

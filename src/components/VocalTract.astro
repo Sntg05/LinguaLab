@@ -1,0 +1,499 @@
+---
+/**
+ * Mid-sagittal cross-section of the vocal tract.
+ *
+ * The face points left: lips at the front, pharynx and larynx at the back.
+ *
+ * The drawing has a static anatomy layer and a dynamic layer driven by an
+ * Articulation. Rather than re-parsing path data on every interaction, all
+ * tongue shapes are rendered once and the active one is marked with
+ * `data-active`, which the stylesheet turns into visibility. Switching a
+ * phoneme is then a handful of attribute writes.
+ *
+ * Note: every attribute below is given an explicit value. A valueless
+ * attribute is valid HTML but invalid XML, and ArborLab exports SVG files
+ * that must open in XML-based tools.
+ */
+import {
+  TONGUE_PATHS,
+  VIEW,
+  type Articulation,
+  type TongueShape,
+} from "../data/articulation";
+import { ANATOMY_LABELS, PLACE_LABELS } from "../data/articulation-labels";
+import type { Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+  /** Rendered server-side so the diagram is meaningful without JavaScript. */
+  initial: Articulation;
+  /** Glyph the initial state belongs to, for the accessible label. */
+  symbol: string;
+  /** Show the anatomical captions. */
+  labels?: boolean;
+}
+
+const { locale, initial, symbol, labels = true } = Astro.props;
+
+const TONGUE_SHAPES = Object.keys(TONGUE_PATHS) as TongueShape[];
+
+const caption = (key: keyof typeof ANATOMY_LABELS) => ANATOMY_LABELS[key][locale];
+const placeName = (place: string) =>
+  place in PLACE_LABELS ? PLACE_LABELS[place as keyof typeof PLACE_LABELS][locale] : "";
+
+/* "Velo del paladar" is too wide for one line at this scale, so it wraps. */
+const [velumLine1 = "", velumLine2 = ""] = caption("velum").split(/\s(?=\(|paladar)/i);
+
+const velumRaised = initial.velum === "raised";
+const airRoute = velumRaised ? "oral" : "nasal";
+const active = (value: boolean) => (value ? "true" : undefined);
+---
+
+<figure class="tract" data-vocal-tract="true" data-locale={locale}>
+  <svg
+    viewBox={`0 0 ${VIEW.width} ${VIEW.height}`}
+    class="tract__svg"
+    role="img"
+    aria-labelledby="tract-title tract-desc"
+  >
+    <title id="tract-title">{symbol}</title>
+    <desc id="tract-desc" data-tract-desc="true">
+      {locale === "es" ? "Corte sagital del aparato fonador." : "Sagittal section of the vocal tract."}
+    </desc>
+
+    {/* ---------- Airflow, behind the anatomy ---------- */}
+    <g class="tract__air" aria-hidden="true">
+      <path
+        data-air="oral"
+        class="air-path"
+        d="M184 188 C 190 164, 188 138, 176 124 C 150 106, 100 102, 50 106"
+        data-active={active(airRoute === "oral")}
+      />
+      <path
+        data-air="nasal"
+        class="air-path"
+        d="M184 188 C 190 164, 190 138, 182 122 C 176 106, 166 90, 150 82 C 120 66, 68 66, 36 84"
+        data-active={active(airRoute === "nasal")}
+      />
+    </g>
+
+    {/* ---------- Static anatomy ---------- */}
+    <g class="tract__anatomy" aria-hidden="true">
+      {/* Nasal roof, then down the back wall of the pharynx */}
+      <path class="tract__cavity" d="M36 84 C 34 58, 58 40, 94 34 C 138 26, 178 44, 190 76" />
+      <path class="tract__bone" d="M190 76 C 196 110, 198 152, 192 192" />
+      {/* The nose: bridge to nostril opening */}
+      <path class="tract__cavity" d="M36 84 C 24 88, 20 96, 30 101" />
+
+      {/* Roof of the mouth: alveolar ridge into the hard palate */}
+      <path class="tract__bone" d="M56 98 L74 92 C 100 84, 128 80, 148 84" />
+      {/* Ridge texture, so the alveolar region reads as a distinct bump */}
+      <path class="tract__crest" d="M58 94 C 66 88, 78 88, 86 91" />
+      <path class="tract__crest" d="M96 86 C 108 81, 124 80, 134 82" />
+
+      {/* Upper teeth and lip */}
+      <path class="tract__tooth" d="M48 96 L48 108 L57 108 L57 96 Z" />
+      <path class="tract__lip" d="M26 94 C 36 92, 44 96, 48 100" />
+      {/* Lower teeth and lip */}
+      <path class="tract__tooth" d="M48 118 L48 130 L57 130 L57 118 Z" />
+      <path class="tract__lip" d="M26 124 C 36 126, 44 124, 48 128" />
+
+      {/* Mandible and the floor of the mouth */}
+      <path class="tract__bone" d="M26 132 C 50 150, 90 176, 140 186 C 162 190, 178 192, 188 194" />
+
+      {/* Larynx and the trachea below it */}
+      <path
+        class="tract__larynx"
+        d="M172 190 C 178 182, 192 182, 197 190 C 199 196, 196 202, 190 204 L178 204 C 172 202, 170 196, 172 190 Z"
+      />
+      <path class="tract__bone" d="M178 206 L178 226" />
+      <path class="tract__bone" d="M192 206 L192 226" />
+    </g>
+
+    {/* ---------- Velum: the oral/nasal valve ---------- */}
+    <g class="tract__velum" aria-hidden="true">
+      <path
+        data-velum="raised"
+        class="velum-path"
+        d="M148 84 C 166 88, 180 96, 189 106"
+        data-active={active(velumRaised)}
+      />
+      <path
+        data-velum="lowered"
+        class="velum-path"
+        d="M148 84 C 164 94, 176 114, 181 134"
+        data-active={active(!velumRaised)}
+      />
+      <g data-uvula="raised" data-active={active(velumRaised)}>
+        <ellipse class="velum-uvula" cx="189" cy="108" rx="3.5" ry="6" />
+      </g>
+      <g data-uvula="lowered" data-active={active(!velumRaised)}>
+        <ellipse class="velum-uvula" cx="181" cy="136" rx="3.5" ry="6" />
+      </g>
+    </g>
+
+    {/* ---------- Glottis: the voicing source ---------- */}
+    <g class="tract__glottis" aria-hidden="true">
+      <path
+        data-glottis="open"
+        class="glottis-path"
+        d="M175 192 L193 192"
+        data-active={active(initial.glottis === "open")}
+      />
+      <path
+        data-glottis="vibrating"
+        class="glottis-path"
+        d="M175 190 C 181 185, 187 196, 193 190"
+        data-active={active(initial.glottis === "vibrating")}
+      />
+      <path
+        data-glottis="closed"
+        class="glottis-path"
+        d="M175 192 C 179 188, 189 188, 193 192"
+        data-active={active(initial.glottis === "closed")}
+      />
+    </g>
+
+    {/* ---------- Lips ---------- */}
+    <g class="tract__lips" aria-hidden="true">
+      <path
+        data-lips="neutral"
+        class="lips-path"
+        d="M26 96 C 34 100, 36 124, 26 128"
+        data-active={active(initial.lips === "neutral")}
+      />
+      <path
+        data-lips="spread"
+        class="lips-path"
+        d="M24 94 C 31 99, 32 126, 24 131"
+        data-active={active(initial.lips === "spread")}
+      />
+      <path
+        data-lips="rounded"
+        class="lips-path"
+        d="M28 92 C 42 100, 42 124, 28 132"
+        data-active={active(initial.lips === "rounded")}
+      />
+      <path
+        data-lips="closed"
+        class="lips-path"
+        d="M26 106 C 34 109, 34 115, 26 118"
+        data-active={active(initial.lips === "closed")}
+      />
+    </g>
+
+    {/* ---------- Tongue: all shapes, one active ---------- */}
+    <g class="tract__tongue" aria-hidden="true">
+      {
+        TONGUE_SHAPES.map((shape) => (
+          <path
+            data-tongue={shape}
+            class="tongue-path"
+            d={TONGUE_PATHS[shape]}
+            data-active={active(shape === initial.tongue)}
+          />
+        ))
+      }
+    </g>
+
+    {/* ---------- Constriction markers ---------- */}
+    <g class="tract__markers">
+      {
+        initial.constrictions.map((c) => (
+          <g
+            class="marker"
+            data-marker="true"
+            data-place={c.place}
+            style={`--mx:${c.x};--my:${c.y}`}
+          >
+            <circle class="marker__halo" cx={c.x} cy={c.y} r="11" />
+            <circle class="marker__dot" cx={c.x} cy={c.y} r="4" />
+          </g>
+        ))
+      }
+      {/* Kept in the DOM so the driver can clone it without rebuilding the
+          group. Hidden with a class: SVG has no `hidden` attribute. */}
+      <g class="marker marker--template" data-marker-template="true">
+        <circle class="marker__halo" r="11" />
+        <circle class="marker__dot" r="4" />
+      </g>
+    </g>
+
+    {/* ---------- Captions ---------- */}
+    {
+      labels && (
+        <g class="tract__labels" aria-hidden="true">
+          <text x="100" y="20" text-anchor="middle">
+            {caption("nasalCavity")}
+          </text>
+
+          <g>
+            <text x="58" y="60" text-anchor="middle">
+              {caption("alveolarRidge")}
+            </text>
+            <path d="M60 63 L72 88" />
+          </g>
+
+          <g>
+            <text x="118" y="74" text-anchor="middle">
+              {caption("hardPalate")}
+            </text>
+            <path d="M118 77 L113 80" />
+          </g>
+
+          <g>
+            <text x="182" y="44" text-anchor="middle">
+              <tspan x="182" dy="0">{velumLine1}</tspan>
+              <tspan x="182" dy="10">{velumLine2}</tspan>
+            </text>
+            <path d="M178 59 L158 82" />
+          </g>
+
+          <g>
+            <text x="6" y="150" text-anchor="start">
+              {caption("lips")}
+            </text>
+            <path d="M24 146 L28 132" />
+          </g>
+
+          <text x="206" y="140" text-anchor="start">
+            {caption("pharynx")}
+          </text>
+
+          <g>
+            <text x="204" y="224" text-anchor="start">
+              {caption("glottis")}
+            </text>
+            <path d="M202 220 L192 196" />
+          </g>
+
+          <text x="104" y="158" text-anchor="middle" class="tract__labels--on-shape">
+            {caption("tongue")}
+          </text>
+        </g>
+      )
+    }
+  </svg>
+
+  <figcaption class="tract__caption">
+    <span class="tract__place" data-tract-place>
+      {initial.constrictions[0] ? placeName(initial.constrictions[0].place) : ""}
+    </span>
+    <span class="tract__note" data-tract-note></span>
+  </figcaption>
+</figure>
+
+<style>
+  .tract {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .tract__svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* ---- Anatomy ---- */
+  .tract__anatomy {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .tract__cavity {
+    stroke: var(--line-strong);
+    stroke-width: 1.4;
+  }
+
+  .tract__crest {
+    stroke: var(--line);
+    stroke-width: 1.1;
+  }
+
+  .tract__tooth {
+    fill: var(--bg-sunken);
+    stroke: var(--line-strong);
+    stroke-width: 1.3;
+  }
+
+  .tract__lip {
+    stroke: var(--ink-muted);
+    stroke-width: 1.8;
+  }
+
+  .tract__larynx {
+    fill: var(--bg-sunken);
+    stroke: var(--line-strong);
+    stroke-width: 1.4;
+  }
+
+  /* ---- Variants: only the active one is shown ---- */
+  .velum-path,
+  .glottis-path,
+  .lips-path,
+  [data-uvula],
+  [data-air] {
+    display: none;
+  }
+
+  .velum-path[data-active],
+  .glottis-path[data-active],
+  .lips-path[data-active],
+  [data-uvula][data-active],
+  [data-air][data-active] {
+    display: block;
+  }
+
+  .velum-path {
+    fill: none;
+    stroke: var(--mark);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+  }
+
+  .velum-uvula {
+    fill: var(--mark);
+    opacity: 0.85;
+  }
+
+  .glottis-path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+  }
+
+  /* Voiced sounds get the "vibrating" shape, drawn in the success colour. */
+  .glottis-path[data-glottis="vibrating"] {
+    stroke: var(--ok);
+  }
+
+  .lips-path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.4;
+    stroke-linecap: round;
+  }
+
+  /* ---- Tongue ---- */
+  .tongue-path {
+    display: none;
+    fill: color-mix(in oklab, var(--accent) 14%, transparent);
+    stroke: var(--accent);
+    stroke-width: 1.9;
+    stroke-linejoin: round;
+    transition: fill var(--dur-base) ease;
+  }
+
+  .tongue-path[data-active] {
+    display: block;
+  }
+
+  /* ---- Airflow ---- */
+  .air-path {
+    fill: none;
+    stroke: var(--ink-faint);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 5;
+    stroke-linecap: round;
+    opacity: 0.8;
+  }
+
+  [data-air][data-active] {
+    animation: airflow 1.8s linear infinite;
+  }
+
+  @keyframes airflow {
+    to {
+      stroke-dashoffset: -18;
+    }
+  }
+
+  /* ---- Constriction marker ---- */
+  .marker--template {
+    display: none;
+  }
+
+  .marker__halo {
+    fill: color-mix(in oklab, var(--warn) 20%, transparent);
+    stroke: var(--warn);
+    stroke-width: 1.3;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  .marker__dot {
+    fill: var(--warn);
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.14);
+    }
+  }
+
+  /* ---- Captions ---- */
+  .tract__labels {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    fill: var(--ink-faint);
+  }
+
+  .tract__labels path {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-width: 0.9;
+    stroke-dasharray: 2 2;
+  }
+
+  .tract__labels text {
+    paint-order: stroke;
+    stroke: var(--bg);
+    stroke-width: 3px;
+    stroke-linejoin: round;
+  }
+
+  /* The tongue caption sits on top of the filled shape, so it needs the
+     surface colour behind it rather than the page background. */
+  .tract__labels--on-shape {
+    fill: var(--accent);
+    font-weight: 600;
+  }
+
+  .tract__caption {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2xs);
+    flex-wrap: wrap;
+    font-size: var(--step--1);
+  }
+
+  .tract__place {
+    font-weight: 600;
+    color: var(--warn);
+  }
+
+  .tract__note {
+    color: var(--ink-muted);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .air-path,
+    .marker__halo {
+      animation: none;
+    }
+  }
+</style>

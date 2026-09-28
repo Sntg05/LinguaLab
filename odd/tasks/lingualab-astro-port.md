@@ -117,3 +117,79 @@ Note for the maintainer: the repository now lives at `/home/santi/LinguaLab`.
 The untouched original site is at `/home/santi/Documentos/LinguaLab`, and the
 problematic directory still exists and should be removed once its contents are
 confirmed redundant.
+
+## WU-3 — FonoLab (complete)
+
+The IPA chart, the articulatory diagram, licensed audio and the transcriber.
+
+### Articulatory model (`src/data/articulation.ts`)
+
+Maps a symbol to a drawable state of the vocal tract: tongue shape, up to two
+constriction points, lip shape, velum position and glottis state. 29 tests
+assert that all 108 symbols resolve, that every tongue shape has a path, that
+markers stay inside the drawing area, and that constrictions run front-to-back
+in the right order (bilabial < alveolar < velar < glottal).
+
+Vowels are generated from height and backness; consonants use authored tongue
+shapes, because a single hump cannot express an independent tongue tip.
+
+Two bugs the tests caught:
+- `"sin redondeo"` (unrounded) CONTAINS `"redondeo"`, so a naive substring test
+  marked every unrounded vowel as rounded. Matching on `"redondead"` fixes it.
+- Vowels use Front/Central/Back on a separate axis from consonant places, so
+  the two are validated separately rather than through one table.
+
+### Mid-sagittal diagram (`src/components/VocalTract.astro`)
+
+Face points left. Static anatomy plus a dynamic layer. All 23 tongue shapes are
+rendered once and the active one is marked, so switching phoneme is a few
+attribute writes rather than a re-parse.
+
+Verified by rasterising the diagram for 23 phonemes and inspecting the result.
+The first attempt was wrong — the tongue spilled below the jaw, the teeth and
+lips floated detached, the palate labels collided, and the airstream never
+appeared because no initial route was marked active. All four were fixed.
+
+### Audio
+
+35 real recordings fetched from Wikimedia Commons, all CC BY-SA 3.0, committed
+so the build stays offline. `scripts/fetch-ipa-audio.mjs`:
+
+- batches the licence lookup into ONE API request (one request per file tripped
+  the rate limit almost immediately), with backoff and a metadata cache so
+  re-runs need no network at all
+- normalises to mono Ogg Vorbis via ffmpeg: 1.1 MB of WAV became 456 KB
+- refuses any licence outside CC0 / CC BY / CC BY-SA / public domain
+- writes the attribution table, and says "not stated on Commons" rather than
+  inventing an author
+
+Playback has two tiers and always reports which was used. Speech synthesis
+cannot pronounce an IPA glyph — handing it "θ" makes it say "theta" — so the
+fallback speaks a carrier word instead (`src/data/ipa-carriers.ts`).
+
+`pickVoice` had a real bug: scoring language match and voice quality together
+let a `localService` bonus qualify an unrelated language, so a French voice
+could be chosen for Spanish. Language is now a hard gate.
+
+The build verifier now also fails if a manifest entry has no shipped file, or
+if a file ships with no attribution row. Both were confirmed against
+deliberate regressions.
+
+### Defects fixed in the transcriber
+
+- Spanish orthographic `v` had no rule, so `llave` came out as `/ʎave/` with a
+  segment Spanish does not have. `v` now merges into `/b/`.
+- English `a` in a closed syllable was unhandled, so `cat` was `/kat/`. It is
+  now `/kæt/`.
+- Two dead rules removed, and the rule tables no longer share `/g/` regex
+  state between calls.
+
+Known limitations are pinned by tests rather than left implicit: English short
+`i` and magic-e lengthening are not modelled, and Spanish `d` is always a stop.
+
+### Note for ArborLab
+
+Astro renders scoped-style markers as VALUELESS attributes
+(`data-astro-cid-xxx`), which is valid HTML but invalid XML. The FonoLab page
+carries 88 of them. Any SVG that ArborLab offers for download must strip these,
+or the exported file will not open in Illustrator, Inkscape or rsvg.
