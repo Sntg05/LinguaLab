@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguridad y guardrails web — estado en vivo | LinguaLab</title>
+<meta name="description" content="Política de seguridad y salvaguardas verificadas en tu navegador: HTTPS, CSP, SRI, sin cookies, escape anti-XSS, límites de entrada y borrado de datos locales.">
+<meta name="theme-color" content="#0B1B2B">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
+<script>
+(function(){try{document.documentElement.classList.add('js');var m=localStorage.getItem('lingualab-theme');
+if(m==='dark'||m==='light'){document.documentElement.setAttribute('data-theme',m);}
+var l=localStorage.getItem('lingualab-lang');if(l){document.documentElement.lang=l;}
+}catch(e){}})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><text y='30' font-size='30'>🔒</text></svg>">
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Saltar al contenido</a>
+
+<header class="tool-top">
+  <div class="tool-brand">
+    <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+      <line x1="20" y1="10" x2="9" y2="30" stroke="currentColor" stroke-width="2" opacity=".5"/>
+      <line x1="20" y1="10" x2="31" y2="30" stroke="currentColor" stroke-width="2" opacity=".5"/>
+      <circle cx="20" cy="9" r="6" fill="currentColor"/>
+      <circle cx="9" cy="31" r="5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+      <circle cx="31" cy="31" r="5" fill="none" stroke="var(--gold)" stroke-width="2.4"/>
+    </svg>
+    <div>
+      <h1 data-i18n="sec.title">Seguridad y guardrails web</h1>
+      <p data-i18n="sec.sub">Estado en vivo de las salvaguardas de LinguaLab. Verificado en tu navegador ahora mismo.</p>
+    </div>
+  </div>
+  <div class="tool-actions">
+    <a class="btn sm ghost" href="index.html" data-i18n="tree.back">← Volver al inicio</a>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">ES</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <button class="iconbtn" id="themeBtn" type="button" aria-pressed="false" title="Tema" aria-label="Cambiar tema"><span aria-hidden="true">🌙</span></button>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+
+<!-- ============ VERIFICACIÓN EN VIVO ============ -->
+<section class="page-head">
+  <div class="gridbg" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="eyebrow" data-i18n="sec.eyebrow">Estamos protegidos</p>
+    <div class="grid g2" style="align-items:start">
+      <div class="card">
+        <div class="spread" style="margin-bottom:14px">
+          <h2 style="margin:0;font-size:1.1rem" data-i18n="sec.panel">Verificación en vivo</h2>
+          <span class="tagpill live">runtime</span>
+        </div>
+        <p class="small slate">Estas comprobaciones se ejecutan ahora mismo en tu navegador
+          (protocolo, CSP, SRI, rastreadores, cookies, almacenamiento y ejecución dinámica).</p>
+        <div data-security-panel></div>
+      </div>
+      <div class="card">
+        <div class="spread" style="margin-bottom:14px">
+          <h2 style="margin:0;font-size:1.1rem" data-i18n="sec.guardrails">Guardrails activos</h2>
+          <span class="tagpill ok"><span data-guardrail-count>0/8</span></span>
+        </div>
+        <p class="small slate">Salvaguardas de entrada, contenido, privacidad e integridad
+          de datos aplicadas en cada herramienta.</p>
+        <div data-guardrails-panel></div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:24px">
+      <a class="btn solid" href="docs/SECURITY.md" download><span>Política completa (SECURITY.md)</span><span class="arw">↓</span></a>
+      <button class="btn" type="button" data-wipe data-i18n="sec.wipe">Borrar mis datos locales</button>
+      <span class="pill-note">🔒 procesamiento local · sin cookies</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PRÁCTICAS ============ -->
+<section class="off">
+  <div class="wrap">
+    <div class="shead">
+      <p class="eyebrow">Buenas prácticas OWASP</p>
+      <h2>Cómo protegemos tus datos y tu navegador</h2>
+      <p class="sub">Todo lo siguiente se aplica en cliente y puede inspeccionarse en las fuentes
+        de esta página.</p>
+    </div>
+    <div class="grid g3 stg">
+      <div class="card">
+        <div class="ic" aria-hidden="true">🛡</div>
+        <h3>Content-Security-Policy</h3>
+        <p class="small slate">CSP restrictiva por meta: <code>default-src 'self'</code>,
+          <code>object-src 'none'</code>, <code>base-uri 'self'</code> y fuentes en lista blanca.
+          Bloquea scripts y marcos inyectados.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">✍</div>
+        <h3>Escape anti-XSS</h3>
+        <p class="small slate">Ningún texto tuyo llega al DOM con <code>innerHTML</code>: se escapa
+          con <code>escapeHTML()</code> antes de renderizarse y el marcado activo pegado se limpia
+          con <code>sanitizeInput()</code>.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">⚖</div>
+        <h3>Límites de entrada</h3>
+        <p class="small slate">Textos hasta 100 KB, extensiones de archivo permitidas
+          (txt, md, csv, json, conllu) y rate-limiting visual para análisis repetidos.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">#️⃣</div>
+        <h3>SRI en dependencias</h3>
+        <p class="small slate">Las librerías externas se cargan con versión fijada y, cuando hay
+          CDN, con atributo <code>integrity</code>. La comprobación corre en la lista en vivo.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">🍪</div>
+        <h3>Sin cookies ni rastreo</h3>
+        <p class="small slate">Cero cookies, cero píxeles, cero analítica de terceros. Solo
+          <code>localStorage</code> en tu equipo para idioma y tema, con botón de borrado total.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">📦</div>
+        <h3>Presupuesto de rendimiento</h3>
+        <p class="small slate">Sin descargas pesadas por consulta: los análisis, los árboles y el
+          audio se calculan o sintetizan localmente. Menos red, menos superficie de ataque.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DATOS LOCALES ============ -->
+<section>
+  <div class="wrap">
+    <div class="shead">
+      <p class="eyebrow">Tus datos</p>
+      <h2>Qué guardamos y cómo borrarlo</h2>
+    </div>
+    <div class="grid g2" style="align-items:start">
+      <div class="card">
+        <h3>Almacenamiento local</h3>
+        <dl class="stats" style="margin-top:12px">
+          <div><dt>lingualab-lang</dt><dd>Idioma (es / en)</dd></div>
+          <div><dt>lingualab-theme</dt><dd>Tema (auto / claro / oscuro)</dd></div>
+        </dl>
+        <p class="small slate" style="margin-top:14px">No hay más claves. Los textos que analizas,
+          los árboles que dibujas y las transcripciones no se persisten ni se envían: viven solo
+          en la memoria de la pestaña.</p>
+      </div>
+      <div class="card">
+        <h3>¿Cómo lo verifico tú mismo?</h3>
+        <ol class="small slate" style="padding-left:20px;line-height:1.9">
+          <li>Abre DevTools (F12) → pestaña <b>Application</b> → <b>Local Storage</b>.</li>
+          <li>Verás únicamente <code>lingualab-lang</code> y <code>lingualab-theme</code>.</li>
+          <li>En <b>Network</b>, recarga tras analizar un texto: no verás ninguna petición con tu contenido.</li>
+          <li>Pulsa «Borrar mis datos locales» y las claves desaparecerán.</li>
+        </ol>
+        <button class="btn" type="button" data-wipe style="margin-top:12px">Borrar mis datos locales</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer style="text-align:center;color:var(--slate);font-size:.86rem;padding:26px;border-top:1px solid var(--line)">
+  <p>© 2026 LinguaLab · <a href="index.html" style="color:var(--teal);font-weight:700">Volver al inicio</a>
+    · Abriendo issues en <a href="about.html" style="color:var(--teal);font-weight:700">Acerca de</a></p>
+</footer>
+
+<noscript><p class="wrap center">LinguaLab necesita JavaScript para las herramientas interactivas.</p></noscript>
+<script defer src="data/i18n/es.js"></script>
+<script defer src="data/i18n/en.js"></script>
+<script defer src="js/core/theme.js"></script>
+<script defer src="js/core/i18n.js"></script>
+<script defer src="js/core/guardrails.js"></script>
+<script defer src="js/core/security.js"></script>
+<script defer src="js/core/app.js"></script>
+</body>
+</html>

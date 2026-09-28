@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estación de análisis textual — frecuencia, concordancia KWIC, n-gramas | LinguaLab</title>
+<meta name="description" content="Analiza un texto en tu navegador: frecuencia, concordancia KWIC, estadísticas (TTR, hapax), n-gramas, legibilidad y exportación JSON. Sin servidores.">
+<meta name="theme-color" content="#0B1B2B">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
+<script>
+(function(){try{document.documentElement.classList.add('js');var m=localStorage.getItem('lingualab-theme');
+if(m==='dark'||m==='light'){document.documentElement.setAttribute('data-theme',m);}
+var l=localStorage.getItem('lingualab-lang');if(l){document.documentElement.lang=l;}
+}catch(e){}})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><text y='30' font-size='30'>📊</text></svg>">
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Saltar al contenido</a>
+
+<header class="tool-top">
+  <div class="tool-brand">
+    <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+      <line x1="20" y1="10" x2="9" y2="30" stroke="currentColor" stroke-width="2" opacity=".5"/>
+      <line x1="20" y1="10" x2="31" y2="30" stroke="currentColor" stroke-width="2" opacity=".5"/>
+      <circle cx="20" cy="9" r="6" fill="currentColor"/>
+      <circle cx="9" cy="31" r="5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+      <circle cx="31" cy="31" r="5" fill="none" stroke="var(--gold)" stroke-width="2.4"/>
+    </svg>
+    <div>
+      <h1 data-i18n="tools.title">Estación de análisis textual</h1>
+      <p data-i18n="tools.sub">Pega o sube un texto y elige una herramienta: todo se calcula en tu navegador.</p>
+    </div>
+  </div>
+  <div class="tool-actions">
+    <span class="localnote">🔒 100% local · límite 100 KB</span>
+    <a class="btn sm ghost" href="index.html" data-i18n="tools.back">← Volver al inicio</a>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">ES</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <button class="iconbtn" id="themeBtn" type="button" aria-pressed="false" title="Tema" aria-label="Cambiar tema"><span aria-hidden="true">🌙</span></button>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+<section style="padding-top:34px">
+  <div class="wrap">
+
+    <!-- ============ ENTRADA ============ -->
+    <div class="grid tools-grid" id="toolsGrid">
+      <div>
+        <div class="toolbar-panel" style="margin-bottom:14px">
+          <label class="lbl" for="toolsInput" data-i18n="tools.input">Texto de entrada</label>
+          <div class="row" style="margin-left:auto">
+            <button class="btn sm ghost" type="button" id="toolsSample" data-i18n="tools.sample">Cargar texto de ejemplo</button>
+            <label class="btn sm ghost" for="toolsUpload" style="cursor:pointer" data-i18n="tools.upload">Subir archivo (.txt, .md, .csv)</label>
+            <input type="file" id="toolsUpload" accept=".txt,.md,.csv,.json,.conllu" class="visually-hidden">
+          </div>
+        </div>
+
+        <textarea id="toolsInput" rows="12" spellcheck="false"
+                  placeholder="Pega aquí tu texto (máx. 100 KB)…"
+                  aria-describedby="toolsHint"></textarea>
+
+        <div class="row" style="margin-top:14px">
+          <button class="btn solid" type="button" id="toolsRun" data-i18n="tools.run">Analizar</button>
+          <button class="btn ghost" type="button" id="toolsClear" data-i18n="tools.clear">Limpiar</button>
+          <button class="btn" type="button" id="toolsExport" data-i18n="tools.export">Exportar resultados (JSON)</button>
+          <label class="opt" style="margin-left:6px">
+            <input type="checkbox" id="chkStop" checked>
+            <span>Quitar vacías</span>
+          </label>
+        </div>
+
+        <p class="hint" id="toolsHint" style="margin-top:10px">
+          🔒 Tu texto nunca sale de este navegador. Máximo
+          <b>100 KB</b>, extensiones permitidas, marcado activo bloqueado y todo el contenido
+          escapado antes de renderizarse.
+        </p>
+      </div>
+
+      <!-- ============ RESULTADOS ============ -->
+      <div>
+        <div class="field" style="margin-bottom:14px">
+          <label class="lbl" for="kwInput" data-i18n="tools.keyword">Palabra clave (nodo)</label>
+          <input type="text" id="kwInput" placeholder="p. ej. gato" autocomplete="off">
+        </div>
+
+        <div class="tabbar" role="group" aria-label="Herramientas">
+          <button type="button" data-tool-tab="freq" aria-pressed="true" data-i18n="tools.tab.freq">Frecuencia</button>
+          <button type="button" data-tool-tab="kwic" aria-pressed="false" data-i18n="tools.tab.kwic">Concordancia</button>
+          <button type="button" data-tool-tab="stats" aria-pressed="false" data-i18n="tools.tab.stats">Estadísticas</button>
+          <button type="button" data-tool-tab="ngrams" aria-pressed="false" data-i18n="tools.tab.ngrams">N-gramas</button>
+          <button type="button" data-tool-tab="read" aria-pressed="false" data-i18n="tools.tab.read">Legibilidad</button>
+        </div>
+
+        <div id="toolsResults" aria-live="polite">
+          <p class="slate">Pega un texto y pulsa «Analizar».</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EXPLICACIÓN DE HERRAMIENTAS ============ -->
+<section class="off">
+  <div class="wrap">
+    <div class="shead">
+      <p class="eyebrow">Qué hace cada una</p>
+      <h2>Cinco lecturas de un mismo texto</h2>
+    </div>
+    <div class="grid g3 stg">
+      <div class="card">
+        <div class="ic" aria-hidden="true">#</div>
+        <h3>Frecuencia</h3>
+        <p class="small slate">Cuenta ocurrencias por palabra y las ordena. Puedes quitar las
+          palabras vacías (artículos, preposiciones) para ver el léxico informativo.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">↔</div>
+        <h3>Concordancia KWIC</h3>
+        <p class="small slate">«Keyword in context»: cada aparición de la palabra clave centrada,
+          con cinco palabras de contexto a cada lado. Es la vista clásica para estudiar
+          colocaciones.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">Σ</div>
+        <h3>Estadísticas</h3>
+        <p class="small slate">Tokens, tipos, razón tipo/token (TTR), hapax, oraciones y medias.
+          Indicadores básicos de diversidad léxica.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">n·n</div>
+        <h3>N-gramas</h3>
+        <p class="small slate">Bigramas y trigramas repetidos, ordenados por frecuencia. Punto de
+          partida para detectar fórmulas y colocaciones recurrentes.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">Aa</div>
+        <h3>Legibilidad</h3>
+        <p class="small slate">Índice de Flesch en su adaptación de Fernández-Huerta para español,
+          Flesch Reading Ease y Flesch–Kincaid para inglés, con sílabas estimadas.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">↓</div>
+        <h3>Exportar</h3>
+        <p class="small slate">Todo el análisis en un JSON con fecha, idioma y estadísticas:
+          reproducible y citable en tus trabajos.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer style="text-align:center;color:var(--slate);font-size:.86rem;padding:26px;border-top:1px solid var(--line)">
+  <p>© 2026 LinguaLab · <a href="index.html" style="color:var(--teal);font-weight:700">Volver al inicio</a>
+    · Guardrails verificados en <a href="security.html" style="color:var(--teal);font-weight:700">Seguridad</a></p>
+</footer>
+
+<noscript><p class="wrap center">LinguaLab necesita JavaScript para las herramientas interactivas.</p></noscript>
+<script defer src="data/i18n/es.js"></script>
+<script defer src="data/i18n/en.js"></script>
+<script defer src="js/core/theme.js"></script>
+<script defer src="js/core/i18n.js"></script>
+<script defer src="js/core/guardrails.js"></script>
+<script defer src="js/core/app.js"></script>
+<script defer src="js/tools/text-tools.js"></script>
+</body>
+</html>

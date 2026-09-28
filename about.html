@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acerca de LinguaLab — herramientas abiertas para investigar el lenguaje</title>
+<meta name="description" content="Qué es LinguaLab, para quién es, cómo se usa, licencias y contacto.">
+<meta name="theme-color" content="#0B1B2B">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+
+<script>
+(function(){try{document.documentElement.classList.add('js');var m=localStorage.getItem('lingualab-theme');
+if(m==='dark'||m==='light'){document.documentElement.setAttribute('data-theme',m);}
+var l=localStorage.getItem('lingualab-lang');if(l){document.documentElement.lang=l;}
+}catch(e){}})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><text y='30' font-size='30'>🔬</text></svg>">
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Saltar al contenido</a>
+
+<header class="tool-top">
+  <div class="tool-brand">
+    <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+      <line x1="20" y1="10" x2="9" y2="30" stroke="currentColor" stroke-width="2" opacity=".5"/>
+      <line x1="20" y1="10" x2="31" y2="30" stroke="currentColor" stroke-width="2" opacity=".5"/>
+      <circle cx="20" cy="9" r="6" fill="currentColor"/>
+      <circle cx="9" cy="31" r="5" fill="none" stroke="currentColor" stroke-width="2.4"/>
+      <circle cx="31" cy="31" r="5" fill="none" stroke="var(--gold)" stroke-width="2.4"/>
+    </svg>
+    <div>
+      <h1 data-i18n="about.title">Acerca de LinguaLab</h1>
+      <p data-i18n="about.sub">Herramientas abiertas para investigar el lenguaje.</p>
+    </div>
+  </div>
+  <div class="tool-actions">
+    <a class="btn sm ghost" href="index.html" data-i18n="tree.back">← Volver al inicio</a>
+    <div class="seg" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true">ES</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <button class="iconbtn" id="themeBtn" type="button" aria-pressed="false" title="Tema" aria-label="Cambiar tema"><span aria-hidden="true">🌙</span></button>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+<section class="page-head">
+  <div class="gridbg" aria-hidden="true"></div>
+  <div class="wrap">
+    <p class="eyebrow">Proyecto</p>
+    <h2>Un laboratorio que cabe en tu navegador</h2>
+    <p class="sub">LinguaLab reúne herramientas de análisis lingüístico pensadas para quien
+      investiga, enseña o aprende: fonética, sintaxis, corpus y bibliografía. No hay cuenta, no
+      hay servidor de análisis y no hay telemétría. Todo se calcula en tu equipo, con HTML, CSS y
+      JavaScript sin paso de compilación.</p>
+
+    <div class="grid g3 stg" style="margin-top:34px">
+      <div class="card">
+        <div class="ic" aria-hidden="true">🎓</div>
+        <h3>Para quién</h3>
+        <p class="small slate">Estudiantes de lingüística y de NLP, docentes que necesitan
+          ejemplos dibujables, y equipos de investigación que quieren un vistoso antes de
+          montar un pipeline.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">🧭</div>
+        <h3>Cómo empezar</h3>
+        <p class="small slate">1) Analiza un texto en la <a href="tools.html" style="color:var(--teal);font-weight:700">Estación textual</a>.
+          2) Transcribe sonidos en <a href="ipa-chart.html" style="color:var(--teal);font-weight:700">FonoLab</a>.
+          3) Dibuja tu árbol en <a href="trees.html" style="color:var(--teal);font-weight:700">ArborLab</a> y expórtalo.</p>
+      </div>
+      <div class="card">
+        <div class="ic" aria-hidden="true">⚖</div>
+        <h3>Licencias</h3>
+        <p class="small slate">Código bajo licencia libre (ver <code>LICENSE</code>). El audio IPA
+          y los datos descargables llevan su propia licencia y atribución en
+          <a href="audio/README.md" style="color:var(--teal);font-weight:700">audio/README.md</a>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="off">
+  <div class="wrap">
+    <div class="shead">
+      <p class="eyebrow">Preguntas frecuentes</p>
+      <h2 data-i18n="foot.faq">Preguntas frecuentes</h2>
+    </div>
+    <div class="grid g2">
+      <div class="card hov">
+        <h3>¿Se envía lo que escribo a algún servidor?</h3>
+        <p class="small slate">No. Tokenización, frecuencias, árboles, exportaciones y
+          transcripciones ocurren en tu navegador. Puedes comprobarlo en la pestaña Network de
+          DevTools.</p>
+      </div>
+      <div class="card hov">
+        <h3>¿Por qué español por defecto?</h3>
+        <p class="small slate">Porque la interfaz está pensada primero en español y luego se
+          traduce al inglés. El selector ES/EN del encabezado cambia todo el sitio y se recuerda
+          para tu próxima visita.</p>
+      </div>
+      <div class="card hov">
+        <h3>¿Los árboles son correctos?</h3>
+        <p class="small slate">Los parsers validan raíces, cabezas, ciclos, proyectividad,
+          binariedad y c-command, y te dicen qué línea falla. Son herramientas didácticas: revisa
+          siempre el resultado con tu manual de referencia.</p>
+      </div>
+      <div class="card hov">
+        <h3>¿Puedo citarlo?</h3>
+        <p class="small slate">Sí. Sugiere la forma: LinguaLab (2026). Herramientas de análisis
+          lingüístico [software]. Consultado en &lt;fecha&gt;.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:26px">
+      <h3 data-i18n="about.contact">Contacto</h3>
+      <p class="small slate">¿Has encontrado un fallo o quieres proponer un tipo de árbol nuevo?
+        Abre un issue describiendo: (1) qué esperabas, (2) qué pasó, (3) el texto de entrada exacto
+        y (4) navegador y versión.</p>
+      <div class="row">
+        <a class="btn sm" href="security.html">Ver el panel de seguridad <span class="arw">→</span></a>
+        <a class="btn sm" href="resources.html">Ir a la bibliografía <span class="arw">→</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer style="text-align:center;color:var(--slate);font-size:.86rem;padding:26px;border-top:1px solid var(--line)">
+  <p>© 2026 LinguaLab · Recursos libres con atribución · <a href="index.html" style="color:var(--teal);font-weight:700">Volver al inicio</a></p>
+</footer>
+
+<noscript><p class="wrap center">LinguaLab necesita JavaScript para las herramientas interactivas.</p></noscript>
+<script defer src="data/i18n/es.js"></script>
+<script defer src="data/i18n/en.js"></script>
+<script defer src="js/core/theme.js"></script>
+<script defer src="js/core/i18n.js"></script>
+<script defer src="js/core/guardrails.js"></script>
+<script defer src="js/core/app.js"></script>
+</body>
+</html>
