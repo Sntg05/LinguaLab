@@ -18,6 +18,19 @@ const ICON_PATHS: Record<"light" | "dark", string> = {
   dark: "M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z",
 };
 
+/**
+ * The label describes the action, not the current state, so it has to be
+ * translated. The strings arrive as data attributes rendered by the masthead,
+ * because this module runs in the browser where the build-time dictionaries
+ * are gone. When they are missing the server-rendered label is left alone
+ * rather than replaced with a hard-coded language.
+ */
+const LABEL_KEYS: Record<Theme, "themeLabelAuto" | "themeLabelLight" | "themeLabelDark"> = {
+  auto: "themeLabelAuto",
+  light: "themeLabelLight",
+  dark: "themeLabelDark",
+};
+
 function paint(preference: Theme): void {
   const root = document.documentElement;
   const attribute = themeAttribute(preference);
@@ -39,9 +52,10 @@ function renderIcon(button: HTMLButtonElement, preference: Theme): void {
 
   // The label describes the action, not the current state.
   const next = nextTheme(preference);
-  const label =
-    next === "auto" ? "Tema: automático" : next === "light" ? "Tema: claro" : "Tema: oscuro";
-  button.setAttribute("aria-label", label);
+  const label = button.dataset[LABEL_KEYS[next]];
+  if (label) {
+    button.setAttribute("aria-label", label);
+  }
   button.dataset["themeState"] = preference;
 }
 

@@ -3,6 +3,7 @@
  * Landing page. Locale-agnostic: both / and /en/ render this component
  * with a different locale, so the markup exists in exactly one place.
  */
+import { BIBLIOGRAPHY } from "../data/bibliography";
 import { IPA_CHART } from "../data/ipa-chart";
 import { PHONEMES } from "../data/phoneme-of-day";
 import { TREE_EXAMPLES } from "../data/trees/examples";
@@ -17,21 +18,21 @@ const { locale } = Astro.props;
 
 const es = locale === "es";
 
-/** Hero copy, per locale. */
+/** Hero copy, per locale. Leads with the discipline, not with the plumbing. */
 const hero = es
   ? {
-      eyebrow: "Fonética · Sintaxis · Corpus",
-      title: "Analiza el lenguaje, en el navegador.",
-      lede: "Alfabeto fonético con audio, árboles sintácticos editables y análisis de corpus. Todo se procesa en tu dispositivo: nada se envía a ningún servidor.",
-      primary: "Empezar a analizar",
-      secondary: "Ver las herramientas",
+      eyebrow: "Lingüística computacional · Inteligencia artificial",
+      title: "Herramientas de lingüística computacional para tu formación.",
+      lede: "FonoLab, ArborLab y la Estación textual en una sola caja de herramientas: fonética, sintaxis y corpus. Pensada para estudiantes de la Universidad Nacional de Colombia que se forman en lingüística computacional e inteligencia artificial.",
+      primary: "Abrir las herramientas",
+      secondary: "Ver los laboratorios",
     }
   : {
-      eyebrow: "Phonetics · Syntax · Corpus",
-      title: "Analyse language, in the browser.",
-      lede: "A phonetic alphabet with audio, editable syntactic trees and corpus analysis. Everything is processed on your device: nothing is sent to a server.",
-      primary: "Start analysing",
-      secondary: "See the tools",
+      eyebrow: "Computational linguistics · Artificial intelligence",
+      title: "Computational linguistics tools for your training.",
+      lede: "FonoLab, ArborLab and the Text station in one toolbox: phonetics, syntax and corpora. Built for Universidad Nacional de Colombia students working in computational linguistics and artificial intelligence.",
+      primary: "Open the tools",
+      secondary: "See the labs",
     };
 
 interface Tool {
@@ -102,33 +103,39 @@ const tools: Tool[] = es
    the page from ever repeating that class of error. */
 const ipaCount = IPA_CHART.categories.reduce((n, c) => n + c.symbols.length, 0);
 const treeCount = Object.keys(TREE_EXAMPLES).length;
+const bibliographyCount = BIBLIOGRAPHY.length;
 
-const trust: { label: string; value: string }[] = es
+/* What the toolbox contains. Every figure is derived from the data or from the
+   module list, never typed by hand. */
+const stats: { label: string; value: string }[] = es
   ? [
+      { label: "Módulos de trabajo", value: String(tools.length) },
       { label: "Símbolos AFI", value: String(ipaCount) },
       { label: "Tipos de árbol", value: String(treeCount) },
-      { label: "Envío de datos", value: "Ninguno" },
-      { label: "Cookies", value: "Ninguna" },
+      { label: "Recursos bibliográficos", value: String(bibliographyCount) },
     ]
   : [
+      { label: "Work modules", value: String(tools.length) },
       { label: "IPA symbols", value: String(ipaCount) },
       { label: "Tree types", value: String(treeCount) },
-      { label: "Data sent", value: "None" },
-      { label: "Cookies", value: "None" },
+      { label: "Bibliography entries", value: String(bibliographyCount) },
     ];
 
+/* Why this is useful for a degree, not why it is safe. The security property
+   is still true and still documented, on /seguridad: a reader who goes looking
+   for it finds it, and a reader who is here to work is not stopped by it. */
 const notes: { headingKey: MessageKey; body: string }[] = [
   {
-    headingKey: "hero.trust1",
+    headingKey: "purpose.1t",
     body: es
-      ? "El texto que escribes se procesa con JavaScript en tu pestaña. No hay servidor de análisis, ni analítica, ni telemetría."
-      : "The text you type is processed with JavaScript in your tab. There is no analysis server, no analytics and no telemetry.",
+      ? "Cada módulo cubre una tarea real del oficio: transcribir, anotar, segmentar, contar, comparar. Los resultados se exportan en formatos que puedes entregar, citar y reutilizar."
+      : "Each module covers a real task of the trade: transcribe, annotate, segment, count, compare. Results export in formats you can hand in, cite and reuse.",
   },
   {
-    headingKey: "hero.trust3",
+    headingKey: "purpose.2t",
     body: es
-      ? "Todo el código es libre y auditable. Cada recurso externo declara su licencia, y el audio que no se puede verificar cae a la voz del sistema."
-      : "All code is free and auditable. Every external resource declares its licence, and audio that cannot be verified falls back to the system voice.",
+      ? "Árboles a SVG, Newick, CoNLL-U y PNG; corpus a CSV. Los mismos formatos que usa la investigación y los conjuntos de datos que alimentan los modelos de lenguaje."
+      : "Trees to SVG, Newick, CoNLL-U and PNG; corpora to CSV. The same formats research uses and the datasets that feed language models.",
   },
 ];
 
@@ -220,18 +227,22 @@ const payload = JSON.stringify({ entries: PHONEMES, locale });
   payload={payload}
 />
 
-<section class="section" aria-labelledby="trust-heading">
+<section class="section" aria-labelledby="purpose-heading">
   <div class="shell">
     <div class="u-section-head">
-      <span class="eyebrow">{es ? "Privacidad" : "Privacy"}</span>
-      <h2 id="trust-heading">
-        {es ? "Tus textos no salen de tu dispositivo" : "Your texts never leave your device"}
+      <span class="eyebrow">{es ? "Formación" : "Training"}</span>
+      <h2 id="purpose-heading">
+        {
+          es
+            ? "Una caja de herramientas para lingüística computacional"
+            : "A toolbox for computational linguistics"
+        }
       </h2>
     </div>
 
     <dl class="stats">
       {
-        trust.map((item) => (
+        stats.map((item) => (
           <div class="stat">
             <dt class="stat__label">{item.label}</dt>
             <dd class="stat__value">{item.value}</dd>
@@ -250,6 +261,13 @@ const payload = JSON.stringify({ entries: PHONEMES, locale });
         ))
       }
     </div>
+
+    {/* The one place the landing still mentions the local-processing
+        property: a footnote, not a headline. */}
+    <p class="purpose__foot">
+      {t(locale, "purpose.local")}{" "}
+      <a href={localePath(locale, "/seguridad")}>{t(locale, "purpose.localLink")}</a>
+    </p>
   </div>
 </section>
 
@@ -442,6 +460,13 @@ const payload = JSON.stringify({ entries: PHONEMES, locale });
     display: grid;
     gap: var(--space-l);
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+
+  /* A footnote, deliberately quieter than the notes above it. */
+  .purpose__foot {
+    margin: var(--space-xl) 0 0;
+    font-size: var(--step--1);
+    color: var(--ink-faint);
   }
 
   .note__title {

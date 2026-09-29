@@ -3,9 +3,14 @@
  * Site masthead: brand, primary navigation, language and theme controls.
  * Server-rendered; the disclosure and theme toggle are progressive
  * enhancements layered on top of working links and a working <html lang>.
+ *
+ * Only the primary navigation items are rendered here. Reference pages live
+ * in the footer, which keeps the header to the four tools and the two
+ * controls.
  */
-import { NAV_ITEMS } from "../config/site";
+import { PRIMARY_NAV_ITEMS } from "../config/site";
 import { DEFAULT_LOCALE, LOCALES, LOCALE_NAMES, localePath, t, type Locale } from "../i18n";
+import Brand from "./Brand.astro";
 
 interface Props {
   locale?: Locale;
@@ -19,16 +24,7 @@ const isCurrent = (candidate: string) => candidate === path;
 
 <header class="masthead" data-masthead>
   <div class="shell masthead__inner">
-    <a class="brand" href={localePath(locale, "/")}>
-      <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-        <path d="M16 6 L4 27" stroke="currentColor" stroke-width="1.75" opacity=".45" fill="none" />
-        <path d="M16 6 L28 27" stroke="currentColor" stroke-width="1.75" opacity=".45" fill="none" />
-        <circle cx="16" cy="6" r="4.5" fill="currentColor" />
-        <circle cx="4" cy="27" r="3.75" fill="none" stroke="currentColor" stroke-width="1.75" />
-        <circle cx="28" cy="27" r="3.75" fill="none" stroke="currentColor" stroke-width="1.75" opacity=".5" />
-      </svg>
-      <span class="brand__name">LinguaLab</span>
-    </a>
+    <Brand locale={locale} />
 
     <button
       class="nav__toggle"
@@ -43,7 +39,7 @@ const isCurrent = (candidate: string) => candidate === path;
 
     <nav class="nav" id="primary-nav" data-nav data-open="false" aria-label={t(locale, "nav.menu")}>
       {
-        NAV_ITEMS.map((item) => (
+        PRIMARY_NAV_ITEMS.map((item) => (
           <a
             class="nav__link"
             href={localePath(locale, item.path)}
@@ -55,7 +51,7 @@ const isCurrent = (candidate: string) => candidate === path;
       }
 
       <div class="nav__controls cluster">
-        <div class="segmented" role="group" aria-label={t(locale, "nav.menu")}>
+        <div class="segmented" role="group" aria-label={t(locale, "nav.lang")}>
           {
             LOCALES.map((l) => (
               <a
@@ -74,12 +70,18 @@ const isCurrent = (candidate: string) => candidate === path;
           }
         </div>
 
+        {/* The script reads the per-state labels from the data attributes
+            below, because it runs in the browser where the build-time
+            translations are no longer reachable. */}
         <button
           class="icon-btn"
           type="button"
           data-theme-toggle
+          data-theme-label-auto={t(locale, "nav.themeAuto")}
+          data-theme-label-light={t(locale, "nav.themeLight")}
+          data-theme-label-dark={t(locale, "nav.themeDark")}
           aria-live="polite"
-          aria-label={t(locale, "nav.menu")}
+          aria-label={t(locale, "nav.theme")}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" data-theme-icon>
             <path
