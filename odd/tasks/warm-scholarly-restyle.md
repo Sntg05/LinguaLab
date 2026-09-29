@@ -91,15 +91,21 @@ instructions. **Recorded as a deliberate routing deviation, not an oversight.**
 
 Branch pushed over SSH with a repository-scoped deploy key, so no secret
 travelled through the session. Vercel's Git integration built a **Preview**
-deployment automatically; nothing was promoted to production.
+deployment automatically.
 
-- Preview: `https://lingualab-h4szw0u38-lambda-un.vercel.app` (commit `cb00e02`)
-- Vercel reported `success`; GitHub Pages did not run (its workflow listens to
-  `main` only) and CI did not run (no pull request)
+Merged to `main` as a fast-forward (`cf84f4a..e173ab7`), which triggered all
+three pipelines on the same commit. Vercel and GitHub Pages serve the site with
+different bases (`/` and `/LinguaLab`), so both were verified separately.
+
+| Pipeline | Result |
+|---|---|
+| CI (types, tests, build, payload) | success |
+| Deploy to GitHub Pages | success |
+| Vercel (Production) | success |
 
 Verified against the **deployed HTML and CSS**, not the local build:
 
-| Check | Production | Preview |
+| Check | Before (production) | After (Vercel + Pages) |
 |---|---|---|
 | `theme-color` | `#fcfdfe` / `#0d1620` | `#fbf7ef` / `#1a140f` |
 | Header links | 8, including `/seguridad` | 4, no `Seguridad` |
@@ -108,6 +114,11 @@ Verified against the **deployed HTML and CSS**, not the local build:
 | Footer | lone word `procesamiento` | full sentence, plus the non-affiliation line |
 | Source link | absent | `github.com/Sntg05/LinguaLab` |
 | CSP | — | hashes present, no `unsafe-inline` |
+
+Subpath safety on Pages: the links added in this change resolve to
+`/LinguaLab/seguridad` and `/LinguaLab/`, and both stylesheets load from
+`/LinguaLab/assets/`. `Landing.CcxyxH9U.css` carries the same content hash on
+both targets, as expected.
 
 Every colour in the served stylesheet matches its authored value. Note that
 `lightningcss` transpiles `oklch()` into a hex fallback plus a `lab()`
