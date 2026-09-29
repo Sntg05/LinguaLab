@@ -1,6 +1,7 @@
 ---
 import { SITE } from "../config/site";
 import { DEFAULT_LOCALE, localePath, t, type Locale, type MessageKey } from "../i18n";
+import Brand from "./Brand.astro";
 
 interface Props {
   locale?: Locale;
@@ -13,6 +14,11 @@ interface FooterGroup {
   links: { path: string; labelKey: MessageKey }[];
 }
 
+/**
+ * Everything the masthead deliberately leaves out. Security is not a column of
+ * its own here: it sits in the legal line below, which is where a reader looks
+ * for it only when they actually want it.
+ */
 const groups: FooterGroup[] = [
   {
     headingKey: "nav.tools",
@@ -31,35 +37,18 @@ const groups: FooterGroup[] = [
   },
   {
     headingKey: "nav.about",
-    links: [
-      { path: "/acerca", labelKey: "nav.about" },
-      { path: "/seguridad", labelKey: "nav.security" },
-    ],
+    links: [{ path: "/acerca", labelKey: "nav.about" }],
   },
 ];
-
 ---
 
 <footer class="footer">
   <div class="shell">
     <div class="footer__grid">
       <div>
-        <a class="brand" href={localePath(locale, "/")}>
-          <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-            <path d="M16 6 L4 27" stroke="currentColor" stroke-width="1.75" opacity=".45" fill="none"></path>
-            <path d="M16 6 L28 27" stroke="currentColor" stroke-width="1.75" opacity=".45" fill="none"></path>
-            <circle cx="16" cy="6" r="4.5" fill="currentColor"></circle>
-            <circle cx="4" cy="27" r="3.75" fill="none" stroke="currentColor" stroke-width="1.75"></circle>
-            <circle cx="28" cy="27" r="3.75" fill="none" stroke="currentColor" stroke-width="1.75" opacity=".5"></circle>
-          </svg>
-          <span class="brand__name">LinguaLab</span>
-        </a>
-        <p class="muted" style="margin-block-start: var(--space-s); max-width: 34ch; font-size: var(--step--1)">
-          {t(locale, "foot.about")}
-        </p>
-        <p class="faint" style="font-size: var(--step--2); font-family: var(--font-mono)">
-          {t(locale, "foot.local")}
-        </p>
+        <Brand locale={locale} />
+        <p class="footer__about">{t(locale, "foot.about")}</p>
+        <p class="footer__note">{t(locale, "foot.local")}</p>
       </div>
 
       {
@@ -80,13 +69,21 @@ const groups: FooterGroup[] = [
 
     <div class="footer__base">
       <span>{t(locale, "foot.rights")}</span>
-      {
-        SITE.repository && (
-          <a href={SITE.repository} rel="noopener noreferrer">
-            {t(locale, "foot.source")}
-          </a>
-        )
-      }
+      <span class="cluster">
+        <a href={localePath(locale, "/seguridad")}>{t(locale, "nav.security")}</a>
+        {
+          SITE.repository && (
+            <a href={SITE.repository} rel="noopener noreferrer">
+              {t(locale, "foot.source")}
+            </a>
+          )
+        }
+      </span>
     </div>
+
+    {/* This project is the author's own and merely names an institution as its
+        intended audience. Saying so plainly costs one line and removes any
+        reading of institutional endorsement. */}
+    <p class="footer__disclaimer">{t(locale, "foot.disclaimer")}</p>
   </div>
 </footer>

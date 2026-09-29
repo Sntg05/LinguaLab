@@ -226,6 +226,25 @@
     grid-template-columns: minmax(0, 1.4fr) repeat(auto-fit, minmax(9rem, 1fr));
   }
 
+  /* These two were inline `style` attributes on the elements themselves.
+     Under this project's policy they never applied: `style-src` carries
+     hashes, which cover <style> elements, while attributes need
+     `'unsafe-hashes'` or `'unsafe-inline'`. The rules below are what the
+     markup was always trying to say. */
+  .footer__about {
+    margin-block-start: var(--space-s);
+    max-width: 34ch;
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+  }
+
+  .footer__note {
+    margin: 0;
+    font-size: var(--step--2);
+    font-family: var(--font-mono);
+    color: var(--ink-faint);
+  }
+
   .footer__col h2 {
     font-family: var(--font-sans);
     font-size: var(--step--2);
@@ -264,6 +283,15 @@
     padding-block-start: var(--space-m);
     border-block-start: 1px solid var(--line);
     font-size: var(--step--1);
+    color: var(--ink-faint);
+  }
+
+  /* Deliberately quieter than the legal line above it: it is a clarification,
+     not a claim anyone needs to read first. */
+  .footer__disclaimer {
+    margin: var(--space-s) 0 0;
+    max-width: 72ch;
+    font-size: var(--step--2);
     color: var(--ink-faint);
   }
 }
