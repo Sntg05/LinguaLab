@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { BIBLIOGRAPHY } from "./bibliography";
 import { GLOSSARY } from "./glossary";
 import { IPA_CHART } from "./ipa-chart";
@@ -85,8 +87,8 @@ describe("glossary", () => {
 });
 
 describe("bibliography", () => {
-  it("ships 12 entries", () => {
-    expect(BIBLIOGRAPHY).toHaveLength(12);
+  it("ships 54 entries", () => {
+    expect(BIBLIOGRAPHY).toHaveLength(54);
   });
 
   it("declares a licence and a year for every entry", () => {
@@ -100,6 +102,20 @@ describe("bibliography", () => {
   it("provides at least one of file or url", () => {
     for (const e of BIBLIOGRAPHY) {
       expect(Boolean(e.file || e.url), `${e.id} is unreachable`).toBe(true);
+    }
+  });
+
+  it("points every declared file at a real file in public/", () => {
+    /* The assertion above passes for any non-empty string, so three entries
+       shipped download links to PDFs that were never added to public/ and
+       nobody noticed. A path that does not resolve is not a resource. */
+    const publicDir = fileURLToPath(new URL("../../public/", import.meta.url));
+    for (const e of BIBLIOGRAPHY) {
+      if (!e.file) continue;
+      expect(
+        existsSync(`${publicDir}${e.file}`),
+        `${e.id} declares file "${e.file}", which is not in public/`,
+      ).toBe(true);
     }
   });
 });
