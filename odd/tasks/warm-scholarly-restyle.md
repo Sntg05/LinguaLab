@@ -87,6 +87,34 @@ conversation's context, the four files are mutually dependent (the component is
 consumed by both layouts), and the user asked to iterate on taste with further
 instructions. **Recorded as a deliberate routing deviation, not an oversight.**
 
+## Deployment
+
+Branch pushed over SSH with a repository-scoped deploy key, so no secret
+travelled through the session. Vercel's Git integration built a **Preview**
+deployment automatically; nothing was promoted to production.
+
+- Preview: `https://lingualab-h4szw0u38-lambda-un.vercel.app` (commit `cb00e02`)
+- Vercel reported `success`; GitHub Pages did not run (its workflow listens to
+  `main` only) and CI did not run (no pull request)
+
+Verified against the **deployed HTML and CSS**, not the local build:
+
+| Check | Production | Preview |
+|---|---|---|
+| `theme-color` | `#fcfdfe` / `#0d1620` | `#fbf7ef` / `#1a140f` |
+| Header links | 8, including `/seguridad` | 4, no `Seguridad` |
+| Hero | "Analiza el lenguaje, en el navegador." | "Herramientas de lingüística computacional para tu formación." |
+| Brand wordmark | single tone, serif | two-tone, UI face (`brand__name-accent`) |
+| Footer | lone word `procesamiento` | full sentence, plus the non-affiliation line |
+| Source link | absent | `github.com/Sntg05/LinguaLab` |
+| CSP | — | hashes present, no `unsafe-inline` |
+
+Every colour in the served stylesheet matches its authored value. Note that
+`lightningcss` transpiles `oklch()` into a hex fallback plus a `lab()`
+value, so the palette is present but not in its authored notation. Each
+token appears six times: three theme blocks (light, `[data-theme="dark"]`,
+and the `prefers-color-scheme` fallback) times two declarations.
+
 ## Evidence
 
 | Check | Result |
@@ -169,12 +197,15 @@ affiliation explicitly.
 
 ## Checks not yet run
 
-1. **No browser confirmation.** The CSP finding below, and the visual result of
-   the palette and the new lockup, were never confirmed in a real browser by
-   this session. Headless Firefox fails to render in this environment
-   (`RenderCompositorSWGL failed mapping default framebuffer`). The dev server
-   on `http://localhost:4321/` is how to confirm it.
-2. **`lint:css` cannot run** — see Defects found.
+1. **No visual browser confirmation.** The deployed HTML, CSS and headers were
+   verified by fetching them, and the values are provably correct, but no human
+   or automated browser has rendered the result to confirm it *looks* right.
+   Headless Firefox fails in this environment
+   (`RenderCompositorSWGL failed mapping default framebuffer`).
+   **Look at `https://lingualab-h4szw0u38-lambda-un.vercel.app`.**
+2. **No pull request, so CI never ran** on this branch. Local `check`, `test`,
+   `build` and `verify:build` all pass, commit by commit.
+3. **`lint:css` cannot run** — see Defects found.
 
 ## Notes for the reviewer
 
