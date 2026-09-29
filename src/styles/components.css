@@ -8,23 +8,29 @@
   .brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.55rem;
     text-decoration: none;
     color: var(--ink);
   }
 
   .brand__mark {
     flex: 0 0 auto;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: 1.9rem;
+    height: 1.9rem;
     color: var(--accent);
   }
 
+  /* The wordmark is a product name, not an editorial heading: the UI face,
+     tightened, with the second half picking up the accent. */
   .brand__name {
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
     font-size: var(--step-1);
-    font-weight: 500;
-    letter-spacing: var(--tracking-tight);
+    font-weight: 620;
+    letter-spacing: -0.035em;
+  }
+
+  .brand__name-accent {
+    color: var(--accent);
   }
 
   /* ---- Buttons ---- */

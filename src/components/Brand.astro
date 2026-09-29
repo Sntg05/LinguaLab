@@ -1,0 +1,51 @@
+---
+/**
+ * The LinguaLab brand lockup: mark plus wordmark.
+ *
+ * Extracted because the masthead and the footer each carried their own
+ * byte-identical copy of the mark, so any change had to be made twice and the
+ * two could drift apart silently.
+ *
+ * The wordmark is deliberately not translated: "LinguaLab" is a proper noun.
+ * It is set in the UI face rather than the display serif so the lockup reads
+ * as a product name instead of a chapter heading, tightened, with the second
+ * half in the accent colour.
+ *
+ * The mark is a geometric glyph: a rounded container holding two nodes joined
+ * by an orthogonal edge. It reads as structure (a syntactic edge, a graph) and
+ * as a self-contained tool, and it stays legible at the 1.9rem it renders at
+ * in the masthead because every stroke sits on the pixel grid.
+ */
+import { localePath, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<a class="brand" href={localePath(locale, "/")}>
+  <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+    <rect
+      x="3"
+      y="3"
+      width="26"
+      height="26"
+      rx="8.5"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      opacity=".4"></rect>
+    <path
+      d="M11.8 11.2h7.4a1.8 1.8 0 0 1 1.8 1.8v7.4"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.4"
+      stroke-linecap="round"
+      stroke-linejoin="round"></path>
+    <circle cx="11.8" cy="11.2" r="2.6" fill="currentColor"></circle>
+    <circle cx="21" cy="20.4" r="2.6" fill="currentColor"></circle>
+  </svg>
+  <span class="brand__name">Lingua<span class="brand__name-accent">Lab</span></span>
+</a>
