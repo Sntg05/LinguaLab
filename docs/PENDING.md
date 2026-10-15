@@ -19,7 +19,8 @@ npm run verify:all    # lint, tipos, reglas hexagonales, 744 pruebas, build veri
 npx playwright test   # 56 e2e; requiere el puerto 4321 LIBRE (ver P7)
 ```
 
-**Estado al escribir esto:** rama `feat/lingualab-hexagonal-monorepo`, 47 commits, árbol limpio,
+**Estado al escribir esto:** rama `feat/lingualab-hexagonal-monorepo`, sincronizada con `origin` y con
+el árbol limpio,
 `verify:all` en verde, 56 e2e en verde, 21 páginas sin violaciones de axe en los dos temas.
 
 ---
@@ -31,7 +32,7 @@ npx playwright test   # 56 e2e; requiere el puerto 4321 LIBRE (ver P7)
 **Síntoma.** Abrí `/en/ortografia`, cargá una tabla con un error y mirá el mensaje: la insignia está en
 inglés y **la oración está en español**.
 
-**Evidencia.** `packages/core/src/domain/orthography-table.ts` define `OrthographyIssue` con un campo
+**Evidencia.** `packages/core/src/application/validate-orthography-table.ts:27` define `OrthographyIssue` con un campo
 `message: string` que ya viene redactado en español. Lo redacta el caso de uso
 `packages/core/src/application/validate-orthography-table.ts`. La capa de presentación
 (`src/scripts/ortografia/render.ts`) solo puede pintarlo tal cual, porque no recibe el dato, recibe la
@@ -131,24 +132,31 @@ la refactorización cambió comportamiento y hay que revertirla.
 
 ---
 
-## P5 — No existe el editor de clases `{V}`
+## P5 — El motor resuelve las clases `{V}`; el editor no tiene interfaz para ellas
 
-**Síntoma.** El prompt original describe clases de contexto con la forma `{V}` y el editor no las
-reconoce.
+**Síntoma.** El prompt original describe clases de contexto con la forma `{V}`. Se pueden escribir en el
+JSON de la tabla y el motor las resuelve, pero en el editor no hay forma de crearlas ni de editarlas.
 
-**Evidencia.** `packages/core/src/engine/patterns.ts` implementa contexto, prioridad, coincidencia más
-larga y capas fonémica y alofónica. `{V}` no aparece en el repositorio.
+**Evidencia — y una corrección.** Una versión anterior de este documento afirmaba que `{V}` «no aparece
+en el repositorio». **Es falso, y el error era grave** porque desalentaba una tarea que en realidad es
+mucho más chica de lo que parecía. `{V}` **está implementado**: `packages/core/src/engine/patterns.ts:13`
+lo define como «cualquier carácter de la clase `V`», y hay pruebas que lo ejercitan —
+`patterns.test.ts:12,27` lo resuelve contra `["a","e","i","o","u"]`; `convert-layer.test.ts:104` lo
+resuelve contra las clases de la tabla; `validate-orthography-table.test.ts:72` rechaza una regla cuya
+clase no existe—. Está documentado en `docs/orthography-tables.md`. Lo que falta es **solo la interfaz**:
+sin editor de clases, hay que escribir la sintaxis a mano.
 
-**Por qué no se hizo.** El pedido del usuario cubría hasta la «Herramienta A: ortografía → AFI», y `{V}`
-es una sintaxis de una herramienta posterior. Inventarla ahora habría sido adivinar.
+**Por qué no se hizo.** El pedido del usuario cubría hasta la «Herramienta A: ortografía → AFI». El motor
+necesitaba las clases para poder expresar contexto, así que se implementaron; la interfaz para editarlas
+quedó fuera de ese alcance.
 
-**Próximo paso exacto.** **Preguntá antes de implementar.** Qué significa `{V}` exactamente —¿una clase
-de vocales?, ¿un conjunto definido por el usuario?, ¿la notación de algún formato existente?— no se puede
-deducir del repositorio. Dos preguntas concretas al usuario: qué notación de clases quiere y de dónde
-sale su definición.
+**Próximo paso exacto.** Es una tarea de **interfaz sobre algo que ya funciona**, no de motor. Antes de
+empezar, preguntá al usuario **cómo quiere editar** una clase: ¿un campo donde escribe los caracteres?,
+¿elegirlos de la tabla de símbolos?, ¿una lista derivada de las reglas existentes? La **notación** ya está
+decidida; lo que falta decidir es la edición.
 
-**Criterio de aceptación.** Una tabla con una regla de clase produce el AFI esperado, y el `trace` dice
-qué clase coincidió. Sin lo segundo no se puede revisar.
+**Criterio de aceptación.** Crear una clase desde la interfaz produce **exactamente el mismo JSON** que
+escribirla a mano, y el `trace` nombra la clase que coincidió. Sin lo segundo no se puede revisar.
 
 ---
 
@@ -190,7 +198,8 @@ se corta a mitad, **se reanuda con `STATUS`** sobre el `lineageId` retenido: no 
 sirve los módulos sin empaquetar. Con la suite entera encima, los tiempos de espera caen en cascada.
 
 **Estado: cerrado.** `reuseExistingServer` pasó a `false` y `docs/CONTRIBUTING.md` lo explica. Con `false`
-la puerta exige el puerto libre y **falla diciendo qué lo ocupa**, que es ruidoso y correcto; el verde
+la puerta exige el puerto libre y **falla avisando que la url ya está en uso** —nombra la url, no el
+proceso que la ocupa—, que es ruidoso y correcto; el verde
 silencioso sobre el artefacto equivocado era peor, porque un verde no lo investiga nadie.
 
 **Por qué queda anotado igual.** Porque la lección es la que importa: mi primera hipótesis fue «contención
@@ -202,23 +211,30 @@ tapado el síntoma y dejado la trampa viva. Se reprodujo antes de decidir.
 
 ---
 
-## P8 — Biome se cae sobre el árbol heredado, así que no hay línea base
+## P8 — La línea base de lint es medible; el «se cae» era falso
 
-**Síntoma.** No se puede establecer qué avisos de lint son heredados **midiéndolos**.
+**Síntoma.** El reparto entre avisos heredados y propios de P4 se estableció **por existencia del archivo**
+en `main`, no corriendo el linter sobre él.
 
-**Evidencia.** Biome 2.5.15 falla con `exit=101` sobre un árbol de `main` extraído aparte. Por eso el
-reparto «heredado frente a nuevo» de P4 se estableció **por existencia del archivo** en `main`, no
-corriendo el linter sobre él.
+**Evidencia, corregida.** Una versión anterior de este documento afirmaba que Biome 2.5.15 se cae con
+`exit=101` sobre un árbol de `main`. **Un verificador independiente no pudo reproducirlo en cinco
+escenarios** —árbol extraído con `git archive`, clon nuevo, con y sin la configuración actual, `check` y
+`lint`—: en todos, Biome termina con `exit=1` y **completa el informe**. Con la configuración de esta rama
+sobre `main` informa «Checked 64 files. Found 5 errors. Found 36 warnings». Así que **la línea base sí es
+medible** y el reparto se puede comprobar en vez de inferir.
 
 **Por qué importa.** Un aviso heredado y uno propio se arreglan distinto: el heredado es deuda aceptada,
-el propio es trabajo sin terminar. Sin línea base, esa distinción es una inferencia.
+el propio es trabajo sin terminar. Mientras el reparto sea una inferencia, no se sabe cuál es cuál.
 
-**Próximo paso exacto.** Averiguar **por qué** revienta. La sospecha razonable es una regla o un ajuste de
-la configuración nueva aplicado a archivos que nunca fueron migrados. Si el fallo es de la versión de
-Biome y no de la configuración, fijá una versión anterior solo para la comparación.
+**Próximo paso exacto.** Extraé `main` a un directorio aparte, copiá la `biome.json` de esta rama y corré
+`biome lint` con el informe en JSON. Compará contra el informe de la rama. Recién entonces P4 puede decir
+«heredado» con una medición detrás.
 
-**Criterio de aceptación.** `biome check` corre sobre `main` sin caerse, aunque devuelva cientos de
-avisos. Sin eso, la línea base sigue sin existir.
+**Criterio de aceptación.** Los dos informes JSON existen y cada aviso queda atribuido a uno de los dos
+lados. Un aviso que aparece en los dos es heredado.
+
+**Lo que sigue sin explicarse.** El `exit=101` original no se reproduce, así que o fue un estado
+transitorio del árbol de prueba o un error de aquella medición. **No lo cuentes como un hecho.**
 
 ---
 
@@ -251,3 +267,39 @@ entender por qué axe duda.
 **Los 21 avisos de complejidad heredados** de la v2.0.0. Son deuda aceptada de la versión anterior, no
 trabajo de esta rama. Tocarlos mezcla dos historias en un mismo diff y le complica la revisión a quien
 lea el cambio.
+
+---
+
+## P11 — El punto ciego de la puerta: los nodos que axe no mide
+
+**Síntoma.** La puerta pasa y no dice nada sobre el contraste de ciertos nodos. No es que estén bien: es
+que **nadie los midió**.
+
+**Evidencia.** Al afirmar por primera vez sobre `results.incomplete` —hasta ahora la puerta solo miraba
+`violations`— aparecieron **36 + 28 + 16 resultados incompletos** en `inicio` y `FonoLab`, en los dos
+temas. axe declara cuatro motivos y los cuatro significan que **no pudo medir**: `imgNode` («background
+color could not be determined because element contains an image node»), `bgOverlap` («...because it is
+overlapped by another element»), `shortTextContent` (`visibleText.length === 1`: no decide si el texto es
+«grande») y `nonBmp` (caracteres fuera del plano básico). Los nodos son `<text>` y `<tspan>` de SVG,
+`button[data-symbol]` del teclado AFI, y `.tract__labels--on-shape`.
+
+**Por qué importa.** Es la diferencia entre «verificado» y «no mirado», y el proyecto declara WCAG 2.2 AA
+como requisito. Un punto ciego declarado se puede cerrar; uno silencioso se convierte en una afirmación
+falsa.
+
+**Lo que NO hay que hacer: medirlo con estilos computados.** Se intentó y **la medición era falsa**. Subir
+por los ancestros buscando el primer `background-color` o `fill` opaco toma el valor heredado de un `<g>`
+de SVG **que no pinta nada**, e inventa un fondo: con ese método «gato» en la portada daba **1,67:1**, y
+mirando los píxeles es texto oscuro sobre fondo claro. El método producía defectos donde no había ninguno
+—estuvo a punto de entrar a este documento como dos hallazgos reales—. Queda escrito acá porque es el
+atajo que va a tentar a la próxima sesión.
+
+**Próximo paso exacto.** Medir **píxeles**, no estilos: capturar la caja del nodo, muestrear de la imagen
+el color del texto y el del fondo real, y calcular el ratio. Sirve un `<canvas>` para leer los bytes y un
+recorte de `page.screenshot`. Lo único ya medido de forma confiable es el botón del teclado AFI, por
+estilos, y porque ahí el fondo es un `background-color` real de un `<button>`: **16,18:1 en claro y
+14,08:1 en oscuro**. Las etiquetas del tracto vocal siguen sin medirse.
+
+**Criterio de aceptación.** Cada nodo que aparece en `incomplete` tiene un ratio medido **desde píxeles**,
+con el método guardado en el repositorio, y la lista `AXE_COULD_NOT_MEASURE` de `e2e/accessibility.spec.ts`
+queda con una justificación por motivo en lugar de una promesa.

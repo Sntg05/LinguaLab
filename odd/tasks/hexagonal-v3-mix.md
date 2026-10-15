@@ -291,8 +291,9 @@ Se cerró de las dos formas:
    flujos, todas en verde contra `dist/`. `emulateMedia({ colorScheme })` va **antes** de `goto`, porque
    la hoja decide la paleta con `prefers-color-scheme` y navegar primero pintaría el tema del sistema.
 2. La guarda pasa a ser estructural: `reuseExistingServer: false`. Si el puerto está ocupado, la puerta
-   **falla diciendo qué lo ocupa** (`already used, make sure that nothing is running on the port`),
-   comprobado ocupando el puerto con un señuelo y viendo el error. Un verde que no significa lo que dice
+   **falla avisando que la url ya esta en uso** (`already used, make sure that nothing is running on the
+   port`) —nombra la url, no el proceso que la ocupa—, comprobado ocupando el puerto con un señuelo y
+   viendo el error. Un verde que no significa lo que dice
    es peor que un rojo, porque un verde no lo investiga nadie. Queda explicado en
    `docs/CONTRIBUTING.md`.
 
