@@ -29,13 +29,16 @@ import {
   createExportOrthographyTable,
   createImportOrthographyTable,
   createListOrthographyTables,
+  createListTools,
   createRemoveOrthographyTable,
   createSaveOrthographyTable,
 } from "@lingualab/core";
 import {
   type PersistenceStatus,
   createIndexedDbOrthographyRepository,
+  createStaticToolRegistry,
 } from "@lingualab/adapters";
+import { TOOLS } from "./scripts/catalogo/catalog-data";
 
 /**
  * The ports below are trivial but still injected rather than called inline:
@@ -63,6 +66,13 @@ const ids: IdGeneratorPort = { generate: generateId };
 const tables = createIndexedDbOrthographyRepository();
 
 /**
+ * El catalogo se construye a partir de `src/data/tools.json`, que llega ya
+ * validado por `catalog-data`. El adaptador no conoce el archivo: recibe las
+ * fichas, y por eso se puede probar con un catalogo minimo sin tocar el real.
+ */
+const registry = createStaticToolRegistry(TOOLS);
+
+/**
  * The type is derived from the factories instead of re-typed by hand. A hand
  * written signature would compile while silently disagreeing with the use
  * case the moment `packages/core` changed a parameter, and the whole point of
@@ -75,6 +85,12 @@ export interface LinguaLab {
   readonly removeOrthographyTable: ReturnType<typeof createRemoveOrthographyTable>;
   readonly importOrthographyTable: ReturnType<typeof createImportOrthographyTable>;
   readonly exportOrthographyTable: ReturnType<typeof createExportOrthographyTable>;
+  /**
+   * Catalogo de herramientas del sitio. Devuelve `Result` como cualquier otro
+   * caso de uso: la pagina lo comprueba en vez de dar por hecho que el registro
+   * siempre responde.
+   */
+  readonly listTools: ReturnType<typeof createListTools>;
   /**
    * Which store is actually holding the tables right now, and why it degraded
    * if it did. It is exposed because the editor must tell the truth about
@@ -91,6 +107,7 @@ export const lingualab: LinguaLab = {
   removeOrthographyTable: createRemoveOrthographyTable({ tables }),
   importOrthographyTable: createImportOrthographyTable({ tables }),
   exportOrthographyTable: createExportOrthographyTable({ tables }),
+  listTools: createListTools({ registry }),
   // `persistence` does not depend on `this`, so passing the reference is exact
   // and avoids a wrapper that would only add a stack frame.
   persistence: tables.persistence,

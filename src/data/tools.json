@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "tools": [
+    {
+      "id": "fono",
+      "name": { "es": "FonoLab", "en": "FonoLab" },
+      "area": "fonetica",
+      "integration": "embedded",
+      "status": "stable",
+      "languages": ["es", "en"],
+      "notes": {
+        "es": "Alfabeto AFI con descripción articulatoria, corte sagital y audio, más un transcriptor grafema→AFI para español e inglés. Corre entero en el navegador.",
+        "en": "IPA chart with articulatory description, sagittal section and audio, plus a grapheme→IPA transcriber for Spanish and English. Runs entirely in the browser."
+      }
+    },
+    {
+      "id": "arboles",
+      "name": { "es": "ArborLab", "en": "ArborLab" },
+      "area": "morfosintaxis",
+      "integration": "embedded",
+      "status": "stable",
+      "languages": ["es", "en"],
+      "notes": {
+        "es": "Editor de árboles sintácticos y de estructuras de datos: 23 tipos, cuatro formatos de entrada y exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat.",
+        "en": "Syntax and data-structure tree editor: 23 types, four input formats, and export to SVG, PNG, JSON, Newick, CoNLL-U and Brat."
+      }
+    },
+    {
+      "id": "tools",
+      "name": { "es": "Estación textual", "en": "Text station" },
+      "area": "documentacion",
+      "integration": "embedded",
+      "status": "stable",
+      "languages": ["es", "en"],
+      "notes": {
+        "es": "Análisis de corpus: frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad. No hay lematización.",
+        "en": "Corpus analysis: frequency with dispersion, collocations with log-Dice and PMI, KWIC concordances, lexical statistics and readability. There is no lemmatisation."
+      }
+    },
+    {
+      "id": "ortografia",
+      "name": { "es": "Ortografía a AFI", "en": "Spelling to IPA" },
+      "area": "fonologia",
+      "integration": "embedded",
+      "status": "stable",
+      "languages": ["es", "en"],
+      "notes": {
+        "es": "Editor de tablas grafema→AFI con coincidencia por contexto y prioridad, capa alofónica, rastro por carácter y cobertura. Trae demos en español e inglés.",
+        "en": "Grapheme→IPA rule-table editor with context and priority matching, an allophonic layer, per-character tracing and coverage. Ships Spanish and English demos."
+      }
+    },
+    {
+      "id": "phonemizer",
+      "name": { "es": "Fonemizador es/en", "en": "Spanish/English phonemizer" },
+      "area": "fonologia",
+      "integration": "embedded",
+      "status": "planned",
+      "languages": ["es", "en"],
+      "notes": {
+        "es": "Fonemizador con eSpeak NG compilado a WebAssembly, dentro de un Web Worker. Su AFI es aproximado y no sustituye una transcripción revisada.",
+        "en": "Phonemizer using eSpeak NG compiled to WebAssembly, inside a Web Worker. Its IPA is approximate and does not replace a reviewed transcription."
+      },
+      "citation": "eSpeak NG contributors. eSpeak NG [Computer software]."
+    },
+    {
+      "id": "textgrid-viewer",
+      "name": { "es": "Visor de audio y TextGrid", "en": "Audio and TextGrid viewer" },
+      "area": "documentacion",
+      "integration": "embedded",
+      "status": "planned",
+      "languages": [],
+      "notes": {
+        "es": "Visor de audio con espectrograma y capas de anotación que importa y exporta TextGrid de Praat. Depende del formato, no de una lengua.",
+        "en": "Audio viewer with a spectrogram and annotation tiers that imports and exports Praat TextGrid. It depends on the format, not on a language."
+      },
+      "citation": "Boersma, P., & Weenink, D. Praat: doing phonetics by computer [Computer software]."
+    },
+    {
+      "id": "jspsych-experiments",
+      "name": { "es": "Experimentos de psicolingüística", "en": "Psycholinguistics experiments" },
+      "area": "psicolinguistica",
+      "integration": "embedded",
+      "status": "planned",
+      "languages": [],
+      "notes": {
+        "es": "Constructor y ejecutor de experimentos de psicolingüística (juicios de aceptabilidad, 2AFC, lectura autocontrolada, decisión léxica). Independiente de la lengua.",
+        "en": "Builder and runner for psycholinguistics experiments (acceptability judgements, 2AFC, self-paced reading, lexical decision). Language-independent."
+      },
+      "citation": "de Leeuw, J. R. (2015). jsPsych: A JavaScript library for creating behavioral experiments in a Web browser. Behavior Research Methods, 47(1), 1–12."
+    },
+    {
+      "id": "acoustic-analysis",
+      "name": { "es": "Análisis acústico (F0 y formantes)", "en": "Acoustic analysis (F0 and formants)" },
+      "area": "fonetica",
+      "integration": "embedded",
+      "status": "experimental",
+      "languages": [],
+      "notes": {
+        "es": "Experimental: contorno de F0, formantes F1–F3 e intensidad en dB sobre el visor de audio. Trabaja sobre la señal, no sobre una lengua concreta.",
+        "en": "Experimental: F0 contour, F1–F3 formants and intensity in dB over the audio viewer. It works on the signal, not on a specific language."
+      }
+    },
+    {
+      "id": "elan-textgrid",
+      "name": { "es": "Conversor ELAN ↔ TextGrid", "en": "ELAN ↔ TextGrid converter" },
+      "area": "documentacion",
+      "integration": "needs-backend",
+      "status": "planned",
+      "languages": [],
+      "notes": {
+        "es": "Conversión entre ELAN (.eaf) y Praat (.TextGrid) con informe de lo que no se pudo convertir. Necesita descargar el entorno de Python, así que no se puede prometer que corra sin conexión.",
+        "en": "Conversion between ELAN (.eaf) and Praat (.TextGrid) with a report of what could not be converted. It needs to download the Python runtime, so it cannot be promised to run offline."
+      }
+    },
+    {
+      "id": "mapa-lenguas-colombia",
+      "name": { "es": "Mapa de lenguas indígenas de Colombia", "en": "Map of Colombia's Indigenous languages" },
+      "area": "tipologia",
+      "integration": "embedded",
+      "status": "planned",
+      "languages": [],
+      "notes": {
+        "es": "Mapa consultable de las lenguas de Colombia, con familia, identificadores y enlace a Glottolog. Cataloga lenguas: no procesa texto en ninguna en concreto.",
+        "en": "Browsable map of Colombia's languages, with family, identifiers and a link to Glottolog. It catalogues languages: it does not process text in any particular one."
+      },
+      "citation": "Hammarström, H., Forkel, R., Haspelmath, M., & Bank, S. Glottolog [Data set]. Max Planck Institute for Evolutionary Anthropology."
+    }
+  ]
+}
