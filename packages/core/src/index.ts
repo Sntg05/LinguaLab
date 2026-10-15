@@ -14,5 +14,11 @@
 export * from "./result";
 // Entidades y valores inmutables, mas las funciones puras del dominio.
 export * from "./domain/index";
+// El motor ortografia -> AFI: normalizacion, contextos, capas y rastro.
+export * from "./engine/index";
+// Casos de uso: la unica puerta de entrada al dominio.
+export * from "./application/index";
+// Datos que viajan con el nucleo: demos, plantillas y el formato JSON.
+export * from "./data/index";
 // Contratos de salida hacia el mundo exterior (adaptadores secundarios).
 export * from "./ports/index";
