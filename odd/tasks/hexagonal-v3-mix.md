@@ -269,3 +269,39 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado antes de escribir
   (`burn_evidence: gentle-ai.review-acknowledged/v1`). La entrega, por política ordinaria del
   repositorio, sigue siendo decisión del humano: la revisión nunca autoriza publicar, comitear ni abrir
   un PR.
+
+### L13 — Cierre del tema oscuro, y una trampa que no era la que yo creía
+
+T19 quedó cerrada, pero **no por el camino que yo había anunciado**. Mi hipótesis era contención de
+recursos: 56 navegadores en paralelo y la suite cayéndose. Era **falsa**.
+
+La causa real, reproducida antes de decidir: había un `astro dev` vivo en el puerto 4321 —levantado para
+mirar el sitio a mano— y `reuseExistingServer: true` hacía que Playwright **reutilizara ese servidor de
+desarrollo** en vez de compilar y servir `dist/`. Ese servidor no aplica la CSP, sirve los módulos sin
+empaquetar y compila a demanda, así que con la suite entera encima casi todas las pruebas se caían por
+tiempo de espera, y el síntoma se leía como «las pruebas están mal».
+
+El arreglo que iba a aplicar —limitar `workers`— habría tapado el síntoma y dejado la trampa viva. Es
+exactamente la razón de la regla de reproducir antes de decidir: la hipótesis plausible y el arreglo
+plausible se sostenían el uno al otro, y ninguno de los dos miraba el puerto.
+
+Se cerró de las dos formas:
+
+1. El tema oscuro entra en la puerta: 21 páginas × 2 temas = **42 pruebas de accesibilidad**, 56 con los
+   flujos, todas en verde contra `dist/`. `emulateMedia({ colorScheme })` va **antes** de `goto`, porque
+   la hoja decide la paleta con `prefers-color-scheme` y navegar primero pintaría el tema del sistema.
+2. La guarda pasa a ser estructural: `reuseExistingServer: false`. Si el puerto está ocupado, la puerta
+   **falla diciendo qué lo ocupa** (`already used, make sure that nothing is running on the port`),
+   comprobado ocupando el puerto con un señuelo y viendo el error. Un verde que no significa lo que dice
+   es peor que un rojo, porque un verde no lo investiga nadie. Queda explicado en
+   `docs/CONTRIBUTING.md`.
+
+El trabajo pendiente quedó traspasado en **`docs/PENDING.md`**: diez entradas, cada una con síntoma,
+evidencia medida, por qué no se hizo, próximo paso exacto y criterio de aceptación. Ahí está T16 (la
+prosa del núcleo), la trampa de puerto compartido como mejora estructural —separar el puerto del e2e del
+que usa `astro dev`—, la línea base de Biome que se cae sobre `main`, y la receta de revisión ya pagada
+en L12.
+
+Nota de método, que vale para la próxima vez: el `pkill -f "http.server 4321"` con el que iba a liberar el
+puerto **mató mi propio script**, porque su línea de comandos contenía el texto buscado. Matar por PID
+del que escucha, no por patrón.
