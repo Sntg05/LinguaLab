@@ -221,3 +221,23 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado antes de escribir
   fraccionamiento del historial en 35 commits ya está hecho justamente con ese presupuesto en mente.
   Si el humano prefiere que se intente el alcance completo igual, basta con decirlo: la decisión está
   fundada en evidencia del proveedor, no en un juicio propio sobre si la revisión hace falta.
+
+- **L11** (dos hallazgos operativos al cerrar, que conviene no redescubrir):
+
+  1. **`baseRef` solo permite rebanar SUFIJOS.** La instrucción del proveedor es reducir el alcance y
+     ejecutar la transición «for the reduced scope», y el único mecanismo documentado es un `baseRef`
+     explícito con `committedOnly: true`. Pero el rango que produce es `baseRef..HEAD`, así que no se
+     puede aislar un commit interior del historial —por ejemplo el adaptador de IndexedDB, que es
+     donde más valor tendría una mirada externa— sin reescribir historia, que está descartado. Las
+     rebanadas posibles son sufijos: el catálogo y la documentación, o solo la documentación.
+
+  2. **Nunca lanzar `npm ci` en paralelo con un commit que dispara ganchos.** El commit de `STATUS.md`
+     falló con `Cannot find module 'fast-deep-equal'` y `husky - commit-msg script failed`, porque
+     `npm ci` estaba borrando y reponiendo `node_modules` mientras el gancho de commitlint intentaba
+     cargar `ajv`. El cambio quedó staged y se rehízo con el árbol de dependencias sano. Es la misma
+     clase de error de coordinación que ya se había evitado con los writers: dos procesos que tocan el
+     mismo recurso compartido no pueden correr en el mismo lote.
+
+  Estado final de la rama en este punto: 41 commits, árbol limpio, `npm ci` y `npm run verify:all` en
+  verde sobre Node 22, 744 pruebas unitarias en 40 archivos, 20 pruebas e2e, 21 páginas construidas,
+  peor página 28.5 KB sobre 60 de presupuesto, y 0 vulnerabilidades de producción.
