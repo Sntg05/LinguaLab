@@ -41,16 +41,17 @@ Todas ellas corren por completo en el navegador y funcionan sin conexión despu�
 | **Bibliografía de recursos con licencia** | `/bibliografia` | **Estable** | Que cada ficha declara su licencia y su enlace de origen | — |
 | **Verificación de salvaguardas** | `/seguridad` | **Estable** | Lee el DOM real y comprueba en vivo las salvaguardas; el resultado compilado se verifica en cada build | Comprueba lo que el propio sitio declara; no es una auditoría externa |
 | **Acerca de** | `/acerca` | **Estable** | — | — |
+| **Catálogo de herramientas** — tarjetas filtrables por área, idioma y tipo de integración, con el estado real de cada una | `/catalogo` | **Estable** | El filtrado, que una herramienta planeada no se vea como una que existe, y su accesibilidad con axe | Ninguna herramienta lleva enlace: el prompt exige verificar cada URL publicada y no se ha verificado ninguna |
 
 ## Herramienta A: ortografía → IPA (segmento 4 del prompt)
 
 | | |
 |---|---|
-| **Estado** | **En curso.** El núcleo y el adaptador están terminados y probados; la interfaz está en construcción |
-| **Qué está listo y probado** | `packages/core`: el motor de reglas (NFC, coincidencia más larga, contexto, prioridad, capas fonémica y alofónica, rastro por carácter, cobertura), el validador con seis códigos de hallazgo, los casos de uso y las tablas demo es/en. Las ocho pruebas de español que pide el prompt pasan. `packages/adapters`: el repositorio sobre IndexedDB pasando la suite de contrato contra IndexedDB **y** contra el respaldo en memoria |
-| **Supuestos asumidos** | El formato JSON de las tablas vive en el núcleo y no en cada adaptador, para que un archivo exportado por uno se pueda importar en otro. `remove` es idempotente: borrar algo que ya no está no es un fallo. El idioma demo es español latinoamericano con seseo, con dos variantes que difieren solo en `ll` (yeísmo o distinción) |
-| **Pendiente** | La página del editor, el modo «explicar» en pantalla, la lista de cobertura visible, importar y exportar JSON y CSV, y compartir por URL. La rama de cuota agotada del adaptador no tiene prueba automática: `fake-indexeddb` no puede provocar `QuotaExceededError` de forma determinista |
-| **Cómo ejecutarla** | `npm run dev` y, cuando la página exista, `/ortografia` |
+| **Estado** | **Estable**, con los límites de abajo declarados |
+| **Qué se probó** | El motor de reglas (NFC, coincidencia más larga, contexto, prioridad, capas fonémica y alofónica, rastro por carácter, cobertura) y el validador con seis códigos de hallazgo, todo con pruebas unitarias. Las **ocho pruebas de español que pide el prompt**, incluido el par `perro`/`pero` con sus puntos de código explícitos. El repositorio sobre IndexedDB pasando la suite de contrato contra IndexedDB **y** contra el respaldo en memoria. Y ocho pruebas e2e que recorren el flujo completo: cargar la demo, probar una palabra, ver qué regla ganó, añadir una regla, exportar, recargar y volver a importar |
+| **Supuestos asumidos** | El formato JSON de las tablas vive en el núcleo y no en cada adaptador, para que un archivo exportado por uno se pueda importar en otro. `remove` es idempotente: borrar algo que ya no está no es un fallo. El idioma demo es español latinoamericano con seseo, con dos variantes que difieren solo en `ll`. El CSV es **deliberadamente incompleto** (una capa, seis columnas) y el JSON es el formato completo |
+| **Límites declarados** | Sin editor de clases `{V}`: se escriben en el JSON y el editor las preserva, pero no hay interfaz para crearlas. `render.ts` no tiene prueba unitaria —Vitest corre en entorno `node` y su configuración quedaba fuera de las superficies de esa tarea—; lo cubren las e2e. La rama de cuota agotada del adaptador no se puede provocar de forma determinista con `fake-indexeddb`. Y las frases de validación del núcleo son solo en español: en `/en/ortografia` la insignia está localizada y la oración no (tarea T16, declarada) |
+| **Cómo ejecutarla** | `npm run dev` y abrir `/ortografia` |
 
 **Plantillas de lenguas indígenas.** Inga (`inb`), wayuunaiki (`guc`), nasa yuwe (`pbb`) y arhuaco
 (`arh`) existen como plantillas **vacías**, con `status: "draft"`. Los códigos se verificaron en
@@ -93,9 +94,10 @@ que no hacen nada.
 
 | Comprobación | Resultado |
 |---|---|
-| Pruebas unitarias | **690 en 34 archivos** |
-| Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las páginas de inicio, en español y en inglés |
-| Reglas de dependencia hexagonales | 143 módulos y 324 dependencias, **0 violaciones** |
+| Pruebas unitarias | **744 en 40 archivos** |
+| Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las 6 páginas públicas: inicio, editor y catálogo, en español y en inglés |
+| Pruebas de extremo a extremo | **20**, sobre el sitio compilado |
+| Reglas de dependencia hexagonales | 162 módulos y 365 dependencias, **0 violaciones** |
 | Tipos | `astro check` y los dos paquetes del workspace, **0 errores** |
 | Linter | 0 errores (36 avisos declarados en el código heredado) |
 | Página más pesada | 28.5 KB comprimidos, sobre un presupuesto de 60 KB |
