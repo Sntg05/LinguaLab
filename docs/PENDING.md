@@ -104,7 +104,7 @@ prueba falla y el adaptador está mal.
 
 ---
 
-## P4 — Cinco avisos de complejidad cognitiva, y uno es un 40
+## P4 — Seis avisos de complejidad cognitiva, y uno es un 40
 
 **Síntoma.** Ninguno hoy. Es el costo de mantenimiento de la próxima persona.
 
@@ -115,7 +115,7 @@ prueba falla y el adaptador está mal.
 |---|---|
 | `src/scripts/ortografia/index.ts` | **40**, más dos de 16 y 23 |
 | `src/scripts/ortografia/csv.ts` | 23 y 21 |
-| `e2e/accessibility.spec.ts` | 1, introducido por la afirmación sobre `incomplete` |
+| `e2e/accessibility.spec.ts` | **30** (un aviso), introducido por la afirmación sobre `incomplete` |
 
 El de la puerta de accesibilidad **lo agregó este mismo cambio**: eran 41 avisos con 26 de complejidad
 antes de la afirmación, y el anidamiento de `flatMap` más las ramas la cruzaron de umbral. Se anota en vez

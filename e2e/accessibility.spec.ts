@@ -119,9 +119,10 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
  * Y el punto ciego sigue siendo un punto ciego, no una afirmación de que los nodos
  * estén bien: en lo que axe no midió, la puerta no sabe nada del contraste y no lo
  * finge. Ver P11, con el aviso de que medirlo por estilos computados da resultados
- * falsos. Medición del sitio completo: los 40 `incomplete` de las tres páginas más
- * pesadas traen `contrastRatio` 0 o ausente, o sea que **axe no calculó nada** en
- * ninguno. El único caso medido por debajo del umbral fue la mutación del verificador.
+ * falsos. Medición del sitio completo: los **186** `incomplete` (21 páginas × 2 temas) traen
+ * `contrastRatio` 0 o ausente, o sea que **axe no calculó nada** en ninguno. Los 40 eran solo las
+ * tres rutas más pesadas en UN tema, no el sitio entero. El único caso medido por debajo del umbral
+ * fue la mutación de un verificador.
  */
 const AXE_COULD_NOT_MEASURE: readonly string[] = [
   "imgNode",

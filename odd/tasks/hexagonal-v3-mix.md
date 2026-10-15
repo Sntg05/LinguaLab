@@ -299,11 +299,13 @@ Se cerró de las dos formas:
    es peor que un rojo, porque un verde no lo investiga nadie. Queda explicado en
    `docs/CONTRIBUTING.md`.
 
-El trabajo pendiente quedó traspasado en **`docs/PENDING.md`**: diez entradas, cada una con síntoma,
-evidencia medida, por qué no se hizo, próximo paso exacto y criterio de aceptación. Ahí está T16 (la
-prosa del núcleo), la trampa de puerto compartido como mejora estructural —separar el puerto del e2e del
-que usa `astro dev`—, la línea base de Biome que se cae sobre `main`, y la receta de revisión ya pagada
-en L12.
+El trabajo pendiente quedó traspasado en **`docs/PENDING.md`**: doce entradas, cada una con síntoma,
+evidencia medida, por qué no se hizo, próximo paso exacto y criterio de aceptación. Ahí está **P1** —la
+prosa del núcleo—, el punto ciego de la puerta con el aviso de que medirlo por estilos computados da
+resultados falsos (**P11**), la lista vacía de `/arboles` como decisión de producto (**P12**), la trampa de
+puerto compartido como mejora estructural —separar el puerto del e2e del que usa `astro dev`—, la línea
+base de Biome —**que sí es medible**: el «se cae sobre `main`» quedó refutado, ver P8—, y la receta de
+revisión ya pagada en L12.
 
 Nota de método, que vale para la próxima vez: el `pkill -f "http.server 4321"` con el que iba a liberar el
 puerto **mató mi propio script**, porque su línea de comandos contenía el texto buscado. Matar por PID
