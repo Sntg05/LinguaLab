@@ -27,6 +27,8 @@ const WCAG_22_AA_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
 const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] = [
   { path: "/", name: "inicio (espanol)" },
   { path: "/en/", name: "inicio (ingles)" },
+  { path: "/ortografia", name: "editor de tablas (espanol)" },
+  { path: "/en/ortografia", name: "editor de tablas (ingles)" },
 ];
 
 for (const { path, name } of PUBLIC_PAGES) {

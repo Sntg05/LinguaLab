@@ -1,0 +1,283 @@
+---
+/**
+ * OrthographyLab: the rule-table editor for turning a language's spelling into
+ * its IPA transcription.
+ *
+ * Everything that can be decided at build time is decided here: the section
+ * frame, every button label, the template catalogue and the community
+ * validation notice. Only the table itself, the live transcription and the
+ * stored-table list are built in the browser. That keeps the page useful
+ * without JavaScript and keeps the client bundle to one script.
+ *
+ * The notice is imported, never retyped. `packages/core` exports
+ * `COMMUNITY_VALIDATION_NOTICE` so the test that guards the exact sentence and
+ * this page show the same string; a copy here would be a second source of truth
+ * that no test could keep honest.
+ */
+import { COMMUNITY_VALIDATION_NOTICE, DEMO_TABLES, INDIGENOUS_TEMPLATES } from "@lingualab/core";
+import { t, type Locale } from "../i18n";
+import { EDITOR_STRING_KEYS } from "../scripts/ortografia/strings";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+/* Runtime sentences the client script needs, already translated and keyed. */
+const editorStrings: Record<string, string> = {};
+for (const key of EDITOR_STRING_KEYS) {
+  editorStrings[key] = t(locale, key);
+}
+
+const columns = [
+  "ortho.col.grapheme",
+  "ortho.col.ipa",
+  "ortho.col.before",
+  "ortho.col.after",
+  "ortho.col.priority",
+  "ortho.col.note",
+  "ortho.col.actions",
+] as const;
+---
+
+<section class="section" data-ortholab="true">
+  <div class="shell">
+    <!-- The dictionary subset reaches the script as data, never as inline code:
+         the CSP is hash-based, so the script itself stays a static file. -->
+    <div data-ortho-strings hidden data-json={JSON.stringify(editorStrings)}></div>
+
+    <div class="u-section-head">
+      <span class="eyebrow">OrthographyLab</span>
+      <h1>{t(locale, "ortho.title")}</h1>
+      <p class="u-lead">{t(locale, "ortho.sub")}</p>
+      <p class="callout">{t(locale, "ortho.privacy")}</p>
+    </div>
+
+    <!-- ---------------- Templates ---------------- -->
+    <div class="card">
+      <h2 class="card__title">{t(locale, "ortho.templates.title")}</h2>
+      <p class="card__body">{t(locale, "ortho.templates.empty")}</p>
+
+      <h3>{t(locale, "ortho.templates.demo")}</h3>
+      <div class="cluster">
+        {
+          DEMO_TABLES.map((table) => (
+            <button class="btn btn--sm" type="button" data-template-id={table.id}>
+              <span class="badge">{t(locale, "ortho.templates.demoBadge")}</span>
+              {table.name}
+            </button>
+          ))
+        }
+      </div>
+
+      <h3>{t(locale, "ortho.templates.indigenous")}</h3>
+      <!-- Verbatim and prominent, as the specification demands. -->
+      <p class="callout callout--warn">{COMMUNITY_VALIDATION_NOTICE}</p>
+      <div class="cluster">
+        {
+          INDIGENOUS_TEMPLATES.map((table) => (
+            <button class="btn btn--sm" type="button" data-template-id={table.id}>
+              <span class="badge">{t(locale, "ortho.templates.indigenousBadge")}</span>
+              {table.name}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- ---------------- Meta ---------------- -->
+    <div class="card">
+      <h2 class="card__title">{t(locale, "ortho.meta.title")}</h2>
+      <div class="cluster">
+        <label for="ortho-name">{t(locale, "ortho.meta.name")}</label>
+        <input
+          id="ortho-name"
+          type="text"
+          data-meta-name
+          autocomplete="off"
+          placeholder={t(locale, "ortho.meta.namePlaceholder")}
+        />
+        <label for="ortho-language">{t(locale, "ortho.meta.language")}</label>
+        <input
+          id="ortho-language"
+          type="text"
+          data-meta-language
+          autocomplete="off"
+          placeholder={t(locale, "ortho.meta.languagePlaceholder")}
+        />
+        <button class="btn btn--quiet btn--sm" type="button" data-new-table>
+          {t(locale, "ortho.data.new")}
+        </button>
+      </div>
+    </div>
+
+    <!-- ---------------- Rule table ---------------- -->
+    <div class="card">
+      <h2 class="card__title">{t(locale, "ortho.rules.title")}</h2>
+      <p class="faint" data-rules-count></p>
+      <p class="faint">{t(locale, "ortho.rules.keys")}</p>
+
+      <div class="cluster">
+        <div class="segmented" role="group" aria-label={t(locale, "ortho.edit.layer")}>
+          <button
+            class="segmented__btn"
+            type="button"
+            data-edit-layer="phonemic"
+            aria-pressed="true">{t(locale, "ortho.layers.phonemic")}</button>
+          <button
+            class="segmented__btn"
+            type="button"
+            data-edit-layer="allophonic"
+            aria-pressed="false">{t(locale, "ortho.layers.allophonic")}</button>
+        </div>
+        <button class="btn btn--quiet btn--sm" type="button" data-rule-add>
+          {t(locale, "ortho.rules.add")}
+        </button>
+        <button class="btn btn--quiet btn--sm" type="button" data-undo>
+          {t(locale, "ortho.undo")}
+        </button>
+        <button class="btn btn--quiet btn--sm" type="button" data-redo>
+          {t(locale, "ortho.redo")}
+        </button>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <caption class="u-visually-hidden">{t(locale, "ortho.rules.title")}</caption>
+          <thead data-rules-head>
+            <tr>
+              {
+                columns.map((key) => (
+                  <th scope="col">{t(locale, key)}</th>
+                ))
+              }
+            </tr>
+          </thead>
+          <tbody data-rules-body></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ---------------- Test panel ---------------- -->
+    <div class="card">
+      <h2 class="card__title">{t(locale, "ortho.test.title")}</h2>
+
+      <label for="ortho-test-input">{t(locale, "ortho.test.input")}</label>
+      <textarea
+        id="ortho-test-input"
+        data-test-input
+        rows="2"
+        placeholder={t(locale, "ortho.test.inputPlaceholder")}></textarea>
+
+      <div class="cluster">
+        <span id="ortho-layers-legend" class="faint">{t(locale, "ortho.layers.legend")}</span>
+        <div class="segmented" role="group" aria-labelledby="ortho-layers-legend">
+          <button
+            class="segmented__btn"
+            type="button"
+            data-output-layer="phonemic"
+            aria-pressed="true">{t(locale, "ortho.layers.phonemic")}</button>
+          <button
+            class="segmented__btn"
+            type="button"
+            data-output-layer="allophonic"
+            aria-pressed="false">{t(locale, "ortho.layers.allophonic")}</button>
+          <button
+            class="segmented__btn"
+            type="button"
+            data-output-layer="both"
+            aria-pressed="false">{t(locale, "ortho.layers.both")}</button>
+        </div>
+
+        <input id="ortho-explain" type="checkbox" data-explain />
+        <label for="ortho-explain">{t(locale, "ortho.test.explain")}</label>
+      </div>
+
+      <p class="faint" data-layer-note></p>
+
+      <p>
+        <span class="faint">{t(locale, "ortho.test.output")}</span>
+        <output class="data-surface ipa" data-output aria-live="polite"></output>
+      </p>
+
+      <h3>{t(locale, "ortho.trace.title")}</h3>
+      <div data-trace></div>
+
+      <h3>{t(locale, "ortho.coverage.title")}</h3>
+      <div data-coverage></div>
+    </div>
+
+    <!-- ---------------- Validation ---------------- -->
+    <div class="card">
+      <h2 class="card__title">{t(locale, "ortho.validation.title")}</h2>
+      <div data-issues></div>
+    </div>
+
+    <!-- ---------------- Data ---------------- -->
+    <div class="card">
+      <h2 class="card__title">{t(locale, "ortho.data.title")}</h2>
+      <p class="faint">{t(locale, "ortho.data.csvLayer")}</p>
+
+      <div class="cluster">
+        <button class="btn btn--primary btn--sm" type="button" data-save>
+          {t(locale, "ortho.data.save")}
+        </button>
+        <button class="btn btn--quiet btn--sm" type="button" data-export-json>
+          {t(locale, "ortho.data.exportJson")}
+        </button>
+        <button class="btn btn--quiet btn--sm" type="button" data-import-json>
+          {t(locale, "ortho.data.importJson")}
+        </button>
+        <button class="btn btn--quiet btn--sm" type="button" data-export-csv>
+          {t(locale, "ortho.data.exportCsv")}
+        </button>
+        <button class="btn btn--quiet btn--sm" type="button" data-import-csv>
+          {t(locale, "ortho.data.importCsv")}
+        </button>
+        <button class="btn btn--quiet btn--sm" type="button" data-share>
+          {t(locale, "ortho.share.button")}
+        </button>
+      </div>
+
+      <input
+        class="u-visually-hidden"
+        type="file"
+        data-import-json-file
+        accept=".json,application/json"
+        aria-label={t(locale, "ortho.data.importJson")}
+      />
+      <input
+        class="u-visually-hidden"
+        type="file"
+        data-import-csv-file
+        accept=".csv,text/csv"
+        aria-label={t(locale, "ortho.data.importCsv")}
+      />
+
+      <div data-share-box hidden>
+        <label for="ortho-share-url">{t(locale, "ortho.share.button")}</label>
+        <input id="ortho-share-url" type="text" data-share-url readonly />
+      </div>
+
+      <h3>{t(locale, "ortho.data.savedList")}</h3>
+      <div data-saved-list></div>
+
+      <!-- Persistence lives with the data controls because that is where it
+           matters: it is the answer to "did that save actually go anywhere?". -->
+      <div data-persistence></div>
+      <p role="status" aria-live="polite" data-status></p>
+    </div>
+  </div>
+</section>
+
+<p class="u-visually-hidden" role="status" aria-live="polite" data-live-region></p>
+
+<script>
+  import { initOrthographyLab } from "../scripts/ortografia/index";
+  import { safeInit } from "../scripts/core/safe";
+
+  // A broken editor must not take the page down with it: safeInit contains the
+  // failure and names the widget in the console.
+  safeInit("orthography lab", initOrthographyLab);
+</script>
