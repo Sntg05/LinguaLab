@@ -5,4 +5,6 @@
  * publican en un subpath aparte (`@lingualab/core/testing`) para que el codigo
  * de produccion no pueda depender de ellos por accidente.
  */
-export {};
+
+export * from "./fakes/index";
+export * from "./contracts/index";
