@@ -194,3 +194,30 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado antes de escribir
   Declarado y sin probar por ejecución: la rama `quota-exceeded` del adaptador. `fake-indexeddb` no
   puede provocar `QuotaExceededError` de forma determinista y la firma de la fábrica no ofrece una
   costura para inyectar un `IDBFactory` que falle.
+
+- **L10** (segunda inspección de la autoridad de revisión, y por qué NO se ejecutó el `start`): el
+  recordatorio de RDD volvió a dispararse y `inspect` ofreció `review.start` para un candidato nuevo
+  (`sha256:c597575…`). El alcance ofrecido es `base-diff:workspace` con `base-ref=f355c3bea25cab7ec613ae57a4315c0905ea7a7e`
+  — es decir, **la rama acumulada entera**: 156 rutas y 35 commits.
+
+  Decisión: no se ejecuta, por tres razones con evidencia y no por preferencia.
+
+  1. **El proveedor ya rechazó este mismo alcance.** El intento anterior, con 66 archivos y 4.810
+     líneas, terminó en `lens_context_budget_exceeded` con `next_action: stop` y este diagnóstico
+     textual: *«retrying this exact candidate cannot succeed, so split it into a chained sequence of
+     smaller reviewable commits, each under the budget, then refresh the exact native next transition
+     […] and execute the returned transition for the reduced scope»*. El candidato actual es un
+     **superconjunto** de aquel, así que el argumento vale con más fuerza: reintentarlo quema una
+     ceremonia de consentimiento del humano para recibir el mismo rechazo.
+  2. **La continuación es condicional a reducir el alcance primero.** Dice «execute the returned
+     transition **for the reduced scope**». No se ha reducido nada todavía, así que ejecutar ahora
+     sería ejecutarlo para el alcance equivocado: el que el proveedor ya declaró inviable.
+  3. **El árbol no está quieto.** El worker del catálogo sigue escribiendo, y un candidato congelado
+     sobre un árbol en movimiento nace inestable, con el riesgo de fallar la verificación por algo que
+     no es un defecto.
+
+  Lo que sí queda decidido, y es lo que el proveedor pidió: la revisión se hace **por unidad de trabajo**,
+  con el árbol quieto, refrescando el estado nativo antes de ejecutar. Es la tarea T13, y el
+  fraccionamiento del historial en 35 commits ya está hecho justamente con ese presupuesto en mente.
+  Si el humano prefiere que se intente el alcance completo igual, basta con decirlo: la decisión está
+  fundada en evidencia del proveedor, no en un juicio propio sobre si la revisión hace falta.
