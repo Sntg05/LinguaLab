@@ -34,19 +34,42 @@ npm run dev        # http://localhost:4321
 |---|---|
 | `npm run dev` | Servidor de desarrollo |
 | `npm run build` | Compila el sitio estático en `dist/` |
-| `npm run check` | Comprueba tipos con `astro check` |
-| `npm test` | Pruebas unitarias (Vitest) |
+| `npm run check` | Comprueba tipos del sitio con `astro check` |
+| `npm run typecheck:packages` | Comprueba tipos del workspace; el núcleo no tiene `lib.DOM` |
+| `npm run lint` | Biome sobre `packages/**` y los archivos de herramienta |
+| `npm run deps:check` | Reglas de dependencia hexagonales (dependency-cruiser) |
+| `npm test` | Pruebas unitarias (Vitest): sitio, núcleo y adaptadores |
 | `npm run verify` | Tipos + pruebas + compilación + verificación del resultado |
 | `npm run verify:build` | Solo la verificación del resultado compilado |
+| `npm run verify:all` | **La puerta completa**: todo lo anterior en orden |
 
-`npm run verify` es la puerta completa: si pasa, el sitio es publicable.
+`npm run verify:all` es la puerta completa: si pasa, el sitio es publicable y el
+núcleo no rompió ninguna de sus reglas. `npm run verify` se conserva con el
+mismo significado que tenía antes de que existiera el workspace.
 
 ## Arquitectura
 
-Astro 7 con salida estática, TypeScript estricto y **ningún framework de UI**.
-Las herramientas son cálculo puro más DOM, así que un runtime de framework se
-pagaría sin obtener nada a cambio: la interactividad son bloques de TypeScript
-que Astro empaqueta por página.
+LinguaLab es un **npm workspace** con un hexágono en el centro:
+
+```
+packages/
+├── core/           dominio, puertos y casos de uso — TypeScript puro, sin DOM
+└── adapters/       implementaciones de los puertos sobre APIs del navegador
+src/                el adaptador primario: el sitio Astro
+```
+
+El núcleo **no sabe que existe un navegador**, y eso no se le pide por favor:
+`packages/core/tsconfig.json` declara `"lib": ["ES2022"]` y `"types": []`, así
+que `document`, `window` y `fetch` simplemente no existen ahí dentro. Las flechas
+de dependencia se comprueban en CI con dependency-cruiser: el núcleo no importa
+adaptadores, un adaptador no conoce la pantalla que lo invoca, y la interfaz solo
+toca adaptadores desde el composition root. El mapa completo, con la tabla de
+puertos y su adaptador previsto, está en [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+El sitio, encima de ese núcleo, es Astro 7 con salida estática, TypeScript
+estricto y **ningún framework de UI**. Las herramientas son cálculo puro más DOM,
+así que un runtime de framework se pagaría sin obtener nada a cambio: la
+interactividad son bloques de TypeScript que Astro empaqueta por página.
 
 ```
 src/
@@ -100,9 +123,10 @@ git archive <commit> legacy/ | tar -x -C /tmp
 | Comprobación | Estado |
 |---|---|
 | `astro check` | 0 errores, 0 avisos |
-| Pruebas | 536 en 17 archivos |
+| Pruebas | 664 en 32 archivos |
+| Reglas hexagonales | 140 módulos, 0 violaciones |
 | Verificación de compilación | pasa |
-| Página más pesada | 28.3 KB gzip |
+| Página más pesada | 28.5 KB gzip |
 
 `scripts/verify-build.mjs` comprueba el resultado compilado: cobertura de la CSP
 por script inline, ausencia de `unsafe-inline`, ausencia de subrecursos externos,
@@ -157,7 +181,15 @@ fiable del sitio.
 
 ## Guía de contribución
 
-Cómo alimentar la bibliografía y cómo ampliar el sitio, con las convenciones, los
+El flujo de trabajo completo —ramas, Conventional Commits, cómo agregar una lengua
+o una herramienta, cómo escribir un ADR y qué hacer cuando una librería marcada
+`[VERIFICAR]` no hace lo que se esperaba— está en
+[`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md).
+
+Las decisiones de arquitectura y su porqué, incluidas las alternativas que se
+descartaron, están en [`docs/adr/`](docs/adr/).
+
+Y cómo alimentar la bibliografía y ampliar el sitio, con las convenciones, los
 invariantes que el compilador protege y las trampas que ya costaron tiempo:
 [`docs/GUIDE.md`](docs/GUIDE.md).
 
