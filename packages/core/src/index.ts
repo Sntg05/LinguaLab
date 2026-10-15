@@ -5,6 +5,14 @@
  * de uso. No importa nada de fuera de si mismo, y su `tsconfig` sin `lib.DOM`
  * lo hace cumplir en el compilador.
  *
- * Los modulos reales se anaden en las tareas T3 a T7.
+ * Todo lo que se publica pasa por aqui: quien consuma el paquete no debe
+ * conocer rutas internas. Los adaptadores y la interfaz importan
+ * `@lingualab/core` y nada mas.
  */
-export {};
+
+// El primitivo de error explicito: toda la superficie que puede fallar lo usa.
+export * from "./result";
+// Entidades y valores inmutables, mas las funciones puras del dominio.
+export * from "./domain/index";
+// Contratos de salida hacia el mundo exterior (adaptadores secundarios).
+export * from "./ports/index";
