@@ -19,7 +19,7 @@ Rama: `feat/lingualab-hexagonal-monorepo` · Commits: `8216d2d`, `bb71166`, `36d
 
 | Commit | Qué trae |
 |---|---|
-| `8216d2d` | Dominio inmutable, trece puertos con su unión de errores y el primitivo `Result` |
+| `8216d2d` | Dominio inmutable, doce puertos con su unión de errores y el primitivo `Result` |
 | `bb71166` | Formato JSON compartido, tablas demo es/en y las cuatro plantillas indígenas vacías |
 | `36d644d` | Un fake en memoria por cada puerto (los doce) |
 | `5cce9f8` | Siete suites de contrato reutilizables, ejecutadas contra los fakes |

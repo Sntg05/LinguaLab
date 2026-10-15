@@ -81,7 +81,7 @@ const spanishRules = (llIpa: string): readonly G2PRule[] => [
 ];
 
 /**
- * Alofonos lenis de las oclusivas sonoras entre vocales (especificacion S10
+ * Alofonos lenis de las oclusivas sonoras entre vocales (especificacion S7
  * del prompt original): `b`, `d` y `ɡ` se vuelven aproximantes cuando estan
  * flanqueadas por vocales. Exigir los dos contextos es lo que impide que la
  * regla se dispare al inicio de palabra, donde la oclusiva es plena.

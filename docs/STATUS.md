@@ -50,7 +50,7 @@ Todas ellas corren por completo en el navegador y funcionan sin conexión despu�
 | **Estado** | **Estable**, con los límites de abajo declarados |
 | **Qué se probó** | El motor de reglas (NFC, coincidencia más larga, contexto, prioridad, capas fonémica y alofónica, rastro por carácter, cobertura) y el validador con seis códigos de hallazgo, todo con pruebas unitarias. Las **ocho pruebas de español que pide el prompt**, incluido el par `perro`/`pero` con sus puntos de código explícitos. El repositorio sobre IndexedDB pasando la suite de contrato contra IndexedDB **y** contra el respaldo en memoria. Y ocho pruebas e2e que recorren el flujo completo: cargar la demo, probar una palabra, ver qué regla ganó, añadir una regla, exportar, recargar y volver a importar |
 | **Supuestos asumidos** | El formato JSON de las tablas vive en el núcleo y no en cada adaptador, para que un archivo exportado por uno se pueda importar en otro. `remove` es idempotente: borrar algo que ya no está no es un fallo. El idioma demo es español latinoamericano con seseo, con dos variantes que difieren solo en `ll`. El CSV es **deliberadamente incompleto** (una capa, seis columnas) y el JSON es el formato completo |
-| **Límites declarados** | Sin editor de clases `{V}`: se escriben en el JSON y el editor las preserva, pero no hay interfaz para crearlas. `render.ts` no tiene prueba unitaria —Vitest corre en entorno `node` y su configuración quedaba fuera de las superficies de esa tarea—; lo cubren las e2e. La rama de cuota agotada del adaptador no se puede provocar de forma determinista con `fake-indexeddb`. Y las frases de validación del núcleo son solo en español: en `/en/ortografia` la insignia está localizada y la oración no (tarea T16, declarada) |
+| **Límites declarados** | Sin editor de clases `{V}`: se escriben en el JSON y el editor las preserva, pero no hay interfaz para crearlas. `render.ts` no tiene prueba unitaria —Vitest corre en entorno `node` y su configuración quedaba fuera de las superficies de esa tarea—; lo cubren las e2e. La rama de cuota agotada del adaptador no se puede provocar de forma determinista con `fake-indexeddb`. Y las frases de validación del núcleo son solo en español: en `/en/ortografia` la insignia está localizada y la oración no (tarea T16, declarada). Tampoco tienen prueba unitaria `src/scripts/ortografia/index.ts` (835 líneas) ni `src/scripts/catalogo/index.ts`: solo la tienen los módulos puros, y a los dos orquestadores los cubren las e2e. Y hay **cinco avisos de complejidad cognitiva** en el código nuevo, ninguno bloqueante |
 | **Cómo ejecutarla** | `npm run dev` y abrir `/ortografia` |
 
 **Plantillas de lenguas indígenas.** Inga (`inb`), wayuunaiki (`guc`), nasa yuwe (`pbb`) y arhuaco
@@ -75,7 +75,7 @@ No se inventó ni un solo par grafema→AFI, y no es una limitación temporal: e
 | 11 | Catálogo de enlaces externos y puerto de reconocimiento de fonos | **No disponible** — fuera del alcance autorizado |
 
 El usuario autorizó los segmentos **1 a 4**. Lo que sí existe de esos segmentos futuros son sus **puertos
-y sus fakes** en el núcleo —trece puertos con su unión de errores, doce con fake en memoria—, que es lo
+y sus fakes** en el núcleo —doce puertos con su unión de errores, y un fake en memoria para cada uno—, que es lo
 que permite añadirlos después sin tocar el dominio. **No hay stubs vacíos**: `application/index.ts`
 declara en un comentario qué casos de uso pertenecen a los segmentos 6 a 9 en vez de exportar funciones
 que no hacen nada.
@@ -95,11 +95,11 @@ que no hacen nada.
 | Comprobación | Resultado |
 |---|---|
 | Pruebas unitarias | **744 en 40 archivos** |
-| Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las 6 páginas públicas: inicio, editor y catálogo, en español y en inglés |
-| Pruebas de extremo a extremo | **20**, sobre el sitio compilado |
+| Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las **21 páginas públicas**: las 20 rutas y la 404, en español y en inglés. Ampliar la puerta a todas encontró **una violación real más** que nadie había mirado: la 404 usaba un token de LÍNEA (`--line-strong`) como color de texto, que da 2.02:1 donde se exigen 3:1 para texto grande. Corregido a `--ink-faint`, que es el token con la escala pensada para leerse |
+| Pruebas de extremo a extremo | **35**, sobre el sitio compilado |
 | Reglas de dependencia hexagonales | 162 módulos y 365 dependencias, **0 violaciones** |
 | Tipos | `astro check` y los dos paquetes del workspace, **0 errores** |
-| Linter | 0 errores (36 avisos declarados en el código heredado) |
+| Linter | 0 errores. **41 avisos**: 36 heredados y **5 de complejidad cognitiva en el código nuevo**, declarados en `docs/pr/04-editor-de-ortografia.md` |
 | Página más pesada | 28.5 KB comprimidos, sobre un presupuesto de 60 KB |
 | Vulnerabilidades de producción | 0 (`npm audit --omit=dev`) |
 
