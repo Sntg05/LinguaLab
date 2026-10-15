@@ -95,11 +95,11 @@ que no hacen nada.
 | Comprobación | Resultado |
 |---|---|
 | Pruebas unitarias | **744 en 40 archivos** |
-| Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las **21 páginas públicas**: las 20 rutas y la 404, en español y en inglés. Ampliar la puerta a todas encontró **una violación real más** que nadie había mirado: la 404 usaba un token de LÍNEA (`--line-strong`) como color de texto, que da 2.02:1 donde se exigen 3:1 para texto grande. Corregido a `--ink-faint`, que es el token con la escala pensada para leerse. **Pero la puerta corre solo en tema CLARO**: no hay `emulateMedia({ colorScheme: "dark" })` en ninguna prueba, así que el modo oscuro —que el proyecto declara como requisito— no está cubierto por axe. La aritmética de los tokens sugiere margen amplio en ambos temas (≈5:1 frente a los 3:1 exigidos), pero eso es aritmética y no una prueba: **tarea T19** |
+| Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las **21 páginas públicas** —las 20 rutas y la 404— en español y en inglés. Ampliar la puerta a todas encontró **una violación real más** que nadie había mirado: la 404 usaba un token de LÍNEA (`--line-strong`) como color de texto, que da 2.0:1 en claro y 2.4:1 en oscuro, donde se exigen 3:1 para texto grande. Corregido a `--ink-faint`, **medido en un navegador real**: 5.2:1 en claro y 5.4:1 en oscuro. **La puerta sigue corriendo solo en tema claro**: cubrir el oscuro se implementó y pasó en aislamiento (42 pruebas, los dos temas), pero **al sumarlo a la suite completa la corrida falla** y no se diagnosticó dentro del presupuesto, así que se revirtió en lugar de dejar una puerta en rojo. Queda como **tarea T19**, ahora con el modo oscuro ya medido y limpio |
 | Pruebas de extremo a extremo | **35**, sobre el sitio compilado |
 | Reglas de dependencia hexagonales | 162 módulos y 365 dependencias, **0 violaciones** |
 | Tipos | `astro check` y los dos paquetes del workspace, **0 errores** |
-| Linter | 0 errores. **41 avisos**: 36 heredados y **5 de complejidad cognitiva en el código nuevo**, declarados en `docs/pr/04-editor-de-ortografia.md` |
+| Linter | 0 errores. **41 avisos**: **5 de complejidad cognitiva en el código nuevo** y 36 que no lo son. De esos 36, **4 provienen de la regla nueva de `biome.json`**, que no existía en `main`, así que llamarlos «heredados» era generalizar de más |
 | Página más pesada | 28.5 KB comprimidos, sobre un presupuesto de 60 KB |
 | Vulnerabilidades de producción | 0 (`npm audit --omit=dev`) |
 
