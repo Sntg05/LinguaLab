@@ -299,8 +299,9 @@ Se cerró de las dos formas:
    es peor que un rojo, porque un verde no lo investiga nadie. Queda explicado en
    `docs/CONTRIBUTING.md`.
 
-El trabajo pendiente quedó traspasado en **`docs/PENDING.md`**: doce entradas, cada una con síntoma,
-evidencia medida, por qué no se hizo, próximo paso exacto y criterio de aceptación. Ahí está **P1** —la
+El trabajo pendiente quedó traspasado en **`docs/PENDING.md`**: trece entradas, de detalle desigual —las
+hay completas y las hay que solo anotan el síntoma y el próximo paso, porque son traspasos escritos con el
+presupuesto que había—. Ahí está **P1** —la
 prosa del núcleo—, el punto ciego de la puerta con el aviso de que medirlo por estilos computados da
 resultados falsos (**P11**), la lista vacía de `/arboles` como decisión de producto (**P12**), la trampa de
 puerto compartido como mejora estructural —separar el puerto del e2e del que usa `astro dev`—, la línea

@@ -370,7 +370,7 @@ se corrigieron por presupuesto, y quedan con su ubicación exacta para que sea c
 **1. Rename incompleto de `T16` a `P1`.** `docs/STATUS.md:53` ya se corrigió, pero quedan referencias
 viejas en `docs/pr/04-editor-de-ortografia.md:97,106` y `docs/pr/05-catalogo.md:83`. `T16` era el id de la
 lista de trabajo de la sesión; en este documento el tema es **P1**. Un lector que busque «T16» no encuentra
-nada.
+la tarea en la lista de este documento, solo las referencias viejas.
 
 **2. `docs/PENDING.md` P4 describe mal el manejador.** Dice que el archivo de complejidad 40 es «un
 `switch` sobre veinte acciones». Es falso: `src/scripts/ortografia/index.ts:592` es una **cadena de ramas
@@ -378,8 +378,8 @@ nada.
 `field`, y no tienen que ver. Correcto: «una cadena de `if` sobre unas veinte acciones».
 
 **3. La explicación de `shortTextContent` en P11 repite la lectura que los datos no sostienen.** El
-verificador midió que **las 28 apariciones en el sitio traen `contrastRatio: 0`**, que este mismo documento
-define como «axe no calculó nada». La guarda `!isValid` de axe es real, pero también es verdadera cuando
+verificador midió que **las 28 apariciones en el sitio traen `contrastRatio: 0`**, que
+`e2e/accessibility.spec.ts` define como «axe no calculó nada». La guarda `!isValid` de axe es real, pero también es verdadera cuando
 no pudo calcular. El **arreglo no cambia** —comprobar el dato antes que el motivo sigue siendo correcto y
 está probado por mutación—, lo que cambia es cómo se explica. El spec ya quedó corregido; falta alinear la
 redacción de P11 con esa corrección.
@@ -391,9 +391,22 @@ P11** no tienen «por qué no se hizo». O se completan, o la frase se acota a l
 
 **5. La lista por página puede inducir a error.** P11 y `docs/STATUS.md` enumeran `inicio 9, FonoLab 15,
 salvaguardas 16, acerca 4, arboles 2, no-existe 1`. Sumar esos números da 47 y el total es **186**, porque
-son **por idioma y por tema**: cada ruta aparece dos veces por tema (español e inglés). El total está bien;
-lo que falta es decir que la lista es por página y tema, no un desglose del total.
+son **por idioma y por tema**, y **cada ruta localizada aparece dos veces por tema**; la 404 es única
+—no tiene versión en inglés—, así que 47 × 4 = 188 no cierra: la cuenta real es
+47 + 46 + 47 + 46 = **186**. El total está bien y `docs/STATUS.md` ya aclara que la lista es por página y
+tema, así que lo que falta es solo cuidar que nadie sume la lista y espere el total.
 
 **Criterio de aceptación.** Las cinco quedan corregidas, y ninguna introduce una afirmación nueva que no
 esté medida. La lección de esta sesión se aplica a sí misma: **toda ronda de corrección necesita su propia
 verificación**, porque en la ronda anterior tres de cinco errores los había introducido la corrección.
+
+**6. Y esta misma entrada delata el problema del que habla.** Una verificación posterior encontró cuatro
+falsedades en este texto recién escrito: «no encuentra nada» (hay seis referencias), «este mismo documento
+define» (la definición vive en el spec), «cada ruta aparece dos veces por tema» (la 404 es única, y por eso
+47 × 4 no cierra), y una más estructural: **agregar P13 volvió falsa la promesa de que las entradas tienen
+los cinco campos**, porque ahora son trece y esta es la más pobre de todas, con uno solo. La promesa
+universal no se arregla enumerando excepciones —siempre queda alguna— sino **dejando de prometer
+uniformidad**. Y la lección se cierra sin adornos: **la ronda que corrige introduce errores, y verificarla
+es lo único que los saca a la luz**. Este documento llegó a la quinta ronda de verificación; la sexta
+probablemente encuentre algo en estas mismas líneas, y por eso el próximo paso no es escribir más prosa
+sino verificar la que hay.
