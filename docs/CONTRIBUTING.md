@@ -46,15 +46,25 @@ src/                  el sitio Astro: el adaptador primario
 
 | Comando | Qué comprueba |
 |---|---|
-| `npm run lint` | Biome sobre `packages/**` y los archivos de herramienta |
+| `npm run lint` | Biome sobre `packages/**`, `e2e/**` y los archivos de herramienta |
 | `npm run typecheck:packages` | Tipos del workspace, con el núcleo sin `lib.DOM` |
 | `npm run deps:check` | Reglas de dependencia hexagonales (dependency-cruiser) |
 | `npm run check` | Tipos del sitio Astro |
 | `npm test` | Vitest: sitio, núcleo y adaptadores |
+| `npm run test:e2e` | Playwright contra el sitio **compilado**: accesibilidad con axe y flujos reales |
 | `npm run build:verify` | Compila y verifica el resultado (CSP, peso, subrecursos) |
-| `npm run verify:all` | Todas las anteriores, en orden |
+| `npm run verify:all` | Todas las anteriores menos `test:e2e`, en orden |
 
 `npm run verify:all` es la puerta completa. Si pasa, el cambio es publicable.
+
+`npm run test:e2e` no está dentro de `verify:all` porque necesita un navegador descargado y levanta un
+servidor: `npx playwright install chromium` una vez, y después `npm run test:e2e`. Conviene correrlo
+antes de un PR que toque la interfaz; en CI llega con su propio paso.
+
+**Toda página pública nueva entra en `e2e/accessibility.spec.ts`.** No es una formalidad: el proyecto
+declara WCAG 2.2 AA como requisito, y una declaración que nadie comprueba se degrada sola. Esa prueba
+encontró un `aria-pressed` puesto sobre un enlace —inválido en ARIA— en el sitio que ya estaba en
+producción.
 
 ---
 

@@ -117,6 +117,15 @@ depender de él por accidente.
   pasaba el fake. Eso es lo que convierte «dos implementaciones del mismo puerto» en «dos
   implementaciones que de verdad hacen lo mismo».
 
+  Hoy tienen suite **siete de los doce puertos**: los que ya tienen caso de uso o adaptador. Los otros
+  cinco —TextGrid, ELAN, audio, acústica y experimentos— llegan con su segmento, porque un contrato que
+  no puede afirmar nada es ruido con apariencia de cobertura. Los doce **sí** tienen fake desde el
+  principio, para que las interfaces se mantengan honestas mientras tanto.
+
+  Esa suite ya se ganó su lugar: encontró que el fake en memoria y el adaptador de IndexedDB devolvían
+  resultados distintos al borrar un id inexistente, y que **los dos pasaban** porque el caso no estaba
+  cubierto.
+
 ---
 
 ## Las reglas de dependencia, y cómo se comprueban
