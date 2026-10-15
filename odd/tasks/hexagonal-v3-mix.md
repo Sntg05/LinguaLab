@@ -86,3 +86,54 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado antes de escribir
 
 - **L4** (decisión de sustrato, registrada en ADR 0001): la raíz sigue siendo el paquete Astro y a la vez
   la raíz del workspace; la UI web es el adaptador primario en `src/**`, no una app React nueva.
+
+- **L5** (revisión nativa detenida por presupuesto de contexto): con el interruptor de RDD activado,
+  `inspect` ofreció `review.start` sobre `main..HEAD`. El humano concedió el consentimiento explícito
+  (`consentBinding` `d6bc121a-19ff-40ec-8e28-15a41e6506bc`, respuesta `granted`) y el proveedor lo
+  rechazó en la fase de preflight con el código terminal `lens_context_budget_exceeded`:
+
+  > The candidate's complete reviewer evidence exceeds the native context budget, so no review
+  > authority was created; review this change as smaller candidates that each fit under it.
+
+  `mutation_performed: false`, `mutation_outcome: "none"`, `lineage_created: false` en el intento de
+  `start`: no hay autoridad que abandonar ni linaje que reconciliar, y reintentar este mismo candidato
+  no puede funcionar. El diagnóstico del proveedor: 66 archivos y 4.810 líneas en un solo candidato.
+
+  **Consecuencia para el plan:** la revisión no se hace nunca sobre la rama acumulada, sino sobre
+  candidatos más pequeños, uno por unidad de trabajo. Es exactamente el modelo que el prompt ya pedía
+  («un PR por segmento») y lo que recomienda la habilidad de PRs encadenados. La tarea T13 recoge la
+  decisión de cómo rebanar el rango ya commiteado; la continuación del proveedor exige reducir el
+  alcance y después refrescar el estado nativo antes de ejecutar la transición devuelta.
+
+- **L6** (entorno cerrado): Node 22.23.3 instalado con nvm, y `npm ci && npm run verify:all` en verde
+  sobre ese runtime — el camino exacto de CI. El binario real de dependency-cruiser ya corre y da 89
+  módulos y 125 dependencias, idéntico al desvío por API que se escribió para Node 25. Playwright
+  1.63.0 quedó con sus navegadores correctos (`chromium-1243`, `chromium_headless_shell-1243`,
+  `ffmpeg-1011`) y la cadena se probó lanzando chromium contra un HTML local: la captura de 5.185
+  bytes se generó y se revisó a ojo. `@axe-core/playwright` carga y exporta una función.
+
+  Nota operativa que hay que recordar en cada sesión: el shell no interactivo de Pi no lee
+  `~/.bashrc`, así que nvm no se carga solo y `node` cae al 25.9.0 de Linuxbrew. Todo comando de
+  npm o npx de este repositorio debe activar nvm 22 antes.
+
+- **L7** (segmento 4 cerrado): el motor queda implementado y verificado en seis commits en lugar de uno.
+  La razón es ejecutable, no estética: el proveedor ya rechazó un candidato de 66 archivos y 4.810
+  líneas por presupuesto de contexto, así que un solo commit de ~3.900 líneas habría reproducido el
+  problema. El orden de los commits lo fijó el acoplamiento real — **todas** las pruebas de `engine`
+  y `application` importan los fakes, así que `data` va primero, después los fakes, después los
+  contratos, después el motor, después el validador y por último los casos de uso.
+
+  Verificación del padre, con evidencia propia y no delegada:
+  - Las ocho cadenas de español se leyeron en el código de las pruebas, con los puntos de código
+    explícitos: `rr` → `r` (U+0072) frente a `r` → `ɾ` (U+027E), y la esh como `\u0283`.
+  - El aviso obligatorio de las plantillas se resolvió programáticamente desde los escapes Unicode y
+    coincide **carácter por carácter** con el texto exigido en S10.
+  - Las cuatro plantillas indígenas se generan con un único `template()` con `rules: []` y
+    `status: "draft"`, así que no hay forma de que una quede con datos.
+
+  Un hallazgo que nació de la revisión del padre y no del worker: `layerOutputs.allophonic` se
+  rellenaba con la salida **fonémica** cuando la tabla no declaraba capa alofónica, así que la
+  interfaz habría mostrado «capa alofónica: aboɡado» en un idioma sin reglas alofónicas. La suite del
+  worker cubría la cobertura de esa rama pero no ese campo. Se corrigió con su prueba, y es
+  exactamente el tipo de defecto que el principio de honestidad técnica del proyecto existe para
+  atrapar: una etiqueta que afirma más de lo que el dato respalda.
