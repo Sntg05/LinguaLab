@@ -171,7 +171,14 @@
     color: var(--ink);
   }
 
-  .segmented__btn[aria-pressed="true"] {
+  /* El estado activo se marca de dos formas segun el elemento, y no es
+     duplicacion: `aria-pressed` es valido en los botones de filtro de las demas
+     herramientas, y `aria-current` es lo que ARIA permite en los enlaces del
+     selector de idioma. Un enlace NO admite `aria-pressed` —solo los elementos
+     con rol de boton— y axe lo marca como violacion critica de aria-allowed-attr.
+     Aqui vivia ese defecto, y por eso la prueba de accesibilidad lo encontro. */
+  .segmented__btn[aria-pressed="true"],
+  .segmented__btn[aria-current="true"] {
     color: var(--accent-ink);
     background: var(--accent);
   }
