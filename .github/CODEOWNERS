@@ -1,0 +1,8 @@
+# CODEOWNERS decide a quién se le pide la revisión. La última regla que coincide
+# con un archivo es la que manda: por eso las reglas específicas van después del
+# comodín, y así `packages/core/` gana sobre `*` en lugar de quedar tapado por él.
+
+* @Sntg05
+
+packages/core/ @Sntg05
+packages/adapters/ @Sntg05

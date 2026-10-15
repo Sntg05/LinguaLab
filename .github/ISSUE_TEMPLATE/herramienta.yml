@@ -1,0 +1,58 @@
+name: Propuesta de herramienta
+description: Proponer una herramienta o una mejora para el laboratorio.
+title: "[herramienta] "
+labels: [type:feature]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área de la lingüística
+      description: ¿A qué área sirve esta herramienta?
+      options:
+        - fonética
+        - fonología
+        - morfosintaxis
+        - semántica
+        - pragmática
+        - psicolingüística
+        - tipología
+        - documentación
+    validations:
+      required: true
+
+  - type: input
+    id: lenguas
+    attributes:
+      label: Lengua o lenguas implicadas
+      description: ¿Sobre qué lenguas trabaja? Si es agnóstica, dilo también.
+      placeholder: Español y quechua sureño
+    validations:
+      required: true
+
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qué problema resuelve
+      description: Describe la tarea actual y por qué hoy es difícil o lenta.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: servidor
+    attributes:
+      label: ¿Necesita servidor?
+      description: El sitio corre entero en el navegador; cualquier cosa que necesite servidor es una excepción que hay que justificar.
+      options:
+        - "No: puede correr entera en el navegador"
+        - "Sí: necesita un servidor"
+        - "No estoy seguro"
+    validations:
+      required: true
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto adicional
+      description: Ejemplos, referencias bibliográficas o bocetos que ayuden a entender la propuesta.
+    validations:
+      required: false

@@ -1,0 +1,55 @@
+name: Propuesta de lengua
+description: Proponer la incorporación o el trabajo sobre una lengua indígena.
+title: "[lengua] "
+labels: [lengua:indigena]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Las plantillas de lenguas indígenas se publican **vacías a propósito**: no
+        traemos datos ni listas de palabras sueltas de ningún sitio. Cada plantilla
+        se llena después, y solo se acepta cuando la validan hablantes de la
+        comunidad y fuentes lingüísticas verificables.
+
+  - type: input
+    id: lengua
+    attributes:
+      label: Nombre de la lengua
+      description: El nombre tal como lo usa la propia comunidad, con el endónimo si lo conoces.
+      placeholder: Quechua sureño (Runasimi)
+    validations:
+      required: true
+
+  - type: input
+    id: codigo
+    attributes:
+      label: Código ISO 639-3 o Glottocode
+      description: El identificador que permite citar la lengua sin ambigüedad.
+      placeholder: ISO 639-3 quy / Glottocode quec1387
+    validations:
+      required: true
+
+  - type: input
+    id: comunidad
+    attributes:
+      label: Comunidad o región
+      description: ¿Dónde se habla? Si hay varias comunidades, indícalo.
+      placeholder: Cusco y Puno, Perú
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: autorizacion
+    attributes:
+      label: Autorización para compartir datos
+      options:
+        - label: Confirmo que NO estoy aportando datos ni listas de palabras que no esté autorizado a compartir, y que cualquier material de la comunidad se incorporará solo con su permiso y con la atribución correspondiente.
+          required: true
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto adicional
+      description: Fuentes, hablantes con quienes ya se habló o cualquier acuerdo previo con la comunidad.
+    validations:
+      required: false

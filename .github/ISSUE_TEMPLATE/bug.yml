@@ -1,0 +1,55 @@
+name: Reporte de error
+description: Algo no funciona como debería en el sitio o en una herramienta.
+title: "[bug] "
+labels: [type:bug]
+body:
+  - type: input
+    id: pagina
+    attributes:
+      label: Página o herramienta
+      description: ¿Dónde ocurre? Indica la ruta o el enlace directo.
+      placeholder: https://lingualab.pages.dev/fono
+    validations:
+      required: true
+
+  - type: textarea
+    id: que-paso
+    attributes:
+      label: Qué pasó
+      description: Describe el fallo tal como lo viviste, con los pasos para reproducirlo.
+      placeholder: Entré a /arboles, pegué este texto y la exportación a PNG salió en blanco.
+    validations:
+      required: true
+
+  - type: textarea
+    id: que-esperaba
+    attributes:
+      label: Qué esperabas que pasara
+      description: El resultado correcto que debería haberse producido.
+    validations:
+      required: true
+
+  - type: input
+    id: navegador
+    attributes:
+      label: Navegador y sistema
+      description: Navegador, versión y sistema operativo. Nos ayuda a ubicar el fallo.
+      placeholder: Firefox 133 en Windows 11
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: datos-personales
+    attributes:
+      label: Datos personales o de la comunidad
+      options:
+        - label: He borrado del reporte cualquier dato personal o de una comunidad (nombres, textos privados, listas de palabras no públicas).
+          required: true
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto adicional
+      description: Capturas, mensajes de consola o cualquier detalle que ayude a reproducirlo.
+    validations:
+      required: false

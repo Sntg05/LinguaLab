@@ -1,0 +1,43 @@
+version: 2
+
+# Dependabot propone dos clases de actualización, y a propósito no son la misma
+# clase de PR: los saltos de versión mayor llegan sueltos, uno por PR, porque
+# romper compatibilidad es una decisión humana que hay que revisar; los cambios
+# menores y de parche se agrupan en un único PR porque ya vienen cubiertos por la
+# suite de CI y no merecen diez revisiones separadas.
+updates:
+  # Dependencias de la aplicación y del workspace de paquetes.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      # El prefijo incluye el ámbito: lo que Dependabot propone es siempre
+      # `chore(deps)`, un tipo válido de Conventional Commits. Un prefijo suelto
+      # como `deps` sería rechazado por el `type-enum` de commitlint.config.cjs.
+      prefix: "chore(deps)"
+    groups:
+      minor-y-patch:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch
+
+  # Las acciones del propio CI: mantener el pinning al día es parte de la
+  # seguridad del flujo, pero también es lo que menos puede permitirse una
+  # actualización mayor automática.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      # Mismo criterio que arriba: `ci` es el ámbito, `chore` el tipo.
+      prefix: "chore(ci)"
+    groups:
+      minor-y-patch:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch

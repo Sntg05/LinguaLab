@@ -30,6 +30,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Va primero porque es lo más barato de arreglar: un problema de estilo o
+      # de imports no debería hacer esperar a los pasos lentos que vienen detrás.
+      - name: Lint
+        run: npm run lint
+
+      # Esta es la forma ejecutable del ADR 0001: las flechas de la arquitectura
+      # apuntan hacia adentro (la UI y los adaptadores conocen el núcleo, nunca al
+      # revés). Si alguien invierte una flecha, CI la rechaza aquí en lugar de
+      # dejar que el acoplamiento se extienda por el repositorio.
+      - name: Hexagonal dependency rules
+        run: npm run deps:check
+
+      # `astro check` solo mira el sitio: los paquetes del workspace compilan con
+      # su propio tsconfig y de otro modo llegarían al merge sin nadie leerlos.
+      - name: Type check the workspace packages
+        run: npm run typecheck:packages
+
       - name: Type check
         run: npm run check
 

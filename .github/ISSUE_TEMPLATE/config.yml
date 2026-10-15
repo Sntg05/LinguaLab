@@ -1,0 +1,7 @@
+# Las plantillas son la única puerta de entrada: un issue en blanco no trae el
+# contexto que hace falta para reproducirlo ni para revisarlo.
+blank_issues_enabled: false
+contact_links:
+  - name: Guía del proyecto
+    url: https://github.com/Sntg05/LinguaLab/blob/main/docs/GUIDE.md
+    about: Cómo alimentar la bibliografía y ampliar el sitio sin romper sus garantías.
