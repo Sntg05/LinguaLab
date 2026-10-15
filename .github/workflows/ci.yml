@@ -62,6 +62,27 @@ jobs:
       - name: Verify build output
         run: npm run verify:build
 
+      # Playwright necesita su propio navegador y las bibliotecas del sistema que
+      # este no arrastra. Se cachea porque la descarga es lo mas caro del job y no
+      # cambia mientras no cambie la version de Playwright: la clave incluye el
+      # lockfile, asi que una actualizacion la invalida sola.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # La puerta de accesibilidad tiene que correr donde corre todo lo demas, y
+      # no solo en la maquina de quien la escribio. Esta prueba ya encontro una
+      # violacion critica en produccion —`aria-pressed` sobre un enlace, que ARIA
+      # no permite fuera de los roles de boton— y el proyecto declara WCAG 2.2 AA
+      # como requisito, no como intencion.
+      - name: End-to-end and accessibility tests
+        run: npm run test:e2e
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
