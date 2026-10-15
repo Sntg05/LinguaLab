@@ -24,12 +24,11 @@ const WCAG_22_AA_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
  *
  * POR QUE SE PRUEBAN LOS DOS
  *
- * El tema oscuro no es un extra: `base.css` define la paleta clara y, cuando el
- * sistema pide oscuro, el bloque `@media (prefers-color-scheme: dark)` la
- * reemplaza entera. Son dos juegos de colores distintos, así que un contraste
- * aprobado en uno no dice nada del otro. La puerta probaba un solo tema, y un
- * token que fallaba en LOS DOS —`--line-strong` como color de texto: 2.0:1 en
- * claro y 2.4:1 en oscuro— pasó desapercibido porque nadie miraba.
+ * El tema oscuro no es un extra: `tokens.css` define la paleta clara en `:root` y, cuando el sistema
+ * pide oscuro, el bloque `@media (prefers-color-scheme: dark)` la reemplaza entera. Son dos juegos de
+ * colores distintos, así que un contraste aprobado en uno no dice nada del otro. La puerta probaba un
+ * solo tema, y un token que fallaba en LOS DOS —`--line-strong` como color de texto: 2.0:1 en claro y
+ * 2.4:1 en oscuro— pasó desapercibido porque nadie miraba.
  *
  * El tema se emula con `emulateMedia` ANTES de `goto`, que es lo que evita el
  * parpadeo con la paleta del sistema en el primer pintado. El orden **no** cambia
@@ -86,35 +85,64 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
  * entre comillas es la definición de axe-core 4.13.0, copiada de su código fuente,
  * no mi interpretación:
  *
- * - `imgNode`:          "Element's background color could not be determined because
- *                       element contains an image node"
- * - `bgOverlap`:        "Element's background color could not be determined because
- *                       it is overlapped by another element"
- * - `shortTextContent`: axe no decide si el texto es «grande» porque tiene UN solo
- *                       carácter (`visibleText.length === 1`), y el umbral depende
- *                       de eso. El teclado de símbolos AFI cae acá.
- * - `nonBmp`:           axe no evalúa el contraste de caracteres fuera del plano
- *                       básico (la flecha de `.btn__arrow`).
+ * - `imgNode`:     "Element's background color could not be determined because
+ *                  element contains an image node"
+ * - `bgOverlap`:   "Element's background color could not be determined because it
+ *                  is overlapped by another element"
+ * - `nonBmp`:      axe saltea la medición cuando el contenido está compuesto solo
+ *                  de caracteres que su regex trata como símbolos. Ojo: esa regex
+ *                  cubre flechas (`\u2190-\u21FF`), operadores y dingbats **dentro**
+ *                  del plano básico, así que la flecha `→` (U+2192) entra por ahí y
+ *                  el motivo no tiene nada que ver con el plano básico. Y una
+ *                  versión anterior de este comentario decía eso último: era falso.
  *
- * Los cuatro dicen lo mismo: **axe no midió**. Es una categoría distinta de
- * `equalRatio`, donde `truncatedResult === 1` significa que axe SÍ midió y el
- * resultado fue 1:1 —un texto del mismo color que su fondo—; ese es un defecto y
- * por eso no está en esta lista, y sigue haciendo fallar la prueba.
+ * `shortTextContent`: axe **ya midió** un ratio que no alcanza —la rama está guardada
+ * por `!isValid`— y solo duda de si un carácter cuenta como texto. O sea que NO
+ * significa «no pudo medir». Está en la lista **solo porque el dato se comprueba antes
+ * que el motivo**: si trae un contraste medido por debajo del exigido, falla igual. Un
+ * verificador lo probó con una mutación —un texto a 2,63:1 sobre un umbral de 3:1
+ * pasaba la puerta— y con el orden invertido ese caso lo caza el dato.
  *
- * PUNTO CIEGO DECLARADO, no una afirmación de que estos nodos estén bien. La
- * puerta no sabe nada del contraste acá y no lo finge; ver P11 en
- * `docs/PENDING.md`. Se intentó medirlos por su cuenta y **la medición fue
- * falsa**: subir por los ancestros buscando el primer `fill` opaco toma el valor
- * heredado de un `<g>` de SVG que no pinta nada, e inventa un fondo. Con ese
- * método «gato» en la portada daba 1,67:1, y mirando los píxeles es texto oscuro
- * sobre fondo claro. El método producía defectos donde no había ninguno.
+ * POR ESO LA AFIRMACIÓN NO ES «ESTE MOTIVO ESTÁ PERMITIDO» sino «este motivo no trae
+ * un contraste medido por debajo del exigido». Un `incomplete` falla si su motivo no
+ * está en la lista, y falla también si el motivo está pero axe trae un `contrastRatio`
+ * positivo menor que el `expectedContrastRatio`. Un `contrastRatio` de 0 significa que
+ * axe no calculó nada —lo vio un verificador en los botones de marcas combinantes— y
+ * ese caso sí es «no midió».
+ *
+ * AGUJERO DECLARADO, no tapado: algunos `incomplete` no traen motivo textual porque axe
+ * pone `data` como array. En `/arboles` pasa con un `aria-required-children` de impacto
+ * **crítico** sobre `.checks__list`. No se descartan en silencio: pasan solo si su
+ * **regla** está exceptuada por nombre en `AXE_INCOMPLETE_WITHOUT_MOTIVE`, y hoy hay una
+ * sola, con la decisión pendiente en P12 de `docs/PENDING.md`.
+ *
+ * Y el punto ciego sigue siendo un punto ciego, no una afirmación de que los nodos
+ * estén bien: en lo que axe no midió, la puerta no sabe nada del contraste y no lo
+ * finge. Ver P11, con el aviso de que medirlo por estilos computados da resultados
+ * falsos. Medición del sitio completo: los 40 `incomplete` de las tres páginas más
+ * pesadas traen `contrastRatio` 0 o ausente, o sea que **axe no calculó nada** en
+ * ninguno. El único caso medido por debajo del umbral fue la mutación del verificador.
  */
 const AXE_COULD_NOT_MEASURE: readonly string[] = [
   "imgNode",
   "bgOverlap",
-  "shortTextContent",
   "nonBmp",
+  // Permitido SOLO porque la comprobación del contraste medido corre antes. Ver arriba.
+  "shortTextContent",
 ];
+
+/**
+ * Reglas cuya falta de motivo textual está exceptuada **por nombre**, nunca en general.
+ *
+ * `aria-required-children` sobre `.checks__list` en `/arboles`: axe avisa que espera un
+ * hijo con rol `listitem` en una `<ul role="list">` que en el HTML inicial está vacía.
+ * Impacto **crítico**, y la puerta pasaba sin verlo. No se arregla acá porque la respuesta
+ * depende de algo que el código no puede decidir solo: si esa lista se puebla por
+ * JavaScript después de cargar, es un falso positivo de axe mirando el marcado inicial;
+ * si no se puebla, es un defecto real de la página. La decisión y su criterio están en
+ * **P12** de `docs/PENDING.md`. Cualquier otra regla sin motivo textual falla.
+ */
+const AXE_INCOMPLETE_WITHOUT_MOTIVE: readonly string[] = ["aria-required-children"];
 
 for (const { scheme, name: themeName } of THEMES) {
   for (const { path, name } of PUBLIC_PAGES) {
@@ -148,11 +176,35 @@ for (const { scheme, name: themeName } of THEMES) {
       // al criterio que no pudo evaluar, y el detalle viaja en `data.messageKey`.
       const unexplained = results.incomplete.flatMap((result) =>
         result.nodes.flatMap((node) =>
-          [...node.any, ...node.all, ...node.none]
-            .map((check) => (check.data as { messageKey?: string } | undefined)?.messageKey)
-            .filter((key): key is string => typeof key === "string")
-            .filter((key) => !AXE_COULD_NOT_MEASURE.includes(key))
-            .map((key) => ({ rule: result.id, target: node.target.join(" "), reason: key })),
+          [...node.any, ...node.all, ...node.none].flatMap((check) => {
+            const data = check.data as
+              | { messageKey?: unknown; contrastRatio?: unknown; expectedContrastRatio?: unknown }
+              | undefined;
+            const key = typeof data?.messageKey === "string" ? data.messageKey : "(sin motivo)";
+            const entry = { rule: result.id, target: node.target.join(" "), reason: key };
+
+            // EL DATO ANTES QUE EL MOTIVO, y el orden es lo que sostiene todo: la lista
+            // blanca es segura solo porque esto corre primero. Ver `AXE_COULD_NOT_MEASURE`,
+            // que explica por que `shortTextContent` lo exige.
+            const measured = typeof data?.contrastRatio === "number" ? data.contrastRatio : null;
+            const expected =
+              typeof data?.expectedContrastRatio === "string"
+                ? Number.parseFloat(data.expectedContrastRatio)
+                : null;
+            if (measured !== null && measured > 0 && expected !== null && measured < expected) {
+              return [
+                { ...entry, reason: `${key} con contraste medido ${measured} < ${expected}` },
+              ];
+            }
+
+            // Sin motivo textual no se descarta en silencio: pasa solo si su REGLA esta
+            // exceptuada por nombre. Ver AXE_INCOMPLETE_WITHOUT_MOTIVE y P12.
+            if (key === "(sin motivo)") {
+              return AXE_INCOMPLETE_WITHOUT_MOTIVE.includes(result.id) ? [] : [entry];
+            }
+
+            return AXE_COULD_NOT_MEASURE.includes(key) ? [] : [entry];
+          }),
         ),
       );
 

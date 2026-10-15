@@ -12,9 +12,11 @@ import { defineConfig, devices } from "@playwright/test";
  * pagina. Por eso el `webServer` compila y sirve `dist/` — lo mismo que se
  * despliega.
  *
- * El puerto 4321 es el de `astro preview`. En local, si ya hay un servidor
- * levantado se reutiliza en vez de fallar: mientras se escribe una prueba,
- * reiniciar el servidor en cada corrida es la diferencia entre usarla y no usarla.
+ * El puerto 4321 es el de `astro preview`. **No se reutiliza un servidor que ya este
+ * escuchando, ni en local** —ver el comentario de `reuseExistingServer` mas abajo—:
+ * reutilizar el de desarrollo probaba un artefacto que nadie publica. Una version
+ * anterior de este comentario decia lo contrario, que se reutilizaba por comodidad;
+ * quedo falso cuando la guarda se volvio estructural y se corrige aqui.
  */
 
 const PORT = 4321;
