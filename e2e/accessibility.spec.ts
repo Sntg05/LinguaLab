@@ -29,6 +29,8 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
   { path: "/en/", name: "inicio (ingles)" },
   { path: "/ortografia", name: "editor de tablas (espanol)" },
   { path: "/en/ortografia", name: "editor de tablas (ingles)" },
+  { path: "/catalogo", name: "catalogo (espanol)" },
+  { path: "/en/catalogo", name: "catalogo (ingles)" },
 ];
 
 for (const { path, name } of PUBLIC_PAGES) {

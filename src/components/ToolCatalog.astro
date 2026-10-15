@@ -1,0 +1,240 @@
+---
+/**
+ * ToolCatalog: the public catalog of LinguaLab's tools.
+ *
+ * Everything here is decided at build time. The list is static and known when
+ * the site compiles, so it is rendered on the server and the client never
+ * fetches or builds a card: it only toggles what is already in the HTML. That
+ * keeps the catalog readable without JavaScript and keeps the bundled script to
+ * the two sentences it rewrites.
+ *
+ * The data arrives through the hexagon — `listTools` from the composition root,
+ * which is wired to the `ToolRegistryPort` and its adapter — and not by reading
+ * `src/data/tools.json` here. That keeps the page ignorant of where the catalog
+ * is stored, which is the whole point of the port.
+ */
+import type { MessageKey, Locale } from "../i18n";
+import { localePath, t } from "../i18n";
+import type { ToolArea, ToolDescriptor, ToolIntegration, ToolStatus } from "@lingualab/core";
+import { lingualab } from "../composition-root";
+import { CATALOG_STRING_KEYS, format } from "../scripts/catalogo/strings";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+/** The catalog can only fail if the registry is unavailable; say so instead of
+ *  showing an empty page that would look like "there are no tools". */
+const listed = await lingualab.listTools();
+const tools: readonly ToolDescriptor[] = listed.ok ? listed.value : [];
+
+/**
+ * Internal routes of the tools that actually exist on this site. This lives in
+ * the presentation layer on purpose: a route is a property of THIS site's
+ * navigation, not of the tool, and the descriptor stays portable without it.
+ * Only ids with a page that exists today are mapped: the moment a route is
+ * guessed, the catalog links to a 404. No external URL is used — none has been
+ * verified, and publishing an unverified link is what the project forbids.
+ */
+const SITE_ROUTES: Readonly<Record<string, string>> = {
+  fono: "/fono",
+  ortografia: "/ortografia",
+  arboles: "/arboles",
+  tools: "/tools",
+};
+
+const AREA_KEYS: Readonly<Record<ToolArea, MessageKey>> = {
+  fonetica: "catalog.area.fonetica",
+  fonologia: "catalog.area.fonologia",
+  morfosintaxis: "catalog.area.morfosintaxis",
+  semantica: "catalog.area.semantica",
+  pragmatica: "catalog.area.pragmatica",
+  psicolinguistica: "catalog.area.psicolinguistica",
+  tipologia: "catalog.area.tipologia",
+  documentacion: "catalog.area.documentacion",
+};
+
+const INTEGRATION_KEYS: Readonly<Record<ToolIntegration, MessageKey>> = {
+  embedded: "catalog.integration.embedded",
+  "external-link": "catalog.integration.externalLink",
+  "needs-backend": "catalog.integration.needsBackend",
+};
+
+const STATUS_KEYS: Readonly<Record<ToolStatus, MessageKey>> = {
+  stable: "catalog.status.stable",
+  experimental: "catalog.status.experimental",
+  planned: "catalog.status.planned",
+};
+
+/** Stable tools read as healthy; experimental warns; planned adds a callout. */
+const STATUS_BADGE: Readonly<Record<ToolStatus, string>> = {
+  stable: "badge badge--ok",
+  experimental: "badge badge--warn",
+  planned: "badge",
+};
+
+const LANGUAGE_KEYS: Readonly<Record<string, MessageKey>> = {
+  es: "catalog.language.es",
+  en: "catalog.language.en",
+};
+
+const languageLabel = (code: string): string => {
+  const key = LANGUAGE_KEYS[code];
+  return key === undefined ? code : t(locale, key);
+};
+
+const notesOf = (tool: ToolDescriptor): string => tool.notes?.[locale] ?? "";
+
+const languageLine = (tool: ToolDescriptor): string =>
+  tool.languages.length === 0
+    ? t(locale, "catalog.languageIndependent")
+    : `${t(locale, "catalog.languages")}: ${tool.languages.map(languageLabel).join(", ")}`;
+
+/* The options are derived from the data: an area nobody uses has no reason to
+   occupy a row, and a tool added to the catalog appears in the filter for free. */
+const areas = [...new Set(tools.map((tool) => tool.area))].sort();
+const languages = [...new Set(tools.flatMap((tool) => tool.languages))].sort();
+const integrations: readonly ToolIntegration[] = ["embedded", "external-link", "needs-backend"];
+
+/* Runtime sentences for the filter script, already translated and keyed. */
+const catalogStrings: Record<string, string> = {};
+for (const key of CATALOG_STRING_KEYS) {
+  catalogStrings[key] = t(locale, key);
+}
+---
+
+<section class="section" data-catalog="true">
+  <div class="shell">
+    <!-- The dictionary subset reaches the script as data, never as inline code:
+         the CSP is hash-based, so the script itself stays a static file. -->
+    <div data-catalog-strings hidden data-json={JSON.stringify(catalogStrings)}></div>
+
+    <div class="u-section-head">
+      <span class="eyebrow">{t(locale, "nav.catalog")}</span>
+      <h1>{t(locale, "catalog.title")}</h1>
+      <p class="u-lead">{t(locale, "catalog.sub")}</p>
+      <p class="callout">{t(locale, "catalog.privacy")}</p>
+    </div>
+
+    {!listed.ok && <p class="callout callout--warn">{t(locale, "catalog.error")}</p>}
+
+    <div class="cluster">
+      <label for="catalog-area">
+        <span class="faint">{t(locale, "catalog.filter.area")}</span>
+        <select
+          id="catalog-area"
+          data-catalog-filter="area"
+          data-catalog-label={t(locale, "catalog.filter.area")}
+        >
+          <option value="">{t(locale, "catalog.filter.allAreas")}</option>
+          {areas.map((area) => <option value={area}>{t(locale, AREA_KEYS[area])}</option>)}
+        </select>
+      </label>
+
+      <label for="catalog-language">
+        <span class="faint">{t(locale, "catalog.filter.language")}</span>
+        <select
+          id="catalog-language"
+          data-catalog-filter="language"
+          data-catalog-label={t(locale, "catalog.filter.language")}
+        >
+          <option value="">{t(locale, "catalog.filter.allLanguages")}</option>
+          {
+            languages.map((language) => (
+              <option value={language}>{languageLabel(language)}</option>
+            ))
+          }
+        </select>
+      </label>
+
+      <label for="catalog-integration">
+        <span class="faint">{t(locale, "catalog.filter.integration")}</span>
+        <select
+          id="catalog-integration"
+          data-catalog-filter="integration"
+          data-catalog-label={t(locale, "catalog.filter.integration")}
+        >
+          <option value="">{t(locale, "catalog.filter.allIntegrations")}</option>
+          {
+            integrations.map((integration) => (
+              <option value={integration}>{t(locale, INTEGRATION_KEYS[integration])}</option>
+            ))
+          }
+        </select>
+      </label>
+    </div>
+
+    <!-- One live region carries the count; the empty state below explains WHY
+         nothing matched, so the two never repeat the same sentence. -->
+    <p class="faint" role="status" aria-live="polite" data-catalog-count>
+      {format(t(locale, "catalog.count"), { count: tools.length, total: tools.length })}
+    </p>
+    <p class="callout" data-catalog-empty hidden></p>
+
+    <!-- `role="list"` keeps the list semantics for assistive tech, but as a
+         real list element it would inherit bullets and indent that no catalog
+         style resets. The grid is a plain container whose children are the
+         list items. -->
+    <div class="grid" role="list">
+      {
+        tools.map((tool) => {
+          const route = SITE_ROUTES[tool.id];
+          const planned = tool.status === "planned";
+          return (
+            <article
+              class="card"
+              role="listitem"
+              data-tool-card
+              data-status={tool.status}
+              data-area={tool.area}
+              data-integration={tool.integration}
+              data-languages={tool.languages.join(" ")}
+            >
+              <div class="cluster">
+                <span class={STATUS_BADGE[tool.status]}>{t(locale, STATUS_KEYS[tool.status])}</span>
+                <span class="badge">{t(locale, INTEGRATION_KEYS[tool.integration])}</span>
+                <span class="badge">{t(locale, AREA_KEYS[tool.area])}</span>
+              </div>
+
+              {/* A planned card must not look like a working one: it is not a
+                  link and carries its own warning, so it is never mistaken for
+                  something you can open. */}
+              {planned && (
+                <p class="callout callout--warn" data-planned-mark>
+                  {t(locale, "catalog.plannedMark")}
+                </p>
+              )}
+
+              <h2 class="card__title">
+                {route ? <a href={localePath(locale, route)}>{tool.name[locale]}</a> : tool.name[locale]}
+              </h2>
+
+              <p class="card__body">{notesOf(tool)}</p>
+              <p class="faint">{languageLine(tool)}</p>
+
+              {tool.citation && (
+                <details class="faint">
+                  <summary>{t(locale, "catalog.cite")}</summary>
+                  <p class="card__body">{tool.citation}</p>
+                </details>
+              )}
+
+              {route && <p class="card__cta">{t(locale, "catalog.open")} →</p>}
+            </article>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initToolCatalog } from "../scripts/catalogo/index";
+  import { safeInit } from "../scripts/core/safe";
+
+  // A broken filter must not take the page down with it: safeInit contains the
+  // failure and names the widget in the console.
+  safeInit("tool catalog", initToolCatalog);
+</script>
