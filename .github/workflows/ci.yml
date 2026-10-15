@@ -35,6 +35,14 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # El linter no opina sobre el formato, y durante un tiempo eso dejo un hueco:
+      # `format:check` existia en package.json y no lo invocaba nadie, ni la puerta
+      # local ni este workflow, asi que un archivo mal indentado pasaba todo. Un
+      # verde que no significa lo que dice es peor que un rojo, porque un verde no
+      # lo investiga nadie.
+      - name: Format
+        run: npm run format:check
+
       # Esta es la forma ejecutable del ADR 0001: las flechas de la arquitectura
       # apuntan hacia adentro (la UI y los adaptadores conocen el núcleo, nunca al
       # revés). Si alguien invierte una flecha, CI la rechaza aquí en lugar de

@@ -143,7 +143,9 @@ test("un CSV con un encabezado distinto se rechaza y explica por que", async ({ 
     buffer: Buffer.from("letra,sonido\nx,ks\n", "utf8"),
   });
 
-  await expect(page.locator("[data-status]")).toContainText("grapheme,ipa,before,after,priority,note");
+  await expect(page.locator("[data-status]")).toContainText(
+    "grapheme,ipa,before,after,priority,note",
+  );
 });
 
 test("avisa visiblemente cuando el almacenamiento se degrada a memoria", async ({ page }) => {

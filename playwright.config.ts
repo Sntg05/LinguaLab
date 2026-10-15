@@ -53,7 +53,7 @@ export default defineConfig({
     //
     // Un verde que no significa lo que dice es peor que un rojo: nadie investiga
     // un verde. Con `false`, Playwright exige el puerto libre y, si está ocupado,
-    // falla diciendo qué lo ocupa. Es un segundo de fricción a cambio de que
+    // falla avisando que la url ya esta en uso. Es un segundo de friccion a cambio de que
     // «pasa» signifique «pasa contra lo que se despliega».
     reuseExistingServer: false,
   },
