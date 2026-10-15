@@ -276,7 +276,9 @@ function indexTree(root: TreeNode): IndexedNode[] {
   const index: IndexedNode[] = [];
   const walk = (node: TreeNode, path: number[]): void => {
     index.push({ node, path: [...path] });
-    node.children.forEach((child, i) => walk(child, [...path, i]));
+    node.children.forEach((child, i) => {
+      walk(child, [...path, i]);
+    });
   };
   walk(root, []);
   return index;

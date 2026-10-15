@@ -207,8 +207,7 @@ function attributesWithAncestors(html) {
   const stack = [];
   const tag = /<(\/?)([a-zA-Z][\w:-]*)([^>]*?)(\/?)>/g;
 
-  let match;
-  while ((match = tag.exec(html)) !== null) {
+  for (let match = tag.exec(html); match !== null; match = tag.exec(html)) {
     const [, closing, name, rawAttrs, selfClosing] = match;
     const lower = name.toLowerCase();
 

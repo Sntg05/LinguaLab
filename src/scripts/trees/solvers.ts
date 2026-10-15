@@ -455,7 +455,9 @@ export function buildRB(values: number[]): {
   check(root);
 
   if (violations.length)
-    violations.forEach((v) => L.push("⚠ " + v));
+    violations.forEach((v) => {
+      L.push("⚠ " + v);
+    });
   else L.push("✓ 5 invariantes de rojo-negro verificadas");
 
   return {
@@ -831,7 +833,7 @@ export function buildHuffman(text: string | number): {
     if (c !== "\n") freq[c] = (freq[c] || 0) + 1;
   });
 
-  let heapArr: HuffNode[] = Object.keys(freq).map((c) => {
+  const heapArr: HuffNode[] = Object.keys(freq).map((c) => {
     return { ch: c, f: freq[c]!, l: null, r: null };
   });
   if (!heapArr.length)
@@ -919,7 +921,9 @@ export function buildHuffman(text: string | number): {
       return (c === " " ? "␣" : c) + " → " + codes[c] + " (" + freq[c] + ")";
     });
   L.push("--- códigos ---");
-  table.forEach((r) => L.push(r));
+  table.forEach((r) => {
+    L.push(r);
+  });
 
   return {
     tree: toTree(root) ?? makeNode("vacío", []),
