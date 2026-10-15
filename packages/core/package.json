@@ -1,0 +1,22 @@
+{
+  "name": "@lingualab/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dominio, puertos y casos de uso de LinguaLab en TypeScript puro: sin DOM, sin red, sin librerias de UI.",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./testing": {
+      "types": "./src/testing/index.ts",
+      "default": "./src/testing/index.ts"
+    }
+  },
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc -p . --noEmit"
+  }
+}

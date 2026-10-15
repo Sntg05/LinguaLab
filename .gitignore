@@ -5,6 +5,11 @@ node_modules/
 dist/
 .astro/
 
+# Test and tooling artifacts
+coverage/
+*.tsbuildinfo
+.dependency-cruiser-cache/
+
 # Logs
 *.log
 npm-debug.log*
@@ -19,3 +24,5 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+# Local Pi runtime state
+.atl/

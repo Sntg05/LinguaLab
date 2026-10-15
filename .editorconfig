@@ -1,0 +1,18 @@
+# Un solo estilo de archivo para todo el repositorio. Los editores lo leen
+# solos, así que las discusiones de espacios desaparecen antes del primer diff.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.md]
+# El Markdown usa dos espacios finales para forzar salto de línea.
+trim_trailing_whitespace = false
+
+[*.{yml,yaml}]
+indent_size = 2

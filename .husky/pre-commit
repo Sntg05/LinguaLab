@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# Formatea y lintea SOLO lo que se está commiteando, y solo el código nuevo del
+# núcleo hexagonal. El sitio Astro v2.0.0 no pasa por aquí a propósito: ver
+# ADR 0003 (fidelidad de la v2.0.0 y adopción gradual del lint).
+npx --no-install lint-staged

@@ -3,6 +3,9 @@
   "version": "2.0.0",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "description": "Plataforma de analisis linguistico que corre enteramente en el navegador: fonetica AFI, arboles sintacticos, analisis de corpus y bibliografia.",
   "license": "MIT",
   "engines": {
@@ -20,7 +23,27 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint:css": "stylelint \"src/**/*.{css,astro}\"",
-    "verify": "npm run check && npm run test && npm run build:verify"
+    "verify": "npm run check && npm run test && npm run build:verify",
+
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "typecheck:packages": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run check && npm run typecheck:packages",
+    "deps:check": "node scripts/deps-check.mjs",
+    "verify:all": "npm run lint && npm run typecheck:packages && npm run deps:check && npm run verify",
+    "commitlint": "commitlint --edit",
+    "prepare": "husky || true"
+  },
+
+  "lint-staged": {
+    "packages/**/*.ts": [
+      "biome check --write --no-errors-on-unmatched"
+    ],
+    "{tsconfig.base.json,biome.json,package.json}": [
+      "biome format --write --no-errors-on-unmatched"
+    ]
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
@@ -29,6 +52,12 @@
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/newsreader": "^5.3.0",
     "@fontsource/noto-sans": "^5.3.0",
+    "@biomejs/biome": "2.5.15",
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3",
+    "dependency-cruiser": "18.5.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.0",
     "astro": "^7.3.5",
     "typescript": "^6.0.3",
     "vitest": "^5.0.2"
