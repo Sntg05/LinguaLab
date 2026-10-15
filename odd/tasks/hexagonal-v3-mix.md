@@ -288,8 +288,10 @@ plausible se sostenían el uno al otro, y ninguno de los dos miraba el puerto.
 Se cerró de las dos formas:
 
 1. El tema oscuro entra en la puerta: 21 páginas × 2 temas = **42 pruebas de accesibilidad**, 56 con los
-   flujos, todas en verde contra `dist/`. `emulateMedia({ colorScheme })` va **antes** de `goto`, porque
-   la hoja decide la paleta con `prefers-color-scheme` y navegar primero pintaría el tema del sistema.
+   flujos, todas en verde contra `dist/`. `emulateMedia({ colorScheme })` va **antes** de `goto` para que el
+   tema quede fijado desde el primer pintado, **no porque el orden cambie lo que se mide**: un verificador
+   comprobó que emular después de navegar pinta la misma paleta y da el mismo resultado de axe. Una versión
+   anterior de esta entrada decía que navegar primero mediría el tema equivocado, y era falso.
 2. La guarda pasa a ser estructural: `reuseExistingServer: false`. Si el puerto está ocupado, la puerta
    **falla avisando que la url ya esta en uso** (`already used, make sure that nothing is running on the
    port`) —nombra la url, no el proceso que la ocupa—, comprobado ocupando el puerto con un señuelo y

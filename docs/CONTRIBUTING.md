@@ -53,6 +53,7 @@ src/                  el sitio Astro: el adaptador primario
 | `npm test` | Vitest: sitio, núcleo y adaptadores |
 | `npm run test:e2e` | Playwright contra el sitio **compilado**: accesibilidad con axe y flujos reales |
 | `npm run build:verify` | Compila y verifica el resultado (CSP, peso, subrecursos) |
+| `npm run format:check` | Formato con Biome. Dentro de `verify:all` y de CI desde este cambio |
 | `npm run verify:all` | Todas las anteriores menos `test:e2e`, en orden |
 
 `npm run verify:all` es la puerta completa. Si pasa, el cambio es publicable.

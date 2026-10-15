@@ -15,7 +15,7 @@ una decisión ya tomada, y rehacerla suele dar un resultado peor que el que est�
 cd ~/Documentos/06\ Proyectos/LinguaLab
 nvm use 22            # sin esto no corren las puertas; hay .nvmrc
 npm install
-npm run verify:all    # lint, tipos, reglas hexagonales, 744 pruebas, build verificado
+npm run verify:all    # lint, formato, tipos, reglas hexagonales, 744 pruebas, build verificado
 npx playwright test   # 56 e2e; requiere el puerto 4321 LIBRE (ver P7)
 ```
 
@@ -108,16 +108,26 @@ prueba falla y el adaptador está mal.
 
 **Síntoma.** Ninguno hoy. Es el costo de mantenimiento de la próxima persona.
 
-**Evidencia.** `npm run lint` da **0 errores y 41 avisos**. De los 41, **26** son
-`noExcessiveCognitiveComplexity`. Cinco están en código nuevo y concentrados:
+**Evidencia.** `npm run lint` da **0 errores y 42 avisos**. De los 42, **27** son
+`noExcessiveCognitiveComplexity`. Seis están en código nuevo y concentrados:
 
 | Archivo | Complejidad |
 |---|---|
 | `src/scripts/ortografia/index.ts` | **40**, más dos de 16 y 23 |
 | `src/scripts/ortografia/csv.ts` | 23 y 21 |
+| `e2e/accessibility.spec.ts` | 1, introducido por la afirmación sobre `incomplete` |
 
-Los otros 21 son de código heredado de la v2.0.0, y **4 provienen de la regla nueva de `biome.json`**:
-no son heredados en sentido estricto, porque esa configuración no existía antes de esta rama.
+El de la puerta de accesibilidad **lo agregó este mismo cambio**: eran 41 avisos con 26 de complejidad
+antes de la afirmación, y el anidamiento de `flatMap` más las ramas la cruzaron de umbral. Se anota en vez
+de esconderse, y baja solo si se extrae la lógica de cada comprobación a una función con nombre —que es
+lo que corresponde hacer cuando alguien toque ese archivo por otro motivo—.
+
+Los otros 21 son de código heredado de la v2.0.0, y 27 = 6 nuevos + 21 heredados. Y de los **15 avisos que no son de
+complejidad**, **4
+provienen de la regla nueva de `biome.json`** —`useBiomeIgnoreFolder`, sobre el propio `biome.json`—, que no
+existía antes de esta rama: esos 4 no son heredados en sentido estricto. La suma tiene que dar 26 + 15 = 41,
+y una versión anterior de este documento escribía «21 y 4» como si los 4 salieran de los 21, que no es de
+donde salen.
 
 **Por qué no se hizo.** El archivo de 40 es el manejador de un `click` **delegado**: un `switch` sobre
 veinte acciones. Partirlo en funciones con nombre es lo correcto y es una refactorización que conviene
@@ -259,8 +269,11 @@ fuente, la tabla entra con su cita; si no, se queda vacía.
 
 ## P10 — Dos detalles que no son defectos y conviene no confundir con defectos
 
-**`incomplete` de axe en `.btn__arrow`** (`messageKey: nonBmp`). axe no puede decidir el contraste de un
-carácter fuera del plano básico: la flecha no es un error de la página, es un límite de la herramienta.
+**`incomplete` de axe en `.btn__arrow`** (`messageKey: nonBmp`). axe saltea el contraste de un contenido
+compuesto solo de caracteres que su regex trata como símbolos, y esa regex cubre flechas, operadores y
+dingbats **dentro** del plano básico: la flecha es `→`, U+2192. O sea que **no** es «un carácter fuera del
+plano básico», como decía una versión anterior de este documento. La flecha no es un error de la página:
+es un límite de la herramienta.
 Idéntico en los dos temas y **preexistente** a esta rama. No lo «arregles» cambiando el carácter sin
 entender por qué axe duda.
 
@@ -276,23 +289,35 @@ lea el cambio.
 que **nadie los midió**.
 
 **Evidencia.** Al afirmar por primera vez sobre `results.incomplete` —hasta ahora la puerta solo miraba
-`violations`— aparecieron **36 + 28 + 16 resultados incompletos** en `inicio` y `FonoLab`, en los dos
-temas. axe declara cuatro motivos y los cuatro significan que **no pudo medir**: `imgNode` («background
-color could not be determined because element contains an image node»), `bgOverlap` («...because it is
-overlapped by another element»), `shortTextContent` (`visibleText.length === 1`: no decide si el texto es
-«grande») y `nonBmp` (caracteres fuera del plano básico). Los nodos son `<text>` y `<tspan>` de SVG,
-`button[data-symbol]` del teclado AFI, y `.tract__labels--on-shape`.
+`violations`— aparecieron muchísimos resultados incompletos que nadie había mirado. Medido por un
+verificador, **por página y tema**: `inicio` **9**, `FonoLab` **15**, `salvaguardas` **16**, `acerca` 4,
+`arboles` 2, `no-existe` 1. En total **186 nodos** sobre las 21 páginas en los dos temas.
+
+De esos, axe declara motivos que significan **no pude medir**: `imgNode` («background color could not be
+determined because element contains an image node»), `bgOverlap` («...because it is overlapped by another
+element») y `nonBmp` (contenido compuesto solo de símbolos que su regex no trata como texto). Los nodos
+son `<text>` y `<tspan>` de SVG, `button[data-symbol]` del teclado AFI, `.tract__labels--on-shape` y
+`.btn__arrow` en `inicio`.
+
+**`shortTextContent` NO entra en esa categoría, y al principio sí entró.** Se creyó que significaba «no
+decide si un carácter es texto». El código de axe dice otra cosa: se asigna en una rama guardada por
+`!isValid`, o sea que axe **ya midió un ratio que no alcanza**. Un verificador lo demostró con una
+mutación: un texto a **2,63:1** —por debajo del 3:1 exigido— pasaba la puerta. Por eso ahora un
+`incomplete` falla también cuando su motivo está permitido pero axe trae un `contrastRatio` positivo menor
+que el `expectedContrastRatio`.
 
 **Por qué importa.** Es la diferencia entre «verificado» y «no mirado», y el proyecto declara WCAG 2.2 AA
 como requisito. Un punto ciego declarado se puede cerrar; uno silencioso se convierte en una afirmación
 falsa.
 
 **Lo que NO hay que hacer: medirlo con estilos computados.** Se intentó y **la medición era falsa**. Subir
-por los ancestros buscando el primer `background-color` o `fill` opaco toma el valor heredado de un `<g>`
-de SVG **que no pinta nada**, e inventa un fondo: con ese método «gato» en la portada daba **1,67:1**, y
-mirando los píxeles es texto oscuro sobre fondo claro. El método producía defectos donde no había ninguno
-—estuvo a punto de entrar a este documento como dos hallazgos reales—. Queda escrito acá porque es el
-atajo que va a tentar a la próxima sesión.
+por los ancestros buscando el primer `background-color` o `fill` opaco **no encuentra un fondo**: en el SVG
+de la portada no hay ningún `<g>`, y lo que toma es el `fill` computado por defecto del propio `<svg>`,
+que es `rgb(0, 0, 0)` sin que nada se pinte de negro. Con ese método «gato» daba **2,266:1**; el ratio
+real, medido sobre el `background-color` de verdad y confirmado muestreando los píxeles del recorte
+(`2061` píxeles de `rgb(254,253,248)` y `184` de `rgb(81,69,60)`), es **9,098:1**. El método inventaba
+defectos donde no había ninguno —estuvo a punto de entrar a este documento como dos hallazgos reales—.
+Queda escrito porque es el atajo que va a tentar a la próxima sesión.
 
 **Próximo paso exacto.** Medir **píxeles**, no estilos: capturar la caja del nodo, muestrear de la imagen
 el color del texto y el del fondo real, y calcular el ratio. Sirve un `<canvas>` para leer los bytes y un
@@ -303,3 +328,34 @@ estilos, y porque ahí el fondo es un `background-color` real de un `<button>`: 
 **Criterio de aceptación.** Cada nodo que aparece en `incomplete` tiene un ratio medido **desde píxeles**,
 con el método guardado en el repositorio, y la lista `AXE_COULD_NOT_MEASURE` de `e2e/accessibility.spec.ts`
 queda con una justificación por motivo en lugar de una promesa.
+
+---
+
+## P12 — La afirmación de `incomplete` descarta en silencio los resultados sin motivo textual
+
+**Síntoma.** Un resultado `incomplete` de axe puede pasar por la puerta sin que nadie lo vea.
+
+**Evidencia.** La afirmación lee el motivo de `check.data.messageKey` y exige que sea texto. axe a veces
+pone `data` como **array** en lugar de objeto, y ahí no hay `messageKey`. Un verificador lo encontró en
+`/arboles`, en los dos temas:
+
+```
+rule=aria-required-children   impact=critical
+  target=.checks__list   html="<ul class=\"checks__list\" role=\"list\"></ul>"
+    message="Expecting ARIA child role to be added: listitem"   data=["listitem"]
+```
+
+Es de impacto **crítico** y la puerta pasó `/arboles` en todas las corridas.
+
+**Por qué no se cerró ya.** Cerrarlo es fácil —tratar «sin motivo» como no permitido hace fallar la
+prueba— pero eso deja la suite **roja** hasta decidir antes una pregunta de producto: una `<ul role="list">`
+vacía que se llena por JavaScript, ¿es un defecto real o un falso positivo de axe mirando el HTML inicial?
+La respuesta cambia el arreglo: si es real se arregla el marcado, si no se documenta la excepción con su
+razón. Decidirlo desde el código, sin mirar la página, sería adivinar.
+
+**Próximo paso exacto.** Abrí `/arboles`, mirá si esa lista se puebla en el navegador y con qué. Recién
+entonces: cambiar el marcado, o agregar la excepción nombrando este caso. Después, tratar «sin motivo» como
+no permitido en `e2e/accessibility.spec.ts` y confirmar que la suite queda verde por la razón correcta.
+
+**Criterio de aceptación.** La puerta falla si aparece un `incomplete` sin motivo textual, y el caso de
+`/arboles` está o arreglado o exceptuado **por nombre y con su razón**, nunca filtrado sin dejar rastro.
