@@ -359,3 +359,41 @@ no permitido en `e2e/accessibility.spec.ts` y confirmar que la suite queda verde
 
 **Criterio de aceptación.** La puerta falla si aparece un `incomplete` sin motivo textual, y el caso de
 `/arboles` está o arreglado o exceptuado **por nombre y con su razón**, nunca filtrado sin dejar rastro.
+
+---
+
+## P13 — Cinco inexactitudes menores que quedaron sin corregir
+
+Las encontró la cuarta verificación independiente, todas **preexistentes** a la ronda que las reportó. No
+se corrigieron por presupuesto, y quedan con su ubicación exacta para que sea cuestión de minutos.
+
+**1. Rename incompleto de `T16` a `P1`.** `docs/STATUS.md:53` ya se corrigió, pero quedan referencias
+viejas en `docs/pr/04-editor-de-ortografia.md:97,106` y `docs/pr/05-catalogo.md:83`. `T16` era el id de la
+lista de trabajo de la sesión; en este documento el tema es **P1**. Un lector que busque «T16» no encuentra
+nada.
+
+**2. `docs/PENDING.md` P4 describe mal el manejador.** Dice que el archivo de complejidad 40 es «un
+`switch` sobre veinte acciones». Es falso: `src/scripts/ortografia/index.ts:592` es una **cadena de ramas
+`if` con salidas tempranas**; los `switch` de ese archivo (líneas 326, 450, 518) son sobre `error.code` y
+`field`, y no tienen que ver. Correcto: «una cadena de `if` sobre unas veinte acciones».
+
+**3. La explicación de `shortTextContent` en P11 repite la lectura que los datos no sostienen.** El
+verificador midió que **las 28 apariciones en el sitio traen `contrastRatio: 0`**, que este mismo documento
+define como «axe no calculó nada». La guarda `!isValid` de axe es real, pero también es verdadera cuando
+no pudo calcular. El **arreglo no cambia** —comprobar el dato antes que el motivo sigue siendo correcto y
+está probado por mutación—, lo que cambia es cómo se explica. El spec ya quedó corregido; falta alinear la
+redacción de P11 con esa corrección.
+
+**4. `odd/tasks/hexagonal-v3-mix.md:302` promete más de lo que hay.** Dice que las doce entradas tienen
+todas «síntoma, evidencia medida, por qué no se hizo, próximo paso exacto y criterio de aceptación». No es
+así: **P10** no tiene ninguno de los cinco campos, **P7** no tiene criterio de aceptación, y **P6, P8 y
+P11** no tienen «por qué no se hizo». O se completan, o la frase se acota a las entradas que sí los tienen.
+
+**5. La lista por página puede inducir a error.** P11 y `docs/STATUS.md` enumeran `inicio 9, FonoLab 15,
+salvaguardas 16, acerca 4, arboles 2, no-existe 1`. Sumar esos números da 47 y el total es **186**, porque
+son **por idioma y por tema**: cada ruta aparece dos veces por tema (español e inglés). El total está bien;
+lo que falta es decir que la lista es por página y tema, no un desglose del total.
+
+**Criterio de aceptación.** Las cinco quedan corregidas, y ninguna introduce una afirmación nueva que no
+esté medida. La lección de esta sesión se aplica a sí misma: **toda ronda de corrección necesita su propia
+verificación**, porque en la ronda anterior tres de cinco errores los había introducido la corrección.

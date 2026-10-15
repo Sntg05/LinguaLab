@@ -96,12 +96,16 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
  *                  el motivo no tiene nada que ver con el plano básico. Y una
  *                  versión anterior de este comentario decía eso último: era falso.
  *
- * `shortTextContent`: axe **ya midió** un ratio que no alcanza —la rama está guardada
- * por `!isValid`— y solo duda de si un carácter cuenta como texto. O sea que NO
- * significa «no pudo medir». Está en la lista **solo porque el dato se comprueba antes
- * que el motivo**: si trae un contraste medido por debajo del exigido, falla igual. Un
- * verificador lo probó con una mutación —un texto a 2,63:1 sobre un umbral de 3:1
- * pasaba la puerta— y con el orden invertido ese caso lo caza el dato.
+ * `shortTextContent`: la rama está guardada por `!isValid`, así que este motivo NO garantiza
+ *                  que axe haya medido algo. Medido en el sitio, las **28** apariciones traen
+ *                  `contrastRatio: 0`, o sea que axe **no calculó** ninguna. Pero la mutación de
+ *                  un verificador probó que la rama también puede traer un ratio medido y
+ *                  insuficiente (2,63:1 sobre un umbral de 3:1). Por eso no alcanza con mirar el
+ *                  motivo: está en la lista **solo porque el dato se comprueba antes**, y si trae
+ *                  un contraste medido por debajo del exigido falla igual. Un comentario anterior
+ *                  decía que axe «ya midió un ratio que no alcanza» en todos los casos, y los datos
+ *                  del propio sitio no lo sostienen: es `!isValid`, que también es cierto cuando no
+ *                  pudo calcular.
  *
  * POR ESO LA AFIRMACIÓN NO ES «ESTE MOTIVO ESTÁ PERMITIDO» sino «este motivo no trae
  * un contraste medido por debajo del exigido». Un `incomplete` falla si su motivo no
