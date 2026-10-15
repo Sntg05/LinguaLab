@@ -26,6 +26,19 @@ Reglas de esta tabla:
 | [husky](https://www.npmjs.com/package/husky) | 9.1.7 | MIT | Ganchos de git: lint de lo que se está commiteando |
 | [lint-staged](https://www.npmjs.com/package/lint-staged) | 17.6.0 | MIT | Ejecuta el linter solo sobre los archivos preparados |
 | [@astrojs/sitemap](https://www.npmjs.com/package/@astrojs/sitemap) | 3.7.4 | MIT | Genera el `sitemap.xml` en la compilación |
+| [@playwright/test](https://www.npmjs.com/package/@playwright/test) | 1.63.0 | Apache-2.0 | Recorre los flujos de la interfaz en un navegador de verdad |
+| [playwright](https://www.npmjs.com/package/playwright) | 1.63.0 | Apache-2.0 | El motor de navegador que Playwright controla |
+| [@axe-core/playwright](https://www.npmjs.com/package/@axe-core/playwright) | 4.13.0 | MPL-2.0 | Comprueba accesibilidad WCAG 2.2 AA en las páginas publicadas |
+| [axe-core](https://www.npmjs.com/package/axe-core) | 4.13.0 | MPL-2.0 | El motor de reglas que usa axe |
+| [fake-indexeddb](https://www.npmjs.com/package/fake-indexeddb) | 6.2.5 | Apache-2.0 | IndexedDB en memoria, para probar el adaptador en Node sin navegador |
+
+### Sobre la MPL-2.0 de axe
+
+`axe-core` y `@axe-core/playwright` son MPL-2.0, que es copyleft **a nivel de archivo**: obliga a
+publicar las modificaciones a *sus* archivos, no a contaminar el resto del proyecto. Aquí se usan sin
+modificarlos y solo como dependencias de desarrollo, así que no afectan a la licencia de LinguaLab ni a
+lo que se publica. Se anota porque una licencia con condiciones merece estar declarada y no descubierta
+después.
 
 ## Tipografía
 
