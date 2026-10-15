@@ -57,9 +57,9 @@ module.exports = {
       name: "no-reaching-into-core-internals",
       severity: "error",
       comment:
-        "Nadie importa archivos sueltos del núcleo por ruta profunda: la superficie pública es el índice del paquete.",
+        "Nadie importa archivos sueltos del núcleo por ruta profunda: sus DOS entradas públicas son el índice del paquete y el subpath de pruebas, tal como los declara packages/core/package.json. Cualquier otra ruta profunda queda prohibida.",
       from: { pathNot: "^packages/core" },
-      to: { path: "^packages/core/src/(?!index\\.ts$)" },
+      to: { path: "^packages/core/src/(?!index\\.ts$)(?!testing/index\\.ts$)" },
     },
   ],
   options: {

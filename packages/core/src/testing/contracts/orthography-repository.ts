@@ -78,6 +78,27 @@ export const runOrthographyRepositoryPortContract = (
       }
     });
 
+    it("remove es idempotente: borrar un id inexistente devuelve ok", async () => {
+      const removed = await adapter.remove("no-existe");
+
+      // El fake y el adaptador de IndexedDB discrepaban en esto —uno devolvia
+      // `not-found` y el otro `ok`— y ninguna prueba lo cubria, asi que los dos
+      // pasaban la suite mientras se comportaban distinto. Eso es exactamente lo
+      // que una suite de contrato existe para impedir.
+      expect(isOk(removed)).toBe(true);
+    });
+
+    it("exportJson de un id inexistente si es un error tipado", async () => {
+      const exported = await adapter.exportJson("no-existe");
+
+      // La otra cara de la decision: aqui la ausencia impide producir el archivo,
+      // asi que devolver texto vacio escondería el problema en vez de reportarlo.
+      expect(isErr(exported)).toBe(true);
+      if (isErr(exported)) {
+        expect(exported.error.code).toBe("not-found");
+      }
+    });
+
     it("remove borra la tabla y get vuelve a devolver null", async () => {
       const table = contractTable();
       await adapter.save(table);

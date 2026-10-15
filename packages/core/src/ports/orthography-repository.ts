@@ -44,6 +44,19 @@ export interface OrthographyRepositoryPort {
   list(): Promise<Result<readonly OrthographyTableSummary[], OrthographyRepositoryError>>;
   get(id: string): Promise<Result<OrthographyTable | null, OrthographyRepositoryError>>;
   save(table: OrthographyTable): Promise<Result<OrthographyTable, OrthographyRepositoryError>>;
+  /**
+   * Borra la tabla. Es **idempotente**: borrar un id que ya no esta devuelve
+   * `ok`, no `not-found`.
+   *
+   * La razon es de uso, no de pereza: quien pulsa borrar dos veces, o pulsa
+   * borrar sobre un listado que quedo viejo, quiere el mismo resultado. Convertir
+   * esa carrera en un error obligaria a la interfaz a disculparse por algo que el
+   * usuario pidio y que de hecho ocurrio. `not-found` sigue existiendo para
+   * `exportJson`, donde la ausencia si impide producir el archivo.
+   *
+   * Esta escrito aqui, y no en la cabeza de quien implemente el proximo
+   * adaptador, porque el contrato lo comprueba.
+   */
   remove(id: string): Promise<Result<void, OrthographyRepositoryError>>;
   exportJson(id: string): Promise<Result<string, OrthographyRepositoryError>>;
   importJson(text: string): Promise<Result<OrthographyTable, OrthographyRepositoryError>>;

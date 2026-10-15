@@ -81,9 +81,9 @@ export class InMemoryOrthographyRepository implements OrthographyRepositoryPort 
   }
 
   async remove(id: string): Promise<Result<void, OrthographyRepositoryError>> {
-    if (!this.tables.has(id)) {
-      return err({ code: "not-found", id });
-    }
+    // Idempotente a proposito: ver el comentario del puerto. Borrar algo que ya
+    // no esta no es un fallo, y el listado que veia quien pulso puede estar
+    // desactualizado. El contrato lo comprueba.
     this.tables.delete(id);
     return ok(undefined);
   }
