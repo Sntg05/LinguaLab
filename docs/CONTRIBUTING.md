@@ -61,6 +61,14 @@ src/                  el sitio Astro: el adaptador primario
 servidor: `npx playwright install chromium` una vez, y después `npm run test:e2e`. Conviene correrlo
 antes de un PR que toque la interfaz; en CI llega con su propio paso.
 
+**Si tenés `npm run dev` corriendo, `test:e2e` falla —y está bien que falle.** La puerta exige el puerto
+4321 libre porque prueba el sitio **compilado** (`dist/`), no el de desarrollo. Reutilizar el servidor de
+desarrollo parece cómodo y es una trampa: ese servidor no aplica la CSP, sirve los módulos sin empaquetar
+y compila a demanda, así que las pruebas miden un artefacto que nadie publica. Y con la suite entera
+encima, casi todas se caen por tiempo de espera, así que el fallo se lee como un problema de las pruebas
+y no como lo que es. Pará `npm run dev` antes de correr la puerta; el error te dice que hay algo ocupando
+el puerto.
+
 **Toda página pública nueva entra en `e2e/accessibility.spec.ts`.** No es una formalidad: el proyecto
 declara WCAG 2.2 AA como requisito, y una declaración que nadie comprueba se degrada sola. Esa prueba
 encontró un `aria-pressed` puesto sobre un enlace —inválido en ARIA— en el sitio que ya estaba en

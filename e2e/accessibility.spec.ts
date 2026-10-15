@@ -20,6 +20,27 @@ import { expect, test } from "@playwright/test";
 const WCAG_22_AA_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
 /**
+ * Los dos temas que el sitio declara soportar.
+ *
+ * POR QUE SE PRUEBAN LOS DOS
+ *
+ * El tema oscuro no es un extra: `base.css` define la paleta clara y, cuando el
+ * sistema pide oscuro, el bloque `@media (prefers-color-scheme: dark)` la
+ * reemplaza entera. Son dos juegos de colores distintos, así que un contraste
+ * aprobado en uno no dice nada del otro. La puerta probaba un solo tema, y un
+ * token que fallaba en LOS DOS —`--line-strong` como color de texto: 2.0:1 en
+ * claro y 2.4:1 en oscuro— pasó desapercibido porque nadie miraba.
+ *
+ * El tema se emula con `emulateMedia` ANTES de `goto`: la hoja de estilos decide
+ * la paleta con la consulta `prefers-color-scheme`, así que si se navega primero
+ * la página se pinta con la paleta del sistema y lo medido ya no es el otro tema.
+ */
+const THEMES: readonly { readonly scheme: "light" | "dark"; readonly name: string }[] = [
+  { scheme: "light", name: "claro" },
+  { scheme: "dark", name: "oscuro" },
+];
+
+/**
  * Las páginas que hoy existen. El catálogo de herramientas y el editor de tablas
  * entran aquí en cuanto tengan ruta, con el mismo criterio: si una página es
  * pública, declara su accesibilidad por escrito y la prueba la sostiene.
@@ -58,9 +79,14 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
   { path: "/no-existe", name: "pagina 404" },
 ];
 
-for (const { path, name } of PUBLIC_PAGES) {
-  test(`${name} no tiene violaciones de accesibilidad`, async ({ page }) => {
-    await page.goto(path);
+for (const { scheme, name: themeName } of THEMES) {
+  for (const { path, name } of PUBLIC_PAGES) {
+    test(`${name} no tiene violaciones de accesibilidad en tema ${themeName}`, async ({ page }) => {
+      // La emulacion va antes de navegar: la hoja decide la paleta con
+      // `prefers-color-scheme`, asi que navegar primero pintaria el tema del
+      // sistema y la medicion seria del tema equivocado.
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto(path);
 
     const results = await new AxeBuilder({ page }).withTags(WCAG_22_AA_TAGS).analyze();
 
@@ -79,5 +105,6 @@ for (const { path, name } of PUBLIC_PAGES) {
     }));
 
     expect(summary).toEqual([]);
-  });
+    });
+  }
 }

@@ -40,7 +40,21 @@ export default defineConfig({
   webServer: {
     command: "npm run build && npm run preview",
     url: `http://localhost:${PORT}`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    // POR QUE NO SE REUTILIZA UN SERVIDOR EXISTENTE, NI EN LOCAL
+    //
+    // `reuseExistingServer: true` es la comodidad habitual de Playwright, y aquí
+    // es una trampa silenciosa: si hay un `astro dev` escuchando en el puerto
+    // —cosa que pasa todo el tiempo mientras alguien mira el sitio— la puerta lo
+    // reutiliza y termina probando el servidor de DESARROLLO. Ese servidor no
+    // aplica la CSP, sirve los módulos sin empaquetar y compila a demanda, así
+    // que las pruebas miden un artefacto que nadie publica; encima, con 56
+    // pruebas golpeándolo, casi todas se caen por tiempo de espera y el fallo
+    // parece un problema de las pruebas en vez de lo que es.
+    //
+    // Un verde que no significa lo que dice es peor que un rojo: nadie investiga
+    // un verde. Con `false`, Playwright exige el puerto libre y, si está ocupado,
+    // falla diciendo qué lo ocupa. Es un segundo de fricción a cambio de que
+    // «pasa» signifique «pasa contra lo que se despliega».
+    reuseExistingServer: false,
   },
 });
