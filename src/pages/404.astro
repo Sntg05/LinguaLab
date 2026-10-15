@@ -66,7 +66,11 @@ const links = [
     margin: 0;
     font-size: clamp(3rem, 10vw, 6rem);
     line-height: 1;
-    color: var(--line-strong);
+    /* Estaba en `--line-strong`, que es un token de LINEA: sirve para bordes y
+       divisores, donde ser apenas visible es lo correcto, y como texto da un
+       contraste de 2.02:1 donde WCAG 2.2 AA exige 3:1 para texto grande. El
+       token de tinta es el que tiene la escala pensada para leerse. */
+    color: var(--ink-faint);
   }
 
   .notfound__list {

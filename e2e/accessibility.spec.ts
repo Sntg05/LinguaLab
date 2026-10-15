@@ -24,13 +24,38 @@ const WCAG_22_AA_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
  * entran aquí en cuanto tengan ruta, con el mismo criterio: si una página es
  * pública, declara su accesibilidad por escrito y la prueba la sostiene.
  */
+/**
+ * **Todas** las páginas públicas construidas. Si se añade una ruta, entra aquí.
+ *
+ * No es una lista de conveniencia: la única violación real que encontró esta
+ * puerta estaba en el `Masthead` compartido que usan todas las páginas, así que
+ * una página sin cubrir es una incógnita y no una certeza. Al principio la lista
+ * tenía seis entradas y llamarlas «las páginas públicas» era falso: existían
+ * catorce más sin cubrir.
+ */
 const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] = [
   { path: "/", name: "inicio (espanol)" },
   { path: "/en/", name: "inicio (ingles)" },
+  { path: "/fono", name: "FonoLab (espanol)" },
+  { path: "/en/fono", name: "FonoLab (ingles)" },
+  { path: "/arboles", name: "ArborLab (espanol)" },
+  { path: "/en/arboles", name: "ArborLab (ingles)" },
+  { path: "/tools", name: "estacion textual (espanol)" },
+  { path: "/en/tools", name: "estacion textual (ingles)" },
   { path: "/ortografia", name: "editor de tablas (espanol)" },
   { path: "/en/ortografia", name: "editor de tablas (ingles)" },
   { path: "/catalogo", name: "catalogo (espanol)" },
   { path: "/en/catalogo", name: "catalogo (ingles)" },
+  { path: "/glosario", name: "glosario (espanol)" },
+  { path: "/en/glosario", name: "glosario (ingles)" },
+  { path: "/bibliografia", name: "bibliografia (espanol)" },
+  { path: "/en/bibliografia", name: "bibliografia (ingles)" },
+  { path: "/seguridad", name: "salvaguardas (espanol)" },
+  { path: "/en/seguridad", name: "salvaguardas (ingles)" },
+  { path: "/acerca", name: "acerca (espanol)" },
+  { path: "/en/acerca", name: "acerca (ingles)" },
+  // Una ruta inexistente sirve la pagina 404, que tambien es publica.
+  { path: "/no-existe", name: "pagina 404" },
 ];
 
 for (const { path, name } of PUBLIC_PAGES) {
