@@ -6,6 +6,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "overrides": {
+    "playwright-core": "1.63.0"
+  },
   "description": "Plataforma de analisis linguistico que corre enteramente en el navegador: fonetica AFI, arboles sintacticos, analisis de corpus y bibliografia.",
   "license": "MIT",
   "engines": {
@@ -22,6 +25,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "lint:css": "stylelint \"src/**/*.{css,astro}\"",
     "verify": "npm run check && npm run test && npm run build:verify",
 

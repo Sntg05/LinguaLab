@@ -17,5 +17,8 @@
   },
   "dependencies": {
     "@lingualab/core": "0.1.0"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "6.2.5"
   }
 }

@@ -9,6 +9,7 @@
     "includes": [
       "packages/**/*.ts",
       "src/**/*.ts",
+      "e2e/**/*.ts",
       "scripts/**/*.mjs",
       "*.ts",
       "*.mjs",

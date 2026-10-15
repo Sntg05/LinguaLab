@@ -24,5 +24,12 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+# Playwright: informes, rastros y capturas de fallos. Son evidencia de una
+# corrida, no fuente: se regeneran, y en el historial solo estorban.
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
 # Local Pi runtime state
 .atl/
