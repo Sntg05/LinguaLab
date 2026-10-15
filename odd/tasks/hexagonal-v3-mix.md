@@ -137,3 +137,60 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado antes de escribir
   worker cubría la cobertura de esa rama pero no ese campo. Se corrigió con su prueba, y es
   exactamente el tipo de defecto que el principio de honestidad técnica del proyecto existe para
   atrapar: una etiqueta que afirma más de lo que el dato respalda.
+
+- **L8** (defecto de accesibilidad real en la v2.0.0, encontrado por la puerta nueva): al levantar la
+  infraestructura e2e, axe marcó `aria-allowed-attr` con impacto **crítico** en **ambas** páginas de
+  inicio, sobre los nodos `a[href="/"]` y `a[aria-current="true"]`.
+
+  Diagnóstico, no conjetura: `src/components/Masthead.astro` ponía
+  `aria-pressed={l === locale ? "true" : "false"}` en los **enlaces** del selector de idioma.
+  `aria-pressed` solo es válido en elementos con rol de botón; en un `link` es ARIA inválido, y el
+  lector de pantalla anunciaba un enlace como si fuera un botón de alternancia pulsado. Los otros 14
+  usos de `aria-pressed` del proyecto son sobre `<button type="button">` reales y sí son válidos: el
+  defecto estaba acotado a un solo archivo.
+
+  Corrección: se quita el atributo del enlace y el estado activo pasa a marcarse con `aria-current`,
+  que **ya estaba** y sí es lo que ARIA permite en un enlace. En `src/styles/components.css` el estilo
+  del estado activo pasa a cubrir los dos selectores, porque el resto de las herramientas sigue
+  usando `aria-pressed` en botones y no hay razón para cambiarlas.
+
+  Nota de alcance, declarada: esto toca código heredado, y la spec S1 pedía cambios «puramente
+  aditivos» en el sitio. La excepción está justificada y es la razón de ser de la puerta: una
+  violación crítica en un proyecto que declara WCAG 2.2 AA como requisito, comprobada por una prueba
+  reproducible, se arregla. Dejarla habría significado una prueba en rojo o una prueba debilitada a
+  propósito.
+
+  Efecto colateral visible y esperado: el `e2e/accessibility.spec.ts` destapó también que
+  `@axe-core/playwright` arrastra su propia copia de `playwright-core` (1.64.1) mientras el proyecto
+  usa 1.63.0, lo que rompe el chequeo de tipos de `AxeBuilder({ page })`. Mientras se alinea con un
+  `overrides` de npm (tarea T15, bloqueada porque el lockfile lo tiene tomado el worker del
+  adaptador), `e2e/**` queda **fuera** del `include` del tsconfig para no romperle la puerta a ese
+  worker. Es una brecha temporal declarada, no un descuido: se cierra en el mismo cambio que añade el
+  `overrides`.
+
+- **L9** (segmento 4 completo, incluido el adaptador): cuatro commits más (`d386edd` la corrección de
+  accesibilidad, `b8c0209` el override y la puerta e2e, `6a6f359` las dos correcciones del núcleo,
+  `569a4bb` el adaptador de IndexedDB).
+
+  El worker del adaptador terminó pidiendo una decisión y **tenía razón en las dos cosas que reportó**:
+
+  1. `deps:check` salía 1 y la culpa era de mi regla, no de su código. `@lingualab/core/testing` es una
+     segunda entrada pública declarada en `packages/core/package.json` y creada precisamente para que
+     los adaptadores ejecuten las suites de contrato; mi regla solo excusaba `index.ts`, así que
+     prohibía lo que el diseño pide. Se amplió a las dos entradas declaradas y sigue prohibiendo
+     cualquier otra ruta profunda.
+  2. El fake en memoria devolvía `not-found` al borrar un id inexistente y el adaptador devolvía `ok`.
+     El contrato no cubría ese caso, de modo que **los dos pasaban la suite mientras se comportaban
+     distinto** — justo lo que una suite de contrato existe para impedir. Se decidió idempotencia,
+     se escribió la razón en el puerto y el contrato ahora la comprueba para ambos.
+
+  Pruebas de accesibilidad, con evidencia propia: `npx playwright test` en **verde en las dos páginas**
+  tras quitar `aria-pressed` de los enlaces del selector de idioma. El defecto era real y estaba en
+  producción; lo encontró la puerta nueva, no una revisión a ojo.
+
+  `npm ls playwright-core` confirma una sola copia (1.63.0, `overridden` para axe y `deduped` para el
+  proyecto), y los tipos pasan con `e2e/` dentro del `include`: 92 archivos, 0 errores.
+
+  Declarado y sin probar por ejecución: la rama `quota-exceeded` del adaptador. `fake-indexeddb` no
+  puede provocar `QuotaExceededError` de forma determinista y la firma de la fábrica no ofrece una
+  costura para inyectar un `IDBFactory` que falle.
