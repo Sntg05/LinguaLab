@@ -241,3 +241,31 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado antes de escribir
   Estado final de la rama en este punto: 41 commits, árbol limpio, `npm ci` y `npm run verify:all` en
   verde sobre Node 22, 744 pruebas unitarias en 40 archivos, 20 pruebas e2e, 21 páginas construidas,
   peor página 28.5 KB sobre 60 de presupuesto, y 0 vulnerabilidades de producción.
+
+- **L12** (la revisión se hizo, y por fin con el alcance reducido): el candidato reducido se midió antes
+  de intentarlo — `baseRef=7b6d033` da **13 archivos y 745 líneas** contra las **14.926** de la rama
+  acumulada, una reducción de veinte veces.
+
+  **Tres intentos, y el tercero es el que enseña algo reutilizable:**
+
+  1. `baseRef` + dos lentes → `native-start-input-invalid`, razón `lenses-invalid`.
+  2. `baseRef` + las **tres** lentes que el facade ya había aceptado en un `start` anterior → el MISMO
+     `lenses-invalid`. Eso descarta los lentes y señala a la combinación.
+  3. `baseRef` **sin lentes** → aceptado. El proveedor eligió `review-reliability` por su cuenta
+     (`lenses_required: true`, pero procede con su conjunto por defecto).
+
+  Conclusión operativa para quien retome esto: **lo que el proveedor rechaza es `baseRef` combinado con
+  `lenses`, no los lentes por sí solos**, y el código de error nombra el campo equivocado. La forma de
+  revisar una unidad de trabajo es pasar `baseRef` con `committedOnly` y **omitir** los lentes.
+  Recordado además el límite ya anotado en L11: `baseRef` solo rebanar **sufijos** (`baseRef..HEAD`).
+
+  Resultado: linaje `review-cd4013456007de5a`, riesgo **medio**, `state: approved` en el último evento
+  admitido, con **un único hallazgo informativo y no bloqueante** —`R3-001`, lente `reliability`,
+  `src/scripts/catalogo/index.ts:88-93`, severidad WARNING, disposición `informational`—. El proveedor
+  dice explícitamente que ninguno de los hallazgos abre una corrección ni reabre la revisión, y que se
+  traten como trabajo posterior separado.
+
+  El reconocimiento exacto se ejecutó y la autoridad quedó **quemada**
+  (`burn_evidence: gentle-ai.review-acknowledged/v1`). La entrega, por política ordinaria del
+  repositorio, sigue siendo decisión del humano: la revisión nunca autoriza publicar, comitear ni abrir
+  un PR.
