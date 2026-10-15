@@ -95,7 +95,7 @@ que no hacen nada.
 | Comprobación | Resultado |
 |---|---|
 | Pruebas unitarias | **744 en 40 archivos** |
-| Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las **21 páginas públicas**: las 20 rutas y la 404, en español y en inglés. Ampliar la puerta a todas encontró **una violación real más** que nadie había mirado: la 404 usaba un token de LÍNEA (`--line-strong`) como color de texto, que da 2.02:1 donde se exigen 3:1 para texto grande. Corregido a `--ink-faint`, que es el token con la escala pensada para leerse |
+| Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las **21 páginas públicas**: las 20 rutas y la 404, en español y en inglés. Ampliar la puerta a todas encontró **una violación real más** que nadie había mirado: la 404 usaba un token de LÍNEA (`--line-strong`) como color de texto, que da 2.02:1 donde se exigen 3:1 para texto grande. Corregido a `--ink-faint`, que es el token con la escala pensada para leerse. **Pero la puerta corre solo en tema CLARO**: no hay `emulateMedia({ colorScheme: "dark" })` en ninguna prueba, así que el modo oscuro —que el proyecto declara como requisito— no está cubierto por axe. La aritmética de los tokens sugiere margen amplio en ambos temas (≈5:1 frente a los 3:1 exigidos), pero eso es aritmética y no una prueba: **tarea T19** |
 | Pruebas de extremo a extremo | **35**, sobre el sitio compilado |
 | Reglas de dependencia hexagonales | 162 módulos y 365 dependencias, **0 violaciones** |
 | Tipos | `astro check` y los dos paquetes del workspace, **0 errores** |
