@@ -23,3 +23,16 @@ export {
   createStaticToolRegistry,
   type StaticToolRegistry,
 } from "./tool-registry/static-tool-registry";
+
+export {
+  createSpellophonePhonemizer,
+  type SpellophonePhonemizer,
+  type SpellophonePhonemizerOptions,
+} from "./phonemizer/spellophone-phonemizer";
+
+export {
+  isSupportedLanguage,
+  supportedLanguages,
+  toEspeakVoice,
+  type SupportedLanguageCode,
+} from "./phonemizer/espeak-voices";

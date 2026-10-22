@@ -55,8 +55,8 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado al empezar: `veri
 
 | ID | Tarea | Specs | Ruta | Commit |
 |---|---|---|---|---|
-| T1 | Constructor de n-gramas: controles y cableado al motor | S1, S2 | inline | — |
-| T2 | Pruebas del constructor y export JSON coherente | S1, S5 | inline | — |
+| T1 | Constructor de n-gramas: controles y cableado al motor | S1, S2 | inline | `464b36c` |
+| T2 | Pruebas del constructor y export JSON coherente | S1, S5 | inline | `464b36c` |
 | T3 | `PhonemizerPort`, errores tipados y contrato con fake | S3 | inline | — |
 | T4 | Adaptador spellophone + Web Worker + carga perezosa | S3, S6 | inline | — |
 | T5 | UI del fonemizador, página, i18n y catálogo | S2, S3 | inline | — |
@@ -64,6 +64,10 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado al empezar: `veri
 | T7 | Relicenciamiento a GPL-3.0-or-later | S4 | inline | — |
 | T8 | Docs: STATUS, PENDING, THIRD_PARTY_NOTICES, README | S3, S4 | inline | — |
 | T9 | e2e del fonemizador y del constructor, verificación final | S5 | inline | — |
+
+**Corte de entrega 1.** T1–T2 en `464b36c`, 431 líneas de autoría: el constructor de n-gramas
+completo, con sus pruebas y el documento. Es un slice cerrado y desplegable por sí solo; el
+fonemizador va aparte porque arrastra dependencia, licencia, CSP y datos nuevos.
 
 ## Log
 
