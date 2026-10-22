@@ -51,18 +51,24 @@ Autoalojada: no hay petición a Google Fonts en ningún momento.
 | [@fontsource-variable/jetbrains-mono](https://www.npmjs.com/package/@fontsource-variable/jetbrains-mono) | 5.3.0 | OFL-1.1 | Transcripciones y código |
 | [@fontsource/noto-sans](https://www.npmjs.com/package/@fontsource/noto-sans) | 5.3.0 | OFL-1.1 | Cobertura de los símbolos del AFI |
 
-## Herramientas previstas (segmentos 5 a 9 del prompt)
+## Herramientas integradas (segmentos 5 a 9 del prompt)
 
-Se anotan aquí **antes** de integrarse, con la versión que se fijó y la licencia leída de su propio
-paquete. Si alguna se descarta, pasa a la sección de descartadas con el motivo: una dependencia que
-se probó y no sirvió también es una decisión que conviene poder auditar.
+Se anotan aquí con la versión que se fijó y la licencia leída de su propio paquete. Si alguna se
+descarta, pasa a la sección de descartadas con el motivo: una dependencia que se probó y no sirvió
+también es una decisión que conviene poder auditar.
 
 | Paquete | Versión | Licencia | Uso | Estado |
 |---|---|---|---|---|
-| _pendiente_ | — | — | — | Sin integrar |
+| [@spelling-creator/spellophone](https://www.npmjs.com/package/@spelling-creator/spellophone) | 0.2.1 | **GPL-3.0-or-later** | Fonemizador es/en: eSpeak NG compilado a WebAssembly. Se publican `core.bin.gz` y los diccionarios `es` y `en` del propio paquete, podados del manifiesto original | Integrado en la 3.0.0 |
+
+> **Este paquete cambió la licencia del proyecto.** Antes de integrarlo, LinguaLab era MIT. eSpeak NG
+> es GPL-3.0-or-later y su binario viaja al navegador dentro del bundle, así que la distribución
+> completa pasó a GPL-3.0-or-later. Los `LICENSE` de las versiones anteriores siguen siendo MIT: el
+> cambio no se aplica hacia atrás. La decisión está anotada en
+> `odd/tasks/text-station-ngrams-and-phonemizer.md`, spec S4.
 
 ## Descartadas
 
 | Paquete | Motivo |
 |---|---|
-| _ninguna todavía_ | — |
+| [piper-phonemize](https://www.npmjs.com/package/piper-phonemize) | La 1.5.9 se describe como «compiled to WebAssembly», pero su punto de entrada es un build *nodejs* de Emscripten: usa `require('path')`, `__dirname` y lee `espeak-ng-data` del disco. No corre en un navegador. La variante nativa se publica aparte, como `piper-phonemize-node`. |

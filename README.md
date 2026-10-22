@@ -195,6 +195,11 @@ invariantes que el compilador protege y las trampas que ya costaron tiempo:
 
 ## Licencias
 
-El código es libre — ver [`LICENSE`](LICENSE). Los datos conservan la licencia de
-su fuente, indicada en cada ficha; las grabaciones de audio, en la tabla de
-atribución.
+El código es **GPL-3.0-or-later** — ver [`LICENSE`](LICENSE). No fue una elección estética: desde la
+3.0.0 el sitio incluye eSpeak NG compilado a WebAssembly para fonemizar texto, y como ese binario
+viaja al navegador con el resto del bundle, la distribución completa tiene que ser GPL. Lo que se
+publicó antes bajo MIT sigue bajo MIT: una licencia no es retroactiva.
+
+Los datos conservan la licencia de su fuente, indicada en cada ficha; las grabaciones de audio, en la
+tabla de atribución. La lista completa de terceros y sus licencias vive en
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
