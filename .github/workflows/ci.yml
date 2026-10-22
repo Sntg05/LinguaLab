@@ -75,7 +75,7 @@ jobs:
       # cambia mientras no cambie la version de Playwright: la clave incluye el
       # lockfile, asi que una actualizacion la invalida sola.
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
