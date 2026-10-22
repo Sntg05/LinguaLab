@@ -64,11 +64,11 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado al empezar: `veri
 | T2 | Pruebas del constructor y export JSON coherente | S1, S5 | inline | `464b36c` |
 | T3 | `PhonemizerPort`, errores tipados y contrato con fake | S3 | inline | — |
 | T4 | Adaptador spellophone + Web Worker + carga perezosa | S3, S6 | inline | `79201e3` |
-| T5 | UI del fonemizador, página, i18n y catálogo | S2, S3 | inline | — |
-| T6 | CSP `wasm-unsafe-eval`, hospedaje de datos y build | S3, S5 | inline | — |
+| T5 | UI del fonemizador, página, i18n y catálogo | S2, S3 | inline + writer | `f194e92` |
+| T6 | CSP `wasm-unsafe-eval`, hospedaje de datos y build | S3, S5 | inline + writer | `f194e92` |
 | T7 | Relicenciamiento a GPL-3.0-or-later | S4 | inline | `124f886` |
-| T8 | Docs: STATUS, PENDING, THIRD_PARTY_NOTICES, README | S3, S4 | inline | — |
-| T9 | e2e del fonemizador y del constructor, verificación final | S5 | inline | — |
+| T8 | Docs: STATUS, PENDING, THIRD_PARTY_NOTICES, README | S3, S4 | inline | `1481bf8` |
+| T9 | e2e del fonemizador y del constructor, verificación final | S5 | inline | `f194e92` y `b88cee7` |
 
 **Corte de entrega 1.** T1–T2 en `464b36c`, 431 líneas de autoría: el constructor de n-gramas
 completo, con sus pruebas y este documento. Es un slice cerrado y desplegable por sí solo; el
@@ -85,6 +85,21 @@ cualquier medida de tamaño que lo mezcle con lógica.
 
 **Corte de entrega 4.** T5 y T6: la herramienta visible, la CSP y los datos publicados. Delegado a un
 writer con superficie acotada; este documento no se edita desde esa tarea.
+
+**Corte de entrega 5.** El cambio de paquete en `2665ec8` y el campo `license` en `75cdc19`. El
+writer había construido la UI contra el adaptador anterior; la interfaz sobrevivió al cambio porque
+solo usa `phonemizeText` y `listLanguages`, que no cambiaron. Lo que hubo que rehacer fue el interior
+del adaptador, el script de datos y los documentos de licencia.
+
+**Corte de entrega 6.** T5, T6 y el e2e del fonemizador en `f194e92`; el e2e del constructor en
+`b88cee7`; la documentación en `1481bf8`. Verificado con la puerta completa: 765 pruebas unitarias en
+43 archivos, 69 e2e, 0 violaciones de dependencia y la página más pesada en 28,6 KB sobre 60.
+
+**Lo que las pruebas cambiaron.** Tres afirmaciones iniciales eran falsas y las corrigió la medición,
+no la lectura: el texto de ejemplo no tiene trigramas repetidos con stopwords activadas; la salida del
+fonemizador arranca con un marcador que no está vacío, así que esperar «no vacío» no espera nada; y
+Playwright no intercepta el tráfico de un Web Worker, ni con `page.route` ni con `context.route`, así
+que la degradación se prueba simulando un navegador sin `Worker`.
 
 ## Log
 
