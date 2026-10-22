@@ -1,0 +1,483 @@
+{
+  "generatedAt": "2026-10-01T22:51:36.375Z",
+  "data": {
+    "path": "data.data",
+    "files": {
+      "ar_dict": {
+        "offset": 0,
+        "length": 478165
+      },
+      "bg_dict": {
+        "offset": 478165,
+        "length": 87051
+      },
+      "bn_dict": {
+        "offset": 565216,
+        "length": 89979
+      },
+      "ca_dict": {
+        "offset": 655195,
+        "length": 310331
+      },
+      "cs_dict": {
+        "offset": 965526,
+        "length": 50455
+      },
+      "cy_dict": {
+        "offset": 1015981,
+        "length": 43130
+      },
+      "da_dict": {
+        "offset": 1059111,
+        "length": 245287
+      },
+      "de_dict": {
+        "offset": 1304398,
+        "length": 69277
+      },
+      "el_dict": {
+        "offset": 1373675,
+        "length": 72841
+      },
+      "en_dict": {
+        "offset": 1446516,
+        "length": 168294
+      },
+      "es_dict": {
+        "offset": 1614810,
+        "length": 49543
+      },
+      "et_dict": {
+        "offset": 1664353,
+        "length": 44263
+      },
+      "eu_dict": {
+        "offset": 1708616,
+        "length": 48841
+      },
+      "fa_dict": {
+        "offset": 1757457,
+        "length": 318802
+      },
+      "fi_dict": {
+        "offset": 2076259,
+        "length": 43928
+      },
+      "fr_dict": {
+        "offset": 2120187,
+        "length": 63979
+      },
+      "hi_dict": {
+        "offset": 2184166,
+        "length": 92143
+      },
+      "hu_dict": {
+        "offset": 2276309,
+        "length": 190421
+      },
+      "hy_dict": {
+        "offset": 2466730,
+        "length": 62263
+      },
+      "id_dict": {
+        "offset": 2528993,
+        "length": 43458
+      },
+      "intonations": {
+        "offset": 2572451,
+        "length": 2584
+      },
+      "is_dict": {
+        "offset": 2575035,
+        "length": 44354
+      },
+      "it_dict": {
+        "offset": 2619389,
+        "length": 154408
+      },
+      "ka_dict": {
+        "offset": 2773797,
+        "length": 87775
+      },
+      "kk_dict": {
+        "offset": 2861572,
+        "length": 1859
+      },
+      "ko_dict": {
+        "offset": 2863431,
+        "length": 47523
+      },
+      "ku_dict": {
+        "offset": 2910954,
+        "length": 2265
+      },
+      "lang/aav/vi": {
+        "offset": 2913219,
+        "length": 111
+      },
+      "lang/bat/lv": {
+        "offset": 2913330,
+        "length": 229
+      },
+      "lang/bnt/sw": {
+        "offset": 2913559,
+        "length": 41
+      },
+      "lang/ccs/ka": {
+        "offset": 2913600,
+        "length": 124
+      },
+      "lang/cel/cy": {
+        "offset": 2913724,
+        "length": 37
+      },
+      "lang/dra/ml": {
+        "offset": 2913761,
+        "length": 57
+      },
+      "lang/dra/te": {
+        "offset": 2913818,
+        "length": 70
+      },
+      "lang/eu": {
+        "offset": 2913888,
+        "length": 54
+      },
+      "lang/gmq/da": {
+        "offset": 2913942,
+        "length": 43
+      },
+      "lang/gmq/is": {
+        "offset": 2913985,
+        "length": 27
+      },
+      "lang/gmq/nb": {
+        "offset": 2914012,
+        "length": 87
+      },
+      "lang/gmq/sv": {
+        "offset": 2914099,
+        "length": 183
+      },
+      "lang/gmw/de": {
+        "offset": 2914282,
+        "length": 42
+      },
+      "lang/gmw/en-GB-x-rp": {
+        "offset": 2914324,
+        "length": 249
+      },
+      "lang/gmw/en-US": {
+        "offset": 2914573,
+        "length": 257
+      },
+      "lang/gmw/lb": {
+        "offset": 2914830,
+        "length": 31
+      },
+      "lang/gmw/nl": {
+        "offset": 2914861,
+        "length": 23
+      },
+      "lang/grk/el": {
+        "offset": 2914884,
+        "length": 23
+      },
+      "lang/inc/bn": {
+        "offset": 2914907,
+        "length": 25
+      },
+      "lang/inc/hi": {
+        "offset": 2914932,
+        "length": 23
+      },
+      "lang/inc/mr": {
+        "offset": 2914955,
+        "length": 41
+      },
+      "lang/inc/ne": {
+        "offset": 2914996,
+        "length": 37
+      },
+      "lang/inc/ur": {
+        "offset": 2915033,
+        "length": 94
+      },
+      "lang/ine/hy": {
+        "offset": 2915127,
+        "length": 61
+      },
+      "lang/ine/sq": {
+        "offset": 2915188,
+        "length": 103
+      },
+      "lang/ira/fa": {
+        "offset": 2915291,
+        "length": 90
+      },
+      "lang/ira/ku": {
+        "offset": 2915381,
+        "length": 40
+      },
+      "lang/ko": {
+        "offset": 2915421,
+        "length": 51
+      },
+      "lang/poz/id": {
+        "offset": 2915472,
+        "length": 134
+      },
+      "lang/roa/ca": {
+        "offset": 2915606,
+        "length": 38
+      },
+      "lang/roa/es": {
+        "offset": 2915644,
+        "length": 63
+      },
+      "lang/roa/es-419": {
+        "offset": 2915707,
+        "length": 167
+      },
+      "lang/roa/fr": {
+        "offset": 2915874,
+        "length": 79
+      },
+      "lang/roa/it": {
+        "offset": 2915953,
+        "length": 109
+      },
+      "lang/roa/pt": {
+        "offset": 2916062,
+        "length": 95
+      },
+      "lang/roa/pt-BR": {
+        "offset": 2916157,
+        "length": 183
+      },
+      "lang/roa/ro": {
+        "offset": 2916340,
+        "length": 26
+      },
+      "lang/sem/ar": {
+        "offset": 2916366,
+        "length": 50
+      },
+      "lang/trk/kk": {
+        "offset": 2916416,
+        "length": 40
+      },
+      "lang/trk/tr": {
+        "offset": 2916456,
+        "length": 25
+      },
+      "lang/urj/et": {
+        "offset": 2916481,
+        "length": 237
+      },
+      "lang/urj/fi": {
+        "offset": 2916718,
+        "length": 237
+      },
+      "lang/urj/hu": {
+        "offset": 2916955,
+        "length": 73
+      },
+      "lang/zle/ru": {
+        "offset": 2917028,
+        "length": 57
+      },
+      "lang/zle/uk": {
+        "offset": 2917085,
+        "length": 97
+      },
+      "lang/zls/bg": {
+        "offset": 2917182,
+        "length": 111
+      },
+      "lang/zls/sl": {
+        "offset": 2917293,
+        "length": 43
+      },
+      "lang/zls/sr": {
+        "offset": 2917336,
+        "length": 250
+      },
+      "lang/zlw/cs": {
+        "offset": 2917586,
+        "length": 23
+      },
+      "lang/zlw/pl": {
+        "offset": 2917609,
+        "length": 38
+      },
+      "lang/zlw/sk": {
+        "offset": 2917647,
+        "length": 24
+      },
+      "lb_dict": {
+        "offset": 2917671,
+        "length": 687931
+      },
+      "lv_dict": {
+        "offset": 3605602,
+        "length": 66337
+      },
+      "ml_dict": {
+        "offset": 3671939,
+        "length": 92345
+      },
+      "mr_dict": {
+        "offset": 3764284,
+        "length": 87391
+      },
+      "ne_dict": {
+        "offset": 3851675,
+        "length": 95377
+      },
+      "nl_dict": {
+        "offset": 3947052,
+        "length": 65396
+      },
+      "no_dict": {
+        "offset": 4012448,
+        "length": 4178
+      },
+      "phondata": {
+        "offset": 4016626,
+        "length": 594464
+      },
+      "phonindex": {
+        "offset": 4611090,
+        "length": 48584
+      },
+      "phontab": {
+        "offset": 4659674,
+        "length": 63700
+      },
+      "pl_dict": {
+        "offset": 4723374,
+        "length": 76620
+      },
+      "pt_dict": {
+        "offset": 4799994,
+        "length": 140619
+      },
+      "ro_dict": {
+        "offset": 4940613,
+        "length": 68538
+      },
+      "sk_dict": {
+        "offset": 5009151,
+        "length": 50002
+      },
+      "sl_dict": {
+        "offset": 5059153,
+        "length": 45047
+      },
+      "sq_dict": {
+        "offset": 5104200,
+        "length": 45003
+      },
+      "sr_dict": {
+        "offset": 5149203,
+        "length": 46832
+      },
+      "sv_dict": {
+        "offset": 5196035,
+        "length": 58948
+      },
+      "sw_dict": {
+        "offset": 5254983,
+        "length": 47804
+      },
+      "te_dict": {
+        "offset": 5302787,
+        "length": 94837
+      },
+      "tr_dict": {
+        "offset": 5397624,
+        "length": 46793
+      },
+      "uk_dict": {
+        "offset": 5444417,
+        "length": 3492
+      },
+      "ur_dict": {
+        "offset": 5447909,
+        "length": 133556
+      },
+      "vi_dict": {
+        "offset": 5581465,
+        "length": 52608
+      }
+    },
+    "totalBytes": 5634073
+  },
+  "ru": {
+    "path": "ru.data",
+    "files": {
+      "ru_dict": {
+        "offset": 0,
+        "length": 9053144
+      }
+    },
+    "totalBytes": 9053144
+  },
+  "voices": [
+    "ar",
+    "bg",
+    "bn",
+    "ca",
+    "cs",
+    "cy",
+    "da",
+    "de",
+    "el",
+    "en-gb-x-rp",
+    "en-us",
+    "es",
+    "es-419",
+    "et",
+    "eu",
+    "fa",
+    "fi",
+    "fr",
+    "hi",
+    "hu",
+    "hy",
+    "id",
+    "is",
+    "it",
+    "ka",
+    "kk",
+    "ko",
+    "ku",
+    "lb",
+    "lv",
+    "ml",
+    "mr",
+    "nb",
+    "ne",
+    "nl",
+    "pl",
+    "pt",
+    "pt-br",
+    "ro",
+    "ru",
+    "sk",
+    "sl",
+    "sq",
+    "sr",
+    "sv",
+    "sw",
+    "te",
+    "tr",
+    "uk",
+    "ur",
+    "vi"
+  ],
+  "russianVoices": [
+    "ru"
+  ]
+}

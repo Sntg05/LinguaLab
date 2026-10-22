@@ -66,6 +66,8 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
   { path: "/en/tools", name: "estacion textual (ingles)" },
   { path: "/ortografia", name: "editor de tablas (espanol)" },
   { path: "/en/ortografia", name: "editor de tablas (ingles)" },
+  { path: "/fonemizador", name: "fonemizador (espanol)" },
+  { path: "/en/fonemizador", name: "fonemizador (ingles)" },
   { path: "/catalogo", name: "catalogo (espanol)" },
   { path: "/en/catalogo", name: "catalogo (ingles)" },
   { path: "/glosario", name: "glosario (espanol)" },
@@ -123,10 +125,12 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
  * Y el punto ciego sigue siendo un punto ciego, no una afirmación de que los nodos
  * estén bien: en lo que axe no midió, la puerta no sabe nada del contraste y no lo
  * finge. Ver P11, con el aviso de que medirlo por estilos computados da resultados
- * falsos. Medición del sitio completo: los **186** `incomplete` (21 páginas × 2 temas) traen
- * `contrastRatio` 0 o ausente, o sea que **axe no calculó nada** en ninguno. Los 40 eran solo las
- * tres rutas más pesadas en UN tema, no el sitio entero. El único caso medido por debajo del umbral
- * fue la mutación de un verificador.
+ * falsos. Medición del sitio completo **cuando la puerta cubría 21 páginas**: los **186**
+ * `incomplete` (21 páginas × 2 temas) traen `contrastRatio` 0 o ausente, o sea que **axe no calculó
+ * nada** en ninguno. Los 40 eran solo las tres rutas más pesadas en UN tema, no el sitio entero. El
+ * único caso medido por debajo del umbral fue la mutación de un verificador. La puerta cubre hoy 23
+ * páginas, así que ese total es un piso: sumar las dos rutas nuevas lo sube y hay que volver a
+ * medirlo.
  */
 const AXE_COULD_NOT_MEASURE: readonly string[] = [
   "imgNode",

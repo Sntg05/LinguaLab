@@ -67,7 +67,12 @@ export default defineConfig({
         "form-action 'self'",
         "frame-ancestors 'self'",
       ],
-      scriptDirective: { resources: ["'self'"] },
+      // `wasm-unsafe-eval` permite COMPILAR WebAssembly, y solo eso: sin ella el
+      // navegador se niega a instanciar el motor del fonemizador (eSpeak NG
+      // compilado a wasm) y la herramienta solo puede degradar. Es una concesión
+      // mucho más estrecha que `'unsafe-eval'`, que además habilitaría `eval()` y
+      // el constructor `Function`, y por eso no se usa la segunda.
+      scriptDirective: { resources: ["'self'", "'wasm-unsafe-eval'"] },
       styleDirective: { resources: ["'self'"] },
     },
   },

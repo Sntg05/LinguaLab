@@ -1,0 +1,13 @@
+---
+import PhonemizerLab from "../components/PhonemizerLab.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+  locale="es"
+  path="/fonemizador"
+  title="Fonemizador AFI — Texto a transcripción con eSpeak NG"
+  description="Convierte un texto en su transcripción AFI para español e inglés con eSpeak NG compilado a WebAssembly. Corre en un Web Worker dentro de tu navegador, con la comparación de la tabla grafema a AFI al lado."
+>
+  <PhonemizerLab locale="es" />
+</Base>

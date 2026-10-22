@@ -1,0 +1,442 @@
+---
+/**
+ * PhonemizerLab: text → IPA for Spanish and English.
+ *
+ * Two engines answer the same text and the page shows both. eSpeak NG,
+ * compiled to WebAssembly and running inside a Web Worker, is approximate: it
+ * applies pronunciation rules, not a reviewed reading. Next to it sits the
+ * grapheme-to-IPA rule table from the orthography tool, one demo table per
+ * language. Putting them side by side is the honest way to present an
+ * approximate transcription: the disagreement is visible instead of argued
+ * away in a footnote.
+ *
+ * Everything except the transcription itself is decided here, at build time.
+ * The language list is asked of the port (`listLanguages`) rather than written
+ * into the markup, so the selector cannot offer a language the engine would
+ * refuse.
+ *
+ * The engine is not imported here — `src/composition-root.ts` wires it, and the
+ * engine itself only exists inside the worker. This page therefore ships no
+ * wasm and no dictionary: they are fetched the first time someone presses
+ * Fonemizar.
+ */
+import { DEMO_TABLES } from "@lingualab/core";
+import { lingualab } from "../composition-root";
+import { t, type Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const es = locale === "es";
+
+/**
+ * Display names for the languages the port admits, keyed by the ISO 639-3 code
+ * the port speaks. Anything the port later adds without a name here falls back
+ * to its code, because an invented name would be worse than the truth.
+ */
+const LANGUAGE_NAMES: Readonly<Record<string, { es: string; en: string }>> = {
+  spa: { es: "Español", en: "Spanish" },
+  eng: { es: "Inglés", en: "English" },
+};
+
+const languages = lingualab.phonemizer.listLanguages();
+const nameOf = (code: string): string => LANGUAGE_NAMES[code]?.[locale] ?? code;
+
+/** The languages the comparison can actually show, taken from the tables. */
+const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.languageId)))];
+---
+
+<section class="section" data-phonemizer="true">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{es ? "Fonemizador" : "Phonemizer"}</span>
+      <h1>{t(locale, "phon.title")}</h1>
+      <p class="u-lead">{t(locale, "phon.sub")}</p>
+      <!-- Two things the tool must never hide: that nothing is uploaded, and
+           that the IPA it produces is approximate. Both are visible here, not
+           buried in a help page. -->
+      <p class="callout">{t(locale, "phon.local")}</p>
+      <p class="callout callout--warn">{t(locale, "phon.warn")}</p>
+    </div>
+
+    <div class="phon">
+      <div class="phon__input">
+        <div class="field">
+          <label class="field__label" for="phon-text">{t(locale, "phon.text")}</label>
+          <textarea
+            id="phon-text"
+            data-phon-text
+            rows="4"
+            spellcheck="false"
+            placeholder={es ? "Escribe una frase…" : "Type a phrase…"}></textarea>
+        </div>
+
+        <div class="cluster">
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "phon.language")}</span>
+            <select data-phon-lang>
+              {
+                languages.map((code) => (
+                  <option value={code}>{nameOf(code)}</option>
+                ))
+              }
+            </select>
+          </label>
+
+          <button class="btn btn--primary" type="button" data-phon-run>
+            {t(locale, "phon.run")}
+          </button>
+          <button class="btn btn--quiet" type="button" data-phon-clear>
+            {t(locale, "phon.clear")}
+          </button>
+        </div>
+
+        <p class="phon__status" data-phon-status role="status" aria-live="polite" data-state="idle">
+          {es ? "Escribe un texto y pulsa «Fonemizar»." : "Type a text and press “Phonemize”."}
+        </p>
+        <p class="faint">{t(locale, "phon.limits")}</p>
+      </div>
+
+      <!-- ---------------- Results ---------------- -->
+      <div class="phon__outputs" data-phon-outputs>
+        <div class="panel">
+          <div class="cluster">
+            <h2 class="panel__title">{t(locale, "phon.espeak")}</h2>
+            <span class="badge" data-phon-engine></span>
+          </div>
+          <output class="data-surface ipa phon__ipa" data-phon-ipa aria-live="polite">—</output>
+          <div class="cluster">
+            <button class="btn btn--quiet btn--sm" type="button" data-phon-copy disabled>
+              {t(locale, "phon.copy")}
+            </button>
+            <span class="faint" role="status" aria-live="polite" data-phon-copy-note></span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2 class="panel__title">{t(locale, "phon.table")}</h2>
+          <p class="faint">{t(locale, "phon.tableNote")}</p>
+          <output class="data-surface ipa phon__ipa" data-phon-table aria-live="polite">—</output>
+          <p class="faint" data-phon-table-name></p>
+          <p class="faint">
+            {es ? "Comparación disponible para" : "Comparison available for"}:
+            {comparisonLanguages.join(", ")}.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<p class="u-visually-hidden" role="status" aria-live="polite" data-live-region></p>
+
+<script>
+  import { DEMO_TABLES, convertLayer } from "@lingualab/core";
+  import { lingualab } from "../composition-root";
+  import { safeInit } from "../scripts/core/safe";
+
+  const es = document.documentElement.lang !== "en";
+
+  /**
+   * Roughly what the first phonemization downloads: the wasm binary (305 KB),
+   * the language manifest (9 KB) and the dictionary bundle (5.6 MB). It is a
+   * size, not a promise — the point is that the wait has a reason the person can
+   * see, and that ~5.9 MB is too much to fetch while saying nothing.
+   *
+   * Why a single bundle and not one dictionary per language: this engine ships
+   * one archive for all 51 of its voices, so there is no per-language slice that
+   * would make Spanish and English cheaper to serve.
+   */
+  const DATA_APPROX = "~5.9 MB";
+
+  safeInit("phonemizer", () => {
+    const root = document.querySelector<HTMLElement>("[data-phonemizer]");
+    if (!root) return;
+
+    const $ = <T extends Element>(selector: string): T | null => root.querySelector<T>(selector);
+
+    const input = $<HTMLTextAreaElement>("[data-phon-text]");
+    const lang = $<HTMLSelectElement>("[data-phon-lang]");
+    const runButton = $<HTMLButtonElement>("[data-phon-run]");
+    const clearButton = $<HTMLButtonElement>("[data-phon-clear]");
+    const ipaOut = $<HTMLOutputElement>("[data-phon-ipa]");
+    const copyButton = $<HTMLButtonElement>("[data-phon-copy]");
+    const copyNote = $<HTMLElement>("[data-phon-copy-note]");
+    const tableOut = $<HTMLOutputElement>("[data-phon-table]");
+    const tableName = $<HTMLElement>("[data-phon-table-name]");
+    const engineBadge = $<HTMLElement>("[data-phon-engine]");
+    const status = $<HTMLElement>("[data-phon-status]");
+    const outputs = $<HTMLElement>("[data-phon-outputs]");
+
+    if (!input || !lang || !runButton) return;
+
+    /** One sentence, one state. Never a blank panel that could pass for a result. */
+    const say = (message: string, state: "idle" | "busy" | "ok" | "error"): void => {
+      if (!status) return;
+      status.textContent = message;
+      status.dataset["state"] = state;
+    };
+
+    const setBusy = (busy: boolean): void => {
+      runButton.disabled = busy;
+      runButton.setAttribute("aria-busy", busy ? "true" : "false");
+      outputs?.setAttribute("aria-busy", busy ? "true" : "false");
+    };
+
+    const clearResult = (): void => {
+      if (ipaOut) ipaOut.textContent = "—";
+      if (copyButton) copyButton.disabled = true;
+      if (copyNote) copyNote.textContent = "";
+    };
+
+    /**
+     * The comparison runs synchronously and needs no engine, so it is rendered
+     * before the wasm call: if eSpeak NG is unavailable, the page still shows
+     * an honest answer instead of an empty column.
+     *
+     * `convertLayer` is used directly instead of the `convertOrthographyToIpa`
+     * use case on purpose. That use case reads the table from the repository,
+     * which is the person's stored work — and comparing a demo table would mean
+     * writing it there first, polluting the editor with a table nobody saved.
+     */
+    const renderTable = (text: string, languageCode: string): void => {
+      if (!tableOut) return;
+      const table = DEMO_TABLES.find((candidate) => candidate.languageId === languageCode);
+      if (!table) {
+        tableOut.textContent = "—";
+        if (tableName) {
+          tableName.textContent = es
+            ? "No hay tabla para esta lengua, así que no hay comparación."
+            : "There is no table for this language, so there is nothing to compare.";
+        }
+        return;
+      }
+
+      try {
+        const conversion = convertLayer(text, table.rules, {
+          layer: "phonemic",
+          casePolicy: "fold",
+          classes: table.classes,
+        });
+        tableOut.textContent = conversion.output.trim() === "" ? "—" : conversion.output;
+        if (tableName) tableName.textContent = `${table.name}`;
+      } catch (error) {
+        tableOut.textContent = "—";
+        if (tableName) {
+          tableName.textContent = es
+            ? "La tabla no pudo aplicarse a este texto."
+            : "The table could not be applied to this text.";
+          console.warn("[lingualab] phonemizer comparison failed:", error);
+        }
+      }
+    };
+
+    const describeError = (error: {
+      code: string;
+      languageCode?: string;
+      detail?: string;
+    }): string => {
+      switch (error.code) {
+        case "unsupported-language":
+          return es
+            ? `El motor no admite la lengua «${error.languageCode ?? lang.value}». No hay resultado inventado que mostrar.`
+            : `The engine does not support the language “${error.languageCode ?? lang.value}”. There is no invented result to show.`;
+        case "engine-unavailable":
+          return es
+            ? `El motor no está disponible en este navegador: puede que no admita WebAssembly, que la política de seguridad lo bloquee o que los datos de eSpeak NG no se hayan podido descargar.${error.detail ? ` (${error.detail})` : ""}`
+            : `The engine is not available in this browser: it may not support WebAssembly, the security policy may block it, or the eSpeak NG data could not be downloaded.${error.detail ? ` (${error.detail})` : ""}`;
+        default:
+          return es
+            ? `El motor falló al fonemizar: ${error.detail ?? "sin detalle"}.`
+            : `The engine failed while phonemizing: ${error.detail ?? "no detail"}.`;
+      }
+    };
+
+    const phonemize = async (): Promise<void> => {
+      const text = input.value.trim();
+      if (text === "") {
+        say(
+          es ? "Escribe un texto primero: no hay nada que fonemizar." : "Type some text first: there is nothing to phonemize.",
+          "idle",
+        );
+        return;
+      }
+
+      setBusy(true);
+      clearResult();
+      say(
+        es
+          ? `Cargando el motor… la primera vez se descargan unos ${DATA_APPROX} de datos de eSpeak NG y el resto de veces se reutilizan.`
+          : `Loading the engine… the first run downloads about ${DATA_APPROX} of eSpeak NG data; later runs reuse it.`,
+        "busy",
+      );
+
+      // The table engine is local and synchronous, so render it first.
+      renderTable(text, lang.value);
+
+      const result = await lingualab.phonemizeText({ text, languageCode: lang.value });
+      setBusy(false);
+
+      if (!result.ok) {
+        clearResult();
+        if (engineBadge) {
+          engineBadge.textContent = es ? "no disponible" : "unavailable";
+          engineBadge.className = "badge badge--warn";
+        }
+        say(describeError(result.error), "error");
+        return;
+      }
+
+      if (ipaOut) ipaOut.textContent = result.value.ipa;
+      if (copyButton) copyButton.disabled = false;
+      if (engineBadge) {
+        engineBadge.textContent = es ? "motor cargado" : "engine loaded";
+        engineBadge.className = "badge badge--ok";
+      }
+      say(
+        es
+          ? "Listo. Transcripción aproximada de eSpeak NG: revísala antes de usarla como dato."
+          : "Done. eSpeak NG's approximate transcription: review it before using it as data.",
+        "ok",
+      );
+    };
+
+    runButton.addEventListener("click", () => {
+      void phonemize();
+    });
+
+    clearButton?.addEventListener("click", () => {
+      input.value = "";
+      clearResult();
+      if (tableOut) tableOut.textContent = "—";
+      if (tableName) tableName.textContent = "";
+      if (engineBadge) {
+        engineBadge.textContent = "";
+        engineBadge.className = "badge";
+      }
+      say(
+        es ? "Escribe un texto y pulsa «Fonemizar»." : "Type a text and press “Phonemize”.",
+        "idle",
+      );
+      input.focus();
+    });
+
+    copyButton?.addEventListener("click", async () => {
+      const ipa = ipaOut?.textContent?.trim() ?? "";
+      if (ipa === "" || ipa === "—") return;
+
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error("clipboard unavailable");
+        await navigator.clipboard.writeText(ipa);
+        if (copyNote) copyNote.textContent = es ? "Copiado." : "Copied.";
+      } catch {
+        // The output stays selectable, so the fallback is a sentence, not silence.
+        if (copyNote) {
+          copyNote.textContent = es
+            ? "No se pudo copiar: selecciona la transcripción y cópiala a mano."
+            : "Could not copy: select the transcription and copy it by hand.";
+        }
+      }
+    });
+
+    // Ctrl/Cmd + Enter runs, exactly like the text station does.
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        void phonemize();
+      }
+    });
+  });
+</script>
+
+<style>
+  /* `.field` and `.field__label` are redeclared here on purpose: they live in
+     the scoped style of the text station, so they are not global and copying the
+     four declarations is what keeps this page looking like the same site. The
+     values are that file's values, not a new scale. */
+  .field {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .field--inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .field__label {
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .phon {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .phon__input {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 62rem;
+  }
+
+  .phon__outputs {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  /* Side by side only when there is room for two readable columns; below that
+     the comparison stacks, which keeps the IPA on one line per breath group. */
+  @media (width >= 76rem) {
+    .phon__outputs {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+  }
+
+  .panel {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+    min-width: 0;
+    padding: var(--space-m);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+  }
+
+  .panel__title {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: 650;
+  }
+
+  .phon__ipa {
+    margin: 0;
+    min-height: 3.5rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .phon__status {
+    margin: 0;
+    min-height: 1.4em;
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+  }
+
+  .phon__status[data-state="error"] {
+    color: var(--warn);
+  }
+
+  .phon__status[data-state="busy"] {
+    color: var(--accent);
+  }
+</style>

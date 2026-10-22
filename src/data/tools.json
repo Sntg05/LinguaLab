@@ -54,11 +54,11 @@
       "name": { "es": "Fonemizador es/en", "en": "Spanish/English phonemizer" },
       "area": "fonologia",
       "integration": "embedded",
-      "status": "planned",
+      "status": "stable",
       "languages": ["es", "en"],
       "notes": {
-        "es": "Fonemizador con eSpeak NG compilado a WebAssembly, dentro de un Web Worker. Su AFI es aproximado y no sustituye una transcripción revisada.",
-        "en": "Phonemizer using eSpeak NG compiled to WebAssembly, inside a Web Worker. Its IPA is approximate and does not replace a reviewed transcription."
+        "es": "Texto a AFI con eSpeak NG compilado a WebAssembly, dentro de un Web Worker que se descarga la primera vez que fonemizas. Admite solo español latinoamericano e inglés estadounidense, y su AFI es aproximado: no sustituye una transcripción revisada. Al lado muestra la tabla grafema→AFI de la herramienta de ortografía.",
+        "en": "Text to IPA with eSpeak NG compiled to WebAssembly, inside a Web Worker that is downloaded the first time you phonemize. It admits only Latin American Spanish and American English, and its IPA is approximate: it does not replace a reviewed transcription. The grapheme→IPA table from the orthography tool sits next to it."
       },
       "citation": "eSpeak NG contributors. eSpeak NG [Computer software]."
     },

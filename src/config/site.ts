@@ -38,6 +38,7 @@ export interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   { path: "/fono", labelKey: "nav.ipa", primary: true },
   { path: "/ortografia", labelKey: "nav.ortho", primary: true },
+  { path: "/fonemizador", labelKey: "nav.phonemizer", primary: true },
   { path: "/arboles", labelKey: "nav.trees", primary: true },
   { path: "/tools", labelKey: "nav.tools", primary: true },
   { path: "/catalogo", labelKey: "nav.catalog", primary: true },

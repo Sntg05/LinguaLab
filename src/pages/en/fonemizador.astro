@@ -1,0 +1,13 @@
+---
+import PhonemizerLab from "../../components/PhonemizerLab.astro";
+import Base from "../../layouts/Base.astro";
+---
+
+<Base
+  locale="en"
+  path="/fonemizador"
+  title="IPA phonemizer — Text to transcription with eSpeak NG"
+  description="Turn a text into its IPA transcription for Spanish and English with eSpeak NG compiled to WebAssembly. It runs in a Web Worker inside your browser, next to the grapheme-to-IPA table for comparison."
+>
+  <PhonemizerLab locale="en" />
+</Base>
