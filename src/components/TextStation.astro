@@ -141,6 +141,45 @@ const SAMPLE = es
           </label>
         </div>
 
+        <!-- Only meaningful on the collocations tab, so it is hidden elsewhere. -->
+        <div
+          class="cluster ngram-builder"
+          data-ngram-builder
+          role="group"
+          aria-label={es ? "Constructor de n-gramas" : "n-gram builder"}
+          hidden
+        >
+          <span class="field__label" style="flex-basis: 100%">
+            {es ? "Constructor de n-gramas" : "n-gram builder"}
+          </span>
+
+          <label class="field field--inline">
+            <span class="field__label">n</span>
+            <input type="number" data-ngram-n min="2" max="5" step="1" value="2" style="width: 4rem" />
+          </label>
+
+          <label class="field field--inline">
+            <span class="field__label">{es ? "Frec. mín." : "Min freq."}</span>
+            <input type="number" data-ngram-min min="1" max="100" step="1" value="2" style="width: 5rem" />
+          </label>
+
+          <label class="field field--inline">
+            <span class="field__label">{es ? "Máx. filas" : "Max rows"}</span>
+            <input type="number" data-ngram-limit min="1" max="500" step="1" value="25" style="width: 5rem" />
+          </label>
+
+          <label class="field field--inline">
+            <span class="field__label">{es ? "Orden" : "Sort"}</span>
+            <select data-ngram-sort>
+              <option value="logLikelihood">G²</option>
+              <option value="logDice">log-Dice</option>
+              <option value="pmi">PMI</option>
+              <option value="tScore">t-score</option>
+              <option value="count">{es ? "Recuento" : "Count"}</option>
+            </select>
+          </label>
+        </div>
+
         <p class="faint" style="font-size: var(--step--2)">
           {
             es
@@ -191,7 +230,18 @@ const SAMPLE = es
 <p class="u-visually-hidden" role="status" aria-live="polite" data-live-region></p>
 
 <script>
-  import { frequency, kwic, ngrams, statistics, type Collocation } from "../scripts/tools/analysis";
+  import {
+    frequency,
+    kwic,
+    ngrams,
+    statistics,
+    type Collocation,
+  } from "../scripts/tools/analysis";
+  import {
+    normaliseNgramSettings,
+    type NgramSettings,
+    type NgramSortKey,
+  } from "../scripts/tools/ngram-settings";
   import { readability, type ReadabilityResult } from "../scripts/tools/readability";
   import { tokenizeDetailed, type StopwordMode, type Token } from "../scripts/tools/tokenize";
   import { download } from "../scripts/trees/export";
@@ -324,21 +374,79 @@ const SAMPLE = es
     );
   }
 
+  /* ---------------- n-gram builder ---------------- */
+
+  /** The builder's settings, read from the form and normalised before use. */
+  function ngramSettings(): NgramSettings {
+    return normaliseNgramSettings({
+      n: $<HTMLInputElement>("[data-ngram-n]")?.value,
+      minCount: $<HTMLInputElement>("[data-ngram-min]")?.value,
+      limit: $<HTMLInputElement>("[data-ngram-limit]")?.value,
+      sortBy: $<HTMLSelectElement>("[data-ngram-sort]")?.value,
+    });
+  }
+
+  /** "bigramas", "trigramas", "4-gramas"… for the given size. */
+  function gramLabel(n: number): string {
+    if (n === 2) return es ? "bigramas" : "bigrams";
+    if (n === 3) return es ? "trigramas" : "trigrams";
+    return es ? `${n}-gramas` : `${n}-grams`;
+  }
+
+  /** The same, singular, for column headers and sentences. */
+  function gramLabelSingular(n: number): string {
+    if (n === 2) return es ? "Bigrama" : "Bigram";
+    if (n === 3) return es ? "Trigrama" : "Trigram";
+    return es ? `${n}-grama` : `${n}-gram`;
+  }
+
+  function measureLabel(key: NgramSortKey): string {
+    switch (key) {
+      case "logDice":
+        return "log-Dice";
+      case "pmi":
+        return "PMI";
+      case "tScore":
+        return "t-score";
+      case "count":
+        return es ? "recuento" : "count";
+      default:
+        return "G²";
+    }
+  }
+
+  /** The builder is only meaningful on its own tab, so it is hidden elsewhere. */
+  function syncNgramBuilder(): void {
+    const builder = $<HTMLElement>("[data-ngram-builder]");
+    if (builder) builder.hidden = activeTab !== "colloc";
+  }
+
   function renderCollocations(): void {
-    const bigrams = ngrams(tokens, 2, { stopwords: stopwordMode(), minCount: 2, limit: 25 });
-    if (bigrams.length === 0) {
+    const settings = ngramSettings();
+    const mode = stopwordMode();
+    const { n } = settings;
+    const grams = ngrams(tokens, n, {
+      stopwords: mode,
+      minCount: settings.minCount,
+      limit: settings.limit,
+      sortBy: settings.sortBy,
+    });
+
+    if (grams.length === 0) {
       // Association measures need repeated pairs, so a short text can
-      // legitimately produce nothing. Say why rather than showing a blank.
+      // legitimately produce nothing. Say why rather than showing a blank,
+      // and say which knob is responsible.
+      const times = settings.minCount === 1 ? (es ? "vez" : "time") : es ? "veces" : "times";
       return void $("[data-panel]")?.replaceChildren(
         note(
           es
-            ? "Ningún bigrama se repite al menos dos veces. Las medidas de asociación necesitan pares repetidos: prueba con un texto más largo."
-            : "No bigram repeats at least twice. Association measures need repeated pairs: try a longer text.",
+            ? `Ningún ${gramLabelSingular(n).toLowerCase()} se repite al menos ${settings.minCount} ${times}. Las medidas de asociación necesitan n-gramas repetidos: baja la frecuencia mínima, reduce n o prueba con un texto más largo.`
+            : `No ${gramLabelSingular(n).toLowerCase()} repeats at least ${settings.minCount} ${times}. Association measures need repeated n-grams: lower the minimum frequency, reduce n, or try a longer text.`,
         ),
       );
     }
 
-    const rows = bigrams.map((gram: Collocation) => [
+    const rows = grams.map((gram: Collocation) => [
       gram.display,
       String(gram.count),
       gram.logDice.toFixed(2),
@@ -347,26 +455,38 @@ const SAMPLE = es
       gram.logLikelihood.toFixed(1),
     ]);
 
-    const trigrams = ngrams(tokens, 3, { stopwords: stopwordMode(), minCount: 2, limit: 10 });
-    const trigramList = el("div", "chips");
-    for (const gram of trigrams) {
+    // One size up, as chips. At the default n this is exactly the trigram row
+    // the panel used to show under the bigram table.
+    const nextLabel = gramLabel(n + 1);
+    const next = ngrams(tokens, n + 1, { stopwords: mode, minCount: 2, limit: 10 });
+    const chipList = el("div", "chips");
+    for (const gram of next) {
       const chip = el("span", "chip");
       chip.append(el("code", undefined, gram.display), el("b", undefined, String(gram.count)));
-      trigramList.append(chip);
+      chipList.append(chip);
     }
 
     $("[data-panel]")?.replaceChildren(
-      table(
-        ["Bigrama", es ? "Frec." : "Freq.", "log-Dice", "PMI", "t-score", "G²"],
-        rows,
-      ),
+      el("h3", "eyebrow", `${gramLabel(n)} · ${measureLabel(settings.sortBy)}`),
+      table([gramLabelSingular(n), es ? "Frec." : "Freq.", "log-Dice", "PMI", "t-score", "G²"], rows),
       note(
         es
           ? "log-Dice va de 0 a 14 y favorece las colocaciones frecuentes; PMI favorece las raras; t-score las muy frecuentes; G² es la medida de significación habitual."
           : "log-Dice runs 0 to 14 and favours frequent collocations; PMI favours rare ones; t-score very frequent ones; G² is the usual significance measure.",
       ),
-      el("h3", "eyebrow", "Trigramas"),
-      trigrams.length > 0 ? trigramList : note(es ? "Sin trigramas repetidos." : "No repeated trigrams."),
+      ...(n > 2
+        ? [
+            note(
+              es
+                ? "Por encima de n = 2 las medidas se calculan contra la primera y la última palabra del n-grama, así que son una aproximación: de ese tamaño, el recuento es el dato fiable."
+                : "Above n = 2 the measures are computed against the first and the last word of the n-gram, so they are an approximation: at that size the count is the reliable figure.",
+            ),
+          ]
+        : []),
+      el("h3", "eyebrow", nextLabel),
+      next.length > 0
+        ? chipList
+        : note(es ? `Sin ${nextLabel} repetidos.` : `No repeated ${nextLabel}.`),
     );
   }
 
@@ -483,6 +603,7 @@ const SAMPLE = es
   }
 
   function render(): void {
+    syncNgramBuilder();
     const empty = $<HTMLElement>("[data-empty]");
     if (tokens.length === 0) {
       hasResults = false;
@@ -542,6 +663,7 @@ const SAMPLE = es
     if (!hasResults) return;
     const text = $<HTMLTextAreaElement>("[data-corpus]")?.value ?? "";
     const mode = stopwordMode();
+    const settings = ngramSettings();
 
     download(
       "lingualab-analisis.json",
@@ -553,8 +675,19 @@ const SAMPLE = es
           stopwords: mode,
           statistics: statistics(tokens, { stopwords: mode, sentences }),
           frequency: frequency(tokens, { stopwords: mode }).slice(0, 200),
+          // Kept from before the builder existed so existing exports still parse.
           bigrams: ngrams(tokens, 2, { stopwords: mode, minCount: 2, limit: 100 }),
           trigrams: ngrams(tokens, 3, { stopwords: mode, minCount: 2, limit: 100 }),
+          // The builder's own result, with the settings that produced it.
+          ngrams: {
+            ...settings,
+            results: ngrams(tokens, settings.n, {
+              stopwords: mode,
+              minCount: settings.minCount,
+              limit: settings.limit,
+              sortBy: settings.sortBy,
+            }),
+          },
           readability: readability(text, lang()),
         },
         null,
@@ -614,6 +747,16 @@ const SAMPLE = es
           if (tokens.length > 0) render();
         });
       }
+
+      // The n-gram builder re-renders as you type, but only while its tab is open.
+      for (const selector of ["[data-ngram-n]", "[data-ngram-min]", "[data-ngram-limit]"]) {
+        $(selector)?.addEventListener("input", () => {
+          if (tokens.length > 0 && activeTab === "colloc") renderCollocations();
+        });
+      }
+      $("[data-ngram-sort]")?.addEventListener("change", () => {
+        if (tokens.length > 0 && activeTab === "colloc") renderCollocations();
+      });
 
       const input = $<HTMLTextAreaElement>("[data-corpus]");
       input?.addEventListener("keydown", (event) => {
@@ -734,6 +877,16 @@ const SAMPLE = es
   .field--inline select,
   .field--inline input {
     width: auto;
+  }
+
+  .ngram-builder {
+    padding-block-start: var(--space-2xs);
+    border-block-start: 1px solid var(--line);
+  }
+
+  /* .cluster sets display:flex, which would otherwise defeat [hidden]. */
+  .ngram-builder[hidden] {
+    display: none;
   }
 
   /* ---- Tabs ---- */
