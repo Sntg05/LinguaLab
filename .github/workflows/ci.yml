@@ -2,7 +2,21 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      # La rama larga de trabajo se verifica en cada push, no solo cuando llega a
+      # main. Es donde Vercel construye el preview, y "pasa en la maquina de quien
+      # lo escribio" no es lo mismo que "pasa en el runner": aca corren el mismo
+      # Node, el mismo `npm ci` desde el lockfile y los mismos e2e. Sin esto, una
+      # rama de trabajo podia acumular commits sin que nadie mirara el artefacto
+      # que se despliega.
+      #
+      # Si ademas hay un PR abierto, la rama corre dos veces: los eventos `push` y
+      # `pull_request` tienen refs distintos y el grupo de concurrencia no los
+      # agrupa. Es duplicacion conocida, no un fallo; unificarla pide cambiar la
+      # clave de concurrencia a `github.head_ref || github.ref_name`, que es otra
+      # decision y no se toma de paso.
+      - feat/lingualab-hexagonal-monorepo
   pull_request:
   workflow_dispatch:
 
