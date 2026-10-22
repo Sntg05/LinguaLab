@@ -36,7 +36,7 @@ Todas ellas corren por completo en el navegador y funcionan sin conexión despu�
 |---|---|---|---|---|
 | **FonoLab** — alfabeto AFI, corte sagital, audio, transcriptor grafema→AFI | `/fono` | **Estable** | Que los 108 símbolos del AFI resuelven a un diagrama dibujable; reproducción con audio con licencia y respaldo por voz del sistema | El transcriptor es una **aproximación didáctica**, no un transcriptor morfológico. El inglés no marca la tensión vocálica (`sing` da `/siŋ/`, no `/sɪŋ/`); el español asume distinción, sin seseo |
 | **ArborLab** — 23 tipos de árbol, 4 formatos de entrada, exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat | `/arboles` | **Estable** | El dibujo y el *layout* de los 23 tipos, los 4 formatos de entrada y cada exportación | El modo «Frase» adivina las categorías con una lista cerrada: el dibujo es exacto, la etiquetación no. La exportación a CoNLL-U es un árbol sintácticamente válido, no un análisis lingüístico |
-| **Estación textual** — frecuencia con dispersión, colocaciones (log-Dice y PMI), concordancias KWIC, estadísticas léxicas y legibilidad | `/tools` | **Estable** | El cálculo de cada medida y la tokenización, con pruebas unitarias | **No hay lematización**: no hay léxico, así que las mismas palabras flexionadas cuentan por separado |
+| **Estación textual** — frecuencia con dispersión, colocaciones, concordancias KWIC, estadísticas léxicas y legibilidad, con un **constructor de n-gramas** (n de 2 a 5, frecuencia mínima, máximo de filas y orden por G², log-Dice, PMI, t-score o recuento) | `/tools` | **Estable** | El cálculo de cada medida y la tokenización, con pruebas unitarias; el acotado de lo que escribe el constructor, con pruebas propias; y el constructor en sí, con e2e sobre el sitio compilado | **No hay lematización**: no hay léxico, así que las mismas palabras flexionadas cuentan por separado. Por encima de n = 2 las medidas de asociación se calculan contra la primera y la última palabra del n-grama, así que solo el recuento es fiable de ese tamaño |
 | **Glosario bilingüe filtrable** | `/glosario` | **Estable** | El filtrado por faceta y el contenido del glosario | Es material de referencia, no una herramienta de análisis |
 | **Bibliografía de recursos con licencia** | `/bibliografia` | **Estable** | Que cada ficha declara su licencia y su enlace de origen | — |
 | **Verificación de salvaguardas** | `/seguridad` | **Estable** | Lee el DOM real y comprueba en vivo las salvaguardas; el resultado compilado se verifica en cada build | Comprueba lo que el propio sitio declara; no es una auditoría externa |
@@ -62,11 +62,20 @@ aviso:
 
 No se inventó ni un solo par grafema→AFI, y no es una limitación temporal: es una regla del proyecto.
 
-## Segmentos 5 a 11 del prompt: no disponibles
+## Herramienta B: texto → AFI (segmento 5 del prompt)
+
+| | |
+|---|---|
+| **Estado** | **Estable**, con los límites de abajo declarados |
+| **Qué se probó** | El puerto `PhonemizerPort` con su suite de contrato, contra el fake y contra el adaptador real —en Node, el camino de motor no disponible, que es lo que ese entorno puede demostrar—. La traducción de códigos ISO 639-3 a voces de eSpeak, con pruebas propias, porque equivocarla daría una transcripción en la lengua equivocada en silencio. Y en navegador real, que la página carga, fonemiza y muestra el resultado. El motor se importa solo dentro de un Web Worker |
+| **Supuestos asumidos** | El español que se ofrece es `es-419`, latinoamericano con seseo, para no contradecir a la herramienta de ortografía, que declara esa misma variante; el inglés es `en-us`. De las 51 voces que trae el motor se exponen dos: ofrecer las demás sería ofrecer lenguas cuyos diccionarios nadie probó aquí |
+| **Límites declarados** | El AFI de eSpeak NG es **aproximado**: es un sintetizador, no un transcriptor revisado, y la interfaz lo advierte antes de mostrar nada. La primera fonemización descarga **5,6 MB** de datos —un solo archivo para las 51 voces, sin recorte por lengua salvo el ruso, que no se publica—. Esa descarga queda fuera del presupuesto de peso por página porque se busca en tiempo de ejecución, y se sirve desde este origen: si faltara, el paquete caería en un CDN público que la CSP bloquea y la promesa de funcionar sin conexión dejaría de ser cierta |
+| **Cómo ejecutarla** | `npm run dev` y abrir `/fonemizador` |
+
+## Segmentos 6 a 11 del prompt: no disponibles
 
 | Segmento | Herramienta | Estado |
 |---|---|---|
-| 5 | Fonemizador es/en con eSpeak NG en WebAssembly | **No disponible** — fuera del alcance autorizado |
 | 6 | Visor de audio, espectrograma y TextGrid | **No disponible** — fuera del alcance autorizado |
 | 7 | Experimentos con jsPsych | **No disponible** — fuera del alcance autorizado |
 | 8 | Análisis acústico (praatfan) — **experimental** por diseño | **No disponible** — fuera del alcance autorizado |
@@ -74,7 +83,8 @@ No se inventó ni un solo par grafema→AFI, y no es una limitación temporal: e
 | 10 | Mapa de lenguas indígenas de Colombia | **No disponible** — fuera del alcance autorizado |
 | 11 | Catálogo de enlaces externos y puerto de reconocimiento de fonos | **No disponible** — fuera del alcance autorizado |
 
-El usuario autorizó los segmentos **1 a 4**. Lo que sí existe de esos segmentos futuros son sus **puertos
+El usuario autorizó los segmentos **1 a 5**. Lo que sí existe de los segmentos futuros son sus **puertos
+
 y sus fakes** en el núcleo —doce puertos con su unión de errores, y un fake en memoria para cada uno—, que es lo
 que permite añadirlos después sin tocar el dominio. **No hay stubs vacíos**: `application/index.ts`
 declara en un comentario qué casos de uso pertenecen a los segmentos 6 a 9 en vez de exportar funciones
@@ -94,13 +104,13 @@ que no hacen nada.
 
 | Comprobación | Resultado |
 |---|---|
-| Pruebas unitarias | **744 en 40 archivos** |
-| Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las **21 páginas públicas** —las 20 rutas y la 404— en español y en inglés. Ampliar la puerta a todas encontró **una violación real más** que nadie había mirado: la 404 usaba un token de LÍNEA (`--line-strong`) como color de texto, que da 2.0:1 en claro y 2.4:1 en oscuro, donde se exigen 3:1 para texto grande. Corregido a `--ink-faint`, **medido en un navegador real**: 5.2:1 en claro y 5.4:1 en oscuro. La puerta recorre ahora **cada página en los dos temas** —42 pruebas de accesibilidad sobre `dist/`, dentro de una suite de 56— porque un contraste aprobado en una paleta no dice nada de la otra. Y la guarda quedó estructural: `reuseExistingServer` pasó a `false`, porque con `true` un `astro dev` vivo en el puerto hacía que la puerta probara el **servidor de desarrollo**, sin CSP y compilando a demanda, y casi toda la suite se caía por tiempo de espera. Un verde que no significa lo que dice no lo investiga nadie. Ahora también afirma sobre los resultados `incomplete` de axe, y ahí declaró un **punto ciego**: en los nodos que axe no puede medir —texto sobre SVG, botones de un solo carácter— la puerta no sabe nada del contraste y no lo finge. Son **186 nodos** en las 21 páginas y los dos temas —`inicio` 9 por página y tema, `FonoLab` 15, `salvaguardas` 16, `acerca` 4, `arboles` 2, `no-existe` 1—, y quedan como **P11** y **P12** en `docs/PENDING.md`: P11 con el aviso de que medirlos por estilos computados da resultados falsos, y P12 con el agujero que sigue abierto, los `incomplete` sin motivo textual, entre ellos uno de impacto crítico en `/arboles` |
-| Pruebas de extremo a extremo | **56**, sobre el sitio compilado: 42 de accesibilidad (21 páginas × 2 temas) y 14 de flujo |
-| Reglas de dependencia hexagonales | 162 módulos y 365 dependencias, **0 violaciones** |
+| Pruebas unitarias | **765 en 43 archivos** |
+| Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las **23 páginas públicas** —las 22 rutas y la 404— en español y en inglés. Ampliar la puerta a todas encontró **una violación real más** que nadie había mirado: la 404 usaba un token de LÍNEA (`--line-strong`) como color de texto, que da 2.0:1 en claro y 2.4:1 en oscuro, donde se exigen 3:1 para texto grande. Corregido a `--ink-faint`, **medido en un navegador real**: 5.2:1 en claro y 5.4:1 en oscuro. La puerta recorre ahora **cada página en los dos temas** —46 pruebas de accesibilidad sobre `dist/`, dentro de una suite de 69— porque un contraste aprobado en una paleta no dice nada de la otra. Y la guarda quedó estructural: `reuseExistingServer` pasó a `false`, porque con `true` un `astro dev` vivo en el puerto hacía que la puerta probara el **servidor de desarrollo**, sin CSP y compilando a demanda, y casi toda la suite se caía por tiempo de espera. Un verde que no significa lo que dice no lo investiga nadie. Ahora también afirma sobre los resultados `incomplete` de axe, y ahí declaró un **punto ciego**: en los nodos que axe no puede medir —texto sobre SVG, botones de un solo carácter— la puerta no sabe nada del contraste y no lo finge. Son **186 nodos** medidos cuando la puerta cubría 21 páginas y los dos temas —`inicio` 9 por página y tema, `FonoLab` 15, `salvaguardas` 16, `acerca` 4, `arboles` 2, `no-existe` 1—, y quedan como **P11** y **P12** en `docs/PENDING.md`: P11 con el aviso de que medirlos por estilos computados da resultados falsos, y P12 con el agujero que sigue abierto, los `incomplete` sin motivo textual, entre ellos uno de impacto crítico en `/arboles` |
+| Pruebas de extremo a extremo | **69**, sobre el sitio compilado: 46 de accesibilidad (23 páginas × 2 temas) y 23 de flujo |
+| Reglas de dependencia hexagonales | 170 módulos y 378 dependencias, **0 violaciones** |
 | Tipos | `astro check` y los dos paquetes del workspace, **0 errores** |
-| Linter | 0 errores. **42 avisos**: **27 de complejidad cognitiva** —6 en código nuevo, uno de ellos introducido por la afirmación sobre `incomplete`, y 21 heredados— y **15 de otras reglas**. De esos 15, **4 provienen de la regla nueva de `biome.json`**, que no existía en `main`, así que no son heredados en sentido estricto |
-| Página más pesada | 28.5 KB comprimidos, sobre un presupuesto de 60 KB |
+| Linter | 0 errores. **42 avisos**, el mismo total que antes de estas dos herramientas. El desglose por regla sale de `npm run lint`, que lo imprime agrupado |
+| Página más pesada | 28.6 KB comprimidos, sobre un presupuesto de 60 KB |
 | Vulnerabilidades de producción | 0 (`npm audit --omit=dev`) |
 
 **La puerta de accesibilidad ya se ganó su lugar:** encontró un `aria-pressed` puesto sobre los enlaces

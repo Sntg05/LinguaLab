@@ -410,3 +410,58 @@ uniformidad**. Y la lección se cierra sin adornos: **la ronda que corrige intro
 es lo único que los saca a la luz**. Este documento llegó a la quinta ronda de verificación; la sexta
 probablemente encuentre algo en estas mismas líneas, y por eso el próximo paso no es escribir más prosa
 sino verificar la que hay.
+
+## P14 — El bundle del fonemizador pesa 5,6 MB y trae 49 voces que no se ofrecen
+
+**Severidad:** la primera fonemización tarda lo que tarda una descarga de 5,6 MB, y el 96 % de esos
+bytes son lenguas que la interfaz no muestra.
+
+**Síntoma.** Abrí `/fonemizador` con la red lenta y pulsá «Fonemizar»: el indicador de trabajo se
+queda ahí varios segundos antes de la primera transcripción. En móvil es peor, y no hay forma de
+pedir solo español.
+
+**Evidencia.** `public/espeak-phonemizer/data/data.data` es **un solo archivo** con las tablas
+compartidas y los diccionarios de las 51 voces de `espeak-phonemizer@0.2.0`. El paquete únicamente
+separa el ruso (`ru.data`, 9 MB), que no se publica porque nunca se llama a `initialize()` con
+`includeRussian`. `packages/adapters/src/phonemizer/espeak-voices.ts` mapea dos voces,
+`spa → es-419` y `eng → en-us`. La descarga la dispara
+`packages/adapters/src/phonemizer/phonemizer-worker.ts` en `initialize()`, y no cuenta para el
+presupuesto de 60 KB por página porque se busca en tiempo de ejecución.
+
+**Por qué no se hizo.** Reducir el bundle exige **recompilar el wasm** con otro conjunto de voces, y
+eso es un cambio de cadena de compilación, no de código del sitio:
+`node_modules/espeak-phonemizer/BUILDING.md` describe el proceso, pero el binario resultante ya no es
+el del paquete fijado, y entonces la versión que se audita deja de ser la que se sirve. Exponer las 49
+voces restantes era la salida barata y se descartó por la razón opuesta: aquí nadie verificó que
+transcriban bien, y ofrecerlas sería prometer una calidad que no se midió.
+
+**Próximo paso exacto.** Medir qué ahorra un bundle propio con dos voces: seguir `BUILDING.md` con el
+conjunto reducido, comparar el tamaño resultante y, si baja de ~1 MB, publicarlo como artefacto fijado
+por hash y anotar su procedencia en `THIRD_PARTY_NOTICES.md`. Criterio de aceptación: la página
+fonemiza igual, `npm run build:verify` sigue en verde y lo servido bajo `public/espeak-phonemizer/`
+baja al menos un 80 %.
+
+## P15 — El build avisa que `node:fs/promises` se externalizó para el navegador
+
+**Severidad:** baja. La herramienta funciona —está probada en navegador real— pero el build emite una
+advertencia que alguien va a leer algún día y va a querer entender.
+
+**Síntoma.** `npm run build` imprime:
+`Module "node:fs/promises" has been externalized for browser compatibility, imported by
+node_modules/espeak-phonemizer/dist/espeak.mjs`.
+
+**Evidencia.** `espeak-phonemizer` publica una sola entrada que sirve a Node y al navegador. La rama de
+Node lee los datos del disco con `node:fs/promises`; Vite, al compilar para el navegador, sustituye ese
+módulo por un marcador que falla si se usa. En el navegador nunca se usa: los datos llegan por `fetch`
+desde `public/espeak-phonemizer/`, que es lo que hace `initialize()` cuando recibe una URL. La prueba
+`e2e/phonemizer.spec.ts` fonemiza de verdad y pasa, así que la advertencia no describe un fallo.
+
+**Por qué no se hizo.** Silenciarla requiere una rama de código que no es nuestra: el paquete tenDRÍA
+que separar su entrada de navegador, o habría que interceptar el módulo desde la configuración de Vite.
+Lo segundo es posible y esconde el problema en vez de resolverlo; lo primero no depende de este
+repositorio.
+
+**Próximo paso exacto.** Vigilar si el paquete publica una entrada solo-navegador (algo como
+`/browser`, que sí tiene el otro candidato). Si aparece, fijarla y comprobar que la advertencia
+desaparece. Criterio de aceptación: `npm run build` no menciona `node:fs` y `e2e/phonemizer.spec.ts`
+sigue en verde.

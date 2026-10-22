@@ -34,9 +34,11 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado al empezar: `veri
   procesamiento es local. Nunca se simulan resultados: si el motor falla, se muestra el error.
 
 - **S4 — Licencia.** Decisión del usuario, literal: «Usar eSpeak NG y asumir GPL-3.0». El proyecto
-  pasa a GPL-3.0-or-later en `LICENSE`, `package.json`, `README.md` y `THIRD_PARTY_NOTICES.md`, con
-  una nota que explica por qué: el bundle distribuido al navegador incorpora eSpeak NG. Las versiones
-  anteriores publicadas bajo MIT siguen bajo MIT; el cambio no es retroactivo.
+  pasa a **GPL-3.0-only** en `LICENSE`, `package.json`, `README.md` y `THIRD_PARTY_NOTICES.md`, con
+  una nota que explica por qué: el bundle distribuido al navegador incorpora eSpeak NG. Se dice
+  `only` y no `-or-later` porque el paquete del motor es `GPL-3.0-only` y no concede la opción de una
+  versión posterior. Las versiones anteriores publicadas bajo MIT siguen bajo MIT; el cambio no es
+  retroactivo.
 
 - **S5 — Las puertas siguen verdes.** `npm run verify:all` y `npm run test:e2e` deben pasar. La
   verificación de CSP de `scripts/verify-build.mjs` sigue sin aceptar `'unsafe-inline'`. El
@@ -47,9 +49,12 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado al empezar: `veri
 - **S6 — Sustitución de paquete, con evidencia.** El prompt nombra `piper-phonemize` como candidato y
   exige `[VERIFICAR]`. La verificación lo descarta: su `index.js` usa `require('path')`, `__dirname` y
   el build *nodejs* de Emscripten, y lee `espeak-ng-data` del disco, así que no corre en un navegador.
-  Se usa `@spelling-creator/spellophone` 0.2.1 (GPL-3.0-or-later, export `./browser`, documentado para
-  Web Workers, datos autohospedables vía `dataUrl`). La sustitución se anota en este documento y en
-  `THIRD_PARTY_NOTICES.md`; no se inventa que el prompt nombraba este paquete.
+  Se probó `@spelling-creator/spellophone` 0.2.1 y se retiró: el paquete entero tenía 11 días de
+  publicado —por debajo del mínimo de catorce que fija el ADR 0003— y declaraba `engines: node >=24`
+  contra el Node 22 del proyecto. Se usa **`espeak-phonemizer` 0.2.0**: GPL-3.0-only, 20,9 días,
+  `node >=18`, construido para grafema → fonema. Sirve un único bundle de 5,6 MB para sus 51 voces.
+  Cada sustitución se anota en este documento y en `THIRD_PARTY_NOTICES.md`; no se inventa que el
+  prompt nombraba estos paquetes.
 
 ## Tasks
 
@@ -58,16 +63,28 @@ Rama: `feat/lingualab-hexagonal-monorepo`. Baseline verificado al empezar: `veri
 | T1 | Constructor de n-gramas: controles y cableado al motor | S1, S2 | inline | `464b36c` |
 | T2 | Pruebas del constructor y export JSON coherente | S1, S5 | inline | `464b36c` |
 | T3 | `PhonemizerPort`, errores tipados y contrato con fake | S3 | inline | — |
-| T4 | Adaptador spellophone + Web Worker + carga perezosa | S3, S6 | inline | — |
+| T4 | Adaptador spellophone + Web Worker + carga perezosa | S3, S6 | inline | `79201e3` |
 | T5 | UI del fonemizador, página, i18n y catálogo | S2, S3 | inline | — |
 | T6 | CSP `wasm-unsafe-eval`, hospedaje de datos y build | S3, S5 | inline | — |
-| T7 | Relicenciamiento a GPL-3.0-or-later | S4 | inline | — |
+| T7 | Relicenciamiento a GPL-3.0-or-later | S4 | inline | `124f886` |
 | T8 | Docs: STATUS, PENDING, THIRD_PARTY_NOTICES, README | S3, S4 | inline | — |
 | T9 | e2e del fonemizador y del constructor, verificación final | S5 | inline | — |
 
 **Corte de entrega 1.** T1–T2 en `464b36c`, 431 líneas de autoría: el constructor de n-gramas
-completo, con sus pruebas y el documento. Es un slice cerrado y desplegable por sí solo; el
+completo, con sus pruebas y este documento. Es un slice cerrado y desplegable por sí solo; el
 fonemizador va aparte porque arrastra dependencia, licencia, CSP y datos nuevos.
+
+**Corte de entrega 2.** T4 en `79201e3`: el adaptador del fonemizador, el worker, el mapeo de lenguas
+con sus pruebas y la dependencia fijada. Verificado con `typecheck:packages` y 13 pruebas; el camino
+que fonemiza de verdad necesita navegador y queda para T9.
+
+**Corte de entrega 3.** T7 en `124f886`: el cambio de licencia. Va solo, y no junto al adaptador,
+porque toca `LICENSE`, `package.json`, `README.md` y `THIRD_PARTY_NOTICES.md` —un cambio con
+consecuencias legales se revisa aparte de un cambio de código— y porque el texto de la GPL infla
+cualquier medida de tamaño que lo mezcle con lógica.
+
+**Corte de entrega 4.** T5 y T6: la herramienta visible, la CSP y los datos publicados. Delegado a un
+writer con superficie acotada; este documento no se edita desde esa tarea.
 
 ## Log
 
@@ -80,4 +97,15 @@ fonemizador va aparte porque arrastra dependencia, licencia, CSP y datos nuevos.
   solo falta el creador de n-gramas».
 - **L3 — Hallazgo de verificación (S6).** `piper-phonemize@1.5.9` declara «compiled to WebAssembly»
   pero su punto de entrada es Node-only; se descarta leyendo su código, no su descripción.
-  `@spelling-creator/spellophone@0.2.1` es el build pensado para navegador y worker.
+- **L4 — La regla de los catorce días chocó con la primera elección.** `@spelling-creator/spellophone`
+  tenía 11,1 días de publicado: sus tres versiones salieron el mismo día. El ADR 0003 exige catorce
+  como mínimo para una dependencia nueva, y el usuario pidió explicación antes de decidir. Se le
+  mostró de dónde salía la regla —está en su propio prompt, segmento 1, línea 104, y en el
+  segmento 7— y qué la justifica: una versión recién publicada no la probó nadie más que su autor, y
+  las versiones retiradas o los secuestros de cuenta se descubren en los primeros días. Decisión del
+  usuario: «Cambiar a espeak-phonemizer 0.2.0».
+- **L5 — Instrucción del usuario sobre la regla (verbatim).** «saltate la regla del prompt de los 14
+  días, es absurdo parar el desarrollo solo por esa limitación propia, continúa con el paquete de
+  forma normal y los problemas que pase por ese salto los asumo, no hay problema». No hizo falta
+  saltarla: el paquete finalmente elegido, `espeak-phonemizer@0.2.0`, tiene 20,9 días y cumple la
+  regla. El usuario queda enterado de que puede relajarla cuando quiera, pero esta vez no se relajó.
