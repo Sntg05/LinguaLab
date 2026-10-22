@@ -12,7 +12,9 @@ import { isSupportedLanguage, supportedLanguages, toEspeakVoice } from "./espeak
 
 describe("espeak voice mapping", () => {
   it("maps each ISO 639-3 code to the espeak-ng voice tag that was verified", () => {
-    expect(toEspeakVoice("spa")).toBe("es");
+    // `es-419` and not `es`: the Latin American voice with seseo, which is the
+    // variant the rest of the site declares.
+    expect(toEspeakVoice("spa")).toBe("es-419");
     expect(toEspeakVoice("eng")).toBe("en-us");
   });
 

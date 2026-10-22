@@ -195,7 +195,7 @@ invariantes que el compilador protege y las trampas que ya costaron tiempo:
 
 ## Licencias
 
-El código es **GPL-3.0-or-later** — ver [`LICENSE`](LICENSE). No fue una elección estética: desde la
+El código es **GPL-3.0-only** — ver [`LICENSE`](LICENSE). No fue una elección estética: desde la
 3.0.0 el sitio incluye eSpeak NG compilado a WebAssembly para fonemizar texto, y como ese binario
 viaja al navegador con el resto del bundle, la distribución completa tiene que ser GPL. Lo que se
 publicó antes bajo MIT sigue bajo MIT: una licencia no es retroactiva.

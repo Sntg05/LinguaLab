@@ -2,21 +2,22 @@ LinguaLab — Copyright (C) 2026 Santiago Leaño Duarte
 
 Este programa es software libre: podés redistribuirlo y/o modificarlo bajo los
 términos de la Licencia Pública General de GNU publicada por la Free Software
-Foundation, en su versión 3 o cualquier versión posterior.
+Foundation, en su versión 3.
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation, either version 3 of the License, or (at your option) any later
-version.
+Foundation, version 3 of the License.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-Why GPL-3.0 and not MIT: from version 3.0.0 the site ships eSpeak NG, compiled
-to WebAssembly, to phonemize text in the browser. eSpeak NG is GPL-3.0-or-later,
-so the distributed bundle as a whole must be. Releases published before that
-change were MIT and remain MIT; a license is not retroactive.
+Why GPL-3.0 and not MIT: the site ships eSpeak NG, compiled to WebAssembly, to
+phonemize text in the browser. The engine arrives through `espeak-phonemizer`,
+which is GPL-3.0-ONLY, so the distributed bundle as a whole must be version 3
+and cannot offer a "later version" option it does not have the rights to grant.
+Releases published before that change were MIT and remain MIT; a license is not
+retroactive.
 
 The full license text follows. The canonical version is also available at
 <https://www.gnu.org/licenses/gpl-3.0.txt>.

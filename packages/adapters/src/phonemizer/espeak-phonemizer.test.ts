@@ -11,13 +11,13 @@ import { isErr } from "@lingualab/core";
 import { runPhonemizerPortContract } from "@lingualab/core/testing";
 import { describe, expect, it } from "vitest";
 
-import { createSpellophonePhonemizer } from "./spellophone-phonemizer";
+import { createEspeakPhonemizer } from "./espeak-phonemizer";
 
-runPhonemizerPortContract(() => createSpellophonePhonemizer());
+runPhonemizerPortContract(() => createEspeakPhonemizer());
 
-describe("spellophone phonemizer outside a browser", () => {
+describe("espeak phonemizer outside a browser", () => {
   it("reports a typed engine-unavailable error instead of throwing", async () => {
-    const phonemizer = createSpellophonePhonemizer();
+    const phonemizer = createEspeakPhonemizer();
     const result = await phonemizer.phonemize("hola", "spa");
 
     expect(isErr(result)).toBe(true);
@@ -27,7 +27,7 @@ describe("spellophone phonemizer outside a browser", () => {
   });
 
   it("rejects a language this build does not ship before reaching the engine", async () => {
-    const phonemizer = createSpellophonePhonemizer();
+    const phonemizer = createEspeakPhonemizer();
     const result = await phonemizer.phonemize("hola", "fra");
 
     expect(isErr(result)).toBe(true);
@@ -42,7 +42,7 @@ describe("spellophone phonemizer outside a browser", () => {
   });
 
   it("lists exactly the languages it maps and admits no others", () => {
-    const phonemizer = createSpellophonePhonemizer();
+    const phonemizer = createEspeakPhonemizer();
 
     expect(phonemizer.listLanguages()).toEqual(["spa", "eng"]);
 
@@ -50,7 +50,7 @@ describe("spellophone phonemizer outside a browser", () => {
   });
 
   it("is not available before the module has actually loaded", () => {
-    const phonemizer = createSpellophonePhonemizer();
+    const phonemizer = createEspeakPhonemizer();
 
     expect(phonemizer.isAvailable()).toBe(false);
 
@@ -58,7 +58,7 @@ describe("spellophone phonemizer outside a browser", () => {
   });
 
   it("refuses every request after dispose, with a typed error", async () => {
-    const phonemizer = createSpellophonePhonemizer();
+    const phonemizer = createEspeakPhonemizer();
     phonemizer.dispose();
 
     const result = await phonemizer.phonemize("hola", "spa");

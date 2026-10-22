@@ -59,16 +59,21 @@ también es una decisión que conviene poder auditar.
 
 | Paquete | Versión | Licencia | Uso | Estado |
 |---|---|---|---|---|
-| [@spelling-creator/spellophone](https://www.npmjs.com/package/@spelling-creator/spellophone) | 0.2.1 | **GPL-3.0-or-later** | Fonemizador es/en: eSpeak NG compilado a WebAssembly. Se publican `core.bin.gz` y los diccionarios `es` y `en` del propio paquete, podados del manifiesto original | Integrado en la 3.0.0 |
+| [espeak-phonemizer](https://www.npmjs.com/package/espeak-phonemizer) | 0.2.0 | **GPL-3.0-only** | Fonemizador es/en: eSpeak NG compilado a WebAssembly, en un Web Worker. Se publican `wasm/espeak-ng.wasm`, `data/manifest.json` y `data/data.data` del propio paquete, copiados por `scripts/sync-espeak-data.mjs` | Integrado |
 
 > **Este paquete cambió la licencia del proyecto.** Antes de integrarlo, LinguaLab era MIT. eSpeak NG
-> es GPL-3.0-or-later y su binario viaja al navegador dentro del bundle, así que la distribución
-> completa pasó a GPL-3.0-or-later. Los `LICENSE` de las versiones anteriores siguen siendo MIT: el
-> cambio no se aplica hacia atrás. La decisión está anotada en
-> `odd/tasks/text-station-ngrams-and-phonemizer.md`, spec S4.
+> es GPL-3.0-only y su binario viaja al navegador dentro del bundle, así que la distribución
+> completa pasó a GPL-3.0-only —no a `-or-later`, porque el paquete no concede esa opción—. Los
+> `LICENSE` de las versiones anteriores siguen siendo MIT: el cambio no se aplica hacia atrás. La
+> decisión está anotada en `odd/tasks/text-station-ngrams-and-phonemizer.md`, spec S4.
+>
+> Coste declarado: el bundle de datos pesa **5,6 MB** y no se puede recortar por lengua (el paquete
+> trae un solo archivo para sus 51 voces). Se descarga en tiempo de ejecución, solo al abrir la
+> herramienta, y por eso no entra en el presupuesto de peso por página.
 
 ## Descartadas
 
 | Paquete | Motivo |
 |---|---|
 | [piper-phonemize](https://www.npmjs.com/package/piper-phonemize) | La 1.5.9 se describe como «compiled to WebAssembly», pero su punto de entrada es un build *nodejs* de Emscripten: usa `require('path')`, `__dirname` y lee `espeak-ng-data` del disco. No corre en un navegador. La variante nativa se publica aparte, como `piper-phonemize-node`. |
+| [@spelling-creator/spellophone](https://www.npmjs.com/package/@spelling-creator/spellophone) | Se llegó a integrar la 0.2.1 y se retiró: el paquete entero tenía **11 días** de publicado, por debajo del mínimo de catorce que fija el ADR 0003, y declaraba `engines: node >=24` contra el Node 22 del proyecto. `espeak-phonemizer` cumple las dos cosas (`node >=18`, veinte días) y está construido específicamente para grafema → fonema. |

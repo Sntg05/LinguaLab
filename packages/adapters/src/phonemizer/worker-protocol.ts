@@ -11,10 +11,12 @@ export interface PhonemizerRequest {
   readonly text: string;
   /** An espeak-ng voice tag, already translated from our language code. */
   readonly voice: string;
-  /** Where `espeak-ng-data` is served from, same origin. */
-  readonly dataUrl: string;
-  /** Dictionaries to preload, as espeak-ng language tags. */
-  readonly languages: readonly string[];
+  /**
+   * Where the engine's `wasm/` and `data/` directories are served from. The
+   * package resolves `wasm/espeak-ng.wasm`, `data/manifest.json` and
+   * `data/data.data` under this base.
+   */
+  readonly baseUrl: string;
 }
 
 export type PhonemizerReply =

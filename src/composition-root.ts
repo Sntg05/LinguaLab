@@ -20,6 +20,12 @@
    synchronous and opens the database lazily on first use, so importing this
    module in a page script is cheap and cannot throw. No singleton globals, no
    service locator: if an adapter has to be replaced, there is one file to read.
+
+   The phonemizer follows the same rule for a subtler reason: its engine is
+   WebAssembly behind a Web Worker, and constructing the adapter only records
+   WHERE the data lives. Nothing is downloaded, no worker is spawned and no wasm
+   is compiled until the first `phonemize`, so wiring it here costs the pages
+   that never use it nothing at all.
    ============================================================ */
 
 import {
@@ -30,15 +36,18 @@ import {
   createImportOrthographyTable,
   createListOrthographyTables,
   createListTools,
+  createPhonemizeText,
   createRemoveOrthographyTable,
   createSaveOrthographyTable,
 } from "@lingualab/core";
 import {
   type PersistenceStatus,
   createIndexedDbOrthographyRepository,
+  createEspeakPhonemizer,
   createStaticToolRegistry,
 } from "@lingualab/adapters";
 import { TOOLS } from "./scripts/catalogo/catalog-data";
+import { withBase } from "./lib/paths";
 
 /**
  * The ports below are trivial but still injected rather than called inline:
@@ -73,6 +82,26 @@ const tables = createIndexedDbOrthographyRepository();
 const registry = createStaticToolRegistry(TOOLS);
 
 /**
+ * El fonemizador es el unico adaptador que pide algo fuera de este dispositivo
+ * —los datos de eSpeak NG llegan por HTTP— y por eso su ubicacion se decide aqui.
+ *
+ * `withBase` no es decorativo: GitHub Pages sirve el sitio bajo `/LinguaLab`, y
+ * una base sin prefijo se pediria al dominio y volveria 404. Los datos viven en
+ * `public/espeak-phonemizer/` (los copia `scripts/sync-espeak-data.mjs`), asi que
+ * se buscan en tiempo de ejecucion y no viajan en el bundle: el presupuesto de
+ * peso por pagina mide scripts, y estos 5,7 MB no lo son.
+ *
+ * Esa base no es opcional por otra razon: si los datos no estan donde se los
+ * busca, el paquete cae en pedirlos a un CDN publico. La CSP del sitio
+ * (`connect-src 'self'`) lo bloquearia y la promesa de que la herramienta
+ * funciona sin conexion despues de la primera carga dejaria de ser cierta.
+ */
+const phonemizer = createEspeakPhonemizer({ baseUrl: withBase("/espeak-phonemizer") });
+
+/** El caso de uso solo traduce el texto a AFI; no decide que se muestra. */
+const phonemizeText = createPhonemizeText({ phonemizer });
+
+/**
  * The type is derived from the factories instead of re-typed by hand. A hand
  * written signature would compile while silently disagreeing with the use
  * case the moment `packages/core` changed a parameter, and the whole point of
@@ -92,6 +121,22 @@ export interface LinguaLab {
    */
   readonly listTools: ReturnType<typeof createListTools>;
   /**
+   * Texto → AFI con eSpeak NG. Devuelve `Result` y no lanza: que el motor no
+   * este disponible es una respuesta, y la interfaz tiene que poder mostrarla.
+   *
+   * La firma deriva de la factoria, como todas las de arriba, para que un
+   * cambio de parametros en `@lingualab/core` rompa la compilacion en vez de
+   * publicar una firma escrita a mano que ya no coincide.
+   */
+  readonly phonemizeText: ReturnType<typeof createPhonemizeText>;
+  /**
+   * El adaptador, no el puerto: `listLanguages` e `isAvailable` son consultas
+   * que la interfaz necesita antes de ofrecer el boton, y `dispose` cierra el
+   * worker. Nada de esto se reexporta para que la interfaz siga sin conocer
+   * `@lingualab/adapters`.
+   */
+  readonly phonemizer: ReturnType<typeof createEspeakPhonemizer>;
+  /**
    * Which store is actually holding the tables right now, and why it degraded
    * if it did. It is exposed because the editor must tell the truth about
    * persistence: silently pretending to save is the defect this exists to
@@ -108,6 +153,8 @@ export const lingualab: LinguaLab = {
   importOrthographyTable: createImportOrthographyTable({ tables }),
   exportOrthographyTable: createExportOrthographyTable({ tables }),
   listTools: createListTools({ registry }),
+  phonemizeText,
+  phonemizer,
   // `persistence` does not depend on `this`, so passing the reference is exact
   // and avoids a wrapper that would only add a stack frame.
   persistence: tables.persistence,

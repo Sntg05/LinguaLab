@@ -11,23 +11,24 @@ import {
 import { supportedLanguages, toEspeakVoice } from "./espeak-voices";
 import type { PhonemizerReply, PhonemizerRequest } from "./worker-protocol";
 
-export interface SpellophonePhonemizerOptions {
+export interface EspeakPhonemizerOptions {
   /**
-   * Where `espeak-ng-data` is served from. Must be same-origin: the site's
-   * `connect-src` is `'self'`, and the data is fetched at runtime rather than
-   * bundled, which is also why it stays out of the per-page weight budget.
+   * Where the engine's `wasm/` and `data/` directories are served from. Must be
+   * same-origin: the site's `connect-src` is `'self'`, the data is fetched at
+   * runtime rather than bundled, and the package's fallback to a public CDN
+   * would both break that policy and the offline promise.
    */
-  readonly dataUrl?: string;
+  readonly baseUrl?: string;
   /** Give up on a single request after this long. */
   readonly timeoutMs?: number;
 }
 
-export interface SpellophonePhonemizer extends PhonemizerPort {
+export interface EspeakPhonemizer extends PhonemizerPort {
   /** Terminates the worker. The instance is unusable afterwards. */
   dispose(): void;
 }
 
-const DEFAULT_DATA_URL = "/espeak-ng-data/";
+const DEFAULT_BASE_URL = "/espeak-phonemizer";
 const DEFAULT_TIMEOUT_MS = 30_000;
 
 interface Waiting {
@@ -47,17 +48,9 @@ interface Waiting {
  * actually loaded, which is why it is false before the first successful call.
  * The interface must decide what to show by *trying*, not by asking.
  */
-export function createSpellophonePhonemizer(
-  options: SpellophonePhonemizerOptions = {},
-): SpellophonePhonemizer {
-  const dataUrl = options.dataUrl ?? DEFAULT_DATA_URL;
+export function createEspeakPhonemizer(options: EspeakPhonemizerOptions = {}): EspeakPhonemizer {
+  const baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-
-  // espeak-ng tags, not our codes: this is what createEspeak preloads.
-  const voices = supportedLanguages().flatMap((code) => {
-    const voice = toEspeakVoice(code);
-    return voice === null ? [] : [voice];
-  });
 
   const waiting = new Map<number, Waiting>();
   let worker: Worker | null = null;
@@ -128,7 +121,7 @@ export function createSpellophonePhonemizer(
     }
 
     const id = nextId++;
-    const request: PhonemizerRequest = { id, text, voice, dataUrl, languages: voices };
+    const request: PhonemizerRequest = { id, text, voice, baseUrl };
 
     const answer = new Promise<PhonemizerReply>((resolve) => {
       const timer = setTimeout(() => {

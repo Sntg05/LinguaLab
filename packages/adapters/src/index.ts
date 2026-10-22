@@ -25,10 +25,10 @@ export {
 } from "./tool-registry/static-tool-registry";
 
 export {
-  createSpellophonePhonemizer,
-  type SpellophonePhonemizer,
-  type SpellophonePhonemizerOptions,
-} from "./phonemizer/spellophone-phonemizer";
+  createEspeakPhonemizer,
+  type EspeakPhonemizer,
+  type EspeakPhonemizerOptions,
+} from "./phonemizer/espeak-phonemizer";
 
 export {
   isSupportedLanguage,
