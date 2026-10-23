@@ -45,7 +45,18 @@ Todas ellas corren por completo en el navegador y funcionan sin conexión despu�
 | **Bibliografía de recursos con licencia** | `/bibliografia` | **Estable** | Que cada ficha declara su licencia y su enlace de origen | — |
 | **Verificación de salvaguardas** | `/seguridad` | **Estable** | Lee el DOM real y comprueba en vivo las salvaguardas; el resultado compilado se verifica en cada build | Comprueba lo que el propio sitio declara; no es una auditoría externa |
 | **Acerca de** | `/acerca` | **Estable** | — | — |
-| **Catálogo de herramientas** — tarjetas filtrables por área, idioma y tipo de integración, con el estado real de cada una | `/catalogo` | **Estable** | El filtrado, que una herramienta planeada no se vea como una que existe, y su accesibilidad con axe | Ninguna herramienta lleva enlace: el prompt exige verificar cada URL publicada y no se ha verificado ninguna |
+| **Catálogo de herramientas** — tarjetas filtrables por área, idioma y tipo de integración, **agrupadas por nivel de análisis y con índice**, con el estado real de cada una | `/catalogo` | **Estable** | El filtrado, que una herramienta planeada no se vea como una que existe, la agrupación por nivel con su índice y su accesibilidad con axe | Ninguna herramienta lleva enlace: el prompt exige verificar cada URL publicada y no se ha verificado ninguna |
+
+**La barra superior ya no es una lista de herramientas.** Tiene tres entradas fijas —catálogo,
+bibliografía y acerca de— y las herramientas se alcanzan dentro del catálogo. Con siete herramientas la
+barra anterior se había vuelto una lista que crecía con cada entrega; esta no crece. El orden de los
+niveles vive en `ANALYSIS_LEVELS`, en el núcleo, porque la secuencia fonética → documentación es
+conocimiento lingüístico y no una preferencia de diseño. El pie se deriva de `NAV_ITEMS` desde
+`d34059b`: antes tenía su propia lista, y se había quedado vieja dos veces.
+
+**La revisión de seguridad tiene su propio documento:**
+[`docs/SECURITY-REVIEW.md`](SECURITY-REVIEW.md), con lo que se midió, lo que se corrigió y los seis
+puntos que siguen abiertos.
 
 ## Herramienta A: ortografía → IPA (segmento 4 del prompt)
 

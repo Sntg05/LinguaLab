@@ -41,15 +41,34 @@ ADR (see T4) rather than left implicit.
 
 | ID | Task | Spec | Route | Commit |
 |---|---|---|---|---|
-| T1 | Design the header: brand + «Catálogo de herramientas» entrance + language/theme controls | S1, S2, S3 | inline | `feat(ui): …` |
-| T2 | Order the catalog by level of analysis and make every tool reachable from it | S2 | inline | `feat(catalogo): …` |
-| T3 | Verify the header with the axe gate in both themes and both locales | S3 | inline | included in T1 |
-| T4 | Research bibliography for the two new languages and record the provenance ADR | S5, S6 | research + ADR | `docs(adr): …` |
-| T5 | Implement the example corpora for the two languages in every tool that offers example text | S4, S5 | inline | `feat(datos): …` |
-| T6 | Segment 6: audio viewer, spectrogram and TextGrid | — | see below | `feat(herramientas): …` |
+| T1 | Design the header: brand + «Catálogo de herramientas» entrance + language/theme controls | S1, S2, S3 | inline | `d34059b` |
+| T2 | Order the catalog by level of analysis and make every tool reachable from it | S2 | inline | `d34059b` |
+| T3 | Verify the header with the axe gate in both themes and both locales | S3 | inline | included in `d34059b` |
+| T4 | Research bibliography for the two new languages and record the provenance ADR | S5, S6 | research + ADR | `d1dc9f1` |
+| T5 | Implement the example corpora for the two languages in every tool that offers example text | S4, S5 | inline + worker | `d1dc9f1` |
+| T6 | Segment 6: audio viewer, spectrogram and TextGrid | — | see below | pending |
 
 T6 is the largest item and arrives last on purpose: the header redesign (T1) is what makes room for it.
+
+**Slice boundary.** T1–T3 are the second review unit (`d34059b`, ≈378 authored lines). T4–T5 are the
+third (`d1dc9f1`). Together they already exceed the ~400-line slice guidance for a single PR, so the
+branch is delivered as chained PRs in that order: security and dependencies → navigation and catalog →
+example languages → segment 6.
 
 ## Log
 
 - **L1 — Pedido original del usuario (verbatim).** See `odd/tasks/security-and-doc-hygiene.md`, L1.
+- **L2 — La barra, medida antes y después.** Antes: siete entradas primarias, una por herramienta,
+  creciendo con cada entrega. Después: tres fijas. Las herramientas siguen a un clic, dentro del
+  catálogo, y el catálogo las agrupa por nivel con un índice que salta a cada sección. El pie, que era
+  la única vía para las herramientas que salieron del masthead, se deriva ahora de `NAV_ITEMS`: tenía
+  su propia lista y ya se había quedado vieja dos veces.
+- **L3 — Que lenguas, y por qué.** Mayoritaria: **portugués brasileño**, 260 millones de hablantes,
+  inventario fonológico con descripción publicada y contraste de nasalidad que el español y el inglés
+  no tienen. Minoritaria de Colombia, vital y bien documentada: **wayuunaiki**, ~400 000 hablantes en
+  La Guajira y el Zulia, alfabeto de 20 letras y diccionario publicado por SIL. Ambas decisiones y sus
+  fuentes están en `docs/adr/0005-lenguas-de-ejemplo-portugues-y-wayuunaiki.md`.
+- **L4 — Cómo se cumple el principio de no inventar.** El material es una tabla de correspondencias,
+  no un corpus: el wayuunaiki afirma solo el mapeo alfabeto→AFI de las fuentes citadas, queda en
+  `draft`, conserva la advertencia comunitaria y no incorpora léxico ni oraciones. Una prueba exige
+  que las cuatro plantillas indígenas sigan vacías, para que la demo no se confunda con la plantilla.

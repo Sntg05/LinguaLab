@@ -34,10 +34,13 @@ leave `npm run verify:all` and `npm run test:e2e` green, and the Playwright vers
 
 | ID | Task | Spec | Route | Commit |
 |---|---|---|---|---|
-| T1 | Correct `docs/STATUS.md` and `README.md` drift | S1, S2 | inline | `docs: …` |
-| T2 | Security scan: `npm audit`, dependency inventory, CSP, headers, secrets, supply-chain posture; write the findings down | S3 | inline + `docs/SECURITY-REVIEW.md` | `docs(seguridad): …` |
-| T3 | Diagnose #6's CI failure and fix the root cause (version-skew guard) | S4, S5 | inline | `fix(deps): …` |
-| T4 | Triage and answer the seven pull requests | S4 | inline | `chore(deps): …` + comments |
+| T1 | Correct `docs/STATUS.md` and `README.md` drift | S1, S2 | inline | `d027462` |
+| T2 | Security scan: `npm audit`, dependency inventory, CSP, headers, secrets, supply-chain posture; write the findings down | S3 | inline + `docs/SECURITY-REVIEW.md` | `08dbaeb` |
+| T3 | Diagnose #6's CI failure and fix the root cause (version-skew guard) | S4, S5 | inline | `08dbaeb` |
+| T4 | Triage and answer the seven pull requests | S4 | inline | comments on #1–#7 |
+
+**Slice boundary.** These four tasks are one review unit (≈316 authored lines) and belong to the first
+PR of the branch, before the catalog work.
 
 ## Findings so far
 
@@ -65,3 +68,18 @@ leave `npm run verify:all` and `npm run test:e2e` green, and the Playwright vers
   herramienta, y que en la barra de arriba sea más consistente, accesible y ordenado, haz todo eso y
   me dices si necesitas algo.» Las partes de lenguas y de navegación viven en
   `odd/tasks/toolbox-v3-navigation-and-languages.md`.
+- **L2 — Resultado medido.** `npm audit` sobre 5 avisos (3 altos) → 0 después de las actualizaciones.
+  El fallo del PR #6 no era de las nueve dependencias: era el `overrides` de `playwright-core`, que
+  dejaba dos versiones internas de Playwright conviviendo. Al quitarlo, `npm ls playwright-core`
+  muestra una sola copia deduplicada en 1.64.1.
+- **L3 — Lo que el bump destapó.** Con Playwright 1.64.1 y axe 4.14.0 la suite llegó por fin al
+  aserto: dos nodos de `/arboles` aparecían como `incomplete` **sin motivo textual** —la regla
+  `label-content-name-mismatch` sobre los botones de zoom—, y la puerta se negó a descartarlos en
+  silencio, que es exactamente para lo que se escribió. El defecto era real (WCAG 2.5.3): un botón
+  visible «−» con nombre accesible «Alejar». Se corrigieron a botones de texto y la suite volvió a 69
+  verdes. El PR #6 no era una actualización rota: era una puerta funcionando.
+- **L4 — Incidente de entorno, no del proyecto.** `npm run test:e2e` fallaba con «Process from
+  config.webServer exited early». Causa: `astro preview` se auto-envía al fondo cuando detecta que lo
+  lanza un agente (variable `AI_AGENT`), y Playwright exige un proceso en primer plano. No es un
+  defecto del repositorio ni afecta a CI: se verifica con `env -u AI_AGENT -u PI_CODING_AGENT npm run
+  test:e2e`. Queda anotado en PENDING para el próximo que lo vea.

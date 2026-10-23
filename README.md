@@ -16,7 +16,7 @@ Las filas siguen el mismo orden que el catálogo: de la fonética hacia el discu
 | Página | Qué hace |
 |---|---|
 | `/fono` | **FonoLab** — alfabeto AFI, corte sagital del aparato fonador, audio con licencia y transcriptor de grafemas a AFI |
-| `/ortografia` | **Ortografía a AFI** — editor de tablas grafema→AFI con contexto, prioridad, capa alofónica y rastro por carácter; trae demos en español e inglés y plantillas indígenas vacías |
+| `/ortografia` | **Ortografía a AFI** — editor de tablas grafema→AFI con contexto, prioridad, capa alofónica y rastro por carácter; trae demos en español, inglés, portugués brasileño y wayuunaiki, y plantillas indígenas vacías |
 | `/fonemizador` | **Fonemizador** — texto a AFI para español e inglés con eSpeak NG compilado a WebAssembly, dentro de un Web Worker |
 | `/arboles` | **ArborLab** — 23 tipos de árbol, 4 formatos de entrada, exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat |
 | `/tools` | **Estación textual** — frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad, más un **constructor de n-gramas** (n de 2 a 5) |
@@ -28,6 +28,11 @@ Las filas siguen el mismo orden que el catálogo: de la fonética hacia el discu
 
 Cada página existe en español (raíz) y en inglés (`/en/`), declaradas con
 `hreflang`.
+
+La barra superior tiene tres entradas fijas —**Catálogo de herramientas**,
+**Bibliografía** y **Acerca de**— y no crece con cada herramienta nueva: las
+herramientas viven dentro del catálogo, agrupadas por nivel de análisis. El pie
+mantiene la lista completa, derivada de la misma configuración.
 
 ## Arrancar
 

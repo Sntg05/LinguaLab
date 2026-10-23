@@ -9,6 +9,9 @@ para cerrarlo sin tener que redescubrirlo.
 Una entrada por sesión. Antes de empezar, leé la columna **Próximo paso exacto**: casi todas incluyen
 una decisión ya tomada, y rehacerla suele dar un resultado peor que el que está escrito.
 
+**La puerta e2e falla si la lanza un agente (P16).** Antes de creerle a un rojo de Playwright, corré
+`env -u AI_AGENT -u PI_CODING_AGENT npm run test:e2e`.
+
 **Antes de tocar nada:**
 
 ```bash
@@ -472,3 +475,32 @@ repositorio.
 `/browser`, que sí tiene el otro candidato). Si aparece, fijarla y comprobar que la advertencia
 desaparece. Criterio de aceptación: `npm run build` no menciona `node:fs` y `e2e/phonemizer.spec.ts`
 sigue en verde.
+
+## P16 — La puerta e2e se cae sola si la lanza un agente de IA
+
+**Severidad:** media, y solo para quien desarrolla con un agente. En CI no ocurre.
+
+**Síntoma.** `npm run test:e2e` falla de inmediato con:
+
+```
+Error: Process from config.webServer exited early.
+```
+
+Y el mensaje no dice por qué. Parece un defecto del proyecto y son dos piezas que funcionan como se
+espera por separado.
+
+**Evidencia.** `playwright.config.ts` exige un servidor en primer plano (`reuseExistingServer: false`)
+y su `webServer.command` es `npm run build && npm run preview`. Desde Astro 7, el CLI detecta que lo
+lanza un agente —`am-i-vibing`, que lee variables como `AI_AGENT`— y **manda `astro preview` al fondo
+automáticamente** (`node_modules/astro/dist/cli/preview/index.js:37`, `agentDetected`). El proceso en
+primer plano termina, Playwright ve que el servidor «exited early» y aborta antes de la primera prueba.
+En el runner no hay `AI_AGENT`, así que CI no lo ve nunca.
+
+**Por qué no se parcheó en el config.** Hay dos salidas fáciles y las dos son peores: poner
+`reuseExistingServer: true` reintroduce la trampa que P7 documenta (probar el servidor de desarrollo),
+y sembrar `AI_AGENT` desde el config es mentirle al entorno para que un comando se comporte distinto.
+
+**Próximo paso exacto.** Documentar y usar `env -u AI_AGENT -u PI_CODING_AGENT npm run test:e2e`; si
+esto vuelve a costar una sesión, la solución real es un script `scripts/e2e.mjs` que borre la variable
+solo para el proceso hijo y lo explique en su cabecera. Criterio de aceptación: `npm run test:e2e` en
+verde desde una sesión de agente, sin variables a mano, y `P7` sigue valiendo (puerto ocupado = rojo).
