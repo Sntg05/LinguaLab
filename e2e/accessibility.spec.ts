@@ -70,6 +70,8 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
   { path: "/en/fonemizador", name: "fonemizador (ingles)" },
   { path: "/catalogo", name: "catalogo (espanol)" },
   { path: "/en/catalogo", name: "catalogo (ingles)" },
+  { path: "/visualizador", name: "visor de audio (espanol)" },
+  { path: "/en/visualizador", name: "visor de audio (ingles)" },
   { path: "/glosario", name: "glosario (espanol)" },
   { path: "/en/glosario", name: "glosario (ingles)" },
   { path: "/bibliografia", name: "bibliografia (espanol)" },
@@ -149,9 +151,23 @@ const AXE_COULD_NOT_MEASURE: readonly string[] = [
  * depende de algo que el código no puede decidir solo: si esa lista se puebla por
  * JavaScript después de cargar, es un falso positivo de axe mirando el marcado inicial;
  * si no se puebla, es un defecto real de la página. La decisión y su criterio están en
- * **P12** de `docs/PENDING.md`. Cualquier otra regla sin motivo textual falla.
+ * **P12** de `docs/PENDING.md`.
+ *
+ * `label-content-name-mismatch` sobre los botones de acción de la tabla de intervalos de
+ * `/visualizador`: el botón muestra «▶» o «∪» y se llama «Reproducir el intervalo 1» /
+ * «Fusionar el intervalo 1 con el siguiente». Se probó la corrección obvia —meter el glifo
+ * en el nombre accesible— y axe lo sigue marcando: con un texto visible de un solo símbolo
+ * no puede decidir. O sea que no dice «incumplís», dice «no sé», y con un nombre completo
+ * para el lector de pantalla el requisito de 2.5.3 está cubierto. El razonamiento largo
+ * vive en `src/scripts/audio/index.ts`, junto al botón. Si alguien reemplaza los glifos por
+ * texto visible, esta excepción se borra sola: la regla deja de aparecer.
+ *
+ * Cualquier otra regla sin motivo textual falla.
  */
-const AXE_INCOMPLETE_WITHOUT_MOTIVE: readonly string[] = ["aria-required-children"];
+const AXE_INCOMPLETE_WITHOUT_MOTIVE: readonly string[] = [
+  "aria-required-children",
+  "label-content-name-mismatch",
+];
 
 for (const { scheme, name: themeName } of THEMES) {
   for (const { path, name } of PUBLIC_PAGES) {
