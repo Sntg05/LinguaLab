@@ -1,0 +1,618 @@
+---
+/**
+ * AudioLab: visor de audio con espectrograma, anotacion por intervalos y
+ * TextGrid de Praat.
+ *
+ * QUE HACE Y QUE NO PROMETE
+ *
+ * Reproduce, dibuja la onda y el espectrograma, permite anotar capas de
+ * intervalos y guarda el trabajo en este navegador. Importa y exporta TextGrid y
+ * exporta CSV. No hace analisis acustico (F0, formantes): eso es el segmento 8, y
+ * fingirlo aqui seria prometer lo que no se midio.
+ *
+ * NADA SALE DEL EQUIPO. El audio no se sube a ningun sitio: `decodeAudioData`
+ * trabaja sobre un `ArrayBuffer` que ya esta en memoria, y la unica salida son
+ * los archivos que la persona descarga. El aviso esta escrito en la pagina, no
+ * solo en el README (ADR 0002).
+ *
+ * SIN wavesurfer.js, Y POR QUE
+ *
+ * El prompt del segmento pide wavesurfer.js con sus plugins. Se descarto: la
+ * libreria con regiones, espectrograma y linea de tiempo pesa mas que el
+ * presupuesto ENTERO de la pagina (60 KB comprimidos, medido por
+ * `scripts/verify-build.mjs`), y este repositorio no puede verificar la API real
+ * de una version que nadie ha probado aqui. Lo que hacia falta —onda, regiones,
+ * espectrograma, regla de tiempo— se resuelve con canvas y una FFT de cincuenta
+ * lineas, que ademas se puede probar.
+ *
+ * El marcado lleva `data-audio-*` porque `src/scripts/audio/index.ts` trabaja por
+ * delegacion sobre esos ganchos; ninguna etiqueta visible se construye con
+ * `innerHTML`, asi que la CSP sin `unsafe-inline` no se toca.
+ */
+import { t, type Locale } from "../i18n";
+import { AUDIO_STRING_KEYS } from "../scripts/audio/strings";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const es = locale === "es";
+
+/**
+ * Solo las cadenas que el controlador necesita escribir mientras trabaja. Se
+ * serializan ya traducidas: el diccionario completo no viaja al navegador (ver
+ * `src/i18n/index.ts`).
+ */
+const runtimeStrings = Object.fromEntries(
+  AUDIO_STRING_KEYS.map((key) => [key, t(locale, key)]),
+);
+
+const WINDOWS = [
+  { value: "0.005", label: "5 ms" },
+  { value: "0.01", label: "10 ms" },
+  { value: "0.015", label: "15 ms" },
+  { value: "0.025", label: "25 ms" },
+  { value: "0.032", label: "32 ms" },
+];
+---
+
+<section class="section" data-audiolab data-audiolab-strings={JSON.stringify(runtimeStrings)}>
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{es ? "Visor" : "Viewer"}</span>
+      <h1>{t(locale, "audio.title")}</h1>
+      <p class="u-lead">{t(locale, "audio.sub")}</p>
+      <!-- El aviso de privacidad va visible: quien abre una herramienta tiene que
+           poder saber, sin buscarlo, que su grabacion no sale del equipo. -->
+      <p class="callout">{t(locale, "audio.privacy")}</p>
+      <p class="callout callout--warn">{t(locale, "audio.experimental")}</p>
+    </div>
+
+    <div class="audiolab">
+      <!-- ---------------------------- Carga ---------------------------- -->
+      <div class="panel">
+        <h2 class="panel__title">{t(locale, "audio.load.title")}</h2>
+        <p class="faint">{t(locale, "audio.load.note")}</p>
+        <div class="field">
+          <label class="field__label" for="audio-file">{t(locale, "audio.load.pick")}</label>
+          <input
+            class="audiolab__file"
+            id="audio-file"
+            type="file"
+            data-audio-file
+            accept="audio/*,.wav,.mp3,.ogg,.oga,.opus,.m4a,.flac,.webm"
+          />
+        </div>
+        <p class="audiolab__status" data-audio-status role="status" aria-live="polite" data-state="idle">
+          {t(locale, "audio.status.idle")}
+        </p>
+      </div>
+
+      <!-- ------------------------- Reproduccion ------------------------ -->
+      <div class="panel">
+        <h2 class="panel__title">{t(locale, "audio.transport.title")}</h2>
+        <div class="cluster">
+          <button class="btn btn--primary" type="button" data-audio-play aria-pressed="false">
+            {t(locale, "audio.play")}
+          </button>
+          <button class="btn btn--quiet" type="button" data-audio-stop>
+            {t(locale, "audio.stop")}
+          </button>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "audio.rate")}</span>
+            <input
+              type="range"
+              data-audio-rate
+              min="0.5"
+              max="2"
+              step="0.1"
+              value="1"
+              aria-describedby="audio-rate-note"
+            />
+          </label>
+          <span class="faint" id="audio-rate-note">0.5× – 2×</span>
+          <label class="field field--inline">
+            <input type="checkbox" data-audio-loop />
+            <span class="field__label">{t(locale, "audio.loop")}</span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="audio-cursor">{t(locale, "audio.cursor")}</label>
+          <div class="audiolab__cursor">
+            <input
+              id="audio-cursor"
+              type="range"
+              data-audio-cursor
+              min="0"
+              max="1"
+              step="0.001"
+              value="0"
+              disabled
+            />
+            <output class="audiolab__readout" data-audio-cursor-readout>0.000 s</output>
+          </div>
+        </div>
+
+        <div class="cluster">
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-in>
+            {t(locale, "audio.zoomIn")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-out>
+            {t(locale, "audio.zoomOut")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-pan-left>
+            {t(locale, "audio.panLeft")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-pan-right>
+            {t(locale, "audio.panRight")}
+          </button>
+        </div>
+      </div>
+
+      <!-- --------------------------- Canvas ---------------------------- -->
+      <div class="audiolab__canvas" data-audio-canvas>
+        <canvas
+          class="audiolab__wave"
+          data-audio-wave
+          role="img"
+          aria-label={t(locale, "audio.canvas.wave")}></canvas>
+        <canvas
+          class="audiolab__spec"
+          data-audio-spec
+          role="img"
+          aria-label={t(locale, "audio.canvas.spec")}></canvas>
+        <canvas
+          class="audiolab__tiers"
+          data-audio-tiers
+          role="img"
+          aria-label={t(locale, "audio.canvas.tiers")}></canvas>
+        <p class="faint">{t(locale, "audio.canvas.note")}</p>
+      </div>
+
+      <!-- ------------------------ Espectrograma ------------------------ -->
+      <div class="panel">
+        <h2 class="panel__title">{t(locale, "audio.spectrogram.title")}</h2>
+        <div class="cluster">
+          <label class="field field--inline">
+            <input type="checkbox" data-audio-spectrogram checked />
+            <span class="field__label">{t(locale, "audio.spectrogram.toggle")}</span>
+          </label>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "audio.window")}</span>
+            <select data-audio-window>
+              {
+                WINDOWS.map((option) => (
+                  <option value={option.value} selected={option.value === "0.025"}>
+                    {option.label}
+                  </option>
+                ))
+              }
+            </select>
+          </label>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "audio.fmax")}</span>
+            <input type="number" data-audio-fmax min="500" max="22050" step="100" value="5500" />
+          </label>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "audio.fmin")}</span>
+            <input type="number" data-audio-fmin min="0" max="21000" step="100" value="0" />
+          </label>
+          <span class="badge badge--warn">{t(locale, "audio.experimentalBadge")}</span>
+        </div>
+        <p class="faint">{t(locale, "audio.spectrogram.note")}</p>
+      </div>
+
+      <!-- --------------------------- Capas ----------------------------- -->
+      <div class="panel">
+        <h2 class="panel__title">{t(locale, "audio.tiers.title")}</h2>
+        <div class="cluster">
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "audio.tier.active")}</span>
+            <select data-audio-tier></select>
+          </label>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "audio.tier.name")}</span>
+            <input type="text" data-audio-tier-name aria-describedby="audio-tier-note" />
+          </label>
+        </div>
+        <p class="faint" id="audio-tier-note">{t(locale, "audio.tier.note")}</p>
+        <div class="cluster">
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-add>
+            {t(locale, "audio.tier.add")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-remove>
+            {t(locale, "audio.tier.remove")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-up>
+            {t(locale, "audio.tier.up")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-down>
+            {t(locale, "audio.tier.down")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-undo>
+            {t(locale, "audio.history.undo")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-redo>
+            {t(locale, "audio.history.redo")}
+          </button>
+        </div>
+      </div>
+
+      <!-- ------------------------- Intervalos -------------------------- -->
+      <div class="panel">
+        <h2 class="panel__title">{t(locale, "audio.intervals.title")}</h2>
+        <div class="cluster">
+          <button class="btn btn--primary btn--sm" type="button" data-audio-interval-split>
+            {t(locale, "audio.interval.split")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-interval-prev>
+            {t(locale, "audio.interval.prev")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-interval-next>
+            {t(locale, "audio.interval.next")}
+          </button>
+        </div>
+        <p class="faint">{t(locale, "audio.intervals.note")}</p>
+        <div class="audiolab__table-wrap">
+          <table class="audiolab__table">
+            <caption>
+              <span class="field__label">{t(locale, "audio.intervals.caption")}</span>
+              <span class="audiolab__caption-tier" data-audio-intervals-caption></span>
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">{t(locale, "audio.intervals.head.index")}</th>
+                <th scope="col">{t(locale, "audio.intervals.head.start")}</th>
+                <th scope="col">{t(locale, "audio.intervals.head.end")}</th>
+                <th scope="col">{t(locale, "audio.intervals.head.text")}</th>
+                <th scope="col">{t(locale, "audio.intervals.head.actions")}</th>
+              </tr>
+            </thead>
+            <tbody data-audio-intervals></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ------------------------ Teclado IPA -------------------------- -->
+      <details class="panel">
+        <summary class="panel__title">{t(locale, "audio.ipa.title")}</summary>
+        <p class="faint">{t(locale, "audio.ipa.note")}</p>
+        <div class="audiolab__ipa" data-audio-ipa></div>
+      </details>
+
+      <!-- ------------------------ Datos y archivos --------------------- -->
+      <div class="panel">
+        <h2 class="panel__title">{t(locale, "audio.data.title")}</h2>
+        <div class="field">
+          <label class="field__label" for="audio-project">{t(locale, "audio.data.project")}</label>
+          <input id="audio-project" type="text" data-audio-project value="visor" />
+        </div>
+        <p class="faint" data-audio-save-note role="status" aria-live="polite"></p>
+        <p class="faint" data-audio-persistence></p>
+
+        <div class="cluster">
+          <button class="btn btn--primary btn--sm" type="button" data-audio-export-textgrid>
+            {t(locale, "audio.data.exportTextGrid")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-export-csv>
+            {t(locale, "audio.data.exportCsv")}
+          </button>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="audio-textgrid-file">
+            {t(locale, "audio.data.importTextGrid")}
+          </label>
+          <input
+            class="audiolab__file"
+            id="audio-textgrid-file"
+            type="file"
+            data-audio-textgrid-file
+            accept=".TextGrid,.textgrid,.tg,text/plain"
+          />
+        </div>
+
+        <div class="audiolab__gaps" data-audio-gaps hidden>
+          <p class="audiolab__gaps-text" data-audio-gaps-text></p>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-gaps-fill>
+            {t(locale, "audio.gaps.fill")}
+          </button>
+        </div>
+
+        <p class="faint">{t(locale, "audio.data.note")}</p>
+      </div>
+
+      <!-- ------------------------- Atajos ------------------------------ -->
+      <details class="panel">
+        <summary class="panel__title">{t(locale, "audio.keys.title")}</summary>
+        <dl class="audiolab__keys">
+          <dt><kbd>Espacio</kbd></dt>
+          <dd>{t(locale, "audio.keys.play")}</dd>
+          <dt><kbd>Escape</kbd></dt>
+          <dd>{t(locale, "audio.keys.stop")}</dd>
+          <dt><kbd>S</kbd></dt>
+          <dd>{t(locale, "audio.keys.split")}</dd>
+          <dt><kbd>,</kbd> <kbd>.</kbd></dt>
+          <dd>{t(locale, "audio.keys.move")}</dd>
+          <dt><kbd>Ctrl</kbd>+<kbd>Z</kbd></dt>
+          <dd>{t(locale, "audio.keys.undo")}</dd>
+        </dl>
+        <p class="faint">{t(locale, "audio.keys.note")}</p>
+      </details>
+
+      <p class="faint">{t(locale, "audio.limits")}</p>
+    </div>
+  </div>
+</section>
+
+<p class="u-visually-hidden" role="status" aria-live="polite" data-live-region></p>
+
+<script>
+  import { safeInit } from "../scripts/core/safe";
+  import { initAudioLab, mountIpaKeyboard } from "../scripts/audio/index";
+
+  safeInit("audiolab", () => {
+    mountIpaKeyboard();
+    initAudioLab();
+  });
+</script>
+
+<style>
+  /* `.field`, `.field__label` y `.panel` se redeclaran aqui con los mismos
+     valores que en las otras herramientas: viven en estilos con alcance de
+     componente, no son globales, y copiar las cuatro declaraciones es lo que
+     hace que esta pagina se vea como el mismo sitio. */
+  .field {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .field--inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .field__label {
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .panel {
+    display: grid;
+    gap: var(--space-s);
+    align-content: start;
+    min-width: 0;
+    padding: var(--space-m);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+  }
+
+  .panel__title {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: 650;
+  }
+
+  .audiolab {
+    display: grid;
+    gap: var(--space-l);
+    max-width: 80rem;
+  }
+
+  .audiolab__file {
+    font-size: var(--step--1);
+    color: var(--ink);
+  }
+
+  .audiolab__status {
+    margin: 0;
+    min-height: 1.4em;
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+  }
+
+  .audiolab__status[data-state="ok"] {
+    color: var(--ink);
+  }
+
+  .audiolab__status[data-state="error"] {
+    color: var(--warn);
+  }
+
+  .audiolab__status[data-state="busy"] {
+    color: var(--accent);
+  }
+
+  .audiolab__cursor {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+  }
+
+  .audiolab__cursor input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .audiolab__readout {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    min-width: 5.5rem;
+  }
+
+  .audiolab__canvas {
+    display: grid;
+    gap: 0.35rem;
+    padding: var(--space-s);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+  }
+
+  .audiolab__canvas canvas {
+    display: block;
+    width: 100%;
+    border-radius: var(--radius-s);
+    background: var(--bg-sunken);
+    touch-action: none;
+  }
+
+  .audiolab__wave {
+    height: 120px;
+    cursor: crosshair;
+  }
+
+  .audiolab__spec {
+    height: 160px;
+  }
+
+  .audiolab__tiers {
+    height: 96px;
+  }
+
+  .audiolab__table-wrap {
+    overflow-x: auto;
+  }
+
+  .audiolab__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  .audiolab__table caption {
+    text-align: start;
+    padding-bottom: var(--space-2xs);
+  }
+
+  .audiolab__caption-tier {
+    margin-inline-start: 0.4rem;
+    font-family: var(--font-mono);
+    color: var(--ink-muted);
+  }
+
+  .audiolab__table th,
+  .audiolab__table td {
+    padding: 0.35rem 0.5rem;
+    border-bottom: 1px solid var(--line);
+    text-align: start;
+    vertical-align: middle;
+  }
+
+  .audiolab__table thead th {
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .audiolab__time {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .audiolab__text,
+  .audiolab__table input {
+    width: 100%;
+    min-width: 6rem;
+    padding: 0.3rem 0.4rem;
+    font: inherit;
+    color: var(--ink);
+    background: var(--bg-sunken);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+  }
+
+  .audiolab__actions {
+    display: flex;
+    gap: 0.25rem;
+    white-space: nowrap;
+  }
+
+  .audiolab__ipa {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .audiolab__ipa-group {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  .audiolab__ipa-title {
+    margin: 0;
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .audiolab__ipa-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .audiolab__ipa-symbol {
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    padding: 0.25rem 0.4rem;
+    font-family: var(--font-mono);
+    font-size: var(--step-0);
+    color: var(--ink);
+    background: var(--bg-sunken);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+  }
+
+  .audiolab__ipa-symbol:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .audiolab__gaps {
+    display: grid;
+    gap: var(--space-2xs);
+    padding: var(--space-s);
+    background: var(--bg-sunken);
+    border: 1px solid var(--warn);
+    border-radius: var(--radius-s);
+  }
+
+  .audiolab__gaps-text {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink);
+  }
+
+  .audiolab__keys {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.35rem var(--space-s);
+    margin: 0;
+    font-size: var(--step--1);
+  }
+
+  .audiolab__keys dt {
+    font-family: var(--font-mono);
+  }
+
+  .audiolab__keys dd {
+    margin: 0;
+    color: var(--ink-muted);
+  }
+</style>

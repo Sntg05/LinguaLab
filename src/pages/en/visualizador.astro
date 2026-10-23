@@ -1,0 +1,13 @@
+---
+import AudioLab from "../../components/AudioLab.astro";
+import Base from "../../layouts/Base.astro";
+---
+
+<Base
+  locale="en"
+  path="/visualizador"
+  title="Audio, spectrogram and TextGrid viewer"
+  description="Load an audio file, look at it in time and frequency, annotate intervals on tiers, and export a Praat TextGrid or a CSV. Everything runs in your browser: the audio is never uploaded to a server."
+>
+  <AudioLab locale="en" />
+</Base>

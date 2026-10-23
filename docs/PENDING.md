@@ -504,3 +504,69 @@ y sembrar `AI_AGENT` desde el config es mentirle al entorno para que un comando 
 esto vuelve a costar una sesión, la solución real es un script `scripts/e2e.mjs` que borre la variable
 solo para el proceso hijo y lo explique en su cabecera. Criterio de aceptación: `npm run test:e2e` en
 verde desde una sesión de agente, sin variables a mano, y `P7` sigue valiendo (puerto ocupado = rojo).
+
+## P17 — El visor de audio declara experimental el TextGrid y el espectrograma, y no puede probar Praat
+
+**Severidad:** media, y es una promesa de interoperabilidad, no un fallo visible. La herramienta
+funciona; lo que no está medido es que el archivo exportado abra en el programa de otra persona.
+
+**Síntoma.** Abrí `/visualizador`, cargá un audio, dividí el intervalo, escribí dos etiquetas, exportá el
+TextGrid y volvé a importarlo: vuelve con las mismas capas, los mismos textos y los mismos tiempos. Lo
+que ninguna prueba de este repositorio puede decir es si **Praat** lo abre. La página lo dice en el
+aviso de «Experimental» y la ficha del catálogo lo repite.
+
+**Evidencia.** Lo que sí está medido, y con qué:
+
+- `packages/core/src/data/textgrid.test.ts` — dos archivos de referencia escritos enteros (formato largo
+  y formato corto del MISMO TextGrid) que producen el mismo documento; ida y vuelta sobre cinco
+  documentos con comillas dobles, saltos de línea, tiempos con precisión de doble, intervalos de
+  duración cero y un documento sin capas; BOM UTF-8, UTF-16LE, UTF-16BE y detección sin BOM; archivo
+  vacío, cabecera ausente, clase equivocada, capa truncada y huecos, todos con error tipado y sin
+  excepciones. El contrato del puerto (`runTextGridCodecPortContract`) se ejecuta contra el codec real.
+- `src/scripts/audio/spectrogram.test.ts` — una sinusoide de 1000 Hz a 8000 muestras/s cae exactamente en
+  la banda 32 de una FFT de 256 puntos, una constante se concentra en la banda 0, y las magnitudes
+  quedan normalizadas en 0..1.
+- `e2e/audio.spec.ts` — el viaje completo en Chromium: wav de un segundo generado en la prueba, dos
+  divisiones, dos etiquetas, descarga del `.TextGrid`, y ese archivo —leído del disco— reimportado con
+  las tres filas y los textos intactos.
+
+Lo que NO está medido: que Praat lo abra; y que el espectrograma coincida con el de Praat, que depende de
+ventana, rango dinámico y escala de grises. Una prueba automática no puede abrir un programa de escritorio
+ni comparar contra una imagen de referencia que este repositorio no tiene.
+
+**Por qué no se hizo.** Las dos salidas exigen algo que no puede entrar acá: un binario de Praat (o un
+lector de su formato que valga como árbitro) y audio real. El ADR 0002 prohíbe meter grabaciones al
+repositorio, y una imagen de espectrograma de referencia sin su audio es un número sin procedencia.
+
+**Próximo paso exacto.** Con una grabación corta local (fuera del repositorio): anotar en `/visualizador`,
+exportar el `.TextGrid`, abrirlo en Praat y comprobar que aparecen las capas con sus nombres, los
+intervalos contiguos y los textos con comillas. Anotar el resultado en `docs/STATUS.md` con la versión de
+Praat y la fecha; recién entonces pasar `textgrid-viewer` de `experimental` a `stable` en
+`src/data/tools.json` y quitar el aviso de la página. Para el espectrograma, comparar el dibujo con el de
+Praat con ventana de 0,025 s, rango 0–5500 Hz y 70 dB de rango dinámico: si no coinciden, el criterio es
+ajustar la rampa de color, no cambiar la FFT, que ya está verificada contra una sinusoide.
+Criterio de aceptación: el archivo abre en Praat sin mensajes y la verificación está escrita con su
+versión y su fecha.
+
+**Segundo pendiente, del mismo segmento — RESUELTO.** `src/pages/visualizador.astro` y
+`src/pages/en/visualizador.astro` no estaban en `PUBLIC_PAGES` de `e2e/accessibility.spec.ts`, así que
+`npx playwright test e2e/accessibility.spec.ts --grep visualizador` informaba «No tests found». Ya están
+las dos entradas, y agregarlas encontró un defecto real: los botones de acción de la tabla de intervalos
+mostraban un glifo («▶», «∪») y se llamaban «Reproducir el intervalo 1» / «Fusionar el intervalo 1 con el
+siguiente», que incumple WCAG 2.5.3 (*Label in Name*) y es lo que axe 4.14.0 marca como
+`label-content-name-mismatch`. El glifo pasó a formar parte del nombre accesible.
+
+**La lección que deja, y que conviene no repetir.** El barrido de `e2e/audio.spec.ts` daba cero
+violaciones porque solo mira `result.violations`; la puerta principal también afirma sobre los resultados
+`incomplete` sin motivo textual, y ahí estaba el defecto. Dos puertas que miden cosas distintas sobre la
+misma página es una trampa: una verde tapa a la otra. Si el barrido propio se conserva, tiene que usar el
+mismo criterio de la puerta principal (`e2e/accessibility.spec.ts`, las listas `AXE_COULD_NOT_MEASURE` y
+`AXE_INCOMPLETE_WITHOUT_MOTIVE`), o directamente no duplicarse.
+
+**Tercer pendiente, menor.** `importTextGrid` lee el archivo entero sin tope de tamaño, mientras el resto
+del sitio limita el texto a 100 KB (`src/scripts/core/guardrails.ts`). Un `.TextGrid` de decenas de
+megas congela la pestaña al analizarlo, y el sitio ya tiene una política de límites que esta ruta no
+respeta. *Próximo paso exacto:* rechazar archivos por encima de un tope declarado (1 MB es holgado para
+un TextGrid real) con un mensaje que lo diga, igual que hace el editor de ortografía. Criterio de
+aceptación: un archivo por encima del tope muestra el mensaje y no llega al analizador; uno por debajo
+sigue importándose igual.

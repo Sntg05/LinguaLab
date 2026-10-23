@@ -23,4 +23,14 @@ export {
   WAYUUNAIKI_TEMPLATE,
 } from "./indigenous-templates";
 export { orthographyTableFromJson, orthographyTableToJson } from "./table-json";
+export {
+  ANNOTATION_CSV_HEADER,
+  createTextGridCodec,
+  decodeTextGridBytes,
+  exportAnnotationCsv,
+  parseTextGridBytes,
+  parseTextGridText,
+  serializeTextGrid,
+} from "./textgrid";
+export type { ParsedTextGrid, TextGridTierGap } from "./textgrid";
 export type { OrthographyTableJsonError } from "./table-json";

@@ -102,11 +102,11 @@
       },
       "area": "documentacion",
       "integration": "embedded",
-      "status": "planned",
+      "status": "experimental",
       "languages": [],
       "notes": {
-        "es": "Visor de audio con espectrograma y capas de anotación que importa y exporta TextGrid de Praat. Depende del formato, no de una lengua.",
-        "en": "Audio viewer with a spectrogram and annotation tiers that imports and exports Praat TextGrid. It depends on the format, not on a language."
+        "es": "Experimental: visor de audio con forma de onda, espectrograma (ventana y rango de frecuencia ajustables) y capas de intervalos que importan y exportan TextGrid de Praat, además de exportar CSV. El audio no se sube a ningún servidor. El código de TextGrid está probado con archivos de referencia y de ida y vuelta; que Praat abra el archivo exportado no se puede medir desde una prueba automática, así que ábrelo una vez antes de confiarle una sesión larga. No incluye análisis acústico, ELAN ni alineación automática.",
+        "en": "Experimental: audio viewer with a waveform, a spectrogram (adjustable window and frequency range) and annotation tiers that import and export Praat TextGrid, plus CSV export. The audio is never uploaded to a server. The TextGrid code is tested against reference files and round trips; whether Praat opens the exported file cannot be measured from an automated test, so open it once before trusting it with a long session. No acoustic analysis, ELAN or automatic alignment."
       },
       "citation": "Boersma, P., & Weenink, D. Praat: doing phonetics by computer [Computer software]."
     },

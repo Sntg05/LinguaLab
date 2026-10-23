@@ -7,6 +7,34 @@
  */
 
 export type { AcousticMeasurement, AcousticTrack, AcousticTrackKind } from "./acoustic";
+export {
+  addTier,
+  canRedoAnnotation,
+  canUndoAnnotation,
+  createEmptyDocument,
+  createIntervalTier,
+  fillTierGaps,
+  findTierGaps,
+  intervalTiers,
+  isIntervalTier,
+  mergeIntervalWithNext,
+  moveTier,
+  moveTierBoundary,
+  recordAnnotation,
+  removeTier,
+  renameTier,
+  redoAnnotation,
+  sameTime,
+  setIntervalText,
+  splitIntervalAt,
+  startAnnotationHistory,
+  TIME_EPSILON,
+  undoAnnotation,
+} from "./annotation-edit";
+export type {
+  AnnotationHistoryState,
+  TierGap,
+} from "./annotation-edit";
 export type {
   AnnotationDocument,
   Interval,
