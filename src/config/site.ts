@@ -19,37 +19,68 @@ export interface NavItem {
   path: string;
   labelKey: MessageKey;
   /**
+   * Which column of the footer the item belongs to, and whether it is a tool.
+   *
+   * POR QUE ESTO ES UN DATO Y NO TRES LISTAS ESCRITAS A MANO
+   *
+   * El pie tenía su propia lista de herramientas y se quedó vieja: cuando llegaron
+   * la ortografía y el fonemizador, el pie siguió ofreciendo tres. Con el tipo
+   * aquí, el pie se deriva de esta tabla y no puede desincronizarse.
+   */
+  kind: "tool" | "reference" | "about";
+  /**
    * Primary items make up the masthead. Everything else is reachable from the
-   * footer only, which is what keeps the header short enough to read at a
-   * glance.
+   * footer, which is what keeps the header short enough to read at a glance.
    */
   primary: boolean;
 }
 
 /**
- * The masthead carries only the tools themselves: this is a toolbox, and the
- * header should say so before it says anything else. Reference material
- * (glossary, bibliography) and context (about, security) live in the footer.
+ * The masthead holds the entrance to the tools, not the tools.
+ *
+ * POR QUE LAS HERRAMIENTAS YA NO ESTAN ARRIBA
+ *
+ * Con cuatro herramientas cabían; con siete la barra se volvió una lista que
+ * crecía con cada entrega, y cada herramienta nueva la empujaba un poco más
+ * hacia el desbordamiento. La entrada al catálogo resuelve lo mismo para siete y
+ * para veinte: dentro del catálogo están todas, agrupadas por nivel de análisis.
  *
  * There is no "home" entry on purpose — the brand link already goes to the
  * root, and two links to the same place waste the most valuable row on the
  * page.
  */
 export const NAV_ITEMS: readonly NavItem[] = [
-  { path: "/fono", labelKey: "nav.ipa", primary: true },
-  { path: "/ortografia", labelKey: "nav.ortho", primary: true },
-  { path: "/fonemizador", labelKey: "nav.phonemizer", primary: true },
-  { path: "/arboles", labelKey: "nav.trees", primary: true },
-  { path: "/tools", labelKey: "nav.tools", primary: true },
-  { path: "/catalogo", labelKey: "nav.catalog", primary: true },
-  { path: "/bibliografia", labelKey: "nav.resources", primary: true },
-  { path: "/glosario", labelKey: "nav.glossary", primary: false },
-  { path: "/acerca", labelKey: "nav.about", primary: false },
+  // Herramientas, en el orden de ANALYSIS_LEVELS: del sonido a los flujos de trabajo.
+  { path: "/fono", labelKey: "nav.ipa", kind: "tool", primary: false },
+  { path: "/ortografia", labelKey: "nav.ortho", kind: "tool", primary: false },
+  { path: "/fonemizador", labelKey: "nav.phonemizer", kind: "tool", primary: false },
+  { path: "/arboles", labelKey: "nav.trees", kind: "tool", primary: false },
+  { path: "/tools", labelKey: "nav.tools", kind: "tool", primary: false },
+  // La entrada: una sola puerta a todas las herramientas.
+  { path: "/catalogo", labelKey: "nav.catalogTools", kind: "tool", primary: true },
+  { path: "/bibliografia", labelKey: "nav.resources", kind: "reference", primary: true },
+  { path: "/glosario", labelKey: "nav.glossary", kind: "reference", primary: false },
+  { path: "/acerca", labelKey: "nav.about", kind: "about", primary: true },
 ];
 
 /** The subset the masthead renders, in order. */
 export const PRIMARY_NAV_ITEMS: readonly NavItem[] = NAV_ITEMS.filter(
   (item) => item.primary,
+);
+
+/** The tools themselves, in the order the catalog uses. */
+export const TOOL_NAV_ITEMS: readonly NavItem[] = NAV_ITEMS.filter(
+  (item) => item.kind === "tool",
+);
+
+/** Reference material: the second column of the footer. */
+export const REFERENCE_NAV_ITEMS: readonly NavItem[] = NAV_ITEMS.filter(
+  (item) => item.kind === "reference",
+);
+
+/** Context pages: the third column of the footer. */
+export const ABOUT_NAV_ITEMS: readonly NavItem[] = NAV_ITEMS.filter(
+  (item) => item.kind === "about",
 );
 
 /** Read a build-time environment variable without assuming Node types. */

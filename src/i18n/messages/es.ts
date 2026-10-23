@@ -318,7 +318,10 @@ export const es = {
   "phon.tableNote": "El mismo texto pasado por la tabla grafema→AFI de la herramienta de ortografía. No es un modelo fonológico: sirve para ver dónde coinciden los dos motores y dónde no.",
   "phon.limits": "Dos lenguas: español de Castilla e inglés estadounidense, las únicas voces verificadas contra los datos que se publican. Sin lematización, sin sílabas y sin tono: solo la cadena de fonemas.",
   "nav.catalog": "Catálogo",
+  "nav.catalogTools": "Catálogo de herramientas",
   "catalog.title": "Catálogo de herramientas",
+  "catalog.levels": "Niveles de análisis",
+  "catalog.levelNote": "Las herramientas están agrupadas por nivel de análisis, del sonido hacia los flujos de trabajo: así se lee el catálogo como un recorrido y no como una lista.",
   "catalog.sub": "Qué existe hoy, qué sigue en construcción y qué viene después. Cada ficha declara su área, su integración, su estado y sus límites.",
   "catalog.privacy": "Todo el procesamiento ocurre en tu navegador: esta página no envía nada a ningún servidor, y las herramientas incrustadas tampoco.",
   "catalog.error": "No se pudo leer el catálogo de herramientas.",
@@ -350,5 +353,7 @@ export const es = {
   "catalog.languageIndependent": "Independiente de la lengua",
   "catalog.language.es": "Español",
   "catalog.language.en": "Inglés",
+  "catalog.language.pt": "Portugués",
+  "catalog.language.guc": "Wayuunaiki",
   "catalog.open": "Abrir herramienta"
 } as const;

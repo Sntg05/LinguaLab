@@ -318,7 +318,10 @@ export const en = {
   "phon.tableNote": "The same text run through the grapheme→IPA table from the orthography tool. It is not a phonological model: it shows where the two engines agree and where they do not.",
   "phon.limits": "Two languages: Castilian Spanish and American English, the only voices verified against the data this site publishes. No lemmatisation, no syllables and no tone: just the phoneme string.",
   "nav.catalog": "Catalog",
+  "nav.catalogTools": "Tool catalog",
   "catalog.title": "Tool catalog",
+  "catalog.levels": "Levels of analysis",
+  "catalog.levelNote": "Tools are grouped by level of analysis, from sound towards workflows: that way the catalog reads as a path rather than as a list.",
   "catalog.sub": "What exists today, what is still being built, and what comes next. Every card states its area, its integration, its status and its limits.",
   "catalog.privacy": "All processing happens in your browser: this page sends nothing to any server, and neither do the built-in tools.",
   "catalog.error": "The tool catalog could not be read.",
@@ -350,5 +353,7 @@ export const en = {
   "catalog.languageIndependent": "Language-independent",
   "catalog.language.es": "Spanish",
   "catalog.language.en": "English",
+  "catalog.language.pt": "Portuguese",
+  "catalog.language.guc": "Wayuunaiki",
   "catalog.open": "Open tool"
 } as const;

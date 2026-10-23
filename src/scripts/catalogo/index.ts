@@ -46,6 +46,7 @@ export const initToolCatalog = (): void => {
   );
 
   const cards = [...root.querySelectorAll<HTMLElement>("[data-tool-card]")];
+  const groups = [...root.querySelectorAll<HTMLElement>("[data-catalog-group]")];
   const controls = [...root.querySelectorAll<HTMLSelectElement>("[data-catalog-filter]")];
   const count = root.querySelector<HTMLElement>("[data-catalog-count]");
   const empty = root.querySelector<HTMLElement>("[data-catalog-empty]");
@@ -75,6 +76,16 @@ export const initToolCatalog = (): void => {
       if (!hidden) {
         visible += 1;
       }
+    }
+
+    // Un nivel de analisis sin coincidencias deja de ocupar lugar: su titulo
+    // encabezando una seccion vacia es peor que no tener seccion, porque sugiere
+    // que el catalogo esta incompleto. La seccion se oculta entera, encabezado
+    // incluido, y reaparece en cuanto una ficha suya vuelve a coincidir.
+    for (const group of groups) {
+      group.hidden = [...group.querySelectorAll<HTMLElement>("[data-tool-card]")].every(
+        (card) => card.hidden,
+      );
     }
 
     if (count !== null) {

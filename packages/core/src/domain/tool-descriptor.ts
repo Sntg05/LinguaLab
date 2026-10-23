@@ -7,16 +7,31 @@
  * obligaria a mantener un mapa de traduccion para un dato que ya es contenido.
  */
 
+/**
+ * Las areas linguisticas del catalogo, y a la vez su orden.
+ *
+ * POR QUE UNA SOLA LISTA Y NO UN TIPO MAS UNA SECUENCIA
+ *
+ * El orden va del sonido hacia el uso y de ahi hacia los flujos de trabajo:
+ * asi se ordena la linguistica en cualquier programa de la disciplina, y no es
+ * una decision de diseno visual. Con dos listas —un tipo con ocho valores y un
+ * arreglo aparte— un area nueva compila y desaparece del catalogo agrupado sin
+ * que nadie lo note. Derivando el tipo de la secuencia, agregar un area obliga a
+ * darle lugar, y no hay forma de que las dos se desincronicen.
+ */
+export const ANALYSIS_LEVELS = [
+  "fonetica",
+  "fonologia",
+  "morfosintaxis",
+  "semantica",
+  "pragmatica",
+  "tipologia",
+  "psicolinguistica",
+  "documentacion",
+] as const;
+
 /** Areas linguisticas del catalogo de herramientas. */
-export type ToolArea =
-  | "fonetica"
-  | "fonologia"
-  | "morfosintaxis"
-  | "semantica"
-  | "pragmatica"
-  | "psicolinguistica"
-  | "tipologia"
-  | "documentacion";
+export type ToolArea = (typeof ANALYSIS_LEVELS)[number];
 
 /**
  * Como se integra la herramienta al sitio. `needs-backend` marca lo que no

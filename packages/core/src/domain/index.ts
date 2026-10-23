@@ -21,6 +21,7 @@ export { tokenizeIpa } from "./ipa";
 export type { IpaString, Phoneme, PhonemeSequence } from "./ipa";
 export type { Language, LanguageKind } from "./language";
 export type { OrthographyTable, OrthographyTableStatus } from "./orthography-table";
+export { ANALYSIS_LEVELS } from "./tool-descriptor";
 export type {
   ToolArea,
   ToolDescriptor,

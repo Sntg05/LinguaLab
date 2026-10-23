@@ -1,5 +1,5 @@
 ---
-import { SITE } from "../config/site";
+import { ABOUT_NAV_ITEMS, REFERENCE_NAV_ITEMS, SITE, TOOL_NAV_ITEMS } from "../config/site";
 import { DEFAULT_LOCALE, localePath, t, type Locale, type MessageKey } from "../i18n";
 import Brand from "./Brand.astro";
 
@@ -15,29 +15,29 @@ interface FooterGroup {
 }
 
 /**
- * Everything the masthead deliberately leaves out. Security is not a column of
- * its own here: it sits in the legal line below, which is where a reader looks
- * for it only when they actually want it.
+ * Everything the masthead deliberately leaves out, derived from `NAV_ITEMS` so
+ * it cannot go stale on its own.
+ *
+ * POR QUE SE DERIVA Y NO SE ESCRIBE ACA
+ *
+ * Esta lista estaba escrita a mano y se quedo vieja dos veces: ofrecia tres
+ * herramientas cuando ya habia cinco, y encabezaba la columna con el nombre de
+ * una de ellas («Estacion textual») en vez del de la columna. Derivarla de la
+ * misma tabla que usa el masthead hace que la proxima herramienta aparezca en el
+ * pie sin que nadie se acuerde de este archivo.
+ *
+ * Security is not a column of its own here: it sits in the legal line below,
+ * which is where a reader looks for it only when they actually want it.
  */
 const groups: FooterGroup[] = [
-  {
-    headingKey: "nav.tools",
-    links: [
-      { path: "/tools", labelKey: "nav.tools" },
-      { path: "/fono", labelKey: "nav.ipa" },
-      { path: "/arboles", labelKey: "nav.trees" },
-    ],
-  },
+  { headingKey: "foot.tools", links: TOOL_NAV_ITEMS.map(({ path, labelKey }) => ({ path, labelKey })) },
   {
     headingKey: "nav.resources",
-    links: [
-      { path: "/bibliografia", labelKey: "nav.resources" },
-      { path: "/glosario", labelKey: "nav.glossary" },
-    ],
+    links: REFERENCE_NAV_ITEMS.map(({ path, labelKey }) => ({ path, labelKey })),
   },
   {
-    headingKey: "nav.about",
-    links: [{ path: "/acerca", labelKey: "nav.about" }],
+    headingKey: "foot.about.col",
+    links: ABOUT_NAV_ITEMS.map(({ path, labelKey }) => ({ path, labelKey })),
   },
 ];
 ---

@@ -16,6 +16,7 @@
 import type { MessageKey, Locale } from "../i18n";
 import { localePath, t } from "../i18n";
 import type { ToolArea, ToolDescriptor, ToolIntegration, ToolStatus } from "@lingualab/core";
+import { ANALYSIS_LEVELS } from "@lingualab/core";
 import { lingualab } from "../composition-root";
 import { CATALOG_STRING_KEYS, format } from "../scripts/catalogo/strings";
 
@@ -41,6 +42,7 @@ const tools: readonly ToolDescriptor[] = listed.ok ? listed.value : [];
 const SITE_ROUTES: Readonly<Record<string, string>> = {
   fono: "/fono",
   ortografia: "/ortografia",
+  phonemizer: "/fonemizador",
   arboles: "/arboles",
   tools: "/tools",
 };
@@ -78,6 +80,8 @@ const STATUS_BADGE: Readonly<Record<ToolStatus, string>> = {
 const LANGUAGE_KEYS: Readonly<Record<string, MessageKey>> = {
   es: "catalog.language.es",
   en: "catalog.language.en",
+  pt: "catalog.language.pt",
+  guc: "catalog.language.guc",
 };
 
 const languageLabel = (code: string): string => {
@@ -97,6 +101,21 @@ const languageLine = (tool: ToolDescriptor): string =>
 const areas = [...new Set(tools.map((tool) => tool.area))].sort();
 const languages = [...new Set(tools.flatMap((tool) => tool.languages))].sort();
 const integrations: readonly ToolIntegration[] = ["embedded", "external-link", "needs-backend"];
+
+/**
+ * Las herramientas agrupadas por nivel de analisis, en el orden de la disciplina.
+ *
+ * El orden NO se decide aca: viene de `ANALYSIS_LEVELS` en el nucleo, que es
+ * donde la secuencia fonetica → documentacion es conocimiento linguistico y no
+ * una preferencia de diseno. Un area sin herramientas no ocupa una seccion, y el
+ * filtro de area esconde las secciones que se quedan vacias (ver el script).
+ */
+const groups = ANALYSIS_LEVELS.map((area) => ({
+  area,
+  tools: tools.filter((tool) => tool.area === area),
+})).filter((group) => group.tools.length > 0);
+
+const anchorOf = (area: ToolArea): string => `nivel-${area}`;
 
 /* Runtime sentences for the filter script, already translated and keyed. */
 const catalogStrings: Record<string, string> = {};
@@ -166,6 +185,23 @@ for (const key of CATALOG_STRING_KEYS) {
       </label>
     </div>
 
+    <!-- Indice de niveles: un salto directo a cada seccion, sin JavaScript y sin
+         depender del filtro. Los anchors son estables (`#nivel-fonologia`) para
+         que se puedan citar desde cualquier otro documento. -->
+    <nav class="catalog__index" aria-labelledby="catalog-levels">
+      <p class="eyebrow" id="catalog-levels">{t(locale, "catalog.levels")}</p>
+      <ul class="catalog__index-list">
+        {
+          groups.map((group) => (
+            <li>
+              <a href={`#${anchorOf(group.area)}`}>{t(locale, AREA_KEYS[group.area])}</a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="faint">{t(locale, "catalog.levelNote")}</p>
+    </nav>
+
     <!-- One live region carries the count; the empty state below explains WHY
          nothing matched, so the two never repeat the same sentence. -->
     <p class="faint" role="status" aria-live="polite" data-catalog-count>
@@ -173,60 +209,81 @@ for (const key of CATALOG_STRING_KEYS) {
     </p>
     <p class="callout" data-catalog-empty hidden></p>
 
-    <!-- `role="list"` keeps the list semantics for assistive tech, but as a
-         real list element it would inherit bullets and indent that no catalog
-         style resets. The grid is a plain container whose children are the
-         list items. -->
-    <div class="grid" role="list">
-      {
-        tools.map((tool) => {
-          const route = SITE_ROUTES[tool.id];
-          const planned = tool.status === "planned";
-          return (
-            <article
-              class="card"
-              role="listitem"
-              data-tool-card
-              data-status={tool.status}
-              data-area={tool.area}
-              data-integration={tool.integration}
-              data-languages={tool.languages.join(" ")}
-            >
-              <div class="cluster">
-                <span class={STATUS_BADGE[tool.status]}>{t(locale, STATUS_KEYS[tool.status])}</span>
-                <span class="badge">{t(locale, INTEGRATION_KEYS[tool.integration])}</span>
-                <span class="badge">{t(locale, AREA_KEYS[tool.area])}</span>
-              </div>
+    <!-- Una seccion por nivel de analisis. El titulo es h2 y las fichas pasan a
+         h3: el indice de niveles es la estructura de la pagina, y una ficha ya no
+         compite con las secciones por el mismo nivel de encabezado. -->
+    {
+      groups.map((group) => (
+        <section
+          class="catalog__group"
+          data-catalog-group
+          id={anchorOf(group.area)}
+          aria-labelledby={`${anchorOf(group.area)}-title`}
+        >
+          <h2 class="catalog__group-title" id={`${anchorOf(group.area)}-title`}>
+            {t(locale, AREA_KEYS[group.area])}
+          </h2>
 
-              {/* A planned card must not look like a working one: it is not a
-                  link and carries its own warning, so it is never mistaken for
-                  something you can open. */}
-              {planned && (
-                <p class="callout callout--warn" data-planned-mark>
-                  {t(locale, "catalog.plannedMark")}
-                </p>
-              )}
+          {/* `role="list"` keeps the list semantics for assistive tech, but as a
+              real list element it would inherit bullets and indent that no
+              catalog style resets. The grid is a plain container whose children
+              are the list items. */}
+          <div class="grid" role="list">
+            {group.tools.map((tool) => {
+              const route = SITE_ROUTES[tool.id];
+              const planned = tool.status === "planned";
+              return (
+                <article
+                  class="card"
+                  role="listitem"
+                  data-tool-card
+                  data-status={tool.status}
+                  data-area={tool.area}
+                  data-integration={tool.integration}
+                  data-languages={tool.languages.join(" ")}
+                >
+                  <div class="cluster">
+                    <span class={STATUS_BADGE[tool.status]}>
+                      {t(locale, STATUS_KEYS[tool.status])}
+                    </span>
+                    <span class="badge">{t(locale, INTEGRATION_KEYS[tool.integration])}</span>
+                  </div>
 
-              <h2 class="card__title">
-                {route ? <a href={localePath(locale, route)}>{tool.name[locale]}</a> : tool.name[locale]}
-              </h2>
+                  {/* A planned card must not look like a working one: it is not a
+                      link and carries its own warning, so it is never mistaken
+                      for something you can open. */}
+                  {planned && (
+                    <p class="callout callout--warn" data-planned-mark>
+                      {t(locale, "catalog.plannedMark")}
+                    </p>
+                  )}
 
-              <p class="card__body">{notesOf(tool)}</p>
-              <p class="faint">{languageLine(tool)}</p>
+                  <h3 class="card__title">
+                    {route ? (
+                      <a href={localePath(locale, route)}>{tool.name[locale]}</a>
+                    ) : (
+                      tool.name[locale]
+                    )}
+                  </h3>
 
-              {tool.citation && (
-                <details class="faint">
-                  <summary>{t(locale, "catalog.cite")}</summary>
-                  <p class="card__body">{tool.citation}</p>
-                </details>
-              )}
+                  <p class="card__body">{notesOf(tool)}</p>
+                  <p class="faint">{languageLine(tool)}</p>
 
-              {route && <p class="card__cta">{t(locale, "catalog.open")} →</p>}
-            </article>
-          );
-        })
-      }
-    </div>
+                  {tool.citation && (
+                    <details class="faint">
+                      <summary>{t(locale, "catalog.cite")}</summary>
+                      <p class="card__body">{tool.citation}</p>
+                    </details>
+                  )}
+
+                  {route && <p class="card__cta">{t(locale, "catalog.open")} →</p>}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ))
+    }
   </div>
 </section>
 
