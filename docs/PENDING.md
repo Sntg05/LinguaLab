@@ -15,13 +15,13 @@ una decisión ya tomada, y rehacerla suele dar un resultado peor que el que est�
 cd ~/Documentos/06\ Proyectos/LinguaLab
 nvm use 22            # sin esto no corren las puertas; hay .nvmrc
 npm install
-npm run verify:all    # lint, formato, tipos, reglas hexagonales, 744 pruebas, build verificado
-npx playwright test   # 56 e2e; requiere el puerto 4321 LIBRE (ver P7)
+npm run verify:all    # lint, formato, tipos, reglas hexagonales, pruebas, build verificado
+npx playwright test   # e2e; requiere el puerto 4321 LIBRE (ver P7)
 ```
 
-**Estado al escribir esto:** rama `feat/lingualab-hexagonal-monorepo`, sincronizada con `origin` y con
-el árbol limpio,
-`verify:all` en verde, 56 e2e en verde, 21 páginas sin violaciones de axe en los dos temas.
+**Estado al escribir esto:** rama `main`, sincronizada con `origin` y con el árbol limpio,
+`verify:all` en verde, 69 e2e en verde, 23 páginas sin violaciones de axe en los dos temas.
+Los números exactos del día viven en `docs/STATUS.md`, no acá.
 
 ---
 

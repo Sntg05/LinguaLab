@@ -5,7 +5,7 @@ porque una página que exagera lo que hace es la parte menos fiable de un proyec
 después necesita saber qué se probó y qué se supuso sin tener que reconstruirlo del historial de
 commits.
 
-Rama: `feat/lingualab-hexagonal-monorepo`. El detalle de las decisiones está en [`docs/adr/`](adr/), y
+Rama: `main`. El detalle de las decisiones está en [`docs/adr/`](adr/), y
 el mapa del hexágono en [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ---
@@ -28,7 +28,11 @@ npm run dev         # http://localhost:4321
 
 ---
 
-## Herramientas que existen (v2.0.0)
+## Herramientas que existen (v3.0.0)
+
+La versión vive en `package.json`; no hay etiquetas en Git todavía, porque el sitio se publica como
+una unidad y release-please quedó fuera del alcance (ADR 0003). El salto a 3.0.0 no es cosmético: la
+licencia cambió a GPL por eSpeak NG, y un cambio de licencia es incompatible hacia atrás.
 
 Todas ellas corren por completo en el navegador y funcionan sin conexión después de la primera carga.
 

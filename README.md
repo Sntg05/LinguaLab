@@ -1,8 +1,9 @@
 # LinguaLab
 
 Herramientas de lingüística que corren enteramente en tu navegador: fonética con
-corte sagital, árboles sintácticos y de estructuras de datos, y análisis de
-corpus. Sin cuentas, sin servidor de análisis, sin telemetría.
+corte sagital, transcripción ortográfica y fonémica, árboles sintácticos y de
+estructuras de datos, y análisis de corpus. Sin cuentas, sin servidor de análisis,
+sin telemetría.
 
 **Sitio:** https://lingualab.pages.dev · **Inglés:** `/en/`
 
@@ -10,11 +11,16 @@ corpus. Sin cuentas, sin servidor de análisis, sin telemetría.
 
 ## Qué hay dentro
 
+Las filas siguen el mismo orden que el catálogo: de la fonética hacia el discurso.
+
 | Página | Qué hace |
 |---|---|
 | `/fono` | **FonoLab** — alfabeto AFI, corte sagital del aparato fonador, audio con licencia y transcriptor de grafemas a AFI |
+| `/ortografia` | **Ortografía a AFI** — editor de tablas grafema→AFI con contexto, prioridad, capa alofónica y rastro por carácter; trae demos en español e inglés y plantillas indígenas vacías |
+| `/fonemizador` | **Fonemizador** — texto a AFI para español e inglés con eSpeak NG compilado a WebAssembly, dentro de un Web Worker |
 | `/arboles` | **ArborLab** — 23 tipos de árbol, 4 formatos de entrada, exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat |
-| `/tools` | **Estación textual** — frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad |
+| `/tools` | **Estación textual** — frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad, más un **constructor de n-gramas** (n de 2 a 5) |
+| `/catalogo` | **Catálogo de herramientas** — todas las herramientas ordenadas por nivel de análisis, con su estado real |
 | `/glosario` | Glosario bilingüe filtrable |
 | `/bibliografia` | Recursos con licencia y enlace de origen |
 | `/seguridad` | Verificación en vivo de las salvaguardas, leyendo el DOM real |
@@ -122,11 +128,12 @@ git archive <commit> legacy/ | tar -x -C /tmp
 
 | Comprobación | Estado |
 |---|---|
-| `astro check` | 0 errores, 0 avisos |
-| Pruebas | 664 en 32 archivos |
-| Reglas hexagonales | 140 módulos, 0 violaciones |
+| `astro check` | 0 errores |
+| Pruebas unitarias | 765 en 43 archivos |
+| Pruebas de extremo a extremo | 69 sobre el sitio compilado (46 de accesibilidad) |
+| Reglas hexagonales | 170 módulos, 378 dependencias, 0 violaciones |
 | Verificación de compilación | pasa |
-| Página más pesada | 28.5 KB gzip |
+| Página más pesada | 28.6 KB gzip, sobre un presupuesto de 60 KB |
 
 `scripts/verify-build.mjs` comprueba el resultado compilado: cobertura de la CSP
 por script inline, ausencia de `unsafe-inline`, ausencia de subrecursos externos,
