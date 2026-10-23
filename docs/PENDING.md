@@ -520,9 +520,12 @@ aviso de «Experimental» y la ficha del catálogo lo repite.
 - `packages/core/src/data/textgrid.test.ts` — dos archivos de referencia escritos enteros (formato largo
   y formato corto del MISMO TextGrid) que producen el mismo documento; ida y vuelta sobre cinco
   documentos con comillas dobles, saltos de línea, tiempos con precisión de doble, intervalos de
-  duración cero y un documento sin capas; BOM UTF-8, UTF-16LE, UTF-16BE y detección sin BOM; archivo
-  vacío, cabecera ausente, clase equivocada, capa truncada y huecos, todos con error tipado y sin
-  excepciones. El contrato del puerto (`runTextGridCodecPortContract`) se ejecuta contra el codec real.
+  duración cero y un documento sin capas; BOM UTF-8, UTF-16LE y UTF-16BE —y rechazo de UTF-16 sin BOM y
+  de UTF-8 sobrelargo, que se aceptaban como contenido—; archivo vacío, cabecera ausente, clase
+  equivocada, capa truncada, huecos, número no finito, intervalo fuera de su capa, capa fuera del
+  documento y bloques de más, todos con error tipado y sin excepciones. El contrato del puerto
+  (`runTextGridCodecPortContract`) se ejecuta contra el codec real y cubre un archivo por cada código de
+  error propio del codec.
 - `src/scripts/audio/spectrogram.test.ts` — una sinusoide de 1000 Hz a 8000 muestras/s cae exactamente en
   la banda 32 de una FFT de 256 puntos, una constante se concentra en la banda 0, y las magnitudes
   quedan normalizadas en 0..1.
@@ -554,7 +557,17 @@ versión y su fecha.
 las dos entradas, y agregarlas encontró un defecto real: los botones de acción de la tabla de intervalos
 mostraban un glifo («▶», «∪») y se llamaban «Reproducir el intervalo 1» / «Fusionar el intervalo 1 con el
 siguiente», que incumple WCAG 2.5.3 (*Label in Name*) y es lo que axe 4.14.0 marca como
-`label-content-name-mismatch`. El glifo pasó a formar parte del nombre accesible.
+`label-content-name-mismatch`.
+
+**Corrección de lo que decía antes esta misma entrada.** Una versión previa de este párrafo afirmaba que
+«el glifo pasó a formar parte del nombre accesible». Es falso, y el código lo desmiente:
+`src/scripts/audio/index.ts` deja el glifo (`▶`, `∪`) fuera del `aria-label` —el nombre es «Reproducir
+el intervalo 1», sin el símbolo— y la regla queda **exceptuada por nombre** en
+`AXE_INCOMPLETE_WITHOUT_MOTIVE` (`e2e/accessibility.spec.ts`). La razón está medida: con un texto visible
+de un solo símbolo, axe 4.14.0 no puede decidir y devuelve `incomplete` aunque el nombre incluya el
+glifo, así que meterlo no arreglaba nada. La decisión vigente es la del comentario del código: entre
+anunciar «▶ Reproducir el intervalo 1» y aceptar que la puerta no puede decidir sobre glifos, gana el
+lector de pantalla.
 
 **La lección que deja, y que conviene no repetir.** El barrido de `e2e/audio.spec.ts` daba cero
 violaciones porque solo mira `result.violations`; la puerta principal también afirma sobre los resultados
@@ -563,10 +576,113 @@ misma página es una trampa: una verde tapa a la otra. Si el barrido propio se c
 mismo criterio de la puerta principal (`e2e/accessibility.spec.ts`, las listas `AXE_COULD_NOT_MEASURE` y
 `AXE_INCOMPLETE_WITHOUT_MOTIVE`), o directamente no duplicarse.
 
-**Tercer pendiente, menor.** `importTextGrid` lee el archivo entero sin tope de tamaño, mientras el resto
-del sitio limita el texto a 100 KB (`src/scripts/core/guardrails.ts`). Un `.TextGrid` de decenas de
-megas congela la pestaña al analizarlo, y el sitio ya tiene una política de límites que esta ruta no
-respeta. *Próximo paso exacto:* rechazar archivos por encima de un tope declarado (1 MB es holgado para
-un TextGrid real) con un mensaje que lo diga, igual que hace el editor de ortografía. Criterio de
-aceptación: un archivo por encima del tope muestra el mensaje y no llega al analizador; uno por debajo
-sigue importándose igual.
+**Tercer pendiente — RESUELTO.** `importTextGrid` leía el archivo entero sin tope de tamaño, mientras el
+resto del sitio limita el texto a 100 KB (`src/scripts/core/guardrails.ts`). Un `.TextGrid` de decenas de
+megas congelaba la pestaña al analizarlo: el verificador midió 44 MB / 400 000 intervalos → 896 ms y
++45 MB de heap, con picos de 4 a 6 veces el tamaño del archivo. Qué se hizo, y con qué se mide:
+
+- El tope es una política y vive junto al formato: `MAX_TEXTGRID_BYTES` (1 MB) e
+  `isTextGridTooLarge` en `packages/core/src/data/textgrid.ts`, probados en `textgrid.test.ts` (acepta el
+  archivo justo en el tope, rechaza uno por encima).
+- El controlador comprueba `file.size` **antes** de `readFileBytes`, así que el archivo grande no se lee
+  ni llega al analizador, y lo dice con el tamaño real y el límite real traducidos a los dos idiomas
+  (`audio.error.tooLarge`).
+- El audio tiene su propio tope, `MAX_AUDIO_BYTES` en `src/scripts/audio/index.ts`, derivado del límite
+  que ya existía para la duración (`MAX_DURATION_SECONDS` = 300 s): 300 s de wav sin comprimir a 96 kHz,
+  estéreo y 16 bits son 115,2 MB, así que 128 MB solo rechaza lo que no puede ser un tramo de 300 s. Se
+  comprueba también con `file.size`, antes de leer y de decodificar. **No** se unificaron las dos
+  constantes: un archivo de anotaciones de texto y un contenedor de audio comprimido son límites con
+  motivos distintos.
+- Las dos lecturas van envueltas en `try/catch`: un fallo de lectura —permiso retirado, archivo movido—
+  ahora es un mensaje (`audio.error.read`) y no una promesa rechazada sin manejar.
+- `e2e/audio.spec.ts` genera un `.TextGrid` de más de 1 MB en la prueba, comprueba el mensaje con el
+  límite y que el documento ya abierto no cambia.
+- Criterio de aceptación cumplido: por encima del tope hay mensaje y el analizador no se ejecuta; por
+  debajo, el archivo se importa igual (las pruebas de ida y vuelta y el e2e de importación siguen
+  verdes).
+
+**Cuarto pendiente, del mismo segmento — el verificador independiente encontró defectos reales.** Se
+cerraron con pruebas que los reproducen primero: límites de capa al serializar, huecos de nivel
+documento, números no finitos, `-.5`, bloques de más, `formatNumber` en magnitudes extremas, codificación
+UTF-16 sin BOM y UTF-8 sobrelargo, validación de lo guardado con sobre de versión, actualización del
+estado de persistencia también en el fallo, control para borrar los proyectos guardados, la memoria
+ganando sobre IndexedDB al leer, el tope de tamaño y el contrato del puerto de almacenamiento contra el
+adaptador real (`src/scripts/audio/annotation-storage.test.ts`, con `fake-indexeddb`). Lo que se decidió
+**no** cerrar está en P18, P19 y P20.
+
+## P18 — Los tiempos de una capa de puntos no se validan contra los límites de su capa
+
+**Severidad:** baja. Es el mismo defecto que se cerró para los intervalos (D1), pero el arreglo se aplicó
+solo a `IntervalTier`, así que la invariante queda a medias.
+
+**Síntoma.** Un `TextTier` con `xmax = 3` dentro de un documento de 5 s, y un punto en `time = 7`, se lee
+sin error: `parseTextGridText` devuelve el documento, el visor lo pinta sobre un eje que no llega y la
+exportación escribe el punto fuera de la capa. Praat rechaza esa capa por la misma razón por la que
+rechaza un intervalo fuera de rango.
+
+**Evidencia.** `packages/core/src/data/textgrid.ts` valida `interval-out-of-tier` en la rama
+`IntervalTier` y no toca la rama `TextTier`. `packages/core/src/data/textgrid.test.ts` cubre el caso de
+intervalos (`D1 — un intervalo fuera de los limites de su capa`) y no tiene ningún caso de puntos fuera de
+su capa. El contrato del puerto (`runTextGridCodecPortContract`) tampoco.
+
+**Por qué no se hizo.** El verificador nombró el defecto de los intervalos, no el de los puntos, y el
+código de error autorizado para este segmento (`interval-out-of-tier`) miente si se usa con un punto: el
+consumidor del puerto merece un nombre que diga qué pasó. Inventar un segundo código sin decisión previa
+era peor que dejarlo escrito.
+
+**Próximo paso exacto.** Agregar `point-out-of-tier` a la unión `TextGridError`
+(`packages/core/src/ports/textgrid-codec.ts`) con el mismo nivel de detalle que sus vecinos, validar en la
+rama `TextTier` de `parseTokens` con `TIME_EPSILON` como en los intervalos, y cubrirlo en los dos sitios
+donde ya se prueba el de intervalos: un caso en `textgrid.test.ts` y una entrada en `failureFixtures` de
+`packages/core/src/testing/contracts/textgrid-codec.ts`. Criterio de aceptación: un archivo con un punto
+fuera de su capa devuelve `point-out-of-tier` y el resto de las pruebas sigue verde.
+
+## P19 — El tope de audio no tiene prueba propia
+
+**Severidad:** baja, y es una deuda de prueba, no de comportamiento.
+
+**Síntoma.** Si `MAX_AUDIO_BYTES` cambia de valor o la comparación `file.size` se mueve de sitio en
+`src/scripts/audio/index.ts`, ninguna prueba se pone roja. El caso gemelo del TextGrid sí está cubierto,
+en las dos capas: unitaria en el codec y e2e del mensaje.
+
+**Evidencia.** `MAX_AUDIO_BYTES` vive en `src/scripts/audio/index.ts`, que no tiene archivo de prueba
+propio porque `initAudioLab` necesita DOM y `AudioContext`. La e2e de `e2e/audio.spec.ts` mide el tope del
+TextGrid (`un TextGrid de mas de 1 MB se rechaza...`) y no el del audio: generar en la prueba un archivo de
+más de 128 MB para comprobar un rechazo que ocurre antes de leerlo costaría más que la cobertura que
+aporta.
+
+**Por qué no se hizo.** El tope de TextGrid sí tenía dónde vivir con prueba (el codec, dentro de las
+superficies autorizadas de este segmento); el de audio no, y mover la lógica a un módulo nuevo solo para
+poder probarla no estaba autorizado.
+
+**Próximo paso exacto.** Extraer `MAX_AUDIO_BYTES`, el formateo de tamaño y la decisión
+«¿este archivo supera el tope?» a `src/scripts/audio/limits.ts`, con `src/scripts/audio/limits.test.ts` al
+lado (Node puro, sin DOM), y hacer que el controlador use solo esas funciones. Criterio de aceptación:
+`npx vitest run src/scripts/audio/limits.test.ts` cubre el borde (justo en el tope y un byte más) para los
+dos límites, y `verify:all` sigue verde.
+
+## P20 — Borrar libera todo el almacén, no un proyecto
+
+**Severidad:** baja. La promesa que hace el control se cumple —«borrar los proyectos guardados»—, pero
+`AnnotationStoragePort.remove(projectId)` sigue sin usarse para lo que su firma permite.
+
+**Síntoma.** Quien tiene tres proyectos guardados y quiere liberar el de una prueba no puede: el control
+borra los tres. La alternativa actual es exportar los otros dos a TextGrid antes de borrar y volver a
+importarlos después.
+
+**Evidencia.** El control de `src/components/AudioLab.astro` (`data-audio-projects-clear`) enumera
+`storage.list()` y llama `storage.remove(projectId)` para cada clave
+(`clearSavedProjects` en `src/scripts/audio/index.ts`). No hay lista de proyectos con borrado individual; la
+región solo muestra el conteo (`audio.projects.count`). La e2e
+`borrar los proyectos guardados deja la lista vacia y la persistencia dice la verdad` fija el
+comportamiento actual.
+
+**Por qué no se hizo.** El encargo pedía una forma de liberar espacio con confirmación, y una lista con un
+botón por proyecto es una interfaz nueva —con su estado, su confirmación y su accesibilidad—, no un
+arreglo del defecto.
+
+**Próximo paso exacto.** Convertir la región `data-audio-projects` en una lista (`<ul>`) con un botón
+«Borrar» por proyecto, cada uno con la misma confirmación en el propio control que hoy tiene el borrado
+total, y una cadena nueva por idioma para el nombre del proyecto y su borrado. El borrado individual ya
+existe en el adaptador: `remove(projectId)`. Criterio de aceptación: con dos proyectos guardados, borrar
+uno deja el otro en IndexedDB y el conteo pasa de 2 a 1, medido en la base como en la e2e actual.

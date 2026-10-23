@@ -252,3 +252,174 @@ test("la version en ingles de la pagina existe y avisa en ingles", async ({ page
   await expect(page.locator("h1")).toContainText(/TextGrid/i);
   await expect(page.locator("[data-audiolab]")).toContainText(/never leaves your device/i);
 });
+
+/* ==========================================================================
+   Lo que el verificador independiente encontro y estas pruebas fijan.
+
+   Van al final y con el defecto en el nombre para que, cuando una falle, se
+   sepa que promesa se rompio sin leer el cuerpo entero.
+   ========================================================================== */
+
+const SAVE_NOTE = "[data-audio-save-note]";
+const PERSISTENCE = "[data-audio-persistence]";
+const PROJECTS_COUNT = "[data-audio-projects-count]";
+const PROJECTS_CLEAR = "[data-audio-projects-clear]";
+const PROJECTS_CONFIRM = "[data-audio-projects-confirm]";
+const PROJECTS_CONFIRM_BUTTON = "[data-audio-projects-clear-confirm]";
+
+/** TextGrid de un documento de 5 s cuya unica capa mide 3 s y se queda corta. */
+const DOCUMENT_WITH_A_TIER_THAT_DOES_NOT_SPAN_IT = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+5
+<exists>
+1
+"IntervalTier"
+"words"
+0
+3
+1
+0
+3
+"corto"
+`;
+
+test("un TextGrid cuya capa no llega al final del documento se avisa como hueco", async ({
+  page,
+}) => {
+  await page.goto("/visualizador");
+  await page.locator(TEXTGRID_INPUT).setInputFiles({
+    name: "capa-corta.TextGrid",
+    mimeType: "text/plain",
+    buffer: Buffer.from(DOCUMENT_WITH_A_TIER_THAT_DOES_NOT_SPAN_IT, "utf8"),
+  });
+
+  const gaps = page.locator("[data-audio-gaps]");
+  await expect(gaps).toBeVisible();
+  // El hueco es del documento (3 a 5 s), no de la capa: el mensaje lo nombra.
+  await expect(gaps).toContainText(/hueco/i);
+
+  // Y la exportacion queda bloqueada: el archivo saldria invalido.
+  await page.locator(EXPORT_TEXTGRID).click();
+  await expect(page.locator(STATUS)).toHaveAttribute("data-state", "error");
+});
+
+test("un TextGrid de mas de 1 MB se rechaza con un mensaje y no llega al analizador", async ({
+  page,
+}) => {
+  await loadAudio(page);
+  const rowsBefore = await page.locator(ROWS).count();
+
+  // Se genera aqui, como el wav: el cuerpo son espacios porque lo que se mide es
+  // el tope, y el archivo tiene que ser grande de verdad.
+  const oversized = `File type = "ooTextFile"\nObject class = "TextGrid"\n\n0\n1\n<exists>\n0\n${" ".repeat(1024 * 1024)}`;
+
+  await page.locator(TEXTGRID_INPUT).setInputFiles({
+    name: "enorme.TextGrid",
+    mimeType: "text/plain",
+    buffer: Buffer.from(oversized, "utf8"),
+  });
+
+  await expect(page.locator(STATUS)).toHaveAttribute("data-state", "error");
+  await expect(page.locator(STATUS)).toContainText(/tope/);
+  await expect(page.locator(STATUS)).toContainText(/1\.0 MB/);
+  // El documento que ya estaba abierto no se toco.
+  expect(await page.locator(ROWS).count()).toBe(rowsBefore);
+});
+
+test("lo anotado vuelve despues de recargar la pagina", async ({ page }) => {
+  await loadAudio(page);
+  await moveCursor(page, 0.25);
+  await page.locator(SPLIT).click();
+  await page.locator(ROWS).nth(0).locator("input[type=text]").fill("to");
+
+  // El autoguardado tiene su retraso: se espera a que diga que guardo, no a un
+  // tiempo fijo que haga la prueba lenta y fragil.
+  await expect(page.locator(SAVE_NOTE)).toContainText(/Guardado/, { timeout: 15_000 });
+  await expect(page.locator(PERSISTENCE)).toContainText(/IndexedDB/);
+
+  await page.reload();
+
+  await expect(page.locator(ROWS)).toHaveCount(2);
+  await expect(page.locator(ROWS).nth(0).locator("input[type=text]")).toHaveValue("to");
+  await expect(page.locator(SAVE_NOTE)).toContainText(/recuperado/i);
+});
+
+test("un registro guardado con otra forma no rompe el visor y dice por que", async ({ page }) => {
+  await page.goto("/visualizador");
+
+  // El caso que reprodujo el verificador: `{bounds, layers}` bajo la clave del
+  // proyecto. Se escribe a mano en IndexedDB porque es lo que dejaria otra
+  // version del sitio.
+  await page.evaluate(async () => {
+    await new Promise<void>((resolve, reject) => {
+      const request = indexedDB.open("lingualab-annotations", 1);
+      request.onupgradeneeded = () => {
+        request.result.createObjectStore("projects");
+      };
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const database = request.result;
+        const transaction = database.transaction("projects", "readwrite");
+        transaction
+          .objectStore("projects")
+          .put({ bounds: { min: 0, max: 2 }, layers: [] }, "visor");
+        transaction.oncomplete = () => {
+          database.close();
+          resolve();
+        };
+        transaction.onerror = () => reject(transaction.error);
+      };
+    });
+  });
+
+  await page.reload();
+
+  await expect(page.locator(SAVE_NOTE)).toContainText(/no se pudo leer/i);
+  // El visor sigue usable: la tabla se pinta con el documento vacio y el
+  // guardado automatico no pisa lo anterior.
+  await expect(page.locator(ROWS)).toHaveCount(1);
+  await expect(page.locator(PERSISTENCE)).toContainText(/IndexedDB/);
+});
+
+test("borrar los proyectos guardados deja la lista vacia y la persistencia dice la verdad", async ({
+  page,
+}) => {
+  await loadAudio(page);
+  await expect(page.locator(SAVE_NOTE)).toContainText(/Guardado/, { timeout: 15_000 });
+  await expect(page.locator(PROJECTS_COUNT)).toContainText("1");
+
+  await page.locator(PROJECTS_CLEAR).click();
+  await expect(page.locator(PROJECTS_CONFIRM)).toBeVisible();
+  await page.locator(PROJECTS_CONFIRM_BUTTON).click();
+
+  await expect(page.locator(PROJECTS_COUNT)).toContainText("0");
+  await expect(page.locator(PERSISTENCE)).toContainText(/IndexedDB/);
+  await expect(page.locator(STATUS)).toContainText(/borrados/i);
+
+  // Las claves desaparecieron de la base de verdad, no solo del texto.
+  const remaining = await page.evaluate(
+    async () =>
+      new Promise<number>((resolve, reject) => {
+        const request = indexedDB.open("lingualab-annotations", 1);
+        request.onupgradeneeded = () => {
+          request.result.createObjectStore("projects");
+        };
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          const database = request.result;
+          const keys = database
+            .transaction("projects", "readonly")
+            .objectStore("projects")
+            .getAllKeys();
+          keys.onsuccess = () => {
+            database.close();
+            resolve(keys.result.length);
+          };
+          keys.onerror = () => reject(keys.error);
+        };
+      }),
+  );
+  expect(remaining).toBe(0);
+});

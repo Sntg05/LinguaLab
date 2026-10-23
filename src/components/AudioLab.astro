@@ -292,6 +292,36 @@ const WINDOWS = [
         <p class="faint" data-audio-save-note role="status" aria-live="polite"></p>
         <p class="faint" data-audio-persistence></p>
 
+        <!-- Los proyectos guardados se pueden BORRAR. Sin este control, la unica
+             forma de liberar espacio era borrar los datos del navegador a mano,
+             y la degradacion por cuota quedaba sin salida. La confirmacion vive
+             en el propio control y no en `window.confirm`: un dialogo del
+             navegador no se puede etiquetar, no se lee con el estilo de la
+             pagina y en un lector de pantalla aparece fuera de contexto. -->
+        <div class="audiolab__projects" data-audio-projects>
+          <p class="faint" data-audio-projects-count></p>
+          <div class="cluster">
+            <button class="btn btn--quiet btn--sm" type="button" data-audio-projects-clear>
+              {t(locale, "audio.projects.clear")}
+            </button>
+          </div>
+          <div class="audiolab__confirm" data-audio-projects-confirm hidden>
+            <p class="faint" data-audio-projects-confirm-text></p>
+            <div class="cluster">
+              <button
+                class="btn btn--primary btn--sm"
+                type="button"
+                data-audio-projects-clear-confirm
+              >
+                {t(locale, "audio.projects.clearConfirm")}
+              </button>
+              <button class="btn btn--quiet btn--sm" type="button" data-audio-projects-cancel>
+                {t(locale, "audio.projects.cancel")}
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div class="cluster">
           <button class="btn btn--primary btn--sm" type="button" data-audio-export-textgrid>
             {t(locale, "audio.data.exportTextGrid")}

@@ -20,6 +20,7 @@
 import {
   type AnnotationDocument,
   type AnnotationHistoryState,
+  type AnnotationStorageError,
   type Interval,
   type IntervalTier,
   addTier,
@@ -32,6 +33,8 @@ import {
   fillTierGaps,
   intervalTiers,
   isIntervalTier,
+  isTextGridTooLarge,
+  MAX_TEXTGRID_BYTES,
   mergeIntervalWithNext,
   moveTier,
   moveTierBoundary,
@@ -97,6 +100,24 @@ const DEFAULT_PROJECT = "visor";
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);
+
+/**
+ * Tope de bytes del audio, comprobado ANTES de leer y decodificar el archivo.
+ *
+ * Sale del limite que ya existe para la duracion (`MAX_DURATION_SECONDS` = 300 s)
+ * llevado a su peor caso honesto: 300 s de wav sin comprimir a 96 kHz, estereo y
+ * 16 bits son 115,2 MB, asi que 128 MB rechaza solo lo que no puede ser un
+ * tramo de 300 s. La duracion se sigue midiendo despues de decodificar, porque
+ * antes no se conoce; lo que se evita aca es entregarle a `decodeAudioData` un
+ * archivo que va a llenar la memoria antes de que ningun limite lo detenga.
+ */
+export const MAX_AUDIO_BYTES = 128 * 1024 * 1024;
+
+/** Tamano legible para un mensaje: MB por encima del megabyte, KB por debajo. */
+const formatBytes = (bytes: number): string =>
+  bytes >= 1024 * 1024
+    ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
 
 /**
  * Por que se degrada el guardado, en el idioma de la pagina.
@@ -184,6 +205,12 @@ export const initAudioLab = (): void => {
   const gapsPanel = $<HTMLElement>("[data-audio-gaps]");
   const gapsText = $<HTMLElement>("[data-audio-gaps-text]");
   const gapsFillButton = $<HTMLButtonElement>("[data-audio-gaps-fill]");
+  const projectsCount = $<HTMLElement>("[data-audio-projects-count]");
+  const projectsClearButton = $<HTMLButtonElement>("[data-audio-projects-clear]");
+  const projectsConfirm = $<HTMLElement>("[data-audio-projects-confirm]");
+  const projectsConfirmText = $<HTMLElement>("[data-audio-projects-confirm-text]");
+  const projectsConfirmButton = $<HTMLButtonElement>("[data-audio-projects-clear-confirm]");
+  const projectsCancelButton = $<HTMLButtonElement>("[data-audio-projects-cancel]");
 
   if (audioInput === null || status === null || intervalsBody === null) {
     return;
@@ -201,6 +228,14 @@ export const initAudioLab = (): void => {
   let lastTextInput: HTMLInputElement | null = null;
   let animation = 0;
   let autosaveTimer = 0;
+  /**
+   * Lo que devolvio `load` cuando lo guardado no se pudo entender.
+   *
+   * Mientras haya un fallo aqui, el autoguardado NO escribe: un registro que no
+   * se pudo leer se pierde solo si la persona lo decide (exportando lo que
+   * tenga, o borrandolo con el control de proyectos guardados).
+   */
+  let recordFault: AnnotationStorageError | null = null;
 
   const storage = createIndexedDbAnnotationStorage();
   const saveProject = createSaveAnnotationProject({
@@ -289,6 +324,10 @@ export const initAudioLab = (): void => {
     if (projectInput === null) {
       return;
     }
+    if (recordFault !== null) {
+      // No se guarda encima de un registro que no se pudo leer.
+      return;
+    }
     announce(strings.text("audio.data.saving"));
     window.clearTimeout(autosaveTimer);
     autosaveTimer = window.setTimeout(() => {
@@ -297,16 +336,24 @@ export const initAudioLab = (): void => {
   };
 
   const saveNow = async (): Promise<void> => {
+    if (recordFault !== null) {
+      announceRecordFault();
+      return;
+    }
     const projectId = projectInput?.value.trim() ?? "";
     if (projectId === "") {
       announce(strings.text("audio.data.empty"));
       return;
     }
     const result = await saveProject(projectId, current());
+    // La persistencia se mide TAMBIEN cuando el guardado falla: quedarse sin
+    // cuota es justo el momento en que hay que decirlo, y esperar al proximo
+    // guardado exitoso es esperar a uno que puede no llegar nunca.
+    updatePersistence();
     if (result.ok) {
       const time = result.value.savedAt.toLocaleTimeString();
       announce(format(strings.text("audio.data.saved"), { time }));
-      updatePersistence();
+      void refreshProjects();
       return;
     }
     announce(result.error.detail ?? result.error.code);
@@ -324,6 +371,97 @@ export const initAudioLab = (): void => {
     }
     persistenceNote.textContent = `${strings.text("audio.persist.memory")} ${describeReason(state.reason)}`;
     persistenceNote.dataset.state = "warn";
+  };
+
+  /**
+   * Por que no se pudo leer lo guardado, en el idioma de la pagina.
+   *
+   * Se traducen los dos codigos que importan —forma invalida y version
+   * desconocida— y no el `detail` del nucleo: quien lee esto no necesita el
+   * texto tecnico, necesita saber si el problema es suyo o del sitio.
+   */
+  const describeRecordFault = (error: AnnotationStorageError): string => {
+    if (error.code === "unsupported-schema-version") {
+      return format(strings.text("audio.record.version"), {
+        version: error.version,
+        supported: error.supportedVersion,
+      });
+    }
+    if (error.code === "invalid-record") {
+      return strings.text("audio.record.invalid");
+    }
+    return error.detail ?? error.code;
+  };
+
+  const announceRecordFault = (): void => {
+    if (recordFault === null) {
+      return;
+    }
+    announce(
+      format(strings.text("audio.error.record"), { reason: describeRecordFault(recordFault) }),
+    );
+  };
+
+  /**
+   * Cuantos proyectos hay guardados y si se pueden borrar.
+   *
+   * Se recalcula en vez de llevar una cuenta: la fuente de verdad es la base,
+   * y una cuenta propia se desincroniza en cuanto otra pestana escribe.
+   */
+  const refreshProjects = async (): Promise<void> => {
+    const listed = await storage.list();
+    const count = listed.ok ? listed.value.length : 0;
+    if (projectsCount !== null) {
+      projectsCount.textContent = format(strings.text("audio.projects.count"), { count });
+    }
+    if (projectsClearButton !== null) {
+      projectsClearButton.disabled = count === 0;
+    }
+    if (projectsConfirmText !== null) {
+      projectsConfirmText.textContent = format(strings.text("audio.projects.confirm"), { count });
+    }
+  };
+
+  /**
+   * Borra los proyectos guardados en este navegador, tras la confirmacion.
+   *
+   * `list` y `remove` estaban en el puerto y nadie los llamaba: no habia forma
+   * de liberar espacio desde la pagina, y la unica salida era borrar los datos
+   * del navegador a mano. Se borra solo lo que `list` enumera —y no la base
+   * entera— para que la operacion sea la que dice ser.
+   */
+  const clearSavedProjects = async (): Promise<void> => {
+    const listed = await storage.list();
+    if (!listed.ok) {
+      announce(
+        format(strings.text("audio.projects.clearFailed"), {
+          detail: listed.error.detail ?? listed.error.code,
+        }),
+      );
+      return;
+    }
+
+    let failure: string | null = null;
+    for (const projectId of listed.value) {
+      const removed = await storage.remove(projectId);
+      if (!removed.ok) {
+        failure = removed.error.detail ?? removed.error.code;
+      }
+    }
+
+    // El registro ilegible ya no esta: el autoguardado puede volver.
+    recordFault = null;
+    if (projectsConfirm !== null) {
+      projectsConfirm.hidden = true;
+    }
+    updatePersistence();
+    await refreshProjects();
+    say(strings.text("audio.projects.cleared"), "ok");
+    if (failure !== null) {
+      announce(format(strings.text("audio.projects.clearFailed"), { detail: failure }));
+      return;
+    }
+    announce(strings.text("audio.projects.cleared"));
   };
 
   const applyDocument = (next: AnnotationDocument, rebuild = true): void => {
@@ -687,8 +825,30 @@ export const initAudioLab = (): void => {
       say(strings.text("audio.error.noAudio"), "error");
       return;
     }
+    // ANTES de leer y de decodificar: un archivo de este tamano no puede ser un
+    // tramo de 300 s, y entregarselo a `decodeAudioData` llena la memoria antes
+    // de que ningun limite lo detenga.
+    if (file.size > MAX_AUDIO_BYTES) {
+      say(
+        format(strings.text("audio.error.tooLarge"), {
+          size: formatBytes(file.size),
+          limit: formatBytes(MAX_AUDIO_BYTES),
+        }),
+        "error",
+      );
+      return;
+    }
     say(strings.text("audio.status.loading"), "busy");
-    const bytes = await readFileBytes(file);
+    let bytes: Uint8Array;
+    try {
+      bytes = await readFileBytes(file);
+    } catch {
+      // Un fallo de lectura —permiso retirado, archivo movido, lector de
+      // tarjetas desconectado— se cuenta como mensaje: antes quedaba como
+      // promesa rechazada y la persona veia el visor cargando para siempre.
+      say(strings.text("audio.error.read"), "error");
+      return;
+    }
     const decoded = await decoder.decodeToBuffer(bytes.buffer as ArrayBuffer, file.type);
     if (!decoded.ok) {
       const message =
@@ -781,7 +941,27 @@ export const initAudioLab = (): void => {
   };
 
   const importTextGrid = async (file: File): Promise<void> => {
-    const bytes = await readFileBytes(file);
+    // 1 MB es holgado para un TextGrid real y corta el archivo que congela la
+    // pestaña al analizarlo. Se mira `file.size` y no el resultado de leer: el
+    // punto es no leerlo entero.
+    if (isTextGridTooLarge(file.size)) {
+      say(
+        format(strings.text("audio.error.tooLarge"), {
+          size: formatBytes(file.size),
+          limit: formatBytes(MAX_TEXTGRID_BYTES),
+        }),
+        "error",
+      );
+      return;
+    }
+
+    let bytes: Uint8Array;
+    try {
+      bytes = await readFileBytes(file);
+    } catch {
+      say(strings.text("audio.error.read"), "error");
+      return;
+    }
     const parsed = parseTextGridBytes(bytes);
     if (!parsed.ok) {
       say(
@@ -1059,6 +1239,31 @@ export const initAudioLab = (): void => {
     fillPendingGaps();
   });
 
+  projectsClearButton?.addEventListener("click", () => {
+    // La confirmacion se pide en el propio control: dos botones con su texto, en
+    // vez de un `window.confirm` que no se puede etiquetar ni leer en contexto.
+    if (projectsConfirm !== null) {
+      projectsConfirm.hidden = false;
+    }
+    projectsClearButton.disabled = true;
+    // El boton que tenia el foco acaba de quedar deshabilitado: sin mover el
+    // foco, quien usa el teclado aterriza en el cuerpo del documento y tiene que
+    // volver a tabular desde el principio.
+    projectsConfirmButton?.focus();
+  });
+
+  projectsCancelButton?.addEventListener("click", () => {
+    if (projectsConfirm !== null) {
+      projectsConfirm.hidden = true;
+    }
+    projectsClearButton?.focus();
+    void refreshProjects();
+  });
+
+  projectsConfirmButton?.addEventListener("click", () => {
+    void clearSavedProjects();
+  });
+
   ipaContainer?.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) {
@@ -1161,6 +1366,7 @@ export const initAudioLab = (): void => {
   updatePersistence();
   updateTransport();
   updateHistory();
+  void refreshProjects();
   say(strings.text("audio.status.idle"), "idle");
 
   if (intervalTiers(current()).length === 0) {
@@ -1174,7 +1380,17 @@ export const initAudioLab = (): void => {
       return;
     }
     const restored = await loadProject(projectId);
-    if (!restored.ok || restored.value === null) {
+    if (!restored.ok) {
+      // Un registro que no se entiende NO se borra ni se pisa: se abre un
+      // proyecto vacio, se dice por que y el autoguardado queda detenido hasta
+      // que la persona exporte o borre a mano. Antes, este caso llegaba con la
+      // forma de otro proyecto y rompia el render (`tiers` no existia).
+      recordFault = restored.error;
+      announceRecordFault();
+      updatePersistence();
+      return;
+    }
+    if (restored.value === null) {
       return;
     }
     history = startAnnotationHistory(restored.value);
