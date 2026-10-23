@@ -20,6 +20,7 @@ Las filas siguen el mismo orden que el catálogo: de la fonética hacia el discu
 | `/fonemizador` | **Fonemizador** — texto a AFI para español e inglés con eSpeak NG compilado a WebAssembly, dentro de un Web Worker |
 | `/arboles` | **ArborLab** — 23 tipos de árbol, 4 formatos de entrada, exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat |
 | `/tools` | **Estación textual** — frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad, más un **constructor de n-gramas** (n de 2 a 5) |
+| `/visualizador` | **Visor de audio** — forma de onda, espectrograma y edición de capas de intervalos, con importación y exportación de TextGrid y exportación CSV (**experimental**) |
 | `/catalogo` | **Catálogo de herramientas** — todas las herramientas ordenadas por nivel de análisis, con su estado real |
 | `/glosario` | Glosario bilingüe filtrable |
 | `/bibliografia` | Recursos con licencia y enlace de origen |
@@ -134,11 +135,11 @@ git archive <commit> legacy/ | tar -x -C /tmp
 | Comprobación | Estado |
 |---|---|
 | `astro check` | 0 errores |
-| Pruebas unitarias | 765 en 43 archivos |
-| Pruebas de extremo a extremo | 69 sobre el sitio compilado (46 de accesibilidad) |
-| Reglas hexagonales | 170 módulos, 378 dependencias, 0 violaciones |
+| Pruebas unitarias | 921 en 52 archivos |
+| Pruebas de extremo a extremo | 87 sobre el sitio compilado (50 de accesibilidad) |
+| Reglas hexagonales | 193 módulos, 441 dependencias, 0 violaciones |
 | Verificación de compilación | pasa |
-| Página más pesada | 28.6 KB gzip, sobre un presupuesto de 60 KB |
+| Página más pesada | 28,9 KB gzip, sobre un presupuesto de 60 KB |
 
 `scripts/verify-build.mjs` comprueba el resultado compilado: cobertura de la CSP
 por script inline, ausencia de `unsafe-inline`, ausencia de subrecursos externos,

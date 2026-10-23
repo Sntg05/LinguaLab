@@ -125,6 +125,11 @@ npm run dev     # /ortografia
 **Rama:** `feat/toolbox-v3-audio` · **Base:** `feat/toolbox-v3-languages`.
 **Depende de:** PR3. **Lo sigue:** nada; cierra la entrega.
 
+**Commits:** `2c525f1` (la herramienta), `3e4218d` (la puerta de accesibilidad la cubre), y el
+endurecimiento posterior: `8ac9d5b` (codec) y `2edf72c` (almacenamiento, topes y pruebas que faltaban).
+Ese endurecimiento salió de una verificación independiente que encontró ocho defectos con reproducción,
+entre ellos uno que dejaba el visor inservible hasta borrar datos desde las herramientas de desarrollo.
+
 **Qué entra.** `/visualizador` y `/en/visualizador`: cargar un audio local, ver forma de onda y
 espectrograma, anotar capas de intervalos (dividir, fusionar, mover fronteras, etiquetar), autoguardar
 en IndexedDB, e importar y exportar TextGrid, con exportación CSV adicional. El codec de TextGrid y el
