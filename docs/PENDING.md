@@ -686,3 +686,29 @@ arreglo del defecto.
 total, y una cadena nueva por idioma para el nombre del proyecto y su borrado. El borrado individual ya
 existe en el adaptador: `remove(projectId)`. Criterio de aceptación: con dos proyectos guardados, borrar
 uno deja el otro en IndexedDB y el conteo pasa de 2 a 1, medido en la base como en la e2e actual.
+
+## P21 — El catálogo anunció «Análisis acústico» como experimental durante meses, sin existir
+
+**Severidad:** alta para la credibilidad del sitio. No rompe nada; miente.
+
+**Síntoma.** El 2026-10-23 el usuario buscó «el analizador acústico» en `npm run dev` y no lo encontró.
+No estaba roto: no existía. La ficha `acoustic-analysis` de `src/data/tools.json` declaraba
+`status: "experimental"`, y el catálogo de este proyecto tiene como invariante explícita que **una
+herramienta planeada no se vea como una que existe**. La tarjeta mostraba la insignia «Experimental» y
+una descripción en presente («contorno de F0, formantes F1–F3 e intensidad en dB sobre el visor de
+audio»), sin enlace y sin el aviso de «aún no disponible», que solo se dibuja para `planned`.
+
+**Evidencia.** `src/components/ToolCatalog.astro` marca `planned` con aviso y sin enlace; `experimental`
+solo con insignia. `acoustic-analysis` no tiene ruta en `SITE_ROUTES`, ninguna página, ni motor: lo único
+que existe del segmento 8 son el puerto `AcousticAnalysisPort` y su fake en el núcleo, que es lo que el
+prompt pedía dejar preparado.
+
+**Arreglo.** `status: "planned"` y notas que dicen lo que es: previsto, no implementado. Y una prueba
+nueva, `src/config/site.test.ts`, que cruza `tools.json` con `SITE_ROUTES` en las dos direcciones y
+comprueba que cada ruta mapeada tiene página en el repositorio. Se verificó por mutación: volviendo el
+estado a `experimental`, la prueba falla con `acoustic-analysis (experimental)`.
+
+**Próximo paso exacto.** Si se quiere la herramienta, es el segmento 8 del prompt y necesita autorización
+de alcance: arranca por `praatfan` en WASM, que es lo que el prompt marcó como experimental por el estado
+del paquete. Antes de eso, decidir si el espectrograma de `/visualizador` ya cubre la necesidad real: buena
+parte de lo que se busca con «analizador acústico» en un curso de fonética es eso, y ya está medido.

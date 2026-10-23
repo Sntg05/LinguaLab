@@ -83,6 +83,26 @@ export const ABOUT_NAV_ITEMS: readonly NavItem[] = NAV_ITEMS.filter(
   (item) => item.kind === "about",
 );
 
+/**
+ * Rutas internas de las herramientas que existen en este sitio.
+ *
+ * Vive en `src/config` y no dentro del componente porque una prueba tiene que
+ * poder cruzarla con `src/data/tools.json`: una ficha que se declara existente y
+ * no tiene página promete algo que no está. Es justo lo que pasaba con «Análisis
+ * acústico», anunciada como experimental sin existir. Ver `src/config/site.test.ts`.
+ *
+ * Solo ids con página real: en el momento en que una ruta se adivina, el catálogo
+ * enlaza a un 404. No hay URLs externas porque ninguna está verificada.
+ */
+export const SITE_ROUTES: Readonly<Record<string, string>> = {
+  fono: "/fono",
+  ortografia: "/ortografia",
+  phonemizer: "/fonemizador",
+  arboles: "/arboles",
+  tools: "/tools",
+  "textgrid-viewer": "/visualizador",
+};
+
 /** Read a build-time environment variable without assuming Node types. */
 function env(name: string): string {
   const fromProcess =

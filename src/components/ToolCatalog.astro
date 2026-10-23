@@ -17,6 +17,7 @@ import type { MessageKey, Locale } from "../i18n";
 import { localePath, t } from "../i18n";
 import type { ToolArea, ToolDescriptor, ToolIntegration, ToolStatus } from "@lingualab/core";
 import { ANALYSIS_LEVELS } from "@lingualab/core";
+import { SITE_ROUTES } from "../config/site";
 import { lingualab } from "../composition-root";
 import { CATALOG_STRING_KEYS, format } from "../scripts/catalogo/strings";
 
@@ -32,22 +33,11 @@ const listed = await lingualab.listTools();
 const tools: readonly ToolDescriptor[] = listed.ok ? listed.value : [];
 
 /**
- * Internal routes of the tools that actually exist on this site. This lives in
- * the presentation layer on purpose: a route is a property of THIS site's
- * navigation, not of the tool, and the descriptor stays portable without it.
- * Only ids with a page that exists today are mapped: the moment a route is
- * guessed, the catalog links to a 404. No external URL is used — none has been
- * verified, and publishing an unverified link is what the project forbids.
+ * Internal routes of the tools that actually exist on this site. They live in
+ * `src/config/site.ts` so a test can cross-check them against `tools.json`: a
+ * card that claims to exist without a page promises something that is not there.
+ * The catalog only links ids present in this map.
  */
-const SITE_ROUTES: Readonly<Record<string, string>> = {
-  fono: "/fono",
-  ortografia: "/ortografia",
-  phonemizer: "/fonemizador",
-  arboles: "/arboles",
-  tools: "/tools",
-  "textgrid-viewer": "/visualizador",
-};
-
 const AREA_KEYS: Readonly<Record<ToolArea, MessageKey>> = {
   fonetica: "catalog.area.fonetica",
   fonologia: "catalog.area.fonologia",

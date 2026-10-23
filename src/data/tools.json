@@ -134,11 +134,11 @@
       },
       "area": "fonetica",
       "integration": "embedded",
-      "status": "experimental",
+      "status": "planned",
       "languages": [],
       "notes": {
-        "es": "Experimental: contorno de F0, formantes F1–F3 e intensidad en dB sobre el visor de audio. Trabaja sobre la señal, no sobre una lengua concreta.",
-        "en": "Experimental: F0 contour, F1–F3 formants and intensity in dB over the audio viewer. It works on the signal, not on a specific language."
+        "es": "Previsto: contorno de F0, formantes F1–F3 e intensidad en dB sobre el visor de audio. Todavía no está implementado: no hay página ni motor. El segmento 8 del prompt lo diseñó como experimental por el estado de praatfan, y esa condición se mantendrá cuando exista.",
+        "en": "Planned: F0 contour, F1–F3 formants and intensity in dB on top of the audio viewer. Not implemented yet: there is no page and no engine. Segment 8 of the prompt designed it as experimental given the state of praatfan, and that condition will stand once it exists."
       }
     },
     {
