@@ -111,9 +111,16 @@ const es = locale === "es";
           </div>
 
           <div class="canvas__bar cluster">
-            <button class="icon-btn" type="button" data-zoom="out" aria-label={es ? "Alejar" : "Zoom out"}>−</button>
+            <!-- Botones con texto visible, no iconos con `aria-label`. Es lo que
+                 exige WCAG 2.5.3 (Label in Name): el nombre accesible tiene que
+                 contener el texto visible, y un glifo «−» dentro de un botón
+                 llamado «Alejar» no lo contiene. Lo encontro axe 4.14.0 como
+                 resultado `incomplete` sin motivo en ArborLab y la puerta se niega
+                 a descartarlo en silencio. De paso, la barra queda consistente:
+                 los cuatro botones son texto, como «Ajustar» y «Tamaño real». -->
+            <button class="btn btn--sm" type="button" data-zoom="out">{es ? "Alejar" : "Zoom out"}</button>
             <span class="canvas__zoom mono" data-zoom-value aria-live="polite">100 %</span>
-            <button class="icon-btn" type="button" data-zoom="in" aria-label={es ? "Acercar" : "Zoom in"}>+</button>
+            <button class="btn btn--sm" type="button" data-zoom="in">{es ? "Acercar" : "Zoom in"}</button>
             <button class="btn btn--sm" type="button" data-zoom="fit">{es ? "Ajustar" : "Fit"}</button>
             <button class="btn btn--sm" type="button" data-zoom="actual">{es ? "Tamaño real" : "Actual size"}</button>
           </div>
