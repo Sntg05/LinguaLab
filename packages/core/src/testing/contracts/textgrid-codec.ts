@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { AnnotationDocument } from "../../domain/annotation";
-import type { TextGridCodecPort } from "../../ports/textgrid-codec";
+import type { TextGridCodecPort, TextGridError } from "../../ports/textgrid-codec";
 import { isErr, isOk } from "../../result";
 import type { AdapterFactory } from "./types";
 
@@ -69,6 +69,111 @@ const utf8 = (text: string): Uint8Array => {
   return new Uint8Array(bytes);
 };
 
+/**
+ * Un archivo por cada codigo de error propio del codec.
+ *
+ * Un codigo que ningun consumidor del puerto ve probado es un codigo que nadie
+ * sabe que existe: la interfaz traduce lo que `parse` devuelve, y si un codigo
+ * solo aparece en las pruebas del nucleo, el primer adaptador que lo devuelva
+ * de otra forma rompe la traduccion sin que esta suite diga nada.
+ */
+const failureFixtures: readonly {
+  readonly name: string;
+  readonly text: string;
+  readonly code: TextGridError["code"];
+}[] = [
+  {
+    name: "un intervalo fuera de los limites de su capa",
+    code: "interval-out-of-tier",
+    text: `File type = "ooTextFile"
+Object class = "TextGrid"
+0
+5
+<exists>
+1
+"IntervalTier"
+"words"
+0
+3
+1
+0
+5
+"fuera"
+`,
+  },
+  {
+    name: "una capa mas larga que el documento",
+    code: "tier-out-of-document",
+    text: `File type = "ooTextFile"
+Object class = "TextGrid"
+0
+5
+<exists>
+1
+"IntervalTier"
+"words"
+0
+9
+1
+0
+5
+"larga"
+`,
+  },
+  {
+    name: "un numero que no es finito",
+    code: "non-finite-number",
+    text: `File type = "ooTextFile"
+Object class = "TextGrid"
+0
+1e400
+<exists>
+0
+`,
+  },
+  {
+    name: "mas bloques que los que declara",
+    code: "unexpected-blocks",
+    text: `File type = "ooTextFile"
+Object class = "TextGrid"
+0
+1
+<exists>
+1
+"IntervalTier"
+"palabras"
+0
+1
+1
+0
+1
+"hola"
+0
+1
+"sobrante"
+`,
+  },
+  {
+    name: "una capa que no cubre el documento entero",
+    code: "gap-detected",
+    text: `File type = "ooTextFile"
+Object class = "TextGrid"
+0
+5
+<exists>
+1
+"IntervalTier"
+"words"
+0
+3
+1
+0
+3
+"corto"
+`,
+  },
+];
+
 export const runTextGridCodecPortContract = (
   createAdapter: AdapterFactory<TextGridCodecPort>,
 ): void => {
@@ -117,5 +222,16 @@ export const runTextGridCodecPortContract = (
     it("serialize es determinista", () => {
       expect(adapter.serialize(document)).toBe(adapter.serialize(document));
     });
+
+    for (const fixture of failureFixtures) {
+      it(`un archivo con ${fixture.name} devuelve \`${fixture.code}\``, () => {
+        const result = adapter.parse(utf8(fixture.text));
+
+        expect(isErr(result)).toBe(true);
+        if (isErr(result)) {
+          expect(result.error.code).toBe(fixture.code);
+        }
+      });
+    }
   });
 };

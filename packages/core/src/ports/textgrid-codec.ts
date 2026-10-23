@@ -15,7 +15,31 @@ export type TextGridError =
   | { readonly code: "malformed-header"; readonly detail: string; readonly line?: number }
   | { readonly code: "malformed-tier"; readonly detail: string; readonly line?: number }
   | { readonly code: "unsupported-object-class"; readonly detail: string; readonly line?: number }
-  | { readonly code: "gap-detected"; readonly detail: string; readonly line?: number };
+  | { readonly code: "gap-detected"; readonly detail: string; readonly line?: number }
+  /**
+   * Un numero del archivo (`1e400`) no es finito. Lo produce `parse` al leer
+   * cualquier tiempo: sin este rechazo el valor entra como `Infinity` y la
+   * exportacion lo escribe `0`, moviendo la anotacion en silencio.
+   */
+  | { readonly code: "non-finite-number"; readonly detail: string; readonly line?: number }
+  /**
+   * Un intervalo empieza o termina fuera del `xmin`/`xmax` de SU capa. Lo
+   * produce `parse`: Praat rechaza esa capa, y el visor no puede reescribirla
+   * con limites coherentes sin inventar cobertura que el archivo no tiene.
+   */
+  | { readonly code: "interval-out-of-tier"; readonly detail: string; readonly line?: number }
+  /**
+   * Una capa declara un rango que el documento no cubre (capa 0..9 dentro de un
+   * documento 0..5). Lo produce `parse`; serializar despues con los limites del
+   * documento escribiria intervalos fuera de su capa, o al reves.
+   */
+  | { readonly code: "tier-out-of-document"; readonly detail: string; readonly line?: number }
+  /**
+   * El archivo declara menos bloques de los que trae (`size = 1` con dos capas o
+   * dos intervalos). Lo produce `parse`, y es el espejo del archivo truncado:
+   * descartar lo que sobra pierde anotaciones sin avisar.
+   */
+  | { readonly code: "unexpected-blocks"; readonly detail: string; readonly line?: number };
 
 /**
  * Puerto de lectura y escritura de TextGrid de Praat.

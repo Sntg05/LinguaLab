@@ -28,6 +28,8 @@ export {
   createTextGridCodec,
   decodeTextGridBytes,
   exportAnnotationCsv,
+  isTextGridTooLarge,
+  MAX_TEXTGRID_BYTES,
   parseTextGridBytes,
   parseTextGridText,
   serializeTextGrid,

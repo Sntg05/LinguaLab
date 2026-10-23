@@ -9,6 +9,8 @@ import {
   createTextGridCodec,
   decodeTextGridBytes,
   exportAnnotationCsv,
+  isTextGridTooLarge,
+  MAX_TEXTGRID_BYTES,
   parseTextGridBytes,
   parseTextGridText,
   serializeTextGrid,
@@ -562,4 +564,379 @@ Object class = "TextGrid"
   });
 
   runTextGridCodecPortContract(() => createTextGridCodec());
+});
+
+/* ==========================================================================
+   Defectos que encontro un verificador independiente.
+
+   Cada prueba de este bloque reproduce un archivo concreto que hoy se acepta
+   —o se escribe mal— sin que nadie se entere. Van juntas y con el numero del
+   defecto en el nombre porque no comparten causa: la unica forma de leerlas es
+   una por una.
+   ========================================================================== */
+
+describe("D1 — un intervalo fuera de los limites de su capa", () => {
+  it("parse lo rechaza con `interval-out-of-tier` en vez de aceptarlo", () => {
+    // El documento mide 0..5 y la capa declara 0..3, pero el intervalo llega a 5.
+    const outOfTier = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+5
+<exists>
+1
+"IntervalTier"
+"words"
+0
+3
+1
+0
+5
+"fuera de su capa"
+`;
+
+    expectError(parseTextGridText(outOfTier), "interval-out-of-tier");
+    expectError(createTextGridCodec().parse(encodeUtf8(outOfTier)), "interval-out-of-tier");
+  });
+
+  it("serializa cada capa con los limites que se leyeron, no con los del documento", () => {
+    // El caso valido del mismo desajuste: la capa mide 0..3 y cubre 0..3.
+    const narrowTier = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+5
+<exists>
+1
+"IntervalTier"
+"words"
+0
+3
+1
+0
+3
+"corto"
+`;
+
+    const parsed = parseTextGridText(narrowTier);
+
+    expect(isOk(parsed)).toBe(true);
+    if (!isOk(parsed)) {
+      return;
+    }
+    const text = serializeTextGrid(parsed.value.document, parsed.value.tierBounds);
+
+    // La cabecera del documento sigue diciendo 5; la capa dice lo que decia el archivo.
+    expect(text).toContain("xmax = 5");
+    // Se mira el bloque de la capa y no el archivo entero: el intervalo tambien
+    // escribe `xmax = 3`, y una prueba que busca el texto en cualquier sitio
+    // pasa sin que la capa haya cambiado.
+    const tierSection = text.slice(text.indexOf('name = "words"'), text.indexOf("intervals: size"));
+    expect(tierSection).toContain("xmin = 0");
+    expect(tierSection).toContain("xmax = 3");
+
+    const reparsed = parseTextGridText(text);
+    if (isOk(reparsed)) {
+      expect(reparsed.value.tierBounds).toEqual(parsed.value.tierBounds);
+    }
+  });
+
+  it("rechaza una capa cuyos limites se salen del documento", () => {
+    const tierBeyondDocument = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+5
+<exists>
+1
+"IntervalTier"
+"words"
+0
+9
+1
+0
+5
+"capa mas larga que el documento"
+`;
+
+    expectError(parseTextGridText(tierBeyondDocument), "tier-out-of-document");
+  });
+});
+
+describe("D2 — un hueco a nivel documento no se reportaba", () => {
+  // La capa mide 0..3 y cubre 0..3: no tiene huecos propios, pero el documento
+  // declara 5 s. Praat rechaza esa capa por no llegar al final del archivo.
+  const documentHole = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+5
+<exists>
+1
+"IntervalTier"
+"words"
+0
+3
+1
+0
+3
+"corto"
+`;
+
+  it("el hueco del documento viaja en `gaps`", () => {
+    const parsed = parseTextGridText(documentHole);
+
+    expect(isOk(parsed)).toBe(true);
+    if (isOk(parsed)) {
+      expect(parsed.value.gaps).toEqual([{ start: 3, end: 5, tier: "words", tierIndex: 0 }]);
+    }
+  });
+
+  it("`parse` del puerto no devuelve el documento: hay un hueco", () => {
+    expectError(createTextGridCodec().parse(encodeUtf8(documentHole)), "gap-detected");
+  });
+});
+
+describe("D3 — un numero no finito entraba como Infinity", () => {
+  it("`xmax = 1e400` se rechaza con `non-finite-number`", () => {
+    const infinite = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+1e400
+<exists>
+0
+`;
+
+    expectError(parseTextGridText(infinite), "non-finite-number");
+  });
+
+  it("un tiempo de intervalo no finito tambien se rechaza", () => {
+    const infiniteInterval = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+2
+<exists>
+1
+"IntervalTier"
+"words"
+0
+2
+1
+0
+1e400
+"hasta el infinito"
+`;
+
+    expectError(parseTextGridText(infiniteInterval), "non-finite-number");
+  });
+});
+
+describe("D4 — `-.5` perdia el signo", () => {
+  it("acepta signo seguido de punto decimal y devuelve el valor correcto", () => {
+    const signed = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+-.5
++.5
+<exists>
+1
+"IntervalTier"
+"words"
+-.5
++.5
+1
+-.5
++.5
+"signo"
+`;
+
+    const parsed = parseTextGridText(signed);
+
+    expect(isOk(parsed)).toBe(true);
+    if (isOk(parsed)) {
+      expect(parsed.value.document.xmin).toBe(-0.5);
+      expect(parsed.value.document.xmax).toBe(0.5);
+      const tier = parsed.value.document.tiers[0];
+      if (tier && isIntervalTier(tier)) {
+        expect(tier.items[0]).toEqual({ start: -0.5, end: 0.5, text: "signo" });
+      }
+    }
+  });
+
+  it("acepta las tres formas con signo: `-.5`, `+.5` y `-0.5`", () => {
+    const forms = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+-0.5
+0.5
+<exists>
+1
+"IntervalTier"
+"words"
+-0.5
+0.5
+1
+-0.5
++.5
+"tres formas"
+`;
+
+    const parsed = parseTextGridText(forms);
+
+    expect(isOk(parsed)).toBe(true);
+    if (isOk(parsed)) {
+      const tier = parsed.value.document.tiers[0];
+      if (tier && isIntervalTier(tier)) {
+        expect(tier.items[0]?.start).toBe(-0.5);
+        expect(tier.items[0]?.end).toBe(0.5);
+      }
+    }
+  });
+});
+
+describe("D5 — los bloques que sobran se descartaban en silencio", () => {
+  it("un `size` de capas menor que los bloques que trae el archivo es un error", () => {
+    const extraTier = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+1
+<exists>
+1
+"IntervalTier"
+"palabras"
+0
+1
+1
+0
+1
+"hola"
+"IntervalTier"
+"sobrante"
+0
+1
+1
+0
+1
+"extra"
+`;
+
+    expectError(parseTextGridText(extraTier), "unexpected-blocks");
+  });
+
+  it("un `intervals: size` menor que los bloques de intervalos es un error", () => {
+    const extraInterval = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+1
+<exists>
+1
+"IntervalTier"
+"palabras"
+0
+1
+1
+0
+1
+"hola"
+0
+1
+"sobrante"
+`;
+
+    expectError(parseTextGridText(extraInterval), "unexpected-blocks");
+  });
+});
+
+describe("D6 — `formatNumber` no cumplia su propio comentario", () => {
+  const documentWith = (xmax: number, start: number): AnnotationDocument => ({
+    xmin: 0,
+    xmax,
+    tiers: [{ name: "t", kind: "interval", items: [{ start, end: xmax, text: "" }] }],
+  });
+
+  it("una magnitud grande se escribe en decimal, sin exponente", () => {
+    const text = serializeTextGrid(documentWith(1e21, 0));
+
+    expect(text).toContain("xmax = 1000000000000000000000");
+    expect(text).not.toMatch(/e\+/);
+  });
+
+  it("un valor diminuto se escribe con su valor, no como cero", () => {
+    const text = serializeTextGrid(documentWith(1, 1e-13));
+
+    expect(text).toContain("xmin = 0.0000000000001");
+    // El valor se conserva: lo que se escribe se puede volver a leer.
+    const reparsed = parseTextGridText(text);
+    if (isOk(reparsed)) {
+      const tier = reparsed.value.document.tiers[0];
+      if (tier && isIntervalTier(tier)) {
+        expect(tier.items[0]?.start).toBe(1e-13);
+      }
+    }
+  });
+
+  it("el valor escrito vuelve exacto, sin exponente, en las cuatro magnitudes", () => {
+    for (const value of [1e21, 1e-13, 5e-324, 1.2345678901234568e21]) {
+      const written = /xmax = ([^\n]+)/.exec(serializeTextGrid(documentWith(value, 0)))?.[1] ?? "";
+
+      expect(written).not.toMatch(/e/i);
+      expect(Number(written)).toBe(value);
+    }
+  });
+});
+
+describe("D9 — UTF-16 sin BOM y UTF-8 sobrelargo entraban como basura", () => {
+  /** TextGrid minimo con un nombre acentuado, para codificarlo en UTF-16 sin BOM. */
+  const named = (name: string): string => `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+1
+<exists>
+1
+"IntervalTier"
+"${name}"
+0
+1
+1
+0
+1
+"hola"
+`;
+
+  it("un UTF-16LE sin BOM con `Āguila` se rechaza diciendo la verdad", () => {
+    const result = decodeTextGridBytes(encodeUtf16(named("Āguila"), true));
+
+    expectError(result, "unreadable-encoding");
+    if (isErr(result) && result.error.code === "unreadable-encoding") {
+      // El mensaje dice lo que se esperaba, no que el archivo sea ilegible sin mas.
+      expect(result.error.detail ?? "").toMatch(/UTF-8/);
+      expect(result.error.detail ?? "").toMatch(/BOM/);
+    }
+  });
+
+  it("un UTF-16BE sin BOM con `一n語` se rechaza igual", () => {
+    expectError(decodeTextGridBytes(encodeUtf16(named("一n語"), false)), "unreadable-encoding");
+  });
+
+  it("un UTF-8 sobrelargo `C0 80` no entra como NUL", () => {
+    const overlong = new Uint8Array([0x46, 0x69, 0x6c, 0x65, 0xc0, 0x80, 0x0a]);
+
+    expectError(decodeTextGridBytes(overlong), "unreadable-encoding");
+  });
+});
+
+describe("el tope de tamano de un TextGrid", () => {
+  it("declara 1 MB, que es holgado para un TextGrid real", () => {
+    expect(MAX_TEXTGRID_BYTES).toBe(1024 * 1024);
+  });
+
+  it("acepta el archivo justo en el tope y rechaza uno por encima", () => {
+    expect(isTextGridTooLarge(MAX_TEXTGRID_BYTES)).toBe(false);
+    expect(isTextGridTooLarge(MAX_TEXTGRID_BYTES + 1)).toBe(true);
+  });
 });

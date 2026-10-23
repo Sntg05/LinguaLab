@@ -34,6 +34,12 @@ export interface TextGridTierGap extends TierGap {
   readonly tierIndex: number;
 }
 
+/** Los limites que declara una capa en el archivo, que no son los del documento. */
+export interface TierBounds {
+  readonly xmin: number;
+  readonly xmax: number;
+}
+
 /**
  * Resultado del analisis.
  *
@@ -46,6 +52,16 @@ export interface TextGridTierGap extends TierGap {
 export interface ParsedTextGrid {
   readonly document: AnnotationDocument;
   readonly gaps: readonly TextGridTierGap[];
+  /**
+   * Los `xmin`/`xmax` que declara cada capa, en el orden del documento.
+   *
+   * `AnnotationDocument` no los guarda (una capa es nombre y contenido) y sin
+   * ellos la exportacion inventaba cobertura: escribia los limites del
+   * documento en una capa que media menos, y el archivo resultante declaraba
+   * un tramo que sus intervalos no cubrian. Con estos limites,
+   * `serializeTextGrid` puede escribir lo que se leyo.
+   */
+  readonly tierBounds: readonly TierBounds[];
 }
 
 type Token =
@@ -62,6 +78,57 @@ const isLetter = (char: string | undefined): boolean =>
 
 const isSpace = (char: string | undefined): boolean =>
   char === " " || char === "\t" || char === "\r";
+
+/**
+ * Escanea un numero: signo opcional, digitos, punto decimal opcional y
+ * exponente opcional. Devuelve `null` si en esa posicion no empieza un numero.
+ *
+ * POR QUE NO ALCANZA CON MIRAR EL SIGUIENTE CARACTER
+ *
+ * La version anterior solo aceptaba `-` o `.` cuando los seguia un digito, asi
+ * que `-.5` —la forma que Praat escribe— no entraba como numero: el `-` se
+descartaba como ruido y el tiempo quedaba en `0.5`. Medio segundo de
+ * desplazamiento silencioso es peor que un error, porque nadie lo busca.
+ */
+const scanNumber = (text: string, index: number): { readonly end: number } | null => {
+  let cursor = index;
+  const sign = text.charAt(cursor);
+  if (sign === "-" || sign === "+") {
+    cursor += 1;
+  }
+
+  let digits = 0;
+  while (isDigit(text.charAt(cursor))) {
+    cursor += 1;
+    digits += 1;
+  }
+  if (text.charAt(cursor) === ".") {
+    cursor += 1;
+    while (isDigit(text.charAt(cursor))) {
+      cursor += 1;
+      digits += 1;
+    }
+  }
+  if (digits === 0) {
+    return null;
+  }
+
+  const exponentMark = text.charAt(cursor);
+  if (exponentMark === "e" || exponentMark === "E") {
+    let after = cursor + 1;
+    if (text.charAt(after) === "+" || text.charAt(after) === "-") {
+      after += 1;
+    }
+    if (isDigit(text.charAt(after))) {
+      while (isDigit(text.charAt(after))) {
+        after += 1;
+      }
+      cursor = after;
+    }
+  }
+
+  return { end: cursor };
+};
 
 /**
  * Convierte el archivo en una lista de valores, sin mirar las claves.
@@ -140,37 +207,23 @@ const tokenize = (text: string): Result<readonly Token[], TextGridError> => {
       continue;
     }
 
-    const next = text.charAt(index + 1);
-    if (isDigit(char) || ((char === "-" || char === ".") && isDigit(next))) {
-      let end = index;
-      if (text.charAt(end) === "-") {
-        end += 1;
-      }
-      while (isDigit(text.charAt(end))) {
-        end += 1;
-      }
-      if (text.charAt(end) === ".") {
-        end += 1;
-        while (isDigit(text.charAt(end))) {
-          end += 1;
+    const numberStart = text.charAt(index);
+    if (isDigit(numberStart) || numberStart === "-" || numberStart === "+" || numberStart === ".") {
+      const scanned = scanNumber(text, index);
+      if (scanned !== null) {
+        const literal = text.slice(index, scanned.end);
+        const value = Number(literal);
+        if (!Number.isFinite(value)) {
+          return err({
+            code: "non-finite-number",
+            detail: `El numero \`${literal}\` no es finito: ningun tiempo de un TextGrid puede ser infinito.`,
+            line,
+          });
         }
+        tokens.push({ type: "number", value, line });
+        index = scanned.end;
+        continue;
       }
-      const exponent = text.charAt(end);
-      if (exponent === "e" || exponent === "E") {
-        let cursor = end + 1;
-        if (text.charAt(cursor) === "+" || text.charAt(cursor) === "-") {
-          cursor += 1;
-        }
-        if (isDigit(text.charAt(cursor))) {
-          while (isDigit(text.charAt(cursor))) {
-            cursor += 1;
-          }
-          end = cursor;
-        }
-      }
-      tokens.push({ type: "number", value: Number(text.slice(index, end)), line });
-      index = end;
-      continue;
     }
 
     if (isLetter(char)) {
@@ -201,9 +254,6 @@ const tokenize = (text: string): Result<readonly Token[], TextGridError> => {
 
   return ok(tokens);
 };
-
-/** Documento vacio para los archivos que declaran `<absent>` en las capas. */
-const EMPTY_BOUNDS = { xmin: 0, xmax: 0 } as const;
 
 const parseTokens = (tokens: readonly Token[]): Result<ParsedTextGrid, TextGridError> => {
   const fileType = tokens[0];
@@ -315,7 +365,7 @@ const parseTokens = (tokens: readonly Token[]): Result<ParsedTextGrid, TextGridE
   }
 
   const tiers: Tier[] = [];
-  const bounds: { xmin: number; xmax: number }[] = [];
+  const bounds: TierBounds[] = [];
 
   for (let position = 0; position < tierCount; position += 1) {
     const tierClass = takeString("malformed-tier", `la clase de la capa ${position + 1}`);
@@ -345,6 +395,25 @@ const parseTokens = (tokens: readonly Token[]): Result<ParsedTextGrid, TextGridE
     const itemCount = takeCount(`el numero de elementos de la capa ${position + 1}`);
     if (!itemCount.ok) {
       return itemCount;
+    }
+
+    // Una capa no puede cubrir mas que el documento: si lo hiciera, serializarla
+    // con SUS limites escribiria un archivo mas largo que su cabecera, y
+    // serializarla con los del documento dejaria intervalos fuera de la capa.
+    // Rechazarla es la unica salida que no inventa nada.
+    if (tierXmax.value < tierXmin.value) {
+      return err({
+        code: "malformed-tier",
+        detail: `La capa ${position + 1} ("${name.value}") termina (${formatNumber(tierXmax.value)}) antes de empezar (${formatNumber(tierXmin.value)}).`,
+        line: lastLine,
+      });
+    }
+    if (tierXmin.value < xmin.value - TIME_EPSILON || tierXmax.value > xmax.value + TIME_EPSILON) {
+      return err({
+        code: "tier-out-of-document",
+        detail: `La capa ${position + 1} ("${name.value}") declara ${formatNumber(tierXmin.value)}–${formatNumber(tierXmax.value)} y el documento cubre ${formatNumber(xmin.value)}–${formatNumber(xmax.value)}.`,
+        line: lastLine,
+      });
     }
 
     if (tierClass.value.trim() === "IntervalTier") {
@@ -377,6 +446,16 @@ const parseTokens = (tokens: readonly Token[]): Result<ParsedTextGrid, TextGridE
             line: lastLine,
           });
         }
+        if (
+          start.value < tierXmin.value - TIME_EPSILON ||
+          end.value > tierXmax.value + TIME_EPSILON
+        ) {
+          return err({
+            code: "interval-out-of-tier",
+            detail: `El intervalo ${item + 1} (${formatNumber(start.value)}–${formatNumber(end.value)}) se sale de los limites de "${name.value}" (${formatNumber(tierXmin.value)}–${formatNumber(tierXmax.value)}).`,
+            line: lastLine,
+          });
+        }
         previousEnd = end.value;
         items.push({ start: start.value, end: end.value, text: text.value });
       }
@@ -400,6 +479,20 @@ const parseTokens = (tokens: readonly Token[]): Result<ParsedTextGrid, TextGridE
     bounds.push({ xmin: tierXmin.value, xmax: tierXmax.value });
   }
 
+  // Un archivo que declara menos bloques de los que trae pierde anotaciones sin
+  // avisar: `size = 1` con dos capas —o con dos intervalos— se rechaza aqui,
+  // igual que se rechaza el archivo truncado al que le faltan bloques. Lo que
+  // sobra son valores sueltos porque el analizador ya se sabe el formato: si
+  // queda alguno, el archivo traia mas de lo que dijo.
+  const leftover = tokens[cursor];
+  if (leftover !== undefined) {
+    return err({
+      code: "unexpected-blocks",
+      detail: `El archivo trae mas bloques de los que declara: sobran ${tokens.length - cursor} valor(es) desde la linea ${leftover.line}.`,
+      line: leftover.line,
+    });
+  }
+
   const document: AnnotationDocument = { xmin: xmin.value, xmax: xmax.value, tiers };
 
   const gaps: TextGridTierGap[] = [];
@@ -407,13 +500,17 @@ const parseTokens = (tokens: readonly Token[]): Result<ParsedTextGrid, TextGridE
     if (!isIntervalTier(tier)) {
       continue;
     }
-    const range = bounds[position] ?? EMPTY_BOUNDS;
-    for (const gap of findTierGaps(tier, range.xmin, range.xmax)) {
+    // Los huecos se miden contra los limites del DOCUMENTO y no contra los de la
+    // capa. Una capa que cubre 0..3 en un documento de 5 s no tiene huecos
+    // propios, pero deja 2 s sin cubrir: Praat rechaza el archivo exportado
+    // aunque el visor diga que todo esta bien. El hueco lleva el nombre de la
+    // capa que no llega, que es la que hay que rellenar.
+    for (const gap of findTierGaps(tier, xmin.value, xmax.value)) {
       gaps.push({ ...gap, tier: tier.name, tierIndex: position });
     }
   }
 
-  return ok({ document, gaps });
+  return ok({ document, gaps, tierBounds: bounds });
 };
 
 /** Decodifica UTF-8 validando las secuencias: illegal no se convierte en «basura silenciosa». */
@@ -466,6 +563,23 @@ const decodeUtf8 = (bytes: Uint8Array, offset: number): Result<string, TextGridE
       code = (code << 6) | (continuation & 0x3f);
     }
 
+    // Una secuencia sobrelarga escribe el mismo caracter con mas bytes de los
+    // necesarios: `C0 80` es un NUL escrito con dos. Aceptarla deja entrar bytes
+    // que un lector estricto rechaza, y aqui ese NUL se volvia contenido.
+    const minimumForLength = extra === 1 ? 0x80 : extra === 2 ? 0x800 : 0x10000;
+    if (code < minimumForLength) {
+      return err({
+        code: "unreadable-encoding",
+        detail: `La secuencia UTF-8 que empieza en el desplazamiento ${index} es sobrelarga: el mismo caracter se puede escribir con menos bytes.`,
+      });
+    }
+    if (code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff)) {
+      return err({
+        code: "unreadable-encoding",
+        detail: `La secuencia UTF-8 que empieza en el desplazamiento ${index} no codifica un caracter valido.`,
+      });
+    }
+
     text += String.fromCodePoint(code);
     index += extra + 1;
   }
@@ -485,40 +599,28 @@ const decodeUtf16 = (bytes: Uint8Array, offset: number, littleEndian: boolean): 
 };
 
 /**
- * Sin BOM, un archivo de texto UTF-16 esta lleno de bytes 0 en la mitad de las
- * posiciones. Es la unica senal disponible, y basta: el formato TextGrid es
- * ASCII salvo los textos, asi que media muestra de ceros del lado alto solo
- * ocurre en UTF-16.
+ * Bytes del archivo a texto, detectando la codificacion.
+ *
+ * UTF-16 SOLO CON BOM, Y AQUI SE CUMPLE
+ *
+ * Antes habia una heuristica que contaba bytes 0 y afirmaba que «basta». No
+ * basta: `name = "Āguila"` en UTF-16LE sin BOM pasa por UTF-8 valido (el byte
+ * alto es 0x01, no 0x00) y entra como texto con un caracter de control; el
+ * rechazo llegaba despues, desde el analizador y con un mensaje que culpaba al
+ * formato. Praat escribe el BOM cuando guarda «Unicode», asi que exigirlo no
+ * cierra ninguna puerta real: sin BOM se intenta UTF-8, y si el archivo trae
+ * bytes 0 —que ningun TextGrid legitimo tiene— o secuencias invalidas, se
+ * devuelve `unreadable-encoding` diciendo lo que se esperaba de verdad.
  */
-const sniffUtf16 = (bytes: Uint8Array): "utf16le" | "utf16be" | null => {
-  const limit = Math.min(bytes.length, 512);
-  let evenZeros = 0;
-  let oddZeros = 0;
-  let pairs = 0;
-
-  for (let index = 0; index + 1 < limit; index += 2) {
-    if (bytes[index] === 0) {
-      evenZeros += 1;
+const containsZeroByte = (bytes: Uint8Array): boolean => {
+  for (const byte of bytes) {
+    if (byte === 0) {
+      return true;
     }
-    if (bytes[index + 1] === 0) {
-      oddZeros += 1;
-    }
-    pairs += 1;
   }
-
-  if (pairs === 0) {
-    return null;
-  }
-  if (oddZeros > pairs / 2 && evenZeros === 0) {
-    return "utf16le";
-  }
-  if (evenZeros > pairs / 2 && oddZeros === 0) {
-    return "utf16be";
-  }
-  return null;
+  return false;
 };
 
-/** Bytes del archivo a texto, detectando la codificacion. */
 export const decodeTextGridBytes = (bytes: Uint8Array): Result<string, TextGridError> => {
   if (bytes.length === 0) {
     return err({ code: "empty" });
@@ -534,16 +636,34 @@ export const decodeTextGridBytes = (bytes: Uint8Array): Result<string, TextGridE
     return ok(decodeUtf16(bytes, 2, false));
   }
 
-  const sniffed = sniffUtf16(bytes);
-  if (sniffed === "utf16le") {
-    return ok(decodeUtf16(bytes, 0, true));
-  }
-  if (sniffed === "utf16be") {
-    return ok(decodeUtf16(bytes, 0, false));
+  if (containsZeroByte(bytes)) {
+    return err({
+      code: "unreadable-encoding",
+      detail:
+        "El archivo trae bytes 0, que no aparecen en un TextGrid de texto: se esperaba UTF-8 o un BOM de UTF-16 (Praat lo escribe al guardar en «Unicode»).",
+    });
   }
 
   return decodeUtf8(bytes, 0);
 };
+
+/**
+ * Tope de tamano de un TextGrid, en bytes: 1 MB.
+ *
+ * El resto del sitio limita a 100 KB el texto que se analiza
+ * (`src/scripts/core/guardrails.ts`). Un TextGrid es mas pesado por naturaleza
+ * —un archivo de 44 MB con 400 000 intervalos se midio en 896 ms de analisis y
+ * +45 MB de heap, con picos de 4 a 6 veces el tamano del archivo—, pero 1 MB
+ * sigue siendo holgado para una sesion de anotacion real y corta el caso que
+ * congela la pestaña antes de leer el archivo entero.
+ *
+ * El tope vive aqui, junto al codec, para que la interfaz no invente su propio
+ * numero y para que la prueba del limite sea la del formato.
+ */
+export const MAX_TEXTGRID_BYTES = 1024 * 1024;
+
+/** Verdadero si el archivo supera el tope y hay que rechazarlo antes de leerlo. */
+export const isTextGridTooLarge = (byteLength: number): boolean => byteLength > MAX_TEXTGRID_BYTES;
 
 /** Texto de un TextGrid a documento + huecos. */
 export const parseTextGridText = (raw: string): Result<ParsedTextGrid, TextGridError> => {
@@ -569,11 +689,45 @@ export const parseTextGridBytes = (bytes: Uint8Array): Result<ParsedTextGrid, Te
 };
 
 /**
- * Numero con la representacion mas corta que NO pierda el valor.
+ * Escapa un numero a la notacion decimal exacta, sin exponente.
  *
- * `String` ya lo hace para los dobles habituales, y solo cae en notacion
- * cientifica en magnitudes que un audio no alcanza; en ese caso se escribe en
- * notacion decimal fija, porque el lector de Praat no acepta exponentes.
+ * `toExponential()` sin argumento devuelve los digitos que reconstruyen el
+ * doble exacto, y de ahi solo hace falta mover el punto. No se redondea nada:
+ * `String` es la representacion mas corta, pero para `1e-13` el camino anterior
+ * (`toFixed(12)`) devolvia `0` y para `1e21` devolvia `1e+21`, que es justo la
+ * notacion que el lector de Praat no acepta.
+ */
+const expandDecimal = (value: number): string => {
+  const [mantissa = "0", exponentText = "0"] = Math.abs(value).toExponential().split("e");
+  const [whole = "0", fraction = ""] = mantissa.split(".");
+  const digits = `${whole}${fraction}`;
+  const pointAt = whole.length + Number(exponentText);
+
+  let plain: string;
+  if (pointAt <= 0) {
+    plain = `0.${"0".repeat(-pointAt)}${digits}`;
+  } else if (pointAt >= digits.length) {
+    plain = `${digits}${"0".repeat(pointAt - digits.length)}`;
+  } else {
+    plain = `${digits.slice(0, pointAt)}.${digits.slice(pointAt)}`;
+  }
+
+  return value < 0 ? `-${plain}` : plain;
+};
+
+/**
+ * Numero con la representacion mas corta que NO pierda el valor y sin
+ * exponente.
+ *
+ * `String` ya da la forma corta para los dobles habituales; cuando cae en
+ * notacion cientifica se expande a decimal fija, porque el lector de Praat no
+ * acepta exponentes. Los valores diminutos conservan su valor —`5e-324` se
+ * escribe con sus 324 ceros—: redondearlos a cero moveria la anotacion en
+ * silencio, que es el defecto que esta funcion tuvo y que una prueba afirma.
+ *
+ * Un valor no finito no puede venir de un archivo —`parse` lo rechaza con
+ * `non-finite-number`— sino de un documento construido en memoria; se escribe
+ * `0`, el unico numero que no rompe el formato.
  */
 const formatNumber = (value: number): string => {
   if (!Number.isFinite(value)) {
@@ -583,7 +737,7 @@ const formatNumber = (value: number): string => {
   if (!/e/i.test(plain)) {
     return plain;
   }
-  return value.toFixed(12).replace(/0+$/, "").replace(/\.$/, "");
+  return expandDecimal(value);
 };
 
 /** Dentro de una cadena de TextGrid, una comilla doble se escribe dos veces. */
@@ -594,8 +748,17 @@ const quote = (value: string): string => `"${value.replace(/"/g, '""')}"`;
  *
  * Siempre el largo: es el que se puede leer y corregir a mano, y el unico en el
  * que un revisor ve que capa es cual sin contar posiciones.
+ *
+ * `tierBounds`, cuando viene de `parseTextGridText`, escribe en cada capa los
+ * limites que el archivo declaraba. Sin ellos se usan los del documento, que es
+ * lo correcto para un documento construido en el visor —sus capas se crean con
+ * el rango del audio— pero mentiria al reexportar una capa mas corta que el
+ * documento.
  */
-export const serializeTextGrid = (doc: AnnotationDocument): string => {
+export const serializeTextGrid = (
+  doc: AnnotationDocument,
+  tierBounds?: readonly TierBounds[],
+): string => {
   const lines: string[] = [
     'File type = "ooTextFile"',
     'Object class = "TextGrid"',
@@ -608,11 +771,14 @@ export const serializeTextGrid = (doc: AnnotationDocument): string => {
   ];
 
   for (const [position, tier] of doc.tiers.entries()) {
+    const range = tierBounds?.[position];
+    const tierXmin = range?.xmin ?? doc.xmin;
+    const tierXmax = range?.xmax ?? doc.xmax;
     lines.push(`    item [${position + 1}]:`);
     lines.push(`        class = ${quote(tier.kind === "interval" ? "IntervalTier" : "TextTier")}`);
     lines.push(`        name = ${quote(tier.name)}`);
-    lines.push(`        xmin = ${formatNumber(doc.xmin)}`);
-    lines.push(`        xmax = ${formatNumber(doc.xmax)}`);
+    lines.push(`        xmin = ${formatNumber(tierXmin)}`);
+    lines.push(`        xmax = ${formatNumber(tierXmax)}`);
 
     if (isIntervalTier(tier)) {
       lines.push(`        intervals: size = ${tier.items.length}`);
