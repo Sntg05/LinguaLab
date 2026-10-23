@@ -12,6 +12,11 @@ una decisión ya tomada, y rehacerla suele dar un resultado peor que el que est�
 **La puerta e2e falla si la lanza un agente (P16).** Antes de creerle a un rojo de Playwright, corré
 `env -u AI_AGENT -u PI_CODING_AGENT npm run test:e2e`.
 
+**Si llegás a este documento desde otra máquina o otra sesión:** el estado de la rama de trabajo, el mapa
+de archivos nuevos y las trampas del entorno están en
+[`odd/handoff/toolbox-v3.md`](../odd/handoff/toolbox-v3.md). Este archivo dice qué falta; ese otro dice
+dónde está todo.
+
 **Antes de tocar nada:**
 
 ```bash

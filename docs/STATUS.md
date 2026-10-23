@@ -5,8 +5,14 @@ porque una página que exagera lo que hace es la parte menos fiable de un proyec
 después necesita saber qué se probó y qué se supuso sin tener que reconstruirlo del historial de
 commits.
 
-Rama: `main`. El detalle de las decisiones está en [`docs/adr/`](adr/), y
-el mapa del hexágono en [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
+Rama: `main` es lo publicado. La entrega v3 —visor de audio, catálogo por nivel de análisis y demos de
+portugués y wayuunaiki— vive en `feat/toolbox-v3-security-languages`, **sin fusionar y sin pull requests
+abiertos a propósito**. Para retomar ese trabajo en otra sesión o en otra computadora:
+[`odd/handoff/toolbox-v3.md`](../odd/handoff/toolbox-v3.md), que trae el estado, las trampas del entorno,
+el mapa de archivos y las decisiones que esperan a una persona.
+
+El detalle de las decisiones está en [`docs/adr/`](adr/), y el mapa del hexágono en
+[`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ---
 

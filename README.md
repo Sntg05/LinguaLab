@@ -206,6 +206,11 @@ Y cómo alimentar la bibliografía y ampliar el sitio, con las convenciones, los
 invariantes que el compilador protege y las trampas que ya costaron tiempo:
 [`docs/GUIDE.md`](docs/GUIDE.md).
 
+Si llegás a este repositorio en medio de una entrega sin fusionar —o querés retomarla desde otra
+computadora—, el estado, el mapa de archivos y las trampas del entorno están en
+[`odd/handoff/`](odd/handoff/), un documento por entrega. Lo que falta está en
+[`docs/PENDING.md`](docs/PENDING.md); lo que se midió, en [`docs/STATUS.md`](docs/STATUS.md).
+
 ## Licencias
 
 El código es **GPL-3.0-only** — ver [`LICENSE`](LICENSE). No fue una elección estética: desde la

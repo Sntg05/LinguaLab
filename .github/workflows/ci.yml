@@ -17,6 +17,10 @@ on:
       # clave de concurrencia a `github.head_ref || github.ref_name`, que es otra
       # decision y no se toma de paso.
       - feat/lingualab-hexagonal-monorepo
+      # La rama de trabajo de la entrega v3: misma razon que arriba. Se verifica en
+      # cada push porque es la que se prueba en local y la que se va a desplegar
+      # cuando su duena lo autorice. Ver `odd/handoff/toolbox-v3.md`.
+      - feat/toolbox-v3-security-languages
   pull_request:
   workflow_dispatch:
 
