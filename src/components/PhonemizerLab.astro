@@ -39,6 +39,11 @@ const es = locale === "es";
 const LANGUAGE_NAMES: Readonly<Record<string, { es: string; en: string }>> = {
   spa: { es: "Español", en: "Spanish" },
   eng: { es: "Inglés", en: "English" },
+  // Las demos de ortografía añadieron dos lenguas más, y esta comparación las
+  // recorre desde DEMO_TABLES: sin nombre, la frase mostraba el código ISO
+  // (por, guc) en lugar de la lengua, que es lo mismo que no decir nada.
+  por: { es: "Portugués", en: "Portuguese" },
+  guc: { es: "Wayuunaiki", en: "Wayuunaiki" },
 };
 
 const languages = lingualab.phonemizer.listLanguages();

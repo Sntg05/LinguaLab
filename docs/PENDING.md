@@ -259,6 +259,13 @@ validación pendiente. No hay una sola correspondencia inventada.
 que alguien habla es peor que una tabla vacía: parece un dato y es una suposición, y la comunidad que la
 ve no tiene forma de saber de dónde salió.
 
+**Estado tras la decisión 0005.** `packages/core/src/data/demo-tables.ts` incluye `WAYUU_DEMO` (`guc-demo`),
+una demo del **alfabeto** wayuu con correspondencias citadas (diccionario Webonary/SIL, «Panorámica de la
+fonología y morfología de la lengua wayuu» en *Letras* 61(98), 2021, y Berkeley SAPhon), en `draft` y con
+esta misma advertencia. **No cierra P9**: `guc-template` sigue vacía y una prueba lo pinnea. Lo que cambia
+es que ya hay un ejemplo completo de cómo se ve una tabla indígena construida con fuentes, que era lo que
+faltaba para pedir la siguiente. Ver `docs/adr/0005-lenguas-de-ejemplo-portugues-y-wayuunaiki.md`.
+
 **Próximo paso exacto.** Esto **no es una tarea de programación**. Requiere hablantes o fuentes
 lingüísticas citables, y el aviso de la interfaz tiene que seguir diciendo exactamente eso. Si aparece una
 fuente, la tabla entra con su cita; si no, se queda vacía.
