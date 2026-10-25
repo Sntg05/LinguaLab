@@ -19,7 +19,7 @@ Todo lo de abajo se midió sobre la rama `feat/toolbox-v3-security-languages`, p
 | **Almacenamiento local acotado** | Sana | Dos claves y solo dos, `lingualab-lang` y `lingualab-theme`, con lista blanca en `src/scripts/core/guardrails.ts` y comprobación en vivo en `/seguridad` |
 | **Dependencias de producción** | Sana | `npm audit --omit=dev` → **0 vulnerabilidades**. El árbol de producción de un sitio estático son 5 entradas, ninguna con script de instalación |
 | **Permisos de CI mínimos** | Sana | `ci.yml`: `contents: read`. `deploy.yml`: `contents: read`, `pages: write`, `id-token: write` — lo mínimo que exige GitHub Pages. `codeql.yml`: `contents: read` y `security-events: write`, lo único que necesita para publicar hallazgos |
-| **Acciones fijadas por SHA** | Sana | Las ocho referencias de los tres flujos van por SHA completo con la versión mayor en un comentario al lado. Antes eran etiquetas movibles, que cualquiera con control de la acción puede reapuntar (O2) |
+| **Acciones fijadas por SHA** | Sana | Las **doce** referencias de los tres flujos —ocho acciones distintas— van por SHA completo con la versión mayor en un comentario al lado. Antes eran etiquetas movibles, que cualquiera con control de la acción puede reapuntar (O2) |
 | **La puerta audita dependencias** | Sana | `npm run audit` corre en cada job de CI: bloquea el árbol de **producción** desde `high` e informa el de desarrollo sin cortar. Medido: **0 vulnerabilidades** en los dos árboles (O1) |
 | **Análisis estático de código** | Sana | `.github/workflows/codeql.yml`, `javascript-typescript` con el conjunto `security-and-quality`, en push, en PR y una vez por semana. **Sin hallazgos abiertos** al activarlo (O5) |
 | **Alertas de Dependabot y escaneo de secretos** | Sana | Alertas de Dependabot **activadas** (`0` alertas abiertas al activarlas), actualizaciones de seguridad automáticas activadas, y `secret scanning` más `push protection` activados el 2026-10-25 (O4) |
@@ -80,7 +80,7 @@ es lo más barato de arreglar y lo que más tarda en descubrirse por otro lado. 
 vulnerabilidades** en los dos árboles.
 
 **O2 — Las acciones de GitHub estaban fijadas por etiqueta, no por SHA (severidad media). *Cerrado*.**
-Las ocho referencias de `ci.yml`, `deploy.yml` y `codeql.yml` van ahora por SHA completo, con la versión
+Las **doce** referencias de `ci.yml`, `deploy.yml` y `codeql.yml` —ocho acciones distintas, `checkout` aparece en los tres— van ahora por SHA completo, con la versión
 mayor en un comentario al lado (`# v7`) para que Dependabot siga proponiendo subidas y para que un humano
 lea qué versión es. Las etiquetas elegidas son las que los PRs #1 a #5 ya habían ejercitado en verde; la
 única sin corrida propia era `cache@v6` (PR #5 cancelado), y su primera verificación es el push a
