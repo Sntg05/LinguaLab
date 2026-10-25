@@ -83,8 +83,13 @@ vulnerabilidades** en los dos árboles.
 Las **doce** referencias de `ci.yml`, `deploy.yml` y `codeql.yml` —ocho acciones distintas, `checkout` aparece en los tres— van ahora por SHA completo, con la versión
 mayor en un comentario al lado (`# v7`) para que Dependabot siga proponiendo subidas y para que un humano
 lea qué versión es. Las etiquetas elegidas son las que los PRs #1 a #5 ya habían ejercitado en verde; la
-única sin corrida propia era `cache@v6` (PR #5 cancelado), y su primera verificación es el push a
-`feat/toolbox-v3-closure`. **Esto no se puede probar en local**: lo prueba el runner.
+única sin corrida propia era `cache@v6` (PR #5 cancelado), y su primera verificación fue el push a
+`feat/toolbox-v3-closure`: el paso de caché de Playwright corrió en verde en el runner.
+
+`setup-node` subió además de `v4` a `v7`, y no por gusto: el runner avisa en cada corrida que `v4`
+apunta a Node 20, que ya está deprecado y se fuerza a Node 24. Una advertencia que aparece en todas las
+corridas es una advertencia que nadie lee, así que se arregló cuando apareció. **Esto no se puede probar
+en local**: lo prueba el runner.
 
 **O3 — `frame-ancestors` no protege nada hoy (severidad baja). *Cerrado en lo que el repositorio puede
 cerrar*.**

@@ -39,7 +39,7 @@ auditoría de dependencias en CI (O1) y CodeQL (O5). Están documentados con su 
 ```bash
 npm install                       # el lockfile cambia: las versiones suben
 npm run verify:all                # la puerta completa, sin e2e
-env -u AI_AGENT -u PI_CODING_AGENT npm run test:e2e   # 69 pruebas; el `env -u` es por P16
+npm run test:e2e                  # la puerta arranca el preview sola; ver P16
 npm audit                         # 0 vulnerabilidades
 ```
 

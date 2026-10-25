@@ -47,7 +47,7 @@ marcado experimental) y el **catálogo agrupado por nivel de análisis** en `/ca
    bandera que el CLI documenta para «servidor de una sola corrida, en primer plano». Está en
    `playwright.config.ts` con el porqué, y `P16` lo cuenta entero.
 3. **El navegador de Playwright no viene con `npm install`.** `npx playwright install chromium` es un
-   paso previo, y sin él las 87 pruebas fallan al lanzar Chromium con un mensaje que habla de otra cosa.
+   paso previo, y sin él las 88 pruebas fallan al lanzar Chromium con un mensaje que habla de otra cosa.
 4. **Node 26 también pasa la puerta**, aunque el proyecto declare `>=22.12.0`: medido en esta máquina,
    `npm run verify:all` en verde con 26.12.1. Si `nvm` no tiene el 22 instalado, no hace falta pelearse.
 

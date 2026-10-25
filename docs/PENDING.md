@@ -9,8 +9,9 @@ para cerrarlo sin tener que redescubrirlo.
 Una entrada por sesión. Antes de empezar, leé la columna **Próximo paso exacto**: casi todas incluyen
 una decisión ya tomada, y rehacerla suele dar un resultado peor que el que está escrito.
 
-**La puerta e2e falla si la lanza un agente (P16).** Antes de creerle a un rojo de Playwright, corré
-`env -u AI_AGENT -u PI_CODING_AGENT npm run test:e2e`.
+**La puerta e2e necesita el navegador instalado y el puerto 4321 libre.** `npx playwright install chromium`
+una vez, y ningún `npm run dev` vivo: con el puerto ocupado la corrida falla a propósito (P7). Ya **no**
+hace falta `env -u AI_AGENT`: la puerta arranca el preview con `--ignore-lock` (P16).
 
 **Si llegás a este documento desde otra máquina o otra sesión:** el estado de la rama de trabajo, el mapa
 de archivos nuevos y las trampas del entorno están en
