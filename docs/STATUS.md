@@ -6,8 +6,10 @@ después necesita saber qué se probó y qué se supuso sin tener que reconstrui
 commits.
 
 Rama: `main` es lo publicado. La entrega v3 —visor de audio, catálogo por nivel de análisis y demos de
-portugués y wayuunaiki— vive en `feat/toolbox-v3-security-languages`, **sin fusionar y sin pull requests
-abiertos a propósito**. Para retomar ese trabajo en otra sesión o en otra computadora:
+portugués y wayuunaiki— vive en la cadena `feat/toolbox-v3-security` → `-navigation` → `-languages` →
+`-audio` → `feat/toolbox-v3-closure`, **sin fusionar y sin pull requests abiertos a propósito**. La última
+es la que cierra los pendientes de `docs/PENDING.md` y los puntos abiertos de la revisión de seguridad.
+Para retomar ese trabajo en otra sesión o en otra computadora:
 [`odd/handoff/toolbox-v3.md`](../odd/handoff/toolbox-v3.md), que trae el estado, las trampas del entorno,
 el mapa de archivos y las decisiones que esperan a una persona.
 
@@ -64,7 +66,12 @@ conocimiento lingüístico y no una preferencia de diseño. El pie se deriva de 
 
 **La revisión de seguridad tiene su propio documento:**
 [`docs/SECURITY-REVIEW.md`](SECURITY-REVIEW.md), con lo que se midió, lo que se corrigió y los seis
-puntos que siguen abiertos.
+puntos que estaban abiertos. Los seis están cerrados o tienen su límite declarado: la puerta audita las
+dependencias de producción en cada corrida, las ocho acciones de GitHub van fijadas por SHA, CodeQL
+analiza el código, las alertas de Dependabot y el escaneo de secretos están activados con
+`push protection`, y `frame-ancestors` se declara como lo que es —una directiva que viaja en una
+metaetiqueta y por eso **no se aplica**— en `/seguridad` y aquí arriba. TypeScript 7 sigue fuera por el
+peer de `@astrojs/check`, que es una decisión y no una deuda.
 
 ## Herramienta A: ortografía → IPA (segmento 4 del prompt)
 
