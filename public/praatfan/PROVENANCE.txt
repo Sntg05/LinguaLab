@@ -1,0 +1,10 @@
+praatfan-gpl 0.1.13, wasm32 --target no-modules (embedded V8)
+commit: 1de088c480825ff8af1971267105651278cfd904
+build: wasm/v8/build.sh (wasm-pack build --release --target no-modules --no-default-features --features pipe)
+remap: <repo>=/src, <cargo home>=/cargo, $HOME=/~
+toolchain: rustc 1.99.1 (58cf8f9c3 2026-10-13)
+wasm-pack: wasm-pack 0.14.0
+wasm-bindgen: 0.2.129
+sha256:
+  fb4ca81aa176fd715c9329fda5beb606c745da9245b27c9ad63f05e9fd6c09fa  praatfan_gpl.js
+  cda2ebb28f0c824f3d4b40801062684c842598fe8ee3004e2b35cebfb01860de  praatfan_gpl_bg.wasm

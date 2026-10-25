@@ -4,13 +4,17 @@
  * Cada subdirectorio implementa exactamente un puerto de `@lingualab/core` y
  * debe pasar la suite de contrato de ese puerto. Nada de aqui importa la UI.
  *
- * Hoy viven aqui dos adaptadores:
+ * Hoy viven aqui cuatro adaptadores:
  *
  * - `orthography-repository`, el repositorio de tablas sobre IndexedDB que
  *   conserva el JSON del nucleo y se degrada a un almacen en memoria
  *   —declarandolo— cuando IndexedDB no esta o no responde.
  * - `tool-registry`, el registro de herramientas sobre las fichas que recibe;
  *   los datos del catalogo viven en `src/data/tools.json`, no en el adaptador.
+ * - `phonemizer`, eSpeak NG en WebAssembly dentro de un worker.
+ * - `acoustic`, el analisis de F0, formantes e intensidad con praatfan, tambien
+ *   en un worker. Es experimental: el contraste contra Praat sobre voces reales
+ *   sigue pendiente (ver `docs/validation/acoustic.md`).
  */
 export {
   createIndexedDbOrthographyRepository,
@@ -36,3 +40,9 @@ export {
   toEspeakVoice,
   type SupportedLanguageCode,
 } from "./phonemizer/espeak-voices";
+
+export {
+  createPraatfanAcousticAnalysis,
+  type PraatfanAcousticAnalysis,
+  type PraatfanAcousticAnalysisOptions,
+} from "./acoustic/praatfan-acoustic-analysis";

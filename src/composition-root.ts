@@ -42,8 +42,9 @@ import {
 } from "@lingualab/core";
 import {
   type PersistenceStatus,
-  createIndexedDbOrthographyRepository,
   createEspeakPhonemizer,
+  createIndexedDbOrthographyRepository,
+  createPraatfanAcousticAnalysis,
   createStaticToolRegistry,
 } from "@lingualab/adapters";
 import { TOOLS } from "./scripts/catalogo/catalog-data";
@@ -98,6 +99,20 @@ const registry = createStaticToolRegistry(TOOLS);
  */
 const phonemizer = createEspeakPhonemizer({ baseUrl: withBase("/espeak-phonemizer") });
 
+/**
+ * El analisis acustico sigue el mismo criterio que el fonemizador: construir el
+ * adaptador solo anota DONDE vive el artefacto vendoreado. No descarga el wasm,
+ * no crea el worker y no compila nada hasta el primer analisis, asi que cablearlo
+ * aqui no cuesta nada a las paginas que nunca miden.
+ *
+ * `withBase` no es decorativo: bajo GitHub Pages el sitio se sirve en
+ * `/LinguaLab`, y una ruta sin prefijo se pediria al dominio y volveria 404. El
+ * artefacto esta en `public/praatfan/`, fijado por hash, y se sirve desde este
+ * mismo origen: la CSP no admite un CDN y la promesa de funcionar sin conexion
+ * despues de la primera carga tampoco.
+ */
+const acoustic = createPraatfanAcousticAnalysis({ baseUrl: withBase("/praatfan") });
+
 /** El caso de uso solo traduce el texto a AFI; no decide que se muestra. */
 const phonemizeText = createPhonemizeText({ phonemizer });
 
@@ -137,6 +152,13 @@ export interface LinguaLab {
    */
   readonly phonemizer: ReturnType<typeof createEspeakPhonemizer>;
   /**
+   * El adaptador acustico, no solo el puerto, por la misma razon que el
+   * fonemizador: `isAvailable` responde por el modulo ya cargado y `dispose`
+   * cierra el worker. El puerto sigue siendo lo unico que el visor usa para
+   * medir; el tipo del adaptador solo agrega esas dos consultas.
+   */
+  readonly acoustic: ReturnType<typeof createPraatfanAcousticAnalysis>;
+  /**
    * Which store is actually holding the tables right now, and why it degraded
    * if it did. It is exposed because the editor must tell the truth about
    * persistence: silently pretending to save is the defect this exists to
@@ -155,6 +177,7 @@ export const lingualab: LinguaLab = {
   listTools: createListTools({ registry }),
   phonemizeText,
   phonemizer,
+  acoustic,
   // `persistence` does not depend on `this`, so passing the reference is exact
   // and avoids a wrapper that would only add a stack frame.
   persistence: tables.persistence,
