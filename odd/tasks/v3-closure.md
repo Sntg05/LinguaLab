@@ -111,3 +111,11 @@ de una persona. Este documento cierra el trabajo técnico que no necesita a nadi
   observado en el núcleo y en la e2e antes del arreglo, y el verde después. Lo revisé leyendo el diff: el
   núcleo no tiene un campo de prosa, el número de fila y las llaves de `{V}` se agregan en presentación, y
   el inglés es traducción real.
+- **L10.** Cierre verificado en el runner, no solo en local: `5e327a7` con **CI en verde** de punta a
+  punta (tipos, 943 unitarias, build, verificación del build, 88 e2e en el puerto nuevo) y **CodeQL en
+  verde**. En local, las mismas puertas: `verify:all` en verde, `npm run test:e2e` con 88 en 23,8 s,
+  `npm run audit` con 0 y 0, `npm run lint:baseline` con 42 heredados y 5 nuevos. `main` sigue en
+  `1ee15c6`, sin tocar, y el árbol quedó limpio.
+- **L11.** P7 se cerró del todo, no a medias: la puerta corre en el **4331** con `preview:e2e`, así que
+  convive con `npm run dev`, y la guarda se conservó —con un señuelo en el 4331 la corrida falla
+  nombrando la url—. Se verificó con las 88 pruebas en verde en el puerto nuevo.
