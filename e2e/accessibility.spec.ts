@@ -186,6 +186,35 @@ const AXE_INCOMPLETE_WITHOUT_MOTIVE: readonly string[] = [
   "label-content-name-mismatch",
 ];
 
+/**
+ * Las páginas no se arrastran de lado en un teléfono.
+ *
+ * POR QUE ESTA PRUEBA ESTA AQUI Y NO EN UNA DE FLUJO
+ *
+ * Un desborde horizontal es un defecto de diseño que axe no ve: la página sigue
+ * siendo accesible y se puede usar, pero en un teléfono se mueve sola al
+ * arrastrar y el contenido de la derecha queda fuera. Apareció dos veces durante
+ * este cierre —el campo de búsqueda de `/fono`, que empujaba todo a 428 px en
+ * una pantalla de 360— y las dos se arreglaron a mano. Con 360 px, que es el
+ * ancho de un teléfono común, y todas las páginas públicas, no vuelve sin que
+ * alguien lo vea.
+ */
+test("ninguna página pública se desborda a 360 px de ancho", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+
+  for (const { path, name } of PUBLIC_PAGES) {
+    await page.goto(path);
+    const overflow = await page.evaluate(() => {
+      const doc = document.documentElement;
+      return { scroll: doc.scrollWidth, client: doc.clientWidth };
+    });
+
+    expect(overflow.scroll, `${name} (${path}) se desborda a 360 px`).toBeLessThanOrEqual(
+      overflow.client + 1,
+    );
+  }
+});
+
 for (const { scheme, name: themeName } of THEMES) {
   for (const { path, name } of PUBLIC_PAGES) {
     test(`${name} no tiene violaciones de accesibilidad en tema ${themeName}`, async ({ page }) => {

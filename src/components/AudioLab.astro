@@ -86,13 +86,16 @@ const WINDOWS = [
         <p class="faint">{t(locale, "audio.load.note")}</p>
         <div class="field">
           <label class="field__label" for="audio-file">{t(locale, "audio.load.pick")}</label>
-          <input
-            class="audiolab__file"
-            id="audio-file"
-            type="file"
-            data-audio-file
-            accept="audio/*,.wav,.mp3,.ogg,.oga,.opus,.m4a,.flac,.webm"
-          />
+          <label class="btn btn--quiet u-file">
+            {t(locale, "file.choose")}
+            <input
+              class="u-visually-hidden"
+              id="audio-file"
+              type="file"
+              data-audio-file
+              accept="audio/*,.wav,.mp3,.ogg,.oga,.opus,.m4a,.flac,.webm"
+            />
+          </label>
         </div>
         <p class="audiolab__status" data-audio-status role="status" aria-live="polite" data-state="idle">
           {t(locale, "audio.status.idle")}
@@ -524,13 +527,16 @@ const WINDOWS = [
           <label class="field__label" for="audio-textgrid-file">
             {t(locale, "audio.data.importTextGrid")}
           </label>
-          <input
-            class="audiolab__file"
-            id="audio-textgrid-file"
-            type="file"
-            data-audio-textgrid-file
-            accept=".TextGrid,.textgrid,.tg,text/plain"
-          />
+          <label class="btn btn--quiet u-file">
+            {t(locale, "file.choose")}
+            <input
+              class="u-visually-hidden"
+              id="audio-textgrid-file"
+              type="file"
+              data-audio-textgrid-file
+              accept=".TextGrid,.textgrid,.tg,text/plain"
+            />
+          </label>
         </div>
 
         <div class="audiolab__gaps" data-audio-gaps hidden>

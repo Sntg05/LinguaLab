@@ -380,6 +380,7 @@ export const es = {
   "audio.load.title": "Cargar audio",
   "audio.load.note": "wav, mp3, ogg, opus, m4a, flac o webm, hasta 300 s. También puedes arrastrar el archivo sobre el visor.",
   "audio.load.pick": "Archivo de audio",
+  "file.choose": "Elegir archivo",
   "audio.transport.title": "Reproducción",
   "audio.play": "Reproducir",
   "audio.stop": "Detener",
