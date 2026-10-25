@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ejemplo minimo de ELAN para las pruebas del conversor (segmento 9).
+
+  Dos capas alineadas en el tiempo, 0 a 3 segundos, y nada mas: ni audio, ni
+  vocabularios, ni jerarquias. El ADR 0002 prohibe grabaciones en el
+  repositorio, y la duracion del archivo no necesita audio para probarse.
+
+  Los tiempos van en milisegundos porque asi los define ELAN
+  (`TIME_UNITS="milliseconds"`); el conversor los pasa a segundos al entrar al
+  modelo de dominio, que es la unidad de Praat.
+
+  `palabra` deja el tramo 2200-3000 sin anotacion a proposito: es el caso que
+  obliga a rellenar con un intervalo vacio antes de escribir un TextGrid, y el
+  que la prueba de ida y vuelta comprueba que no se pierde.
+-->
+<ANNOTATION_DOCUMENT AUTHOR="LinguaLab" DATE="2026-01-15T10:00:00+00:00" FORMAT="2.8" VERSION="2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv2.8.xsd">
+    <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds">
+        <PROPERTY NAME="lastUsedAnnotationId">5</PROPERTY>
+    </HEADER>
+    <TIME_ORDER>
+        <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="0"/>
+        <TIME_SLOT TIME_SLOT_ID="ts2" TIME_VALUE="800"/>
+        <TIME_SLOT TIME_SLOT_ID="ts3" TIME_VALUE="1500"/>
+        <TIME_SLOT TIME_SLOT_ID="ts4" TIME_VALUE="2200"/>
+        <TIME_SLOT TIME_SLOT_ID="ts5" TIME_VALUE="3000"/>
+    </TIME_ORDER>
+    <TIER LINGUISTIC_TYPE_REF="default-lt" TIER_ID="frase">
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a1" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts3">
+                <ANNOTATION_VALUE>hola mundo</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a2" TIME_SLOT_REF1="ts3" TIME_SLOT_REF2="ts5">
+                <ANNOTATION_VALUE>adios</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+    </TIER>
+    <TIER LINGUISTIC_TYPE_REF="default-lt" TIER_ID="palabra">
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a3" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
+                <ANNOTATION_VALUE>hola</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a4" TIME_SLOT_REF1="ts2" TIME_SLOT_REF2="ts3">
+                <ANNOTATION_VALUE>mundo</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a5" TIME_SLOT_REF1="ts3" TIME_SLOT_REF2="ts4">
+                <ANNOTATION_VALUE>adios</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+    </TIER>
+    <LINGUISTIC_TYPE GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="default-lt" TIME_ALIGNABLE="true"/>
+    <CONSTRAINT DESCRIPTION="Time subdivision of parent annotation's time interval, no time gaps allowed within this interval" STEREOTYPE="Time_Subdivision"/>
+</ANNOTATION_DOCUMENT>

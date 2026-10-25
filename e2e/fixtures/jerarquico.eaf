@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Ejemplo de ELAN con las tres estructuras que el modelo de dominio NO puede
+  representar, para que el informe de perdida tenga algo que informar:
+
+  1. `palabra` declara `PARENT_REF="frase"`: es una capa jerarquica.
+  2. Sus dos anotaciones son `REF_ANNOTATION` que apuntan a la anotacion `a1`
+     en lugar de a un tramo de tiempo, asi que no tienen tiempos propios.
+  3. Dos tipos linguisticos declaran `CONTROLLED_VOCABULARY_REF="cv-categoria"`
+     y el documento define ese vocabulario.
+
+  Nada de esto se descarta en silencio: el conversor devuelve el documento con
+  las capas que si se pueden escribir y un informe que nombra las tres cosas.
+-->
+<ANNOTATION_DOCUMENT AUTHOR="LinguaLab" DATE="2026-01-15T10:05:00+00:00" FORMAT="2.8" VERSION="2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.mpi.nl/tools/elan/EAFv2.8.xsd">
+    <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds">
+        <PROPERTY NAME="lastUsedAnnotationId">4</PROPERTY>
+    </HEADER>
+    <TIME_ORDER>
+        <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="0"/>
+        <TIME_SLOT TIME_SLOT_ID="ts2" TIME_VALUE="2000"/>
+    </TIME_ORDER>
+    <TIER LINGUISTIC_TYPE_REF="default-lt" TIER_ID="frase">
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a1" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
+                <ANNOTATION_VALUE>una frase</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+    </TIER>
+    <TIER LINGUISTIC_TYPE_REF="palabras-lt" PARENT_REF="frase" TIER_ID="palabra">
+        <ANNOTATION>
+            <REF_ANNOTATION ANNOTATION_ID="a2" ANNOTATION_REF="a1">
+                <ANNOTATION_VALUE>una</ANNOTATION_VALUE>
+            </REF_ANNOTATION>
+        </ANNOTATION>
+        <ANNOTATION>
+            <REF_ANNOTATION ANNOTATION_ID="a3" ANNOTATION_REF="a1" PREVIOUS_ANNOTATION="a2">
+                <ANNOTATION_VALUE>frase</ANNOTATION_VALUE>
+            </REF_ANNOTATION>
+        </ANNOTATION>
+    </TIER>
+    <TIER LINGUISTIC_TYPE_REF="categoria-lt" TIER_ID="categoria">
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a4" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
+                <ANNOTATION_VALUE>saludo</ANNOTATION_VALUE>
+            </ALIGNABLE_ANNOTATION>
+        </ANNOTATION>
+    </TIER>
+    <LINGUISTIC_TYPE GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="default-lt" TIME_ALIGNABLE="true"/>
+    <LINGUISTIC_TYPE CONSTRAINTS="Symbolic_Association" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="palabras-lt" TIME_ALIGNABLE="false"/>
+    <LINGUISTIC_TYPE CONSTRAINTS="Symbolic_Association" CONTROLLED_VOCABULARY_REF="cv-categoria" GRAPHIC_REFERENCES="false" LINGUISTIC_TYPE_ID="categoria-lt" TIME_ALIGNABLE="true"/>
+    <CONSTRAINT DESCRIPTION="Symbolic subdivision of a parent annotation. Annotations refering to the same parent are ordered" STEREOTYPE="Symbolic_Association"/>
+    <CONTROLLED_VOCABULARY CV_ID="cv-categoria">
+        <DESCRIPTION LANG_REF="es">Categorias de ejemplo</DESCRIPTION>
+        <CV_ENTRY_ML CVE_ID="cve1">
+            <CVE_VALUE LANG_REF="es">saludo</CVE_VALUE>
+        </CV_ENTRY_ML>
+    </CONTROLLED_VOCABULARY>
+</ANNOTATION_DOCUMENT>

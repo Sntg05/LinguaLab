@@ -1,0 +1,2 @@
+tier,start,end,text
+frase,0,1.5,hola mundo

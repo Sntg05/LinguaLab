@@ -1,0 +1,13 @@
+---
+import ElanLab from "../components/ElanLab.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+  locale="es"
+  path="/elan"
+  title="Conversor ELAN ↔ TextGrid — Experimental"
+  description="Carga un archivo .eaf de ELAN o un .TextGrid de Praat, mira sus capas y exporta en el otro formato dentro del navegador. Incluye un informe de lo que no se pudo convertir."
+>
+  <ElanLab locale="es" />
+</Base>

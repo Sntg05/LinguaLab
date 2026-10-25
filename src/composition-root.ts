@@ -44,6 +44,7 @@ import {
   type PersistenceStatus,
   createIndexedDbOrthographyRepository,
   createEspeakPhonemizer,
+  createPyodideElanCodec,
   createStaticToolRegistry,
 } from "@lingualab/adapters";
 import { TOOLS } from "./scripts/catalogo/catalog-data";
@@ -98,6 +99,19 @@ const registry = createStaticToolRegistry(TOOLS);
  */
 const phonemizer = createEspeakPhonemizer({ baseUrl: withBase("/espeak-phonemizer") });
 
+/**
+ * El codec ELAN (Pyodide + pympi-ling) del conversor del segmento 9.
+ *
+ * La base es `public/pyodide/` por la misma razon que la del fonemizador: la CSP
+ * es `default-src 'self'` y la promesa de la herramienta es que el archivo de
+ * campo no sale del navegador. Pyodide usa un CDN por defecto si no se le dice
+ * donde estan sus archivos, y ese CDN estaria bloqueado.
+ *
+ * `withBase` no es decorativo: en GitHub Pages el sitio vive bajo `/LinguaLab` y
+ * una base sin prefijo se pediria al dominio y volveria 404.
+ */
+const elan = createPyodideElanCodec({ indexURL: withBase("/pyodide") });
+
 /** El caso de uso solo traduce el texto a AFI; no decide que se muestra. */
 const phonemizeText = createPhonemizeText({ phonemizer });
 
@@ -137,6 +151,19 @@ export interface LinguaLab {
    */
   readonly phonemizer: ReturnType<typeof createEspeakPhonemizer>;
   /**
+   * El codec ELAN, y no solo su puerto.
+   *
+   * La interfaz necesita preguntar si el motor esta listo, escuchar el progreso
+   * de la primera carga, poder precargarlo y cerrarlo; nada de eso es parte de
+   * `ElanCodecPort`. Se expone el adaptador por eso, igual que con el
+   * fonemizador.
+   *
+   * Construirlo NO descarga Pyodide ni crea el worker: solo registra donde estan
+   * los archivos. El motor arranca en la primera conversion, y por eso una
+   * pagina que nunca convierte no paga los ~13 MB del motor.
+   */
+  readonly elan: ReturnType<typeof createPyodideElanCodec>;
+  /**
    * Which store is actually holding the tables right now, and why it degraded
    * if it did. It is exposed because the editor must tell the truth about
    * persistence: silently pretending to save is the defect this exists to
@@ -155,6 +182,7 @@ export const lingualab: LinguaLab = {
   listTools: createListTools({ registry }),
   phonemizeText,
   phonemizer,
+  elan,
   // `persistence` does not depend on `this`, so passing the reference is exact
   // and avoids a wrapper that would only add a stack frame.
   persistence: tables.persistence,
