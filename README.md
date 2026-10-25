@@ -5,7 +5,7 @@ corte sagital, transcripción ortográfica y fonémica, árboles sintácticos y 
 estructuras de datos, y análisis de corpus. Sin cuentas, sin servidor de análisis,
 sin telemetría.
 
-**Sitio:** https://lingualab.pages.dev · **Inglés:** `/en/`
+**Sitio:** https://lingualab-beta.vercel.app · **Inglés:** `/en/`
 
 ---
 
@@ -122,10 +122,13 @@ git archive <commit> legacy/ | tar -x -C /tmp
 
 - **Sin framework de UI.** Deliberado. Añadir React o Svelte costaría entre 40 y
   130 KB comprimidos por página sin aportar nada a estas herramientas.
-- **CSP con hashes, sin `unsafe-inline`.** GitHub Pages no permite cabeceras
-  propias, así que la política viaja como metaetiqueta. Astro calcula un hash por
-  script; el script anti-parpadeo del tema, que debe ser inline, obtiene el suyo
-  a partir de la misma constante que se emite, de modo que no pueden divergir.
+- **CSP con hashes, sin `unsafe-inline`.** Astro calcula un hash por script; el
+  script anti-parpadeo del tema, que debe ser inline, obtiene el suyo a partir de
+  la misma constante que se emite, de modo que no pueden divergir. La política
+  viaja como metaetiqueta —donde `frame-ancestors` no se aplica— y `vercel.json`
+  emite además las cabeceras que sí valen ahí: `frame-ancestors 'none'`,
+  `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` y HSTS.
+  **El sitio se publica solo en Vercel**, desde `main`.
 - **Fuentes autoalojadas.** No hay petición a Google Fonts. La cara del AFI
   cubre latín extendido, extensiones AFI, modificadores y griego, porque `θ` es
   U+03B8, es decir griego, no AFI.

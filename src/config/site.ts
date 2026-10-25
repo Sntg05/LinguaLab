@@ -110,7 +110,16 @@ function env(name: string): string {
   return (fromProcess ?? "").trim();
 }
 
-const DEFAULT_URL = "https://lingualab.pages.dev";
+/**
+ * La URL canonica del sitio.
+ *
+ * Estaba en `lingualab.pages.dev`, que **no es este sitio**: ese dominio
+ * pertenece a otra persona y hoy sirve otra pagina. Los enlaces canonicos y los
+ * `hreflang` le estaban diciendo a los buscadores que esta pagina era aquella.
+ * Se corrige a la direccion real, que es la que el repositorio declara como
+ * homepage y la que responde con este contenido.
+ */
+const DEFAULT_URL = "https://lingualab-beta.vercel.app";
 
 /**
  * The repository is public and its URL is stable, so it serves as the default.

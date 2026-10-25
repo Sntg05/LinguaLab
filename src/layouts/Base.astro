@@ -12,6 +12,7 @@ import { ANTI_FLASH_SOURCE } from "../lib/anti-flash";
 import Masthead from "../components/Masthead.astro";
 import Footer from "../components/Footer.astro";
 import { DEFAULT_LOCALE, LOCALES, htmlLang, localePath, t, type Locale } from "../i18n";
+import { SITE } from "../config/site";
 
 interface Props {
   locale?: Locale;
@@ -33,7 +34,10 @@ const {
 
 const siteName = "LinguaLab";
 const fullTitle = path === "/" ? `${siteName} — ${title}` : `${title} · ${siteName}`;
-const canonical = new URL(localePath(locale, path), Astro.site ?? "https://lingualab.pages.dev");
+// La misma URL que `SITE.url`: el literal duplicado fue lo que dejo los
+// canonicos apuntando a un dominio ajeno cuando el sitio se mudo.
+const siteUrl = Astro.site ?? SITE.url;
+const canonical = new URL(localePath(locale, path), siteUrl);
 
 /* The anti-flash script has to be inline (it runs before first paint), so
    the CSP needs its hash. Hashing the exact constant we emit keeps the two
@@ -60,7 +64,7 @@ Astro.csp?.insertScriptHash({ hash: antiFlashHash, kind: "default" });
       <link
         rel="alternate"
         hreflang={l === DEFAULT_LOCALE ? "x-default" : l}
-        href={new URL(localePath(l, path), Astro.site ?? "https://lingualab.pages.dev").href}
+        href={new URL(localePath(l, path), siteUrl).href}
       />
     ))}
 

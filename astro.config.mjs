@@ -3,14 +3,14 @@ import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
 
 /**
- * Two deployment targets build from this one repository, and they differ in
- * where the site lives:
+ * El sitio se publica en Vercel, desde `main`, en la raiz del dominio. El
+ * repositorio sigue aceptando `SITE_URL` y `SITE_BASE` para que un fork o un
+ * espejo pueda servirse desde un subdirectorio —el caso de GitHub Pages se
+ * retiro por decision de la dueña—, pero ninguno de los dos se define en
+ * Vercel y el valor por defecto es la direccion real del sitio.
  *
- *   Vercel         https://<project>.vercel.app/        base "/"
- *   GitHub Pages   https://<user>.github.io/LinguaLab/  base "/LinguaLab"
- *
- * SITE_URL is the ORIGIN only; SITE_BASE is the subpath, and is "/" for a
- * domain root, a user page, or local development.
+ * `SITE_URL` es SOLO el origen; `SITE_BASE` es el subdirectorio, y es "/" para
+ * la raiz de un dominio, una pagina de usuario o el desarrollo local.
  *
  * Neither is set on Vercel, so the production URL is read from the variables
  * Vercel injects. Without this the canonical and hreflang links would point at
@@ -21,7 +21,7 @@ const vercelHost =
 
 const SITE =
   process.env.SITE_URL ??
-  (vercelHost ? `https://${vercelHost}` : "https://lingualab.pages.dev");
+  (vercelHost ? `https://${vercelHost}` : "https://lingualab-beta.vercel.app");
 
 const BASE = process.env.SITE_BASE ?? "/";
 

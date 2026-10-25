@@ -79,8 +79,8 @@ describe("readShareCode", () => {
 
 describe("shareUrl", () => {
   it("apunta a la página actual, no a una ruta inventada", () => {
-    const url = shareUrl({ origin: "https://lingualab.pages.dev", pathname: "/en/ortografia/" }, "1.abc");
+    const url = shareUrl({ origin: "https://lingualab-beta.vercel.app", pathname: "/en/ortografia/" }, "1.abc");
 
-    expect(url).toBe(`https://lingualab.pages.dev/en/ortografia/${SHARE_HASH_PREFIX}1.abc`);
+    expect(url).toBe(`https://lingualab-beta.vercel.app/en/ortografia/${SHARE_HASH_PREFIX}1.abc`);
   });
 });

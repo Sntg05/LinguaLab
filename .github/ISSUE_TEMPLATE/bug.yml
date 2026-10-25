@@ -8,7 +8,7 @@ body:
     attributes:
       label: Página o herramienta
       description: ¿Dónde ocurre? Indica la ruta o el enlace directo.
-      placeholder: https://lingualab.pages.dev/fono
+      placeholder: https://lingualab-beta.vercel.app/fono
     validations:
       required: true
 

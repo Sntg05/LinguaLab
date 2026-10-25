@@ -110,7 +110,7 @@ git commit -m "docs: add Pérez 2026 to the bibliography"
 git push
 ```
 
-Ambos destinos (Vercel y GitHub Pages) se reconstruyen solos al empujar.
+El sitio se reconstruye solo en Vercel al empujar a `main`.
 
 ### Añadir un tema nuevo
 
@@ -255,19 +255,22 @@ la voz del sistema y pronuncia una palabra que contiene el sonido.
 
 ### Publicar
 
-Ambos destinos se reconstruyen al empujar a `main`:
+**Un solo destino: Vercel, desde `main`, en la raíz del dominio.** El push a
+`main` reconstruye el sitio en `https://lingualab-beta.vercel.app` y las
+cabeceras de seguridad se emiten de verdad (`vercel.json`), porque Vercel sí
+permite cabeceras de respuesta.
 
-| Destino | URL | Base |
-|---|---|---|
-| Vercel | `https://lingualab-beta.vercel.app` | `/` |
-| GitHub Pages | `https://sntg05.github.io/LinguaLab/` | `/LinguaLab` |
+Hasta el 25 de octubre de 2026 había un segundo destino, GitHub Pages, con
+`SITE_BASE=/LinguaLab`. Se retiró por dos motivos medidos: su URL publicada no
+era esta aplicación —el dominio que el README anunciaba como canónico,
+`lingualab.pages.dev`, pertenece a otra persona y sirve otro sitio— y un destino
+sin cabeceras obligaba a que `frame-ancestors` viajara en una metaetiqueta, donde
+los navegadores la ignoran. El flujo `.github/workflows/deploy.yml` ya no existe;
+el sitio de Pages sigue en pie, congelado, hasta que se desactive en los ajustes
+del repositorio.
 
-La diferencia importa: Vercel sirve desde la raíz del dominio y GitHub Pages
-desde un subdirectorio. Por eso `SITE_BASE` se define **solo** en el flujo de
-Pages (`.github/workflows/deploy.yml`), y en Vercel se deja sin definir.
-
-Si algún día conectas un dominio propio, pon `SITE_BASE` en `/` en los dos y todo
-se ajusta solo.
+`SITE_URL` y `SITE_BASE` se conservan para un fork o un espejo que viva en un
+subdirectorio: el código no asume la raíz, aunque hoy sea lo único que se usa.
 
 ---
 
@@ -280,9 +283,10 @@ Las dejo escritas para que no vuelvas a caer.
 `rsvg-convert`, Inkscape o Illustrator rechacen el archivo. Por eso `svgString()`
 da valor a todo antes de exportar. Si añades un SVG descargable, haz lo mismo.
 
-**La base de despliegue se escapa fácil.** Cualquier `href="/algo"` escrito a
-mano se rompe en GitHub Pages. Usa `localePath()` para enlaces de página y
-`withBase()` para todo lo demás.
+**La base de despliegue se escapa fácil.** Hoy el sitio vive en la raíz del
+dominio, así que un `href="/algo"` a mano funciona —hasta que alguien lo sirve
+desde un subdirectorio, que es lo que hace un fork o un espejo—. Usa
+`localePath()` para enlaces de página y `withBase()` para todo lo demás.
 
 **Los acentos y las mayúsculas.** Para buscar y contar se compara la forma
 normalizada (sin tildes, en minúsculas), pero se **muestra** la forma más

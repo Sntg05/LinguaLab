@@ -18,7 +18,8 @@ Todo lo de abajo se midió sobre la rama `feat/toolbox-v3-security-languages`, p
 | **Sin secretos en el repositorio** | Sana | `git ls-files` no devuelve ningún `.env`, ni clave, ni credencial. No hay ficheros de entorno |
 | **Almacenamiento local acotado** | Sana | Dos claves y solo dos, `lingualab-lang` y `lingualab-theme`, con lista blanca en `src/scripts/core/guardrails.ts` y comprobación en vivo en `/seguridad` |
 | **Dependencias de producción** | Sana | `npm audit --omit=dev` → **0 vulnerabilidades**. El árbol de producción de un sitio estático son 5 entradas, ninguna con script de instalación |
-| **Permisos de CI mínimos** | Sana | `ci.yml`: `contents: read`. `deploy.yml`: `contents: read`, `pages: write`, `id-token: write` — lo mínimo que exige GitHub Pages. `codeql.yml`: `contents: read` y `security-events: write`, lo único que necesita para publicar hallazgos |
+| **Permisos de CI mínimos** | Sana | `ci.yml`: `contents: read`. `codeql.yml`: `contents: read` y `security-events: write`, lo único que necesita para publicar hallazgos. El flujo con `pages: write` e `id-token: write` se retiró con el destino de GitHub Pages (ADR 0009): ya no hay ningún flujo que pueda publicar y escribir con el token del repositorio |
+| **Cabeceras de seguridad reales** | Sana | `vercel.json`: `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` sin cámara ni micrófono, HSTS de dos años y caché inmutable para los assets con hash. Vercel permite cabeceras; GitHub Pages no, y por eso durante toda la vida del destino anterior `frame-ancestors` viajaba en una metaetiqueta donde los navegadores la ignoran |
 | **Acciones fijadas por SHA** | Sana | Las **doce** referencias de los tres flujos —ocho acciones distintas— van por SHA completo con la versión mayor en un comentario al lado. Antes eran etiquetas movibles, que cualquiera con control de la acción puede reapuntar (O2) |
 | **La puerta audita dependencias** | Sana | `npm run audit` corre en cada job de CI: bloquea el árbol de **producción** desde `high` e informa el de desarrollo sin cortar. Medido: **0 vulnerabilidades** en los dos árboles (O1) |
 | **Análisis estático de código** | Sana | `.github/workflows/codeql.yml`, `javascript-typescript` con el conjunto `security-and-quality`, en push, en PR y una vez por semana. **Sin hallazgos abiertos** al activarlo (O5) |
@@ -91,13 +92,18 @@ apunta a Node 20, que ya está deprecado y se fuerza a Node 24. Una advertencia 
 corridas es una advertencia que nadie lee, así que se arregló cuando apareció. **Esto no se puede probar
 en local**: lo prueba el runner.
 
-**O3 — `frame-ancestors` no protege nada hoy (severidad baja). *Cerrado en lo que el repositorio puede
-cerrar*.**
-GitHub Pages no permite cabeceras de respuesta, así que la CSP viaja en una metaetiqueta, y los
-navegadores **ignoran** `frame-ancestors` cuando llega por `<meta>`. `/seguridad` tiene ahora un apartado,
-en los dos idiomas, que dice exactamente eso: la directiva está en la política y no se aplica, hoy nada
-impide que otro sitio muestre la página en un marco, y el día que el sitio se sirva desde un host con
-cabeceras se emitirá como cabecera y valdrá. La cabecera real sigue esperando un host que la permita.
+**O3 — `frame-ancestors` no protege nada hoy (severidad baja). *Cerrado, y ahora de verdad*.**
+GitHub Pages no permite cabeceras de respuesta, así que la CSP viajaba en una metaetiqueta, y los
+navegadores **ignoran** `frame-ancestors` cuando llega por `<meta>`. Se declaró ese límite en `/seguridad`
+(y se sigue declarando, porque la metaetiqueta es lo que viaja en el HTML), y además se resolvió la causa:
+el sitio se publica **solo en Vercel**, que sí permite cabeceras, y `vercel.json` emite
+`Content-Security-Policy: frame-ancestors 'none'` junto con `X-Frame-Options: DENY`. Hoy otro sitio no
+puede mostrar esta página dentro de un marco, y esa frase ya no es una promesa sobre un host futuro: es
+una cabecera que el host emite.
+
+El mismo cambio corrigió un defecto peor, encontrado al revisar de dónde salía la política: la URL
+canónica por defecto era `https://lingualab.pages.dev`, un dominio de otra persona que sirve otro sitio, y
+**cada página publicaba un `canonical` que apuntaba allí**. Ver ADR 0009.
 
 **O4 — Las alertas de Dependabot estaban desactivadas (severidad baja). *Cerrado*.**
 El `403` era real y el diagnóstico era correcto —requiere administración del repositorio—, pero no era

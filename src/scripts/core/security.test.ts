@@ -5,7 +5,7 @@ import { evaluate, score, type Probe } from "./security";
 function cleanProbe(overrides: Partial<Probe> = {}): Probe {
   return {
     protocol: "https:",
-    hostname: "lingualab.pages.dev",
+    hostname: "lingualab-beta.vercel.app",
     hasCspMeta: true,
     externalScriptCount: 0,
     externalScriptWithIntegrity: 0,

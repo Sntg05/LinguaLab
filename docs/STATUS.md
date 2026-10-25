@@ -18,6 +18,16 @@ El detalle de las decisiones está en [`docs/adr/`](adr/), y el mapa del hexágo
 
 ---
 
+## Dónde se publica
+
+**Un solo destino: Vercel, desde `main`, en `https://lingualab-beta.vercel.app`.** Hasta el 25 de octubre
+de 2026 el push a `main` publicaba también en GitHub Pages, en un subdirectorio, y el dominio que el
+repositorio anunciaba como canónico (`lingualab.pages.dev`) **pertenecía a otra persona**: cada página
+publicaba un `canonical` que apuntaba a un sitio ajeno. Se corrigió la URL a una sola constante, se retiró
+el flujo de Pages y `vercel.json` emite las cabeceras que Pages no permitía —entre ellas
+`frame-ancestors 'none'`, que hasta entonces viajaba en una metaetiqueta donde no se aplica—. El detalle y
+las alternativas descartadas están en [`docs/adr/0009-publicacion-solo-en-vercel.md`](adr/0009-publicacion-solo-en-vercel.md).
+
 ## Cómo ejecutarlo
 
 ```bash
