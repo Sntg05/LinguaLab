@@ -1,0 +1,10 @@
+ID,Name,Macroarea,Latitude,Longitude,Glottocode,ISO639P3code,Level,Countries,Family_ID,Language_ID,Closest_ISO369P3code,First_Year_Of_Documentation,Last_Year_Of_Documentation,Is_Isolate
+araw1281,Arawakan,North America;South America,-3.1102292773127544,-63.45763454743985,araw1281,,family,,,,,,,
+tuca1253,Tucanoan,South America,-0.08783435069444442,-72.42886514583333,tuca1253,,family,,,,,,,
+uncl1493,Unclassifiable,Africa;Australia;Eurasia;North America;Papunesia;South America,,,uncl1493,,family,,,,,,,
+ando1256,Andoque,South America,-0.53751,-72.0869,ando1256,ano,language,CO,,,ano,,,true
+mali1242,Malibu,South America,,,mali1242,,language,CO,uncl1493,,,,,false
+paez1247,Páez,South America,2.61516,-76.31254,paez1247,pbb,language,CO,,,pbb,,,true
+taiw1247,Taiwano,South America,0.02193,-70.808,taiw1247,,dialect,CO,tuca1253,bara1380,bsn,,,
+wayu1243,Wayuu,South America,11.395566,-72.199791,wayu1243,guc,language,CO;VE,araw1281,,guc,,,false
+stan1295,German,Eurasia,48.649,12.4676,stan1295,deu,language,AT;BE;CH;CZ;DE;DK;FR;HU;IT;LI;LU;NL;PL;RO;SI;SK,indo1319,,deu,,,false
