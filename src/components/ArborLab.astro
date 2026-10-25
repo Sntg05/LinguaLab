@@ -140,13 +140,13 @@ const es = locale === "es";
             <button class="btn btn--sm" type="button" data-export="png" disabled>{es ? "Guardar PNG" : "Save PNG"}</button>
             <button class="btn btn--sm" type="button" data-export="copy" disabled>{es ? "Copiar SVG" : "Copy SVG"}</button>
           </div>
-          <div class="cluster" style="margin-block-start: var(--space-2xs)">
+          <div class="cluster u-mt-2xs">
             <button class="btn btn--sm" type="button" data-script="json" disabled>JSON</button>
             <button class="btn btn--sm" type="button" data-script="newick" disabled>Newick</button>
             <button class="btn btn--sm" type="button" data-script="conllu" disabled>CoNLL-U</button>
             <button class="btn btn--sm" type="button" data-script="brat" disabled>Brat</button>
           </div>
-          <p class="faint" style="font-size: var(--step--2); margin-block-start: var(--space-2xs)">
+          <p class="faint u-text-2xs u-mt-2xs">
             {
               es
                 ? "El SVG se guarda con los colores resueltos y sin atributos vacíos, para que sea XML válido y se abra en Illustrator, Inkscape o rsvg."

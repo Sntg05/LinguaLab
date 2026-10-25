@@ -1,0 +1,342 @@
+/* ============================================================
+   LinguaLab — constructor de experimentos (segmento 7)
+
+   POR QUE ESTE ARCHIVO ES GLOBAL Y LLEVA SU PROPIO PREFIJO
+
+   El componente lo importa en el frontmatter, asi que Astro lo empaqueta como
+   CSS del sitio y no como estilo con alcance de componente. Para que no choque
+   con nada, todas las clases empiezan por `explab`, y solo se reutilizan las
+   utilidades globales (`.btn`, `.callout`, `.table-scroll`, `.cluster`).
+
+   TAMBIEN VISTE A JSSYCH
+
+   Las clases `jspsych-*` las genera la libreria y no se pueden renombrar. En vez
+   de cargar `jspsych/css/jspsych.css` —que trae su tipografia, sus colores y su
+   peso—, se visten aqui con los tokens del proyecto: el experimento tiene que
+   parecer parte del sitio y no un cuadro pegado encima.
+   ============================================================ */
+
+.explab {
+  display: grid;
+  gap: var(--space-m);
+  align-items: start;
+}
+
+@media (width >= 64rem) {
+  .explab {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .explab__panel--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.explab__panel {
+  display: grid;
+  gap: var(--space-s);
+  padding: var(--space-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-s);
+}
+
+.explab__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+}
+
+.explab__note {
+  margin: 0;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+  line-height: var(--leading-normal);
+}
+
+.explab__field {
+  display: grid;
+  gap: var(--space-3xs);
+}
+
+.explab__label {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.explab__hint {
+  margin: 0;
+  font-size: var(--step--2);
+  color: var(--ink-faint);
+  line-height: var(--leading-snug);
+}
+
+.explab__field input[type="text"],
+.explab__field input[type="number"],
+.explab__field textarea {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  font-size: var(--step--1);
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+}
+
+.explab__field textarea {
+  min-height: 8rem;
+  font-family: var(--font-mono);
+  line-height: var(--leading-snug);
+  resize: vertical;
+}
+
+.explab__field input:focus-visible,
+.explab__field textarea:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.explab__numbers {
+  display: grid;
+  gap: var(--space-s);
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+}
+
+.explab__templates {
+  display: grid;
+  gap: var(--space-2xs);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.explab__template {
+  display: flex;
+  gap: var(--space-2xs);
+  align-items: flex-start;
+  padding: var(--space-2xs) var(--space-xs);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.explab__template:has(input:checked) {
+  border-color: var(--accent-line);
+  background: var(--accent-wash);
+}
+
+.explab__template input {
+  margin-block-start: 0.2rem;
+  accent-color: var(--accent);
+}
+
+.explab__template-text {
+  display: grid;
+  gap: 2px;
+}
+
+.explab__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  align-items: center;
+}
+
+.explab__status {
+  margin: 0;
+  padding: var(--space-2xs) var(--space-xs);
+  min-height: 2.25rem;
+  font-size: var(--step--1);
+  background: var(--bg-sunken);
+  border-inline-start: 3px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+}
+
+.explab__status[data-state="ok"] {
+  border-inline-start-color: var(--ok);
+}
+
+.explab__status[data-state="warn"] {
+  border-inline-start-color: var(--mark);
+}
+
+.explab__status[data-state="error"] {
+  border-inline-start-color: var(--warn);
+  color: var(--warn);
+  font-weight: 500;
+}
+
+.explab__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.explab__table caption {
+  text-align: start;
+  padding-block-end: var(--space-3xs);
+  font-size: var(--step--2);
+  color: var(--ink-faint);
+}
+
+.explab__table th,
+.explab__table td {
+  padding: 0.3rem 0.5rem;
+  text-align: start;
+  vertical-align: top;
+  border-block-end: 1px solid var(--line);
+}
+
+.explab__table th {
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.explab__table tr[data-practice="true"] td {
+  color: var(--ink-muted);
+  font-style: italic;
+}
+
+.explab__num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.explab__stimulus {
+  max-width: 28rem;
+  overflow-wrap: anywhere;
+  unicode-bidi: plaintext;
+}
+
+/* ---------------------------- la sesion ---------------------------- */
+
+.explab__stage:empty {
+  display: none;
+}
+
+.explab__stage {
+  display: grid;
+  gap: var(--space-s);
+  justify-items: center;
+  min-height: 16rem;
+  padding: var(--space-m);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+
+/* Lo que sigue son clases que genera jsPsych: no se pueden renombrar. */
+.explab__stage .jspsych-display-element,
+.explab__stage .jspsych-content-wrapper {
+  width: 100%;
+}
+
+.explab__stage .jspsych-content {
+  max-width: 46rem;
+  margin-inline: auto;
+  font-size: var(--step-1);
+  line-height: var(--leading-normal);
+  /* Los estimulos pueden venir en escrituras de derecha a izquierda: cada
+     parrafo se orienta por su primer caracter fuerte. */
+  unicode-bidi: plaintext;
+}
+
+.explab__stage .jspsych-btn {
+  margin: var(--space-3xs);
+  padding: 0.5rem 1rem;
+  font: inherit;
+  font-size: var(--step--1);
+  font-weight: 500;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-s);
+  cursor: pointer;
+}
+
+.explab__stage .jspsych-btn:hover {
+  background: var(--accent-hover);
+}
+
+.explab__stage .jspsych-btn:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.explab__stage .jspsych-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.explab__stage .jspsych-instructions-nav {
+  margin-block-start: var(--space-m);
+}
+
+.explab__stage .jspsych-survey-likert {
+  margin: 0;
+}
+
+.explab__stage .jspsych-survey-likert-statement {
+  font-size: var(--step-1);
+  font-weight: 500;
+  text-align: start;
+}
+
+/* El plugin de escala inyecta su propio <style> en el documento. La CSP del
+   sitio lo bloquea —style-src no lleva 'unsafe-inline'—, asi que esta regla no es
+   un adorno: es la unica razon por la que la escala se ve como una fila. */
+.explab__stage .jspsych-survey-likert-opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin-block: var(--space-2xs) var(--space-m);
+  padding: 0;
+  border: 0;
+  list-style: none;
+}
+
+.explab__stage .jspsych-survey-likert-opts li {
+  display: block;
+}
+
+.explab__stage .jspsych-survey-likert-opt-label {
+  display: flex;
+  gap: var(--space-3xs);
+  align-items: center;
+  padding: 0.35rem 0.6rem;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+
+.explab__stage .jspsych-survey-likert-opt-label:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-wash);
+}
+
+.explab__stage .jspsych-survey-likert-opt-label input {
+  accent-color: var(--accent);
+}
+
+/* La pantalla de la tarea se lee mejor sin el ruido del formulario alrededor. */
+.explab[data-running="true"] .explab__panel:not(.explab__panel--stage) {
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .explab__panel {
+    transition: opacity var(--dur-base) ease;
+  }
+}

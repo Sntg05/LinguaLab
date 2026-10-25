@@ -48,6 +48,12 @@ import {
   createPyodideElanCodec,
   createStaticToolRegistry,
 } from "@lingualab/adapters";
+import type {
+  CreateExperimentRunner,
+  ExperimentRunnerHandle,
+  ExperimentRunnerRequest,
+} from "./scripts/experimentos/runner";
+import sitePackage from "../package.json";
 import { TOOLS } from "./scripts/catalogo/catalog-data";
 import { withBase } from "./lib/paths";
 
@@ -127,6 +133,39 @@ const elan = createPyodideElanCodec({ indexURL: withBase("/pyodide") });
  */
 const acoustic = createPraatfanAcousticAnalysis({ baseUrl: withBase("/praatfan") });
 
+/**
+ * El ejecutor de experimentos, construido por corrida.
+ *
+ * A diferencia de los otros tres adaptadores, este no se puede construir al
+ * cargar la pagina por dos razones: jsPsych **toca `window` al importarse** y
+ * pesa ~30 KB comprimidos, y el motor necesita el elemento donde dibujar, que
+ * solo existe cuando alguien pulsa «Ejecutar». Por eso se expone una factoria
+ * asincrona.
+ *
+ * El `import()` dinamico vive aqui y no en el componente: `dependency-cruiser`
+ * no analiza `.astro`, asi que una importacion de `@lingualab/adapters` dentro de
+ * un componente **no la ve nadie** —ni la regla ni una prueba—, y el sitio
+ * correcto sigue siendo este archivo. Lo comprueba `src/lib/architecture.test.ts`.
+ */
+const createExperimentRunner: CreateExperimentRunner = async (
+  request: ExperimentRunnerRequest,
+): Promise<ExperimentRunnerHandle> => {
+  const { createJsPsychEngine, createJsPsychExperimentRunner } = await import(
+    "@lingualab/adapters/experiment"
+  );
+  let engine: ReturnType<typeof createJsPsychEngine> | null = null;
+  const runner = createJsPsychExperimentRunner({
+    createEngine: () => {
+      engine = createJsPsychEngine({ displayElement: request.displayElement });
+      return engine;
+    },
+    toolVersion: sitePackage.version,
+    participantId: request.participantId,
+    resolveAudio: request.resolveAudio,
+  });
+  return { runner, abort: () => engine?.abort() };
+};
+
 /** El caso de uso solo traduce el texto a AFI; no decide que se muestra. */
 const phonemizeText = createPhonemizeText({ phonemizer });
 
@@ -186,6 +225,12 @@ export interface LinguaLab {
    */
   readonly acoustic: ReturnType<typeof createPraatfanAcousticAnalysis>;
   /**
+   * El ejecutor de experimentos, como factoria y no como instancia: jsPsych se
+   * importa en el momento de ejecutar y necesita el elemento donde dibujar. Ver
+   * el comentario de la constante, arriba.
+   */
+  readonly createExperimentRunner: CreateExperimentRunner;
+  /**
    * Which store is actually holding the tables right now, and why it degraded
    * if it did. It is exposed because the editor must tell the truth about
    * persistence: silently pretending to save is the defect this exists to
@@ -206,6 +251,7 @@ export const lingualab: LinguaLab = {
   phonemizer,
   elan,
   acoustic,
+  createExperimentRunner,
   // `persistence` does not depend on `this`, so passing the reference is exact
   // and avoids a wrapper that would only add a stack frame.
   persistence: tables.persistence,

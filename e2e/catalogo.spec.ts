@@ -88,7 +88,10 @@ test("una herramienta planificada se marca como planificada y no es un enlace", 
 }) => {
   await page.goto("/catalogo");
 
-  const planned = page.locator(CARD).filter({ hasText: "Conversor ELAN" });
+  // La única ficha que sigue planificada es la de los recursos de la
+  // Universidad de los Andes: no se pudo verificar su URL, así que no se
+  // publica un enlace. Las demás pasaron a experimental o estable al integrarse.
+  const planned = page.locator(CARD).filter({ hasText: "Universidad de los Andes" });
 
   // La marca es visible y distinta de una insignia de estado corriente.
   await expect(planned.locator("[data-planned-mark]")).toBeVisible();

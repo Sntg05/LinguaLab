@@ -86,7 +86,7 @@ const SAMPLE = es
             spellcheck="false"
             placeholder={es ? "Pega aquí tu texto…" : "Paste your text here…"}
           ></textarea>
-          <p class="faint mono" style="font-size: var(--step--2)" data-counter></p>
+          <p class="faint mono u-text-2xs" data-counter></p>
         </div>
 
         <div class="cluster">
@@ -110,7 +110,7 @@ const SAMPLE = es
 
           <label class="field field--inline">
             <span class="field__label">{es ? "Ventana" : "Window"}</span>
-            <input type="number" data-window min="1" max="20" value="5" style="width: 5rem" />
+            <input type="number" data-window min="1" max="20" value="5" class="u-w-5" />
           </label>
 
           <label class="field field--inline">
@@ -120,7 +120,7 @@ const SAMPLE = es
               data-keyword
               placeholder={es ? "nodo…" : "node…"}
               autocomplete="off"
-              style="width: 9rem"
+              class="u-w-9"
             />
           </label>
         </div>
@@ -135,7 +135,7 @@ const SAMPLE = es
           <button class="btn btn--quiet" type="button" data-clear>
             {es ? "Limpiar" : "Clear"}
           </button>
-          <label class="btn btn--quiet" style="cursor: pointer">
+          <label class="btn btn--quiet u-pointer">
             {es ? "Subir archivo" : "Upload file"}
             <input type="file" data-upload accept={ALLOWED_EXT.join(",")} hidden />
           </label>
@@ -149,23 +149,23 @@ const SAMPLE = es
           aria-label={es ? "Constructor de n-gramas" : "n-gram builder"}
           hidden
         >
-          <span class="field__label" style="flex-basis: 100%">
+          <span class="field__label u-basis-full">
             {es ? "Constructor de n-gramas" : "n-gram builder"}
           </span>
 
           <label class="field field--inline">
             <span class="field__label">n</span>
-            <input type="number" data-ngram-n min="2" max="5" step="1" value="2" style="width: 4rem" />
+            <input type="number" data-ngram-n min="2" max="5" step="1" value="2" class="u-w-4" />
           </label>
 
           <label class="field field--inline">
             <span class="field__label">{es ? "Frec. mín." : "Min freq."}</span>
-            <input type="number" data-ngram-min min="1" max="100" step="1" value="2" style="width: 5rem" />
+            <input type="number" data-ngram-min min="1" max="100" step="1" value="2" class="u-w-5" />
           </label>
 
           <label class="field field--inline">
             <span class="field__label">{es ? "Máx. filas" : "Max rows"}</span>
-            <input type="number" data-ngram-limit min="1" max="500" step="1" value="25" style="width: 5rem" />
+            <input type="number" data-ngram-limit min="1" max="500" step="1" value="25" class="u-w-5" />
           </label>
 
           <label class="field field--inline">
@@ -180,7 +180,7 @@ const SAMPLE = es
           </label>
         </div>
 
-        <p class="faint" style="font-size: var(--step--2)">
+        <p class="faint u-text-2xs">
           {
             es
               ? `Máximo ${MAX_TEXT_BYTES / 1024} KB. Extensiones admitidas: ${ALLOWED_EXT.join(", ")}.`
@@ -215,7 +215,7 @@ const SAMPLE = es
           </p>
         </div>
 
-        <div class="cluster" style="margin-block-start: var(--space-s)">
+        <div class="cluster u-mt-s">
           <button class="btn btn--sm" type="button" data-export disabled>
             {es ? "Exportar resultados (JSON)" : "Export results (JSON)"}
           </button>

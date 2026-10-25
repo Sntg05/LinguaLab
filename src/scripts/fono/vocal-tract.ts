@@ -40,8 +40,10 @@ function renderMarkers(root: ParentNode, constrictions: readonly Constriction[])
     marker.classList.remove("marker--template");
     marker.setAttribute("data-marker", "true");
     marker.dataset["place"] = c.place;
-    marker.style.setProperty("--mx", String(c.x));
-    marker.style.setProperty("--my", String(c.y));
+    // La posición va en `cx`/`cy` de los círculos y no en un atributo `style`
+    // con propiedades personalizadas: la CSP bloquea los atributos de estilo, y
+    // esas dos variables no las leía ninguna regla. Eran código muerto que
+    // además rompía la política.
     for (const circle of marker.querySelectorAll<SVGCircleElement>("circle")) {
       circle.setAttribute("cx", String(c.x));
       circle.setAttribute("cy", String(c.y));

@@ -333,7 +333,16 @@ const WINDOWS = [
         </div>
         <p class="faint">{t(locale, "acoustic.measure.note")}</p>
         <p class="faint" data-acoustic-measure-empty>{t(locale, "acoustic.measure.empty")}</p>
-        <div class="audiolab__table-wrap">
+        {/* Una región que se desplaza tiene que poder enfocarse con el teclado y
+            tener nombre: si no, quien navega sin ratón no puede recorrer la
+            tabla. Lo encontró axe en esta tabla (`scrollable-region-focusable`,
+            impacto serio) cuando la medición acústica la llenó de columnas. */}
+        <div
+          class="audiolab__table-wrap"
+          tabindex="0"
+          role="region"
+          aria-label={t(locale, "acoustic.measure.title")}
+        >
           <table class="audiolab__table acoustic__table">
             <caption class="faint">{t(locale, "acoustic.measure.title")}</caption>
             <thead>
@@ -425,7 +434,14 @@ const WINDOWS = [
           </button>
         </div>
         <p class="faint">{t(locale, "audio.intervals.note")}</p>
-        <div class="audiolab__table-wrap">
+        {/* Misma razón que en la tabla de mediciones: el contenedor se desplaza
+            en horizontal y tiene que poder recorrerse con el teclado. */}
+        <div
+          class="audiolab__table-wrap"
+          tabindex="0"
+          role="region"
+          aria-label={t(locale, "audio.intervals.caption")}
+        >
           <table class="audiolab__table">
             <caption>
               <span class="field__label">{t(locale, "audio.intervals.caption")}</span>

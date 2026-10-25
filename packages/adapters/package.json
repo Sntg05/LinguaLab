@@ -9,6 +9,10 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./experiment": {
+      "types": "./src/experiment/index.ts",
+      "default": "./src/experiment/index.ts"
     }
   },
   "types": "./src/index.ts",
@@ -16,8 +20,15 @@
     "typecheck": "tsc -p . --noEmit"
   },
   "dependencies": {
+    "@jspsych/plugin-audio-button-response": "2.1.1",
+    "@jspsych/plugin-audio-keyboard-response": "2.2.0",
+    "@jspsych/plugin-html-button-response": "2.1.0",
+    "@jspsych/plugin-html-keyboard-response": "2.2.0",
+    "@jspsych/plugin-instructions": "2.1.0",
+    "@jspsych/plugin-survey-likert": "2.2.0",
     "@lingualab/core": "0.1.0",
-    "espeak-phonemizer": "0.2.0"
+    "espeak-phonemizer": "0.2.0",
+    "jspsych": "8.3.0"
   },
   "devDependencies": {
     "fake-indexeddb": "6.2.6"

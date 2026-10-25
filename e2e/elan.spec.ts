@@ -58,7 +58,7 @@ test("carga un .eaf, muestra sus capas y exporta un TextGrid", async ({ page }) 
 
   await loadFixture(page, "simple.eaf");
 
-  await expect(page.locator(STATUS)).toContainText("listo para exportar", {
+  await expect(page.locator(STATUS)).toContainText("Listo para exportar", {
     timeout: FIRST_CONVERSION_MS,
   });
 
@@ -95,7 +95,7 @@ test("el informe de perdida nombra la capa jerarquica y el vocabulario", async (
   test.setTimeout(FIRST_CONVERSION_MS * 2);
 
   await loadFixture(page, "jerarquico.eaf");
-  await expect(page.locator(STATUS)).toContainText("listo para exportar", {
+  await expect(page.locator(STATUS)).toContainText("Listo para exportar", {
     timeout: FIRST_CONVERSION_MS,
   });
 

@@ -87,7 +87,7 @@ const policies: { heading: string; body: string }[] = es
           <span class="badge badge--accent">runtime</span>
         </div>
         <div data-security-panel>
-          <p class="u-faint u-mono" style="font-size: var(--step--2)">
+          <p class="u-faint u-mono u-text-2xs">
             {es ? "Ejecutando comprobaciones…" : "Running checks…"}
           </p>
         </div>
@@ -101,16 +101,16 @@ const policies: { heading: string; body: string }[] = es
           </span>
         </div>
         <div data-guardrails-panel>
-          <p class="u-faint u-mono" style="font-size: var(--step--2)">
+          <p class="u-faint u-mono u-text-2xs">
             {es ? "Cargando…" : "Loading…"}
           </p>
         </div>
       </section>
     </div>
 
-    <div class="cluster" style="margin-block-start: var(--space-l)">
+    <div class="cluster u-mt-l">
       <button class="btn" type="button" data-wipe>{t(locale, "sec.wipe")}</button>
-      <span class="u-faint u-mono" style="font-size: var(--step--2)">
+      <span class="u-faint u-mono u-text-2xs">
         {es ? `Última revisión: ${REVIEW_DATE}` : `Last review: ${REVIEW_DATE}`}
       </span>
     </div>

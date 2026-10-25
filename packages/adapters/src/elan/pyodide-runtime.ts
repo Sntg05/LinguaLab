@@ -91,11 +91,15 @@ export type PyodideLoader = (options: PyodideLoadOptions) => Promise<PyodideLike
  */
 export const loadPyodideFromUrl: PyodideLoader = async ({ indexURL, packageBaseUrl }) => {
   const base = typeof location === "undefined" ? "http://localhost/" : location.href;
-  const moduleUrl = new URL("pyodide.mjs", new URL(indexURL, base)).href;
+  const resolvedIndex = absoluteUrl(indexURL);
+  const moduleUrl = new URL("pyodide.mjs", new URL(resolvedIndex, base)).href;
   const module = (await import(/* @vite-ignore */ moduleUrl)) as {
     loadPyodide: (options: PyodideLoadOptions) => Promise<PyodideLike>;
   };
-  return module.loadPyodide({ indexURL, packageBaseUrl });
+  return module.loadPyodide({
+    indexURL: resolvedIndex,
+    packageBaseUrl: absoluteUrl(packageBaseUrl),
+  });
 };
 
 export interface PyodideRuntimeOptions {
@@ -423,6 +427,13 @@ export function createPyodideRuntime(options: PyodideRuntimeOptions): PyodideRun
  * download from a non-remote location" y el error no dice nada de esto. En el
  * worker `location` existe; en Node la base solo se usa si `indexURL` ya es
  * absoluta, que es como la pasan las pruebas.
+ *
+ * MEDIDO EN UN NAVEGADOR, Y ERA UN DEFECTO: `indexURL` tambien tiene que ser
+ * absoluta. Con `/pyodide/`, Pyodide cargaba su propio wasm y al resolver los
+ * paquetes hacia `new URL(archivo, indexURL)` reventaba con «Failed to construct
+ * 'URL': Invalid base URL»; la barra de progreso se quedaba en «motor no
+ * disponible». La ruta vale para `fetch` y para `import()`, y no como base de
+ * una URL absoluta.
  */
 function absoluteUrl(path: string): string {
   if (/^[a-z][a-z0-9+.-]*:\/\//i.test(path)) return path;

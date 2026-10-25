@@ -115,6 +115,11 @@ test("mide un intervalo seleccionado y exporta el CSV", async ({ page }) => {
   await page.locator(SPLIT).click();
   await expect(page.locator(ROWS)).toHaveCount(3);
 
+  // El intervalo activo —el que se mide— lo decide el cursor del visor, no la
+  // fila que se esté mirando: tras dividir en 0.5 el cursor quedó ahí y lo que
+  // se mediría sería el tercer intervalo. Se lo lleva al primero a propósito.
+  await moveCursor(page, 0.1);
+
   // La etiqueta de la medición sale del texto del intervalo: sin texto, la fila
   // se rotula con su rango de tiempo y no se sabría qué vocal se midió.
   await page.locator(ROWS).nth(0).locator("input[type=text]").fill("a");

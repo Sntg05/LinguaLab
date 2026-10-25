@@ -7,6 +7,7 @@
  *   2. the policy never falls back to 'unsafe-inline'
  *   3. no page references a third-party origin
  *   4. the compressed payload stays inside the performance budget
+ *   5. no page carries a `style` attribute, which the CSP blocks
  *
  * Run with: node scripts/verify-build.mjs
  */
@@ -124,6 +125,22 @@ for (const file of pages) {
   }
   if (!/<meta name="description"/.test(html)) {
     fail(`${name}: no meta description`);
+  }
+
+  // ---- No inline style attributes ----
+  //
+  // La CSP es `style-src 'self'` con hashes, y eso **bloquea los atributos
+  // `style`**: medido en Chromium, que ademas lo dice en consola con «Applying
+  // inline style violates the following Content Security Policy directive». Un
+  // `style="width: 5rem"` bloqueado no es un matiz de estilo, es un campo que se
+  // queda sin su ancho; un `margin-block-start` bloqueado es un bloque pegado al
+  // anterior. Se comprueba aca para que no vuelva: las utilidades de
+  // `src/styles/utilities.css` existen justamente para esto.
+  const inlineStyles = [...html.matchAll(/\sstyle="[^"]*"/g)];
+  if (inlineStyles.length > 0) {
+    fail(
+      `${name}: ${inlineStyles.length} atributo(s) style en el marcado, que la CSP bloquea; usa una utilidad de utilities.css`,
+    );
   }
 }
 

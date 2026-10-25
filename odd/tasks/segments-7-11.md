@@ -46,10 +46,10 @@ Cada segmento se trabajó en su propio worktree y su propia rama, y se integra a
 | T1 | Mensajes por herramienta (módulos i18n sin colisión) | S3–S7 | inline | `6ea00cc` |
 | T2 | Segmento 11: catálogo verificado, puerto de fonos y fase 2 | S7 | inline | `a7fd703` |
 | T3 | Publicación solo en Vercel, cabeceras y URL canónica | S2 | inline | `20aaa33` |
-| T4 | Segmento 7: experimentos con jsPsych | S3 | worker | pendiente |
-| T5 | Segmento 8: análisis acústico con praatfan | S4 | worker | pendiente |
-| T6 | Segmento 9: ELAN ↔ TextGrid con Pyodide | S5 | worker | pendiente |
-| T7 | Segmento 10: mapa de lenguas desde Glottolog | S6 | worker | pendiente |
+| T4 | Segmento 7: experimentos con jsPsych | S3 | worker | `1ddc97b` + integración |
+| T5 | Segmento 8: análisis acústico con praatfan | S4 | worker | `16be94f` + integración |
+| T6 | Segmento 9: ELAN ↔ TextGrid con Pyodide | S5 | worker | `254f517` + integración |
+| T7 | Segmento 10: mapa de lenguas desde Glottolog | S6 | worker | `eba5a86` + integración |
 | T8 | Integración: rutas, catálogo, avisos de terceros, puertas | S3–S7 | inline | pendiente |
 | T9 | Escaneo final de seguridad, fiabilidad, a11y, legibilidad y UX/UI | S8 | inline + verifier | pendiente |
 | T10 | Merge a `main` y despliegue en Vercel | S9 | inline | pendiente |
@@ -69,3 +69,18 @@ Cada segmento se trabajó en su propio worktree y su propia rama, y se integra a
 - **L4.** Los cuatro segmentos se trabajaron en worktrees separados con superficies de edición disjuntas y
   un módulo de mensajes propio por herramienta, para que dos workers no choquen en el mismo archivo. La
   integración de rutas, catálogo y avisos de terceros queda del lado del padre.
+- **L5.** Los cuatro workers corrieron en paralelo, cada uno en su worktree y su rama, y los cuatro
+  volvieron con rojo observado y sus puertas en verde. La integración fue de a uno: fusión, ajustes de
+  ruta y catálogo, y puertas completas antes de seguir con el siguiente.
+- **L6.** Dos defectos que solo aparecieron al ejecutar en un navegador de verdad, ninguno visible en las
+  pruebas unitarias de los workers:
+  1. **Pyodide no arrancaba**: con `indexURL` en `/pyodide/` la ruta vale para `fetch` y para `import()`,
+     y no como base de una URL: `loadPackage` reventaba con «Failed to construct 'URL': Invalid base
+     URL» y la página decía «motor no disponible». Se arregla resolviendo la base a URL absoluta.
+  2. **La CSP bloqueaba los atributos `style`**, y el sitio tenía 17 escritos a mano más uno generado
+     desde JavaScript (el centinela del masthead) y otro en el SVG del tracto vocal. Un atributo `style`
+     bloqueado no es un matiz: es un campo sin ancho o un margen que desaparece. Se sustituyeron por
+     utilidades en `src/styles/utilities.css` y `verify-build` ahora **falla** si una página publicada
+     trae uno, para que no vuelva.
+- **L7.** El lockfile volvió a podarse en los cuatro worktrees (npm 12, ver la trampa en `docs/GUIDE.md`).
+  La integración conserva el lock del árbol principal y lo regenera con npm 10 al final.

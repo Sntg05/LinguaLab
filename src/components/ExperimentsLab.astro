@@ -1,0 +1,328 @@
+---
+/**
+ * ExperimentsLab: constructor y ejecutor de experimentos de psicolingüística.
+ *
+ * QUE HACE Y QUE NO PROMETE
+ *
+ * Carga estímulos de un CSV, arma una de las cuatro plantillas, muestra el orden
+ * exacto que va a ver el participante y lo ejecuta con jsPsych. Al terminar
+ * descarga un CSV con la respuesta, el tiempo, la semilla y la versión.
+ *
+ * Lo que NO promete: tiempos de reacción de laboratorio (dependen del navegador
+ * y del equipo, y el aviso está en la página, no solo en un comentario), ni
+ * corrección automática de respuestas —la decisión léxica registra lo que la
+ * persona respondió y la condición del CSV dice cuál era la esperada—.
+ *
+ * NADA SALE DEL EQUIPO. Los estímulos se pegan en un campo, los audios se cargan
+ * con una URL de objeto y la única salida son los archivos descargados (ADR
+ * 0002). No hay `fetch` ni `FormData` en ningún punto de esta herramienta.
+ *
+ * POR QUE EL MARCADO LLEVA GANCHOS `data-explab-*`
+ *
+ * `src/scripts/experimentos/index.ts` trabaja por esos ganchos y construye todo
+ * el DOM con nodos: ni una etiqueta visible se arma con `innerHTML`, así que la
+ * CSP sin `unsafe-inline` no se toca y el texto de un CSV no puede convertirse en
+ * marcado.
+ *
+ * POR QUE EL ADAPTADOR SE CARGA AL EJECUTAR Y NO AL ABRIR
+ *
+ * jsPsych y sus plugins pesan más que todo el resto de la página junta. Se piden
+ * a un trozo propio del mismo sitio —nunca a un CDN— en el momento en que alguien
+ * pulsa «Ejecutar», así que quien solo está leyendo la página no lo descarga.
+ * Esa importación dinámica vive aquí, en el `<script>` del componente, y es el
+ * único punto de la interfaz que menciona `@lingualab/adapters`: el controlador
+ * recibe el ejecutor como función (ver `src/scripts/experimentos/runner.ts`).
+ */
+import { t, type Locale } from "../i18n";
+import { EXPERIMENTS_STRING_KEYS } from "../scripts/experimentos/strings";
+import { DEFAULT_TEMPLATE, TEMPLATES } from "../scripts/experimentos/templates";
+import sitePackage from "../../package.json";
+import "../styles/features/experiments.css";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+/**
+ * Solo las cadenas que el controlador escribe mientras trabaja. Se serializan ya
+ * traducidas: el diccionario completo no viaja al navegador (ADR 0004).
+ */
+const runtimeStrings = Object.fromEntries(
+  EXPERIMENTS_STRING_KEYS.map((key) => [key, t(locale, key)]),
+);
+
+/** El texto de instrucciones por defecto de cada plantilla, ya traducido. */
+const defaultInstructions = Object.fromEntries(
+  TEMPLATES.map((template) => [template.kind, t(locale, template.instructionsKey)]),
+);
+---
+
+<section
+  class="section"
+  data-explab
+  data-running="false"
+  data-explab-strings={JSON.stringify(runtimeStrings)}
+  data-explab-defaults={JSON.stringify(defaultInstructions)}
+  data-explab-version={sitePackage.version}
+>
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{t(locale, "exp.eyebrow")}</span>
+      <h1>{t(locale, "exp.title")}</h1>
+      <p class="u-lead">{t(locale, "exp.sub")}</p>
+      <!-- Los dos avisos van arriba y visibles: quien va a pedirle a alguien que
+           haga una tarea tiene que saberlo antes de empezar, no después. -->
+      <p class="callout">{t(locale, "exp.privacy")}</p>
+      <p class="callout callout--warn">{t(locale, "exp.precision")}</p>
+    </div>
+
+    <div class="explab">
+      <!-- ---------------------------- Estímulos ---------------------------- -->
+      <section class="explab__panel" aria-labelledby="exp-load-title">
+        <h2 class="explab__title" id="exp-load-title">{t(locale, "exp.load.title")}</h2>
+        <p class="explab__note">{t(locale, "exp.load.note")}</p>
+
+        <div class="explab__field">
+          <label class="explab__label" for="exp-stimuli">{t(locale, "exp.load.paste")}</label>
+          <textarea
+            id="exp-stimuli"
+            data-explab-stimuli
+            rows="8"
+            spellcheck="false"
+            dir="auto"
+            aria-describedby="exp-columns-note"
+            placeholder={t(locale, "exp.load.pasteHint")}
+          ></textarea>
+        </div>
+
+        <div class="explab__field">
+          <label class="explab__label" for="exp-file">{t(locale, "exp.load.file")}</label>
+          <input id="exp-file" type="file" data-explab-file accept=".csv,.txt,text/csv,text/plain" />
+        </div>
+
+        <p class="explab__note" id="exp-columns-note">
+          <strong>{t(locale, "exp.load.columns")}:</strong>
+          <span class="mono">id, condition, text, audio</span>.
+          {t(locale, "exp.load.columnsNote")}
+        </p>
+
+        <div class="explab__field">
+          <label class="explab__label" for="exp-audio">{t(locale, "exp.load.audio")}</label>
+          <input id="exp-audio" type="file" data-explab-audio accept="audio/*" multiple />
+          <p class="explab__hint">{t(locale, "exp.load.audioNote")}</p>
+        </div>
+
+        <p class="explab__status" data-explab-status role="status" aria-live="polite" data-state="idle">
+          {t(locale, "exp.status.ready")}
+        </p>
+      </section>
+
+      <!-- ------------------------ Plantilla y diseño ----------------------- -->
+      <section class="explab__panel" aria-labelledby="exp-design-title">
+        <h2 class="explab__title" id="exp-design-title">{t(locale, "exp.design.title")}</h2>
+
+        <fieldset class="explab__templates">
+          <legend class="explab__label">{t(locale, "exp.design.template")}</legend>
+          {TEMPLATES.map((template) => (
+            <label class="explab__template">
+              <input
+                type="radio"
+                name="exp-template"
+                value={template.kind}
+                checked={template.kind === DEFAULT_TEMPLATE}
+              />
+              <span class="explab__template-text">
+                <span>{t(locale, template.labelKey)}</span>
+                <span class="explab__hint" data-explab-note={template.kind} hidden>
+                  {t(locale, template.noteKey)}
+                </span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+
+        <div class="explab__numbers">
+          <div class="explab__field">
+            <label class="explab__label" for="exp-seed">{t(locale, "exp.design.seed")}</label>
+            <input id="exp-seed" type="number" min="0" step="1" data-explab-seed inputmode="numeric" />
+          </div>
+          <div class="explab__field">
+            <label class="explab__label" for="exp-blocks">{t(locale, "exp.design.blocks")}</label>
+            <input
+              id="exp-blocks"
+              type="number"
+              min="1"
+              step="1"
+              value="1"
+              data-explab-blocks
+              inputmode="numeric"
+            />
+          </div>
+          <div class="explab__field">
+            <label class="explab__label" for="exp-practice">{t(locale, "exp.design.practice")}</label>
+            <input
+              id="exp-practice"
+              type="number"
+              min="0"
+              step="1"
+              value="0"
+              data-explab-practice
+              inputmode="numeric"
+            />
+          </div>
+        </div>
+        <p class="explab__hint">{t(locale, "exp.design.seedHint")}</p>
+
+        <div class="explab__field">
+          <label class="explab__label" for="exp-instructions">{t(locale, "exp.design.instructions")}</label>
+          <textarea
+            id="exp-instructions"
+            data-explab-instructions
+            rows="6"
+            dir="auto"
+            aria-describedby="exp-instructions-hint"
+          ></textarea>
+          <p class="explab__hint" id="exp-instructions-hint">{t(locale, "exp.design.instructionsHint")}</p>
+          <div class="explab__actions">
+            <button class="btn btn--quiet btn--sm" type="button" data-explab-instructions-reset>
+              {t(locale, "exp.design.instructionsReset")}
+            </button>
+          </div>
+        </div>
+
+        <fieldset class="explab__field">
+          <legend class="explab__label">{t(locale, "exp.design.scale")}</legend>
+          <div class="explab__numbers">
+            <div class="explab__field">
+              <label class="explab__label" for="exp-scale-left">{t(locale, "exp.design.scaleLeft")}</label>
+              <input id="exp-scale-left" type="text" data-explab-scale-left dir="auto" />
+            </div>
+            <div class="explab__field">
+              <label class="explab__label" for="exp-scale-right">{t(locale, "exp.design.scaleRight")}</label>
+              <input id="exp-scale-right" type="text" data-explab-scale-right dir="auto" />
+            </div>
+          </div>
+        </fieldset>
+      </section>
+
+      <!-- ---------------------------- Vista previa -------------------------- -->
+      <section class="explab__panel explab__panel--wide" aria-labelledby="exp-preview-title">
+        <h2 class="explab__title" id="exp-preview-title">{t(locale, "exp.preview.title")}</h2>
+        <p class="explab__note">{t(locale, "exp.preview.note")}</p>
+        <div class="explab__actions">
+          <button class="btn btn--quiet" type="button" data-explab-preview>
+            {t(locale, "exp.preview.refresh")}
+          </button>
+          <button class="btn btn--quiet" type="button" data-explab-spec>
+            {t(locale, "exp.preview.spec")}
+          </button>
+        </div>
+        <p class="explab__hint">{t(locale, "exp.preview.specNote")}</p>
+        <p class="explab__note" data-explab-preview-count>{t(locale, "exp.preview.empty")}</p>
+        <div class="table-scroll">
+          <table class="explab__table">
+            <thead>
+              <tr>
+                <th scope="col">{t(locale, "exp.preview.order")}</th>
+                <th scope="col">{t(locale, "exp.preview.block")}</th>
+                <th scope="col">{t(locale, "exp.preview.condition")}</th>
+                <th scope="col">{t(locale, "exp.preview.text")}</th>
+              </tr>
+            </thead>
+            <tbody data-explab-preview-body></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ----------------------------- Ejecución --------------------------- -->
+      <section class="explab__panel explab__panel--stage" aria-labelledby="exp-run-title">
+        <h2 class="explab__title" id="exp-run-title">{t(locale, "exp.run.title")}</h2>
+        <p class="explab__note">{t(locale, "exp.run.note")}</p>
+        <div class="explab__actions">
+          <label class="explab__template">
+            <input type="checkbox" data-explab-fullscreen />
+            <span>{t(locale, "exp.run.fullscreen")}</span>
+          </label>
+        </div>
+        <div class="explab__actions">
+          <button class="btn btn--primary" type="button" data-explab-run>
+            {t(locale, "exp.run.start")}
+          </button>
+          <button class="btn btn--quiet" type="button" data-explab-abort hidden>
+            {t(locale, "exp.run.abort")}
+          </button>
+        </div>
+        <div class="explab__stage" data-explab-stage aria-live="polite" aria-label={t(locale, "exp.run.stage")}></div>
+      </section>
+
+      <!-- ----------------------------- Resultados -------------------------- -->
+      <section class="explab__panel" aria-labelledby="exp-results-title">
+        <h2 class="explab__title" id="exp-results-title">{t(locale, "exp.results.title")}</h2>
+        <p class="explab__note">{t(locale, "exp.results.note")}</p>
+        <p class="explab__hint">{t(locale, "exp.results.columns")}</p>
+        <p class="explab__note" data-explab-participant aria-live="polite"></p>
+        <div class="explab__actions">
+          <button class="btn btn--primary" type="button" data-explab-download disabled>
+            {t(locale, "exp.results.download")}
+          </button>
+        </div>
+      </section>
+
+      <!-- ------------------------ Ayuda y consentimiento -------------------- -->
+      <section class="explab__panel explab__panel--wide" aria-labelledby="exp-help-title">
+        <h2 class="explab__title" id="exp-help-title">{t(locale, "exp.help.title")}</h2>
+        <ul class="explab__note">
+          <li>{t(locale, "exp.help.twoafc")}</li>
+          <li>{t(locale, "exp.help.spr")}</li>
+          <li>{t(locale, "exp.help.lexical")}</li>
+          <li>{t(locale, "exp.help.rt")}</li>
+        </ul>
+        <h2 class="explab__title">{t(locale, "exp.consent.title")}</h2>
+        <p class="explab__hint">{t(locale, "exp.consent.note")}</p>
+        <ul class="explab__note">
+          <li>{t(locale, "exp.consent.item1")}</li>
+          <li>{t(locale, "exp.consent.item2")}</li>
+          <li>{t(locale, "exp.consent.item3")}</li>
+          <li>{t(locale, "exp.consent.item4")}</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { lingualab } from "../composition-root";
+  import { safeInit } from "../scripts/core/safe";
+  import { initExperimentsLab } from "../scripts/experimentos/index";
+  import {
+    createExperimentsStrings,
+    parseExperimentsStrings,
+    parseExperimentDefaults,
+  } from "../scripts/experimentos/strings";
+
+  const root = document.querySelector<HTMLElement>("[data-explab]");
+
+  if (root !== null) {
+    const strings = createExperimentsStrings(parseExperimentsStrings(root.dataset.explabStrings));
+    const defaults = parseExperimentDefaults(root.dataset.explabDefaults);
+    const toolVersion = root.dataset.explabVersion ?? "0.0.0";
+
+    // Un fallo al montar no puede llevarse la página: safeInit lo contiene y lo
+    // nombra en la consola.
+    safeInit("experiments lab", () =>
+      initExperimentsLab({
+        strings,
+        defaults,
+        toolVersion,
+        // El motor se pide al composition root, que es el único archivo de
+        // `src/` que conoce los adaptadores. El `import()` dinámico de jsPsych
+        // vive allí: `dependency-cruiser` no analiza `.astro`, así que una
+        // importación de `@lingualab/adapters` dentro de un componente no la
+        // vería ninguna regla. Ver `src/lib/architecture.test.ts`.
+        createRunner: (request) => lingualab.createExperimentRunner(request),
+      }),
+    );
+  }
+</script>

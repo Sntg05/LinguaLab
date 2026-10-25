@@ -16,6 +16,62 @@
     border: 0;
   }
 
+  /* Utilidades que sustituyen atributos `style` en el marcado.
+     POR QUE EXISTEN: la CSP es `style-src 'self'` con hashes, y eso bloquea los
+     atributos `style` del HTML —medido en Chromium, con su mensaje en consola—.
+     Un `style="width: 5rem"` no es un detalle de estilo que se pierde: es un
+     campo que se queda sin su ancho, o un margen que desaparece. Lo comprueba
+     `scripts/verify-build.mjs`, que falla si una página publicada trae uno. */
+  .u-text-2xs {
+    font-size: var(--step--2);
+  }
+
+  .u-mt-2xs {
+    margin-block-start: var(--space-2xs);
+  }
+
+  .u-mt-s {
+    margin-block-start: var(--space-s);
+  }
+
+  .u-mt-m {
+    margin-block-start: var(--space-m);
+  }
+
+  .u-mt-l {
+    margin-block-start: var(--space-l);
+  }
+
+  .u-w-4 {
+    width: 4rem;
+  }
+
+  .u-w-5 {
+    width: 5rem;
+  }
+
+  .u-w-9 {
+    width: 9rem;
+  }
+
+  .u-pointer {
+    cursor: pointer;
+  }
+
+  .u-basis-full {
+    flex-basis: 100%;
+  }
+
+  /* Centinela del masthead: un punto invisible fuera del flujo. Vive aqui y no
+     en un `style` inline porque la CSP bloquea los atributos de estilo. */
+  .u-sentinel {
+    position: absolute;
+    inset-block-start: 0;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+
   .u-muted {
     color: var(--ink-muted);
   }
