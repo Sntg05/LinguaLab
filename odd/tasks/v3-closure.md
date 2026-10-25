@@ -65,11 +65,11 @@ de una persona. Este documento cierra el trabajo técnico que no necesita a nadi
 | T6 | `limits.ts` para los topes de audio | S7 | inline | `8575385` |
 | T7 | Prueba de la rama de cuota agotada | S8 | inline | `c6c916a` |
 | T8 | La puerta falla ante `incomplete` sin motivo | S9 | inline | `5bf6e77` |
-| T9 | El núcleo devuelve código y datos; el texto se traduce | S10 | worker | pendiente |
+| T9 | El núcleo devuelve código y datos; el texto se traduce | S10 | worker | `571ac0c` |
 | T10 | Medir la línea base de lint y atribuir los avisos | S11 | inline | `2b90f06` |
 | T11 | Fijar las acciones de GitHub por SHA | S12 | inline | `59d6689` |
 | T12 | Cerrar los PRs de Dependabot con su motivo | S13 | inline | — (GitHub) |
-| T13 | Sincronizar documentos y correr las puertas completas | S14 | inline | pendiente |
+| T13 | Sincronizar documentos y correr las puertas completas | S14 | inline | `docs:` |
 
 ## Log
 
@@ -102,3 +102,12 @@ de una persona. Este documento cierra el trabajo técnico que no necesita a nadi
   token de la sesión tiene administración, así que el «no se puede desde este entorno» del documento de
   seguridad era falso— y el escaneo de secretos también. Eso no vive en el repositorio: vive en los
   ajustes del proyecto y queda escrito en `docs/SECURITY-REVIEW.md` con su fecha.
+- **L8.** La primera corrida de CI sobre la rama puso **rojo el paso hexagonal**: la prueba nueva de
+  los topes importaba `packages/core/src/data/textgrid.ts` por ruta profunda, y la regla
+  `no-reaching-into-core-internals` la atajó. El arreglo es un commit propio (`3ebb121`) que importa el
+  núcleo por su entrada pública. La corrida roja se deja en el historial a propósito: es la prueba de que
+  la regla funciona y de que la rama se verifica en el runner, no solo en local.
+- **L9.** T9 se delegó a `gentle-ai-worker` con las superficies de edición acotadas y volvió con rojo
+  observado en el núcleo y en la e2e antes del arreglo, y el verde después. Lo revisé leyendo el diff: el
+  núcleo no tiene un campo de prosa, el número de fila y las llaves de `{V}` se agregan en presentación, y
+  el inglés es traducción real.

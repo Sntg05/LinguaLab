@@ -13,7 +13,8 @@ main
  └─ PR1 feat/toolbox-v3-security      documentación y dependencias      ~316 líneas
      └─ PR2 feat/toolbox-v3-navigation navegación y catálogo            ~378 líneas
          └─ PR3 feat/toolbox-v3-languages lenguas de ejemplo             ~390 líneas
-             └─ PR4 feat/toolbox-v3-audio  visor de audio y TextGrid     (pendiente)
+             └─ PR4 feat/toolbox-v3-audio  visor de audio y TextGrid     ~745 líneas
+                 └─ PR5 feat/toolbox-v3-closure cierre de pendientes     ~1232 líneas
 ```
 
 ---
@@ -164,10 +165,64 @@ npm run dev     # /visualizador
 
 ---
 
+---
+
+## PR5 — El cierre: los pendientes y los puntos abiertos de seguridad
+
+**Rama:** `feat/toolbox-v3-closure` · **Base:** `feat/toolbox-v3-audio` (`4505ddf`)
+**Depende de:** PR4. **Lo sigue:** nada; cierra la entrega.
+**Commits:** los de la rama, `5c183ad`…`3ebb121` (19 commits).
+
+**Qué entra.** Todo lo que `docs/PENDING.md` y `docs/SECURITY-REVIEW.md` tenían abierto y no necesitaba
+a una persona:
+
+- **P1** — el núcleo dejó de redactar: `OrthographyIssue` es una unión de **código y datos** y la frase se
+  arma en la capa de presentación, con seis claves nuevas por idioma y una e2e que carga la misma tabla
+  rota en las dos rutas y afirma que ninguna salida contiene texto del otro idioma.
+- **P3** — la rama de cuota agotada, provocada interceptando `IDBObjectStore.prototype.put`.
+- **P8** — `scripts/lint-baseline.mjs`: el reparto de los avisos del linter se mide, no se infiere.
+- **P12** — la puerta falla ante un `incomplete` sin motivo textual; `/arboles` queda exceptuado por
+  nombre y con la medición (0 `<li>` al cargar, 1 después de dibujar).
+- **P13** — las cinco inexactitudes documentales, corregidas contra el archivo que las desmentía.
+- **P16** — la puerta e2e arranca el preview con `--ignore-lock`, sin variables borradas.
+- **P18** — `point-out-of-tier` en el codec de TextGrid, con su entrada en el contrato del puerto.
+- **P19** — `src/scripts/audio/limits.ts`, con prueba en Node puro.
+- **O1–O6** — auditoría de dependencias en CI, doce referencias de acciones fijadas por SHA, CodeQL,
+  alertas de Dependabot y escaneo de secretos activados, `frame-ancestors` declarado como lo que es, y
+  TypeScript 7 cerrado como decisión.
+
+**Fuera de alcance.** P5 y P20 (interfaz nueva, piden decisión de producto), P9 (hablantes o fuentes),
+P11 (medir 186 nodos desde píxeles: es un método nuevo, no un arreglo), P14 (recompilar el wasm cambia el
+binario auditado) y P17 (necesita Praat). Fusionar y abrir los PRs: decisión de la dueña.
+
+**Cómo probarlo a mano.**
+
+```bash
+npm ci
+npx playwright install chromium
+npm run verify:all                                  # 943 unitarias, 0 errores de tipos, build verificado
+npm run test:e2e                                    # 88, incluidas 50 de accesibilidad
+npm run audit                                       # 0 en producción y 0 en desarrollo
+npm run lint:baseline                               # 42 heredados, 5 nuevos
+```
+
+1. `/en/ortografia`: cargá una tabla con un error y mirá que la oración esté **en inglés**, no solo la
+   insignia.
+2. `/arboles`: la lista de comprobaciones se llena al pulsar «Dibujar»; la puerta no la marca.
+3. `/seguridad`: el apartado «Lo que esta política no puede hacer aquí» explica `frame-ancestors`.
+4. En GitHub: los siete PRs de Dependabot cerrados con su motivo, y la pestaña de seguridad con
+   Dependabot, escaneo de secretos y `push protection` activos.
+
+**Riesgo de reversión.** Medio: toca el contrato de errores del núcleo (P1) y los flujos de CI. Se revierte
+entero sin migración de datos. La rama se verificó en el runner: la primera corrida puso rojo el paso
+hexagonal por una importación profunda de una prueba nueva, y esa corrida es la prueba de que la regla
+funciona.
+
+---
+
 ## Lo que no entra en ningún PR de la cadena
 
-- Fijar las acciones de GitHub por SHA (O2): exige un push de verificación y no hay forma de probarlo
-  en local. Se hace en una rama propia, mirando el CI.
-- `npm audit` como paso de CI (O1), CodeQL (O5), alertas de Dependabot (O4, requieren permiso de
-  administración), `frame-ancestors` real (O3, requiere un host con cabeceras) y TypeScript 7 (O6).
+- Nada de seguridad: O1, O2, O4, O5 y O6 están resueltos en PR5, y O3 queda declarado donde se afirmaba
+  lo contrario. La cabecera real de `frame-ancestors` sigue esperando un host que la permita, y eso no es
+  código.
 - Las herramientas de los segmentos 7 a 11 del prompt: siguen fuera del alcance autorizado.

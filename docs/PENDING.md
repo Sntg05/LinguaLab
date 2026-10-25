@@ -27,9 +27,17 @@ npm run verify:all    # lint, formato, tipos, reglas hexagonales, pruebas, build
 npx playwright test   # e2e; requiere el puerto 4321 LIBRE (ver P7)
 ```
 
-**Estado al escribir esto:** rama `main`, sincronizada con `origin` y con el árbol limpio,
-`verify:all` en verde, 69 e2e en verde, 23 páginas sin violaciones de axe en los dos temas.
-Los números exactos del día viven en `docs/STATUS.md`, no acá.
+**Estado al escribir esto:** `main` es lo publicado y la entrega v3 sigue en su cadena de ramas, sin
+fusionar. Sobre la rama de cierre (`feat/toolbox-v3-closure`): `verify:all` en verde —**943 pruebas
+unitarias en 55 archivos**, 0 errores de tipos, 198 módulos y 452 dependencias sin violaciones—,
+**88 e2e** en verde (50 de accesibilidad sobre 25 páginas × 2 temas), `npm run audit` en 0 y
+`npm run lint` con 0 errores y 47 avisos, de los cuales 42 ya están en `main`. Los números exactos del día
+viven en `docs/STATUS.md`, no acá; estas cifras se midieron el 2026-10-25.
+
+**Qué está cerrado y qué no.** De P1 a P21, están cerradas con su medición al lado: P1, P3, P8, P12, P13,
+P16, P18 y P19. Siguen abiertas P2, P4, P5, P6, P7, P9, P10, P11, P14, P15, P17, P20 y P21, por los
+motivos que cada una declara —decisión de producto, hablantes o fuentes, un programa externo, un binario
+que se recompila, o un método de medición que todavía no existe—.
 
 ---
 
@@ -60,6 +68,23 @@ seis traducciones van a `src/i18n/messages/es.ts` y `en.ts` como claves tipadas,
 `/en/ortografia` y afirme que **ninguna de las dos salidas contiene texto del otro idioma** —no basta con
 comprobar la insignia. Y las 7 suites de contrato del núcleo siguen en verde, porque el tipo de
 `OrthographyIssue` cambia.
+
+**Estado: cerrado.** `OrthographyIssue` es ahora una **unión discriminada de código y datos**, sin un
+campo de prosa: `grapheme` para `duplicate-rule` y `contradictory-rule`, `className` para
+`undefined-class`, `symbol` para `symbol-outside-ipa`, y nada extra para `empty-grapheme` y
+`unreachable-rule`. `OrthographyIssueCode` se deriva del tipo, así que las dos listas no pueden divergir.
+La frase se arma en `src/scripts/ortografia/render.ts` con seis claves nuevas en `es.ts` y `en.ts`, y un
+`ISSUE_KEYS satisfies Record<OrthographyIssue["code"], EditorStringKey>` hace fallar el typecheck si un
+código se queda sin frase o una frase nombra una clave que el componente no serializa. El número de fila y
+las llaves de `{V}` se agregan en presentación: son notación de la tabla, no datos que el validador deba
+inventar.
+
+Lo que se midió, y con qué: rojo observado en el núcleo antes del cambio (`expected [...] to deeply equal
+['code','ruleIndex','severity']`, con `+ "message"` en lo recibido) y en la e2e (la oración seguía
+llegando redactada desde el núcleo); después, **943 pruebas unitarias en 55 archivos** y **88 e2e** en
+verde, incluidas las de `table-invalid` y la de `/en/ortografia` que afirma las seis oraciones en inglés y
+la ausencia de las seis en español. La sección de validación de las dos rutas queda afirmada oración por
+oración.
 
 ---
 
@@ -562,6 +587,13 @@ repositorio.
 `/browser`, que sí tiene el otro candidato). Si aparece, fijarla y comprobar que la advertencia
 desaparece. Criterio de aceptación: `npm run build` no menciona `node:fs` y `e2e/phonemizer.spec.ts`
 sigue en verde.
+
+**Corrección medida (2026-10-25).** El build no emite **una** advertencia de externalización sino tres:
+`node:fs/promises` y `node:url` desde `espeak-phonemizer/dist/espeak.mjs`, y `node:module` desde
+`.../wasm/espeak-ng.mjs`. El diagnóstico de esta entrada vale para las tres —el paquete sirve Node y
+navegador desde la misma entrada, y en el navegador ninguna se usa—, pero el criterio de aceptación se
+queda corto si solo mira `node:fs`: las tres desaparecen juntas cuando el paquete publique su entrada de
+navegador, o no desaparece ninguna.
 
 ## P16 — La puerta e2e se cae sola si la lanza un agente de IA
 
