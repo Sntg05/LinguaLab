@@ -50,8 +50,8 @@ Cada segmento se trabajó en su propio worktree y su propia rama, y se integra a
 | T5 | Segmento 8: análisis acústico con praatfan | S4 | worker | `16be94f` + integración |
 | T6 | Segmento 9: ELAN ↔ TextGrid con Pyodide | S5 | worker | `254f517` + integración |
 | T7 | Segmento 10: mapa de lenguas desde Glottolog | S6 | worker | `eba5a86` + integración |
-| T8 | Integración: rutas, catálogo, avisos de terceros, puertas | S3–S7 | inline | pendiente |
-| T9 | Escaneo final de seguridad, fiabilidad, a11y, legibilidad y UX/UI | S8 | inline + verifier | pendiente |
+| T8 | Integración: rutas, catálogo, avisos de terceros, puertas | S3–S7 | inline | `d4da59f`, `25f6625`, `0e932b3`, `0b97348`, `55f751e` |
+| T9 | Escaneo final de seguridad, fiabilidad, a11y, legibilidad y UX/UI | S8 | inline | `bdd65da` |
 | T10 | Merge a `main` y despliegue en Vercel | S9 | inline | pendiente |
 
 ## Log
