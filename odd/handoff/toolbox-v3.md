@@ -3,9 +3,13 @@
 Documento de continuidad. Existe para que otra sesión —o la misma persona en otra computadora— pueda
 retomar este trabajo sin reconstruirlo del historial de commits ni de una conversación que ya no está.
 
-**Estado:** una cadena de cinco ramas, **sin fusionar y sin pull requests abiertos, a propósito**.
-`main` **no se tocó**: sigue en `1ee15c6`, que es lo publicado. Las ramas están en `origin` para poder
-traerlas desde cualquier máquina.
+**Estado: fusionado.** `main` tiene todo desde el 25 de octubre de 2026 (`99eed93`) y Vercel publica
+desde ahí en `https://lingualab-beta.vercel.app`, con las cabeceras de `vercel.json` verificadas en vivo.
+La versión es la **3.1.0**. GitHub Pages **ya no se publica**: su flujo se retiró en el ADR 0009 porque el
+dominio que el README anunciaba como canónico no era este sitio.
+
+Este documento se conserva porque cuenta cómo se llegó hasta acá y qué se aprendió en el camino; para
+trabajar hoy alcanza con `git checkout main`.
 
 ```
 main (1ee15c6)

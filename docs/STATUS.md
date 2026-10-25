@@ -5,13 +5,12 @@ porque una página que exagera lo que hace es la parte menos fiable de un proyec
 después necesita saber qué se probó y qué se supuso sin tener que reconstruirlo del historial de
 commits.
 
-Rama: `main` es lo publicado. La entrega v3 —visor de audio, catálogo por nivel de análisis y demos de
-portugués y wayuunaiki— vive en la cadena `feat/toolbox-v3-security` → `-navigation` → `-languages` →
-`-audio` → `feat/toolbox-v3-closure`, **sin fusionar y sin pull requests abiertos a propósito**. La última
-es la que cierra los pendientes de `docs/PENDING.md` y los puntos abiertos de la revisión de seguridad.
-Para retomar ese trabajo en otra sesión o en otra computadora:
-[`odd/handoff/toolbox-v3.md`](../odd/handoff/toolbox-v3.md), que trae el estado, las trampas del entorno,
-el mapa de archivos y las decisiones que esperan a una persona.
+Rama: **`main` tiene todo**, y es lo que se publica en `https://lingualab-beta.vercel.app`. El 25 de
+octubre de 2026 se fusionó de una vez la cadena completa —`feat/toolbox-v3-security` → `-navigation` →
+`-languages` → `-audio` → `-closure` → `feat/v3-segments-7-11`—, con los segmentos 7 a 11 y el cierre de
+`docs/PENDING.md` y `docs/SECURITY-REVIEW.md`. La versión es la **3.1.0**. El estado que queda, las
+trampas del entorno, el mapa de archivos y las decisiones que esperan a una persona están en
+[`odd/handoff/toolbox-v3.md`](../odd/handoff/toolbox-v3.md).
 
 El detalle de las decisiones está en [`docs/adr/`](adr/), y el mapa del hexágono en
 [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).

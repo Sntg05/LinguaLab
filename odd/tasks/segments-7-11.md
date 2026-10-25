@@ -52,7 +52,7 @@ Cada segmento se trabajó en su propio worktree y su propia rama, y se integra a
 | T7 | Segmento 10: mapa de lenguas desde Glottolog | S6 | worker | `eba5a86` + integración |
 | T8 | Integración: rutas, catálogo, avisos de terceros, puertas | S3–S7 | inline | `d4da59f`, `25f6625`, `0e932b3`, `0b97348`, `55f751e` |
 | T9 | Escaneo final de seguridad, fiabilidad, a11y, legibilidad y UX/UI | S8 | inline | `bdd65da` |
-| T10 | Merge a `main` y despliegue en Vercel | S9 | inline | pendiente |
+| T10 | Merge a `main` y despliegue en Vercel | S9 | inline | `99eed93` (fast-forward) |
 
 ## Log
 
@@ -84,3 +84,23 @@ Cada segmento se trabajó en su propio worktree y su propia rama, y se integra a
      trae uno, para que no vuelva.
 - **L7.** El lockfile volvió a podarse en los cuatro worktrees (npm 12, ver la trampa en `docs/GUIDE.md`).
   La integración conserva el lock del árbol principal y lo regenera con npm 10 al final.
+- **L8.** Escaneo final, con lo que encontró y lo que se corrigió:
+  - **Seguridad**: `npm audit` 0/0; sin secretos; cero `innerHTML`/`eval` (eran solo menciones en
+    comentarios y una aserción); ninguna petición a terceros (la única URL absoluta en el código es la
+    ficha de Glottolog, que se abre como enlace, no se pide); cabeceras reales verificadas **en vivo** con
+    `curl -I` contra Vercel; `connect-src 'self'` intacto; Dependabot, actualizaciones de seguridad,
+    escaneo de secretos y `push protection` activos; rama `main` protegida.
+  - **Fiabilidad**: 1168 unitarias y 117 e2e; los caminos de fallo de los tres motores (wasm ausente,
+    Pyodide que no arranca, jsPsych que no carga) muestran un mensaje y no rompen la página; los tres
+    workers se terminan con `dispose`/`terminate`.
+  - **Accesibilidad**: axe en 27 páginas × 2 temas, más una prueba de desborde a 360 px. Cuatro defectos
+    reales encontrados y corregidos: región desplazable sin foco, dos tablas con encabezados y sin filas,
+    dos `label` sobre el mismo control y el desborde de `/fono`.
+  - **Legibilidad**: 0 errores de lint; los 6 avisos nuevos son de complejidad y están atribuidos con
+    `lint:baseline`; los documentos dicen lo que el código hace.
+  - **UX/UI**: revisión visual de las páginas nuevas en claro, oscuro y móvil; tres defectos corregidos:
+    los campos de archivo nativos en inglés dentro de una página en español, el ancho de la tabla de
+    mediciones (P22, declarado) y la falta de un estado vacío en las tablas.
+- **L9.** El merge fue fast-forward a `main` y el push disparó CI (verde) y el despliegue de Vercel. Se
+  verificó en vivo: `/lenguas`, `/elan` y `/experimentos` responden `200`, la versión desplegada es
+  `3.1.0` y las seis cabeceras de seguridad llegan en la respuesta.
