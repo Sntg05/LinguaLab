@@ -21,6 +21,11 @@ on:
       # cada push porque es la que se prueba en local y la que se va a desplegar
       # cuando su duena lo autorice. Ver `odd/handoff/toolbox-v3.md`.
       - feat/toolbox-v3-security-languages
+      # El cierre de la entrega: los pendientes de `docs/PENDING.md` y los
+      # puntos abiertos de `docs/SECURITY-REVIEW.md`. Se verifica en cada push
+      # por la misma razon que las anteriores, y ademas porque aqui se fijan las
+      # acciones por SHA (O2): eso no se puede probar en local.
+      - feat/toolbox-v3-closure
   pull_request:
   workflow_dispatch:
 
@@ -38,15 +43,29 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      # Las acciones van fijadas por SHA completo, no por etiqueta. Una etiqueta
+      # como `@v4` es una referencia movible: quien controle la accion puede
+      # moverla y ejecutar codigo en el runner con el token del proyecto. El
+      # comentario con la version mayor queda al lado para que Dependabot siga
+      # proponiendo subidas y para que un humano lea que version es. Ver O2 en
+      # `docs/SECURITY-REVIEW.md`.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
 
       - name: Install dependencies
         run: npm ci
+
+      # La puerta no auditaba dependencias: un aviso nuevo no rompia nada y
+      # nadie se enteraba hasta mirar el panel. Bloquea solo el arbol de
+      # produccion y solo a partir de `high`; el arbol de desarrollo se informa
+      # y no corta, porque sus avisos no llegan al artefacto publicado y
+      # bloquear por ellos convertiria cada aviso en una emergencia.
+      # Ver O1 en `docs/SECURITY-REVIEW.md`.
+      - name: Audit production dependencies
+        run: npm run audit
 
       # Va primero porque es lo más barato de arreglar: un problema de estilo o
       # de imports no debería hacer esperar a los pasos lentos que vienen detrás.
@@ -93,7 +112,7 @@ jobs:
       # cambia mientras no cambie la version de Playwright: la clave incluye el
       # lockfile, asi que una actualizacion la invalida sola.
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
@@ -110,7 +129,7 @@ jobs:
         run: npm run test:e2e
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: dist
           path: dist/

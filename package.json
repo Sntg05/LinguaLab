@@ -32,6 +32,7 @@
     "typecheck:packages": "npm run typecheck --workspaces --if-present",
     "typecheck": "npm run check && npm run typecheck:packages",
     "deps:check": "node scripts/deps-check.mjs",
+    "audit": "npm audit --omit=dev --audit-level=high && (npm audit --audit-level=low || true)",
     "verify:all": "npm run lint && npm run format:check && npm run typecheck:packages && npm run deps:check && npm run verify",
     "commitlint": "commitlint --edit",
     "prepare": "husky || true"
