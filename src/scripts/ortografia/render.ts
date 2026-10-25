@@ -19,7 +19,7 @@ import type {
 import type { LinguaLab } from "../../composition-root";
 import { describeRule, type RuleTextField } from "./rules";
 import type { EditableLayer } from "./state";
-import { type EditorStrings, format } from "./strings";
+import { type EditorStringKey, type EditorStrings, format } from "./strings";
 
 /**
  * One column of the rendered table. It is `RuleTextField` plus `priority`: the
@@ -298,6 +298,52 @@ export const renderCoverage = (
    Validation
    ------------------------------------------------------------------ */
 
+/**
+ * Which sentence belongs to which validator code.
+ *
+ * `satisfies Record<OrthographyIssueCode, EditorStringKey>` is the compile-time
+ * half of this change: a new code in the core cannot reach the page without a
+ * sentence, and a sentence cannot name a key that the component does not
+ * serialise. Before this, the core shipped the finished sentence and the page
+ * had nothing left to translate, which is how /en/ortografia ended up with an
+ * English badge over a Spanish sentence.
+ */
+const ISSUE_KEYS = {
+  "empty-grapheme": "ortho.issue.emptyGrapheme",
+  "duplicate-rule": "ortho.issue.duplicateRule",
+  "contradictory-rule": "ortho.issue.contradictoryRule",
+  "undefined-class": "ortho.issue.undefinedClass",
+  "symbol-outside-ipa": "ortho.issue.symbolOutsideIpa",
+  "unreachable-rule": "ortho.issue.unreachableRule",
+} as const satisfies Record<OrthographyIssue["code"], EditorStringKey>;
+
+/**
+ * Turn one issue into the sentence a person reads.
+ *
+ * The rule number is derived here and not in the core: it is presentation, it
+ * is one-based, and leaving it out of the contract is what keeps the core from
+ * having an opinion about how the editor counts its rows. The braces around a
+ * class name belong to the table's own notation, so they are added back here
+ * instead of travelling as data the validator would have had to invent.
+ */
+const issueMessage = (issue: OrthographyIssue, strings: EditorStrings): string => {
+  const rule = issue.ruleIndex + 1;
+  const template = strings.text(ISSUE_KEYS[issue.code]);
+
+  switch (issue.code) {
+    case "empty-grapheme":
+    case "unreachable-rule":
+      return format(template, { rule });
+    case "duplicate-rule":
+    case "contradictory-rule":
+      return format(template, { rule, grapheme: issue.grapheme });
+    case "undefined-class":
+      return format(template, { rule, className: `{${issue.className}}` });
+    case "symbol-outside-ipa":
+      return format(template, { rule, symbol: issue.symbol });
+  }
+};
+
 export const renderIssues = (
   container: HTMLElement,
   issues: readonly OrthographyIssue[],
@@ -324,9 +370,10 @@ export const renderIssues = (
       issue.severity === "error" ? "ortho.issue.error" : "ortho.issue.warning",
     );
     const message = element("span");
-    // The message comes from the core validator, which writes it in Spanish on
-    // purpose: it is the same sentence the specification and the tests use.
-    message.textContent = ` ${issue.message}`;
+    // The core sends a code plus the data the sentence needs, never the
+    // sentence itself: the badge and the text have to come from the same
+    // language, and only this layer knows which one that is.
+    message.textContent = ` ${issueMessage(issue, strings)}`;
     item.append(badge, message);
     list.append(item);
   }

@@ -218,3 +218,94 @@ test("compartir por URL pone la tabla en el hash y el enlace la vuelve a cargar"
   await expect(page.locator("[data-meta-name]")).toHaveValue("Espanol (demo, yeismo)");
   await expect(page.locator("[data-status]")).toContainText("enlace");
 });
+
+/**
+ * La misma tabla rota en las dos rutas del editor.
+ *
+ * Tiene un problema de cada uno de los seis codigos, porque el defecto que esta
+ * prueba vigila es que la frase salga en el idioma equivocado: si solo se
+ * mirara un codigo, los otros cinco podrian seguir cruzando el puerto
+ * redactados sin que nadie lo note. Los numeros de fila son datos, no prosa, y
+ * por eso la frase esperada los nombra.
+ */
+const BROKEN_TABLE = {
+  id: "tabla-rota-idioma",
+  languageId: "spa",
+  name: "Tabla rota",
+  version: 1,
+  classes: {},
+  rules: [
+    { grapheme: "a", ipa: "a" },
+    { grapheme: "", ipa: "x" },
+    { grapheme: "c", ipa: "s", after: "[aeiou]" },
+    { grapheme: "c", ipa: "s", after: "a" },
+    { grapheme: "g", ipa: "x", before: "{V}" },
+    { grapheme: "h", ipa: "\u6c49" },
+    { grapheme: "ch", ipa: "t\u0283" },
+    { grapheme: "ch", ipa: "t\u0283" },
+    { grapheme: "ch", ipa: "x" },
+  ],
+  status: "draft",
+};
+
+const ISSUE_SENTENCES: Readonly<Record<"es" | "en", readonly string[]>> = {
+  es: [
+    "La regla 2 tiene un grafema vacío y coincidiría en cualquier posición.",
+    "La regla 4 nunca puede ganar: una regla anterior con el mismo grafema cubre un contexto igual o más amplio.",
+    "La regla 5 referencia la clase {V}, que no está definida en la tabla.",
+    "La regla 6 contiene «\u6c49», que no forma parte del conjunto AFI esperado.",
+    "La regla 8 repite el grafema «ch» con el mismo contexto y la misma transcripción que una regla anterior.",
+    "La regla 9 contradice una regla anterior para «ch»: mismo contexto, transcripción distinta.",
+  ],
+  en: [
+    "Rule 2 has an empty grapheme, so it would match at any position.",
+    "Rule 4 can never win: an earlier rule with the same grapheme covers an equally broad or broader context.",
+    "Rule 5 references the class {V}, which the table does not define.",
+    "Rule 6 contains “\u6c49”, which is not part of the expected IPA set.",
+    "Rule 8 repeats the grapheme “ch” with the same context and the same transcription as an earlier rule.",
+    "Rule 9 contradicts an earlier rule for “ch”: same context, different transcription.",
+  ],
+};
+
+test("la misma tabla rota se explica en el idioma de su ruta, y nunca en el otro", async ({
+  page,
+}) => {
+  for (const [route, locale] of [
+    ["/ortografia", "es"],
+    ["/en/ortografia", "en"],
+  ] as const) {
+    await page.goto(route);
+    await expect(page.locator(EDITOR)).toBeVisible();
+
+    await page.locator("[data-import-json-file]").setInputFiles({
+      name: "rota.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(BROKEN_TABLE), "utf8"),
+    });
+
+    const issues = page.locator("[data-issues]");
+    await expect(issues.locator("li")).toHaveCount(6);
+
+    // Lo que se afirma es la ORACION, no la insignia: la insignia ya estaba
+    // traducida cuando el defecto existia.
+    for (const sentence of ISSUE_SENTENCES[locale]) {
+      await expect(issues).toContainText(sentence);
+    }
+
+    // Y ninguna de las dos salidas puede contener el texto del otro idioma.
+    const other = locale === "es" ? "en" : "es";
+    for (const sentence of ISSUE_SENTENCES[other]) {
+      await expect(issues).not.toContainText(sentence);
+    }
+
+    // Los marcadores bastan para descubrir una frase que se colara sin ser
+    // exactamente la esperada, que es como llegaria una traduccion a medias.
+    if (locale === "es") {
+      await expect(page.locator(EDITOR)).not.toContainText(/Rule \d/);
+      await expect(page.locator(EDITOR)).not.toContainText("can never win");
+    } else {
+      await expect(page.locator(EDITOR)).not.toContainText(/La regla \d/);
+      await expect(page.locator(EDITOR)).not.toContainText("nunca puede ganar");
+    }
+  }
+});

@@ -16,21 +16,52 @@ import { classReferenceName, patternCharacters } from "../engine/patterns";
  * sospecha que una persona debe poder ignorar con conocimiento de causa.
  */
 
-export type OrthographyIssueCode =
-  | "empty-grapheme"
-  | "duplicate-rule"
-  | "contradictory-rule"
-  | "undefined-class"
-  | "symbol-outside-ipa"
-  | "unreachable-rule";
-
-export interface OrthographyIssue {
-  readonly code: OrthographyIssueCode;
-  readonly severity: "error" | "warning";
-  readonly ruleIndex?: number;
-  /** Texto para la persona que usa el editor; por eso esta en espanol. */
-  readonly message: string;
+/** La fila que el editor muestra, contada sobre la lista plana de las dos capas. */
+interface IssueRow {
+  readonly ruleIndex: number;
 }
+
+/**
+ * Un problema de la tabla, como codigo y datos.
+ *
+ * El nucleo no redacta: la frase que lee la persona se arma en la capa de
+ * presentacion, que es la unica que sabe en que idioma esta la ruta. Un aviso
+ * que cruzara el puerto ya escrito lo haria en espanol, y la pagina inglesa
+ * mostraria una insignia traducida junto a una oracion que no lo esta.
+ *
+ * Los datos son exactamente los que la frase necesita: cada campo de mas seria
+ * una invitacion a afirmar algo que esta validacion no midio.
+ */
+export type OrthographyIssue =
+  | (IssueRow & { readonly code: "empty-grapheme"; readonly severity: "error" })
+  | (IssueRow & {
+      readonly code: "duplicate-rule";
+      readonly severity: "error";
+      /** Grafema de la regla repetida. */
+      readonly grapheme: string;
+    })
+  | (IssueRow & {
+      readonly code: "contradictory-rule";
+      readonly severity: "error";
+      /** Grafema sobre el que las dos reglas no coinciden. */
+      readonly grapheme: string;
+    })
+  | (IssueRow & {
+      readonly code: "undefined-class";
+      readonly severity: "error";
+      /** Nombre de la clase, sin las llaves con las que se escribe en la tabla. */
+      readonly className: string;
+    })
+  | (IssueRow & {
+      readonly code: "symbol-outside-ipa";
+      readonly severity: "warning";
+      /** El caracter exacto que no es AFI, para que la frase lo cite tal cual. */
+      readonly symbol: string;
+    })
+  | (IssueRow & { readonly code: "unreachable-rule"; readonly severity: "warning" });
+
+/** El codigo solo: la lista sale del tipo de arriba para que no pueda quedar corta. */
+export type OrthographyIssueCode = OrthographyIssue["code"];
 
 interface LocatedRule {
   readonly rule: G2PRule;
@@ -39,8 +70,6 @@ interface LocatedRule {
 
 const locate = (rules: readonly G2PRule[], offset: number): readonly LocatedRule[] =>
   rules.map((rule, position) => ({ rule, index: offset + position }));
-
-const describeRule = (index: number): string => `La regla ${index + 1}`;
 
 const findOutsideIpa = (ipa: string): string | null => {
   for (const char of ipa) {
@@ -94,9 +123,7 @@ const flagGroup = (
         code: duplicate ? "duplicate-rule" : "contradictory-rule",
         severity: "error",
         ruleIndex: entry.index,
-        message: duplicate
-          ? `${describeRule(entry.index)} repite el grafema "${entry.rule.grapheme}" con el mismo contexto y la misma transcripcion que una regla anterior.`
-          : `${describeRule(entry.index)} contradice una regla anterior para "${entry.rule.grapheme}": mismo contexto, transcripcion distinta.`,
+        grapheme: entry.rule.grapheme,
       });
       flagged.add(entry.index);
     }
@@ -212,7 +239,6 @@ const flagUnreachable = (
         code: "unreachable-rule",
         severity: "warning",
         ruleIndex: later.index,
-        message: `${describeRule(later.index)} nunca puede ganar: una regla anterior con el mismo grafema cubre un contexto igual o mas amplio.`,
       });
     }
   }
@@ -232,7 +258,6 @@ const validateLayer = (
         code: "empty-grapheme",
         severity: "error",
         ruleIndex: entry.index,
-        message: `${describeRule(entry.index)} tiene un grafema vacio y coincidiria en cualquier posicion.`,
       });
     }
 
@@ -246,7 +271,7 @@ const validateLayer = (
           code: "undefined-class",
           severity: "error",
           ruleIndex: entry.index,
-          message: `${describeRule(entry.index)} referencia la clase {${reference}}, que no esta definida en la tabla.`,
+          className: reference,
         });
       }
     }
@@ -257,7 +282,7 @@ const validateLayer = (
         code: "symbol-outside-ipa",
         severity: "warning",
         ruleIndex: entry.index,
-        message: `${describeRule(entry.index)} contiene "${outside}", que no forma parte del conjunto AFI esperado.`,
+        symbol: outside,
       });
     }
   }

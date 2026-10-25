@@ -60,6 +60,38 @@ describe("createSaveOrthographyTable", () => {
       expect(listed.value).toHaveLength(0);
     }
   });
+
+  it("el rechazo sigue siendo table-invalid y cada incidencia llega como codigo y datos", async () => {
+    const repository = new InMemoryOrthographyRepository();
+    const save = createSaveOrthographyTable({
+      tables: repository,
+      ids: new SequentialIdGenerator("tabla"),
+      clock: new FixedClock(new Date(0)),
+    });
+
+    const result = await save({
+      ...validDraft(),
+      rules: [
+        { grapheme: "ch", ipa: "t\u0283" },
+        { grapheme: "", ipa: "a" },
+        { grapheme: "c", ipa: "s", after: "{C}" },
+      ],
+    });
+
+    expect(isErr(result)).toBe(true);
+    if (isErr(result) && result.error.code === "table-invalid") {
+      // La puerta de creacion no cambio: los mismos dos errores, en el mismo
+      // orden de fila. Lo unico distinto es que ahora viajan sin redactar.
+      expect(result.error.issues.map((issue) => issue.code)).toEqual([
+        "empty-grapheme",
+        "undefined-class",
+      ]);
+      expect(result.error.issues).toEqual([
+        { code: "empty-grapheme", severity: "error", ruleIndex: 1 },
+        { code: "undefined-class", severity: "error", ruleIndex: 2, className: "C" },
+      ]);
+    }
+  });
 });
 
 describe("casos de uso que delegan en el repositorio", () => {
