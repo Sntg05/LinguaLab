@@ -3,7 +3,7 @@ import malformadoEaf from "../../../../e2e/fixtures/malformado.eaf?raw";
 import simpleEaf from "../../../../e2e/fixtures/simple.eaf?raw";
 import simpleTextGrid from "../../../../e2e/fixtures/simple.TextGrid?raw";
 import { type AnnotationDocument, parseTextGridBytes, serializeTextGrid } from "@lingualab/core";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createPyodideElanCodec } from "./pyodide-elan-codec";
 import type { PyodideElanCodec } from "./pyodide-elan-types";
 
@@ -112,6 +112,20 @@ beforeAll(async () => {
 afterAll(() => {
   codec?.dispose();
 });
+
+/**
+ * Presupuesto por prueba, y por qué no es el de Vitest.
+ *
+ * Levantar Pyodide —13 MB de wasm, micropip y el wheel de pympi— tarda entre dos
+ * y cinco segundos en una máquina libre, y más cuando la suite entera corre en
+ * paralelo sobre los mismos núcleos. Con el límite por defecto de 5 s esto falla
+ * de forma intermitente, que es la peor clase de rojo: el del día que a alguien
+ * no le da la máquina. El límite grande no esconde un cuelgue, porque el
+ * adaptador tiene su propio `timeoutMs` y una prueba que verifica que responde.
+ */
+// `vi.setConfig` y no el tercer argumento de cada `it`: son diez pruebas y la
+// razón es una sola. Vale solo para este archivo.
+vi.setConfig({ testTimeout: 60_000 });
 
 describe("el codec ELAN sobre Pyodide y pympi", () => {
   it("lee un .eaf simple y coincide con el TextGrid equivalente", async () => {
