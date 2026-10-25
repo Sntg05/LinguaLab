@@ -26,6 +26,11 @@ on:
       # por la misma razon que las anteriores, y ademas porque aqui se fijan las
       # acciones por SHA (O2): eso no se puede probar en local.
       - feat/toolbox-v3-closure
+      # Los segmentos 7 a 11 y el cierre: la rama que se fusiona a `main`. Se
+      # verifica en cada push por la misma razon que las anteriores, y ademas
+      # porque trae tres dependencias nuevas y 13 MB de assets servidos desde el
+      # propio sitio.
+      - feat/v3-segments-7-11
   pull_request:
   workflow_dispatch:
 
