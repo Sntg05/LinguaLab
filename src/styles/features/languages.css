@@ -1,0 +1,269 @@
+/* ============================================================
+   LinguaLab — estilos del mapa de lenguas (segmento 10)
+
+   POR QUE ESTE ARCHIVO EXISTE
+
+   El mapa se dibuja con un SVG propio y necesita su propia piel: el contorno, los
+   puntos y el panel de detalle no aparecen en ninguna otra pagina del sitio, y
+   meterlos en `components.css` haria que cada visita al catalogo pagara estilos
+   que no usa. Lo importa solo `src/components/LanguageMap.astro`, asi que el
+   navegador solo lo descarga en `/lenguas`.
+
+   Los colores salen de los tokens (`tokens.css`) para que el mapa cambie con el
+   tema claro u oscuro sin una regla extra, y la capa es la misma que la del resto
+   de los componentes: el orden lo declara `global.css`.
+   ============================================================ */
+
+@layer components {
+  .language-map__respect {
+    max-width: var(--measure);
+    margin-block-end: var(--space-l);
+  }
+
+  .language-map__respect p {
+    margin: 0;
+  }
+
+  .language-map__respect p + p {
+    margin-block-start: var(--space-2xs);
+  }
+
+  /* ---- Mapa + notas de procedencia ---- */
+  .language-map__stage {
+    display: grid;
+    gap: var(--space-l);
+    margin-block-end: var(--space-l);
+  }
+
+  @media (width >= 56rem) {
+    .language-map__stage {
+      grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  .language-map__figure {
+    margin: 0;
+  }
+
+  .language-map__svg {
+    display: block;
+    width: 100%;
+    max-width: 24rem;
+    height: auto;
+    padding: var(--space-2xs);
+    background: var(--bg-sunken);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    /* El encuadre es el pais: lo que cae fuera no se dibuja, y el SVG no debe
+       expandir su caja para mostrarlo. `overflow: hidden` explicito porque algun
+       navegador no lo aplica al elemento raiz. */
+    overflow: hidden;
+  }
+
+  .language-map__outline {
+    fill: var(--surface);
+    stroke: var(--line-strong);
+    stroke-width: 1;
+    stroke-linejoin: round;
+  }
+
+  .language-map__dot {
+    fill: var(--accent);
+    fill-opacity: 0.85;
+    /* El atributo `hidden` es un `display: none` de la hoja del navegador, que no
+       alcanza a los elementos SVG en todos los motores: la regla lo hace valer. */
+  }
+
+  .language-map__dot[hidden] {
+    display: none;
+  }
+
+  .language-map__dot[data-selected] {
+    fill: var(--warn);
+    fill-opacity: 1;
+    stroke: var(--bg);
+    stroke-width: 1.5;
+  }
+
+  .language-map__notes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    max-width: var(--measure);
+  }
+
+  .language-map__notes p {
+    margin: 0;
+    font-size: var(--step--1);
+    line-height: var(--leading-relaxed);
+  }
+
+  .language-map__composition {
+    color: var(--ink-muted);
+  }
+
+  /* ---- Controles ---- */
+  .language-map__controls {
+    margin-block: var(--space-l) var(--space-s);
+  }
+
+  .language-map__controls label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    font-size: var(--step--1);
+  }
+
+  /* ---- Tabla + panel de detalle ---- */
+  .language-map__body {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  @media (width >= 64rem) {
+    .language-map__body {
+      grid-template-columns: minmax(0, 1fr) minmax(16rem, 20rem);
+      align-items: start;
+    }
+  }
+
+  .language-map__lists {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-l);
+    min-width: 0;
+  }
+
+  .language-map__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--step--1);
+  }
+
+  .language-map__table caption {
+    padding-block-end: var(--space-2xs);
+    text-align: start;
+  }
+
+  .language-map__table th,
+  .language-map__table td {
+    padding: var(--space-3xs) var(--space-2xs);
+    text-align: start;
+    vertical-align: baseline;
+    border-block-end: 1px solid var(--line);
+  }
+
+  .language-map__table thead th {
+    font-family: var(--font-mono);
+    font-size: var(--step--2);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .language-map__table tbody tr[data-selected] {
+    background: var(--accent-wash);
+  }
+
+  /* El nombre es un boton porque abre la ficha, pero se lee como un enlace: el
+     subrayado solo aparece donde hace falta. */
+  .language-map__name {
+    padding: 0;
+    font: inherit;
+    font-weight: 600;
+    color: var(--accent);
+    background: none;
+    border: 0;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .language-map__name:hover {
+    text-decoration: underline;
+  }
+
+  .language-map__subtitle {
+    margin: 0 0 var(--space-2xs);
+    font-family: var(--font-sans);
+    font-size: var(--step-0);
+    font-weight: 600;
+    color: var(--ink-muted);
+  }
+
+  /* ---- Sin ubicacion ---- */
+  .language-map__unlocated {
+    padding-block-start: var(--space-s);
+    border-block-start: 1px solid var(--line);
+  }
+
+  .language-map__unlocated-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    margin: var(--space-s) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--step--1);
+  }
+
+  .language-map__unlocated-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2xs);
+    padding-block: var(--space-3xs);
+    border-block-end: 1px solid var(--line);
+  }
+
+  .language-map__unlocated-item[data-selected] {
+    background: var(--accent-wash);
+  }
+
+  /* ---- Panel de detalle ---- */
+  .language-detail {
+    padding: var(--space-m);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+  }
+
+  @media (width >= 64rem) {
+    .language-detail {
+      position: sticky;
+      top: 5.5rem;
+    }
+  }
+
+  .language-detail__name {
+    margin: 0 0 var(--space-s);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+  }
+
+  .language-detail__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    margin: 0;
+    font-size: var(--step--1);
+  }
+
+  .language-detail__row {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: var(--space-2xs);
+    padding-block-end: var(--space-3xs);
+    border-block-end: 1px solid var(--line);
+  }
+
+  .language-detail__row dt {
+    color: var(--ink-faint);
+  }
+
+  .language-detail__row dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}

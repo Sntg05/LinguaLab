@@ -101,12 +101,14 @@ test("una herramienta planificada se marca como planificada y no es un enlace", 
 test("una herramienta alojada fuera se abre en otra pestaña, con su aviso", async ({ page }) => {
   await page.goto("/catalogo");
 
-  const hosted = page.locator(CARD).filter({ hasText: "Praat" }).first();
-  const link = hosted.locator("[data-external]");
+  // Se localiza por su destino y no por el texto de la tarjeta: la palabra
+  // «Praat» aparece también en las notas del visor de audio, así que filtrar
+  // por texto elegía otra ficha y la prueba fallaba por una ambigüedad suya.
+  const link = page.locator('[data-external][href*="fon.hum.uva.nl"]');
 
-  // El enlace existe, apunta fuera y no deja la ventana abierta sin `noopener`:
-  // `rel` es lo unico que impide que el sitio de destino toque `window.opener`.
-  await expect(link).toHaveAttribute("href", /^https:\/\//);
+  await expect(link).toHaveCount(1);
+  // El enlace apunta fuera y no deja la ventana abierta sin `noopener`:
+  // `rel` es lo único que impide que el sitio de destino toque `window.opener`.
   await expect(link).toHaveAttribute("target", "_blank");
   await expect(link).toHaveAttribute("rel", /noopener/);
   await expect(link).toHaveAttribute("rel", /noreferrer/);
@@ -114,9 +116,10 @@ test("una herramienta alojada fuera se abre en otra pestaña, con su aviso", asy
   // Y dice que se abre en otra pestaña, dentro del nombre accesible.
   await expect(link).toContainText("se abre en otra pestaña");
 
-  // Una ficha prevista no publica un enlace que nadie abrio.
+  // Una ficha prevista no publica un enlace que nadie abrió.
   const planned = page.locator(CARD).filter({ hasText: "Universidad de los Andes" });
-  await expect(planned.locator("[data-external]")).toHaveCount(0);
+  await expect(planned).toHaveCount(1);
+  await expect(planned.locator("a")).toHaveCount(0);
 });
 
 test("el estado vacio explica por que no coincide nada", async ({ page }) => {

@@ -1,0 +1,1216 @@
+{
+  "glottologVersion": "5.2.1",
+  "retrievedAt": "2026-10-25T19:52:29.256Z",
+  "sourceUrl": "https://raw.githubusercontent.com/glottolog/glottolog-cldf/master/cldf/",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "citation": "Hammarström, Harald & Forkel, Robert & Haspelmath, Martin & Bank, Sebastian. 2025. Glottolog 5.2.1. Leipzig: Max Planck Institute for Evolutionary Anthropology. (Available online at https://glottolog.org)",
+  "sha256": "1a50a393bc81568b656f9522be18aa4f80f38e94309ba6c863d583234adfbb89",
+  "languages": [
+    {
+      "glottocode": "acha1250",
+      "name": "Achagua",
+      "family": "Arawakan",
+      "iso639p3": "aca",
+      "latitude": 4.38649,
+      "longitude": -72.2005,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/acha1250"
+    },
+    {
+      "glottocode": "anda1286",
+      "name": "Andaqui",
+      "family": null,
+      "iso639p3": "ana",
+      "latitude": 2.74999,
+      "longitude": -76,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/anda1286"
+    },
+    {
+      "glottocode": "ando1256",
+      "name": "Andoque",
+      "family": null,
+      "iso639p3": "ano",
+      "latitude": -0.53751,
+      "longitude": -72.0869,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/ando1256"
+    },
+    {
+      "glottocode": "ando1254",
+      "name": "Andoquero",
+      "family": "Huitotoan",
+      "iso639p3": null,
+      "latitude": -0.666992,
+      "longitude": -72.310867,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/ando1254"
+    },
+    {
+      "glottocode": "ango1257",
+      "name": "Angosturas Tunebo",
+      "family": "Chibchan",
+      "iso639p3": "tnd",
+      "latitude": 6.54198,
+      "longitude": -71.9212,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/ango1257"
+    },
+    {
+      "glottocode": "anse1238",
+      "name": "Anserma",
+      "family": "Chocoan",
+      "iso639p3": "ans",
+      "latitude": 6.24999,
+      "longitude": -76.05,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/anse1238"
+    },
+    {
+      "glottocode": "anti1242",
+      "name": "Antioquian",
+      "family": "Chibchan",
+      "iso639p3": null,
+      "latitude": 7.199341,
+      "longitude": -75.342236,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/anti1242"
+    },
+    {
+      "glottocode": "arhu1242",
+      "name": "Arhuaco",
+      "family": "Chibchan",
+      "iso639p3": "arh",
+      "latitude": 10.7018,
+      "longitude": -73.6363,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/arhu1242"
+    },
+    {
+      "glottocode": "arma1244",
+      "name": "Arma",
+      "family": "Unattested",
+      "iso639p3": "aoh",
+      "latitude": 2.03332,
+      "longitude": -76,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/arma1244"
+    },
+    {
+      "glottocode": "awac1239",
+      "name": "Awa-Cuaiquer",
+      "family": "Barbacoan",
+      "iso639p3": "kwi",
+      "latitude": 1.21652,
+      "longitude": -78.3401,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/awac1239"
+    },
+    {
+      "glottocode": "guar1293",
+      "name": "Baniva de Maroa",
+      "family": "Arawakan",
+      "iso639p3": "gae",
+      "latitude": 1.80835,
+      "longitude": -66.922505,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/guar1293"
+    },
+    {
+      "glottocode": "bani1255",
+      "name": "Baniwa do Icana",
+      "family": "Arawakan",
+      "iso639p3": "bwi",
+      "latitude": 2.17859,
+      "longitude": -67.7704,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/bani1255"
+    },
+    {
+      "glottocode": "bara1380",
+      "name": "Barasana-Eduria",
+      "family": "Tucanoan",
+      "iso639p3": "bsn",
+      "latitude": 0.02193,
+      "longitude": -70.808,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/bara1380"
+    },
+    {
+      "glottocode": "barb1242",
+      "name": "Barbacoas",
+      "family": "Unattested",
+      "iso639p3": "bpb",
+      "latitude": 1.5206,
+      "longitude": -78.4834,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/barb1242"
+    },
+    {
+      "glottocode": "barr1251",
+      "name": "Barro Negro Tunebo",
+      "family": "Chibchan",
+      "iso639p3": "tbn",
+      "latitude": 6.12622,
+      "longitude": -72.044,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/barr1251"
+    },
+    {
+      "glottocode": "bari1297",
+      "name": "Barí",
+      "family": "Chibchan",
+      "iso639p3": "mot",
+      "latitude": 9.08497,
+      "longitude": -72.9353,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/bari1297"
+    },
+    {
+      "glottocode": "bora1263",
+      "name": "Bora",
+      "family": "Boran",
+      "iso639p3": "boa",
+      "latitude": -2.000259,
+      "longitude": -72.257066,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/bora1263"
+    },
+    {
+      "glottocode": "bord1248",
+      "name": "Border Kuna",
+      "family": "Chibchan",
+      "iso639p3": "kvn",
+      "latitude": 7.92993,
+      "longitude": -77.1664,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/bord1248"
+    },
+    {
+      "glottocode": "cabi1241",
+      "name": "Cabiyarí",
+      "family": "Arawakan",
+      "iso639p3": "cbb",
+      "latitude": 0.16101,
+      "longitude": -71.0622,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cabi1241"
+    },
+    {
+      "glottocode": "cagu1236",
+      "name": "Cagua",
+      "family": "Bookkeeping",
+      "iso639p3": "cbh",
+      "latitude": 3.99999,
+      "longitude": -74,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cagu1236"
+    },
+    {
+      "glottocode": "cams1241",
+      "name": "Camsá",
+      "family": null,
+      "iso639p3": "kbh",
+      "latitude": 1.14537,
+      "longitude": -76.8931,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cams1241"
+    },
+    {
+      "glottocode": "cara1245",
+      "name": "Carabayo",
+      "family": "Unclassifiable",
+      "iso639p3": "cby",
+      "latitude": -1.7922,
+      "longitude": -69.9099,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cara1245"
+    },
+    {
+      "glottocode": "cara1271",
+      "name": "Caramanta",
+      "family": "Chocoan",
+      "iso639p3": "crf",
+      "latitude": 5.624,
+      "longitude": -75.877,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cara1271"
+    },
+    {
+      "glottocode": "cara1272",
+      "name": "Carapana",
+      "family": "Tucanoan",
+      "iso639p3": "cbc",
+      "latitude": 0.06168,
+      "longitude": -69.6465,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cara1272"
+    },
+    {
+      "glottocode": "cari1279",
+      "name": "Carijona",
+      "family": "Cariban",
+      "iso639p3": "cbd",
+      "latitude": 1.21894,
+      "longitude": -72.0664,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cari1279"
+    },
+    {
+      "glottocode": "cauc1241",
+      "name": "Cauca",
+      "family": "Bookkeeping",
+      "iso639p3": "cca",
+      "latitude": 2.09246,
+      "longitude": -75.87725,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cauc1241"
+    },
+    {
+      "glottocode": "cent2150",
+      "name": "Central Tunebo",
+      "family": "Chibchan",
+      "iso639p3": "tuf",
+      "latitude": 6.8867,
+      "longitude": -72.097,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cent2150"
+    },
+    {
+      "glottocode": "chan1324",
+      "name": "Changuena",
+      "family": "Chibchan",
+      "iso639p3": null,
+      "latitude": 9.359643,
+      "longitude": -82.568207,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/chan1324"
+    },
+    {
+      "glottocode": "chib1270",
+      "name": "Chibcha",
+      "family": "Chibchan",
+      "iso639p3": "chb",
+      "latitude": 6.24999,
+      "longitude": -74.1666,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/chib1270"
+    },
+    {
+      "glottocode": "chim1309",
+      "name": "Chimila",
+      "family": "Chibchan",
+      "iso639p3": "cbg",
+      "latitude": 10.1902,
+      "longitude": -74.2559,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/chim1309"
+    },
+    {
+      "glottocode": "chip1236",
+      "name": "Chipiajes",
+      "family": "Bookkeeping",
+      "iso639p3": "cbe",
+      "latitude": 3.08332,
+      "longitude": -71.1667,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/chip1236"
+    },
+    {
+      "glottocode": "coca1259",
+      "name": "Cocama-Cocamilla",
+      "family": "Tupian",
+      "iso639p3": "cod",
+      "latitude": -4.5,
+      "longitude": -74,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/coca1259"
+    },
+    {
+      "glottocode": "coer1236",
+      "name": "Coeruna",
+      "family": "Huitotoan",
+      "iso639p3": null,
+      "latitude": -1.054216,
+      "longitude": -70.58464,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/coer1236"
+    },
+    {
+      "glottocode": "cofa1242",
+      "name": "Cofán",
+      "family": null,
+      "iso639p3": "con",
+      "latitude": 0.276675,
+      "longitude": -77.0643,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cofa1242"
+    },
+    {
+      "glottocode": "cogu1240",
+      "name": "Cogui",
+      "family": "Chibchan",
+      "iso639p3": "kog",
+      "latitude": 10.9485,
+      "longitude": -73.8043,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cogu1240"
+    },
+    {
+      "glottocode": "coli1235",
+      "name": "Colima",
+      "family": "Unclassifiable",
+      "iso639p3": null,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/coli1235"
+    },
+    {
+      "glottocode": "inga1252",
+      "name": "Colombian Inga",
+      "family": "Quechuan",
+      "iso639p3": "inb",
+      "latitude": 1.00313,
+      "longitude": -76.8606,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/inga1252"
+    },
+    {
+      "glottocode": "colo1249",
+      "name": "Colombian Sign Language",
+      "family": "Sign Language",
+      "iso639p3": "csn",
+      "latitude": 5.33532,
+      "longitude": -75.4464,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/colo1249"
+    },
+    {
+      "glottocode": "coxi1236",
+      "name": "Coxima",
+      "family": "Bookkeeping",
+      "iso639p3": "kox",
+      "latitude": 6.08332,
+      "longitude": -72.0833,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/coxi1236"
+    },
+    {
+      "glottocode": "coya1241",
+      "name": "Coyaima",
+      "family": "Bookkeeping",
+      "iso639p3": "coy",
+      "latitude": 11.3333,
+      "longitude": -73,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/coya1241"
+    },
+    {
+      "glottocode": "cube1242",
+      "name": "Cubeo",
+      "family": "Tucanoan",
+      "iso639p3": "cub",
+      "latitude": 1.32382,
+      "longitude": -70.1939,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cube1242"
+    },
+    {
+      "glottocode": "cuib1242",
+      "name": "Cuiba",
+      "family": "Guahiboan",
+      "iso639p3": "cui",
+      "latitude": 6.19829,
+      "longitude": -69.8197,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cuib1242"
+    },
+    {
+      "glottocode": "cume1234",
+      "name": "Cumeral",
+      "family": "Bookkeeping",
+      "iso639p3": "cum",
+      "latitude": 2.83332,
+      "longitude": -69.5,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cume1234"
+    },
+    {
+      "glottocode": "curr1243",
+      "name": "Curripaco",
+      "family": "Arawakan",
+      "iso639p3": "kpc",
+      "latitude": 0.69618,
+      "longitude": -67.5028,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/curr1243"
+    },
+    {
+      "glottocode": "desa1247",
+      "name": "Desano",
+      "family": "Tucanoan",
+      "iso639p3": "des",
+      "latitude": 0.58157,
+      "longitude": -69.4955,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/desa1247"
+    },
+    {
+      "glottocode": "dora1242",
+      "name": "Dorasque",
+      "family": "Chibchan",
+      "iso639p3": null,
+      "latitude": 8.567442,
+      "longitude": -82.375717,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/dora1242"
+    },
+    {
+      "glottocode": "duit1239",
+      "name": "Duit",
+      "family": "Chibchan",
+      "iso639p3": null,
+      "latitude": 5.786798,
+      "longitude": -73.021374,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/duit1239"
+    },
+    {
+      "glottocode": "embe1259",
+      "name": "Emberá-Baudó",
+      "family": "Chocoan",
+      "iso639p3": "bdc",
+      "latitude": 5.2824,
+      "longitude": -76.32548,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/embe1259"
+    },
+    {
+      "glottocode": "embe1260",
+      "name": "Emberá-Catío",
+      "family": "Chocoan",
+      "iso639p3": "cto",
+      "latitude": 7.52721,
+      "longitude": -76.7476,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/embe1260"
+    },
+    {
+      "glottocode": "embe1262",
+      "name": "Emberá-Chamí",
+      "family": "Chocoan",
+      "iso639p3": "cmi",
+      "latitude": 4.8791,
+      "longitude": -76.0749,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/embe1262"
+    },
+    {
+      "glottocode": "embe1261",
+      "name": "Emberá-Tadó",
+      "family": "Chocoan",
+      "iso639p3": "tdc",
+      "latitude": 5.23658,
+      "longitude": -77.1533,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/embe1261"
+    },
+    {
+      "glottocode": "envu1234",
+      "name": "Envuelto",
+      "family": "Unclassifiable",
+      "iso639p3": null,
+      "latitude": -0.0355621,
+      "longitude": -70.944973,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/envu1234"
+    },
+    {
+      "glottocode": "epen1239",
+      "name": "Epena",
+      "family": "Chocoan",
+      "iso639p3": "sja",
+      "latitude": 4.25877,
+      "longitude": -77.3566,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/epen1239"
+    },
+    {
+      "glottocode": "guam1248",
+      "name": "Guambiano",
+      "family": "Barbacoan",
+      "iso639p3": "gum",
+      "latitude": 2.55849,
+      "longitude": -76.582,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/guam1248"
+    },
+    {
+      "glottocode": "guay1257",
+      "name": "Guayabero",
+      "family": "Guahiboan",
+      "iso639p3": "guo",
+      "latitude": 2.8969,
+      "longitude": -71.844,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/guay1257"
+    },
+    {
+      "glottocode": "maca1259",
+      "name": "Hitnu",
+      "family": "Guahiboan",
+      "iso639p3": "mbn",
+      "latitude": 6.34582,
+      "longitude": -71.2671,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/maca1259"
+    },
+    {
+      "glottocode": "hoxa1234",
+      "name": "Hoxa",
+      "family": "Unclassifiable",
+      "iso639p3": null,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/hoxa1234"
+    },
+    {
+      "glottocode": "hupd1244",
+      "name": "Hup",
+      "family": "Naduhup",
+      "iso639p3": "jup",
+      "latitude": 0.58622,
+      "longitude": -69.8359,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/hupd1244"
+    },
+    {
+      "glottocode": "idab1234",
+      "name": "Idabaez",
+      "family": "Unclassifiable",
+      "iso639p3": null,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/idab1234"
+    },
+    {
+      "glottocode": "juri1235",
+      "name": "Juri",
+      "family": "Ticuna-Yuri",
+      "iso639p3": null,
+      "latitude": -1.358881,
+      "longitude": -69.984741,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/juri1235"
+    },
+    {
+      "glottocode": "cacu1241",
+      "name": "Kakua",
+      "family": "Kakua-Nukak",
+      "iso639p3": "cbv",
+      "latitude": 0.88778,
+      "longitude": -69.5659,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cacu1241"
+    },
+    {
+      "glottocode": "kank1244",
+      "name": "Kankuamo",
+      "family": "Chibchan",
+      "iso639p3": null,
+      "latitude": 10.750207,
+      "longitude": -73.357544,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/kank1244"
+    },
+    {
+      "glottocode": "kore1283",
+      "name": "Koreguaje",
+      "family": "Tucanoan",
+      "iso639p3": "coe",
+      "latitude": 0.92316,
+      "longitude": -75.3475,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/kore1283"
+    },
+    {
+      "glottocode": "guan1269",
+      "name": "Kotiria",
+      "family": "Tucanoan",
+      "iso639p3": "gvc",
+      "latitude": 1.07554,
+      "longitude": -69.5705,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/guan1269"
+    },
+    {
+      "glottocode": "cure1236",
+      "name": "Kueretu",
+      "family": "Tucanoan",
+      "iso639p3": null,
+      "latitude": -1.045978,
+      "longitude": -70.305862,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/cure1236"
+    },
+    {
+      "glottocode": "maca1261",
+      "name": "Macaguaje",
+      "family": "Tucanoan",
+      "iso639p3": "mcl",
+      "latitude": 0.49999,
+      "longitude": -75.8333,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/maca1261"
+    },
+    {
+      "glottocode": "macu1260",
+      "name": "Macuna",
+      "family": "Tucanoan",
+      "iso639p3": "myy",
+      "latitude": -0.14459,
+      "longitude": -70.0749,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/macu1260"
+    },
+    {
+      "glottocode": "mala1522",
+      "name": "Malayo",
+      "family": "Chibchan",
+      "iso639p3": "mbp",
+      "latitude": 10.9286,
+      "longitude": -73.4056,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/mala1522"
+    },
+    {
+      "glottocode": "mali1242",
+      "name": "Malibu",
+      "family": "Unclassifiable",
+      "iso639p3": null,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/mali1242"
+    },
+    {
+      "glottocode": "mand1448",
+      "name": "Mandahuaca",
+      "family": "Arawakan",
+      "iso639p3": "mht",
+      "latitude": 1.48,
+      "longitude": -66.52,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/mand1448"
+    },
+    {
+      "glottocode": "mapo1246",
+      "name": "Mapoyo",
+      "family": "Cariban",
+      "iso639p3": "mcg",
+      "latitude": 5.96952,
+      "longitude": -67.2581,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/mapo1246"
+    },
+    {
+      "glottocode": "mini1256",
+      "name": "Minica Huitoto",
+      "family": "Huitotoan",
+      "iso639p3": "hto",
+      "latitude": -1.54535,
+      "longitude": -73.1107,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/mini1256"
+    },
+    {
+      "glottocode": "muel1234",
+      "name": "Muellamues",
+      "family": "Unclassifiable",
+      "iso639p3": null,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/muel1234"
+    },
+    {
+      "glottocode": "muin1242",
+      "name": "Muinane",
+      "family": "Boran",
+      "iso639p3": "bmr",
+      "latitude": -0.8652,
+      "longitude": -72.4249,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/muin1242"
+    },
+    {
+      "glottocode": "muru1274",
+      "name": "Murui Huitoto",
+      "family": "Huitotoan",
+      "iso639p3": "huu",
+      "latitude": -1.13669,
+      "longitude": -73.8331,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/muru1274"
+    },
+    {
+      "glottocode": "muzo1235",
+      "name": "Muzo",
+      "family": "Unclassifiable",
+      "iso639p3": null,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/muzo1235"
+    },
+    {
+      "glottocode": "napo1242",
+      "name": "Napo Lowland Quechua",
+      "family": "Quechuan",
+      "iso639p3": "qvo",
+      "latitude": -0.072525,
+      "longitude": -76.3889,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/napo1242"
+    },
+    {
+      "glottocode": "nata1238",
+      "name": "Natagaimas",
+      "family": "Bookkeeping",
+      "iso639p3": "nts",
+      "latitude": 4.16665,
+      "longitude": -75.0333,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/nata1238"
+    },
+    {
+      "glottocode": "nhen1239",
+      "name": "Nhengatu",
+      "family": "Tupian",
+      "iso639p3": "yrl",
+      "latitude": 1.04503,
+      "longitude": -66.9646,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/nhen1239"
+    },
+    {
+      "glottocode": "nonu1241",
+      "name": "Nonuya",
+      "family": "Huitotoan",
+      "iso639p3": "noj",
+      "latitude": -1.25,
+      "longitude": -72.5,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/nonu1241"
+    },
+    {
+      "glottocode": "nort2972",
+      "name": "Northern Emberá",
+      "family": "Chocoan",
+      "iso639p3": "emp",
+      "latitude": 7.12761,
+      "longitude": -77.574,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/nort2972"
+    },
+    {
+      "glottocode": "nuka1242",
+      "name": "Nukak Makú",
+      "family": "Kakua-Nukak",
+      "iso639p3": "mbr",
+      "latitude": 2.65939,
+      "longitude": -71.4629,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/nuka1242"
+    },
+    {
+      "glottocode": "nupo1240",
+      "name": "Nüpode Huitoto",
+      "family": "Huitotoan",
+      "iso639p3": "hux",
+      "latitude": -2.34495,
+      "longitude": -70.9559,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/nupo1240"
+    },
+    {
+      "glottocode": "ocai1244",
+      "name": "Ocaina",
+      "family": "Huitotoan",
+      "iso639p3": "oca",
+      "latitude": -2.159,
+      "longitude": -72.1422,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/ocai1244"
+    },
+    {
+      "glottocode": "omej1234",
+      "name": "Omejes",
+      "family": "Bookkeeping",
+      "iso639p3": "ome",
+      "latitude": 0.99999,
+      "longitude": -70,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/omej1234"
+    },
+    {
+      "glottocode": "opon1234",
+      "name": "Opón-Carare",
+      "family": "Cariban",
+      "iso639p3": null,
+      "latitude": 6.473146,
+      "longitude": -74.084846,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/opon1234"
+    },
+    {
+      "glottocode": "pale1260",
+      "name": "Palenquero",
+      "family": "Indo-European",
+      "iso639p3": "pln",
+      "latitude": 10.3881,
+      "longitude": -75.2949,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/pale1260"
+    },
+    {
+      "glottocode": "panc1242",
+      "name": "Panche",
+      "family": "Unclassifiable",
+      "iso639p3": null,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/panc1242"
+    },
+    {
+      "glottocode": "piap1246",
+      "name": "Piapoco",
+      "family": "Arawakan",
+      "iso639p3": "pio",
+      "latitude": 4.37718,
+      "longitude": -68.5953,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/piap1246"
+    },
+    {
+      "glottocode": "piar1243",
+      "name": "Piaroa",
+      "family": "Saliban",
+      "iso639p3": "pid",
+      "latitude": 4.41805,
+      "longitude": -67.7574,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/piar1243"
+    },
+    {
+      "glottocode": "pija1235",
+      "name": "Pijao",
+      "family": "Unclassifiable",
+      "iso639p3": "pij",
+      "latitude": 0.49999,
+      "longitude": -75.3333,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/pija1235"
+    },
+    {
+      "glottocode": "pisa1245",
+      "name": "Pisamira",
+      "family": "Tucanoan",
+      "iso639p3": null,
+      "latitude": 1.1017,
+      "longitude": -70.502483,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/pisa1245"
+    },
+    {
+      "glottocode": "play1240",
+      "name": "Playero",
+      "family": "Guahiboan",
+      "iso639p3": "gob",
+      "latitude": 6.90948,
+      "longitude": -71.0036,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/play1240"
+    },
+    {
+      "glottocode": "pona1251",
+      "name": "Ponares",
+      "family": "Bookkeeping",
+      "iso639p3": "pod",
+      "latitude": 4.83332,
+      "longitude": -71.5,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/pona1251"
+    },
+    {
+      "glottocode": "port1283",
+      "name": "Portuguese",
+      "family": "Indo-European",
+      "iso639p3": "por",
+      "latitude": 39.91,
+      "longitude": -8.1,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/port1283"
+    },
+    {
+      "glottocode": "prov1243",
+      "name": "Providencia Sign Language",
+      "family": "Sign Language",
+      "iso639p3": "prz",
+      "latitude": 13.348416,
+      "longitude": -81.373888,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/prov1243"
+    },
+    {
+      "glottocode": "puin1248",
+      "name": "Puinave",
+      "family": null,
+      "iso639p3": "pui",
+      "latitude": 3.92974,
+      "longitude": -67.6886,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/puin1248"
+    },
+    {
+      "glottocode": "pume1238",
+      "name": "Pumé",
+      "family": null,
+      "iso639p3": "yae",
+      "latitude": 7.10677,
+      "longitude": -67.5996,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/pume1238"
+    },
+    {
+      "glottocode": "paez1247",
+      "name": "Páez",
+      "family": null,
+      "iso639p3": "pbb",
+      "latitude": 2.61516,
+      "longitude": -76.31254,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/paez1247"
+    },
+    {
+      "glottocode": "quil1251",
+      "name": "Quillacinga",
+      "family": "Unclassifiable",
+      "iso639p3": null,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/quil1251"
+    },
+    {
+      "glottocode": "resi1247",
+      "name": "Resígaro",
+      "family": "Arawakan",
+      "iso639p3": "rgr",
+      "latitude": -1.169535,
+      "longitude": -71.60524,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/resi1247"
+    },
+    {
+      "glottocode": "runa1235",
+      "name": "Runa",
+      "family": "Unattested",
+      "iso639p3": "rna",
+      "latitude": 2.74999,
+      "longitude": -76.5,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/runa1235"
+    },
+    {
+      "glottocode": "sana1297",
+      "name": "San Andres Creole English",
+      "family": "Indo-European",
+      "iso639p3": "icr",
+      "latitude": 12.55352,
+      "longitude": -81.70425,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/sana1297"
+    },
+    {
+      "glottocode": "sanb1242",
+      "name": "San Blas Kuna",
+      "family": "Chibchan",
+      "iso639p3": "cuk",
+      "latitude": 9.15686,
+      "longitude": -78.3075,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/sanb1242"
+    },
+    {
+      "glottocode": "seco1241",
+      "name": "Secoya",
+      "family": "Tucanoan",
+      "iso639p3": "sey",
+      "latitude": -0.459785,
+      "longitude": -75.5547,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/seco1241"
+    },
+    {
+      "glottocode": "guah1255",
+      "name": "Sikuani",
+      "family": "Guahiboan",
+      "iso639p3": "guh",
+      "latitude": 5.81736,
+      "longitude": -68.9839,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/guah1255"
+    },
+    {
+      "glottocode": "sion1247",
+      "name": "Siona-Tetete",
+      "family": "Tucanoan",
+      "iso639p3": "snn",
+      "latitude": 0.31733,
+      "longitude": -76.0237,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/sion1247"
+    },
+    {
+      "glottocode": "siri1274",
+      "name": "Siriano",
+      "family": "Tucanoan",
+      "iso639p3": "sri",
+      "latitude": 0.436515,
+      "longitude": -70.184,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/siri1274"
+    },
+    {
+      "glottocode": "stan1288",
+      "name": "Spanish",
+      "family": "Indo-European",
+      "iso639p3": "spa",
+      "latitude": 40.4414,
+      "longitude": -1.11788,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/stan1288"
+    },
+    {
+      "glottocode": "sali1298",
+      "name": "Sáliba",
+      "family": "Saliban",
+      "iso639p3": "slc",
+      "latitude": 5.30115,
+      "longitude": -69.3843,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/sali1298"
+    },
+    {
+      "glottocode": "tama1340",
+      "name": "Tama (Colombia)",
+      "family": "Tucanoan",
+      "iso639p3": "ten",
+      "latitude": 1.03332,
+      "longitude": -75.25,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/tama1340"
+    },
+    {
+      "glottocode": "tani1257",
+      "name": "Tanimuca-Retuarã",
+      "family": "Tucanoan",
+      "iso639p3": "tnc",
+      "latitude": -0.59023,
+      "longitude": -70.3853,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/tani1257"
+    },
+    {
+      "glottocode": "tari1256",
+      "name": "Tariana",
+      "family": "Arawakan",
+      "iso639p3": "tae",
+      "latitude": 0.440205,
+      "longitude": -68.9042,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/tari1256"
+    },
+    {
+      "glottocode": "tatu1247",
+      "name": "Tatuyo",
+      "family": "Tucanoan",
+      "iso639p3": "tav",
+      "latitude": 0.55582,
+      "longitude": -70.5327,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/tatu1247"
+    },
+    {
+      "glottocode": "ticu1245",
+      "name": "Ticuna",
+      "family": "Ticuna-Yuri",
+      "iso639p3": "tca",
+      "latitude": -3.66289,
+      "longitude": -69.8723,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/ticu1245"
+    },
+    {
+      "glottocode": "tini1245",
+      "name": "Tinigua",
+      "family": null,
+      "iso639p3": "tit",
+      "latitude": 2.716,
+      "longitude": -73.768,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/tini1245"
+    },
+    {
+      "glottocode": "tome1239",
+      "name": "Tomedes",
+      "family": "Bookkeeping",
+      "iso639p3": "toe",
+      "latitude": 3.24999,
+      "longitude": -69.6666,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/tome1239"
+    },
+    {
+      "glottocode": "toto1306",
+      "name": "Totoro",
+      "family": "Barbacoan",
+      "iso639p3": "ttk",
+      "latitude": 2.55149,
+      "longitude": -76.6379,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/toto1306"
+    },
+    {
+      "glottocode": "tuca1252",
+      "name": "Tucano",
+      "family": "Tucanoan",
+      "iso639p3": "tuo",
+      "latitude": 0.579755,
+      "longitude": -69.5763,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/tuca1252"
+    },
+    {
+      "glottocode": "tuyu1244",
+      "name": "Tuyuca",
+      "family": "Tucanoan",
+      "iso639p3": "tue",
+      "latitude": 0.39441,
+      "longitude": -70.043515,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/tuyu1244"
+    },
+    {
+      "glottocode": "uain1239",
+      "name": "Uainuma-Mariate",
+      "family": "Arawakan",
+      "iso639p3": null,
+      "latitude": -1.676121,
+      "longitude": -71.149307,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/uain1239"
+    },
+    {
+      "glottocode": "pira1254",
+      "name": "Wa'ikhana",
+      "family": "Tucanoan",
+      "iso639p3": "pir",
+      "latitude": 0.50714,
+      "longitude": -69.5032,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/pira1254"
+    },
+    {
+      "glottocode": "waim1255",
+      "name": "Waimaha",
+      "family": "Tucanoan",
+      "iso639p3": "bao",
+      "latitude": 0.30416,
+      "longitude": -70.1644,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/waim1255"
+    },
+    {
+      "glottocode": "wayu1243",
+      "name": "Wayuu",
+      "family": "Arawakan",
+      "iso639p3": "guc",
+      "latitude": 11.395566,
+      "longitude": -72.199791,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/wayu1243"
+    },
+    {
+      "glottocode": "west2651",
+      "name": "Western Tunebo",
+      "family": "Chibchan",
+      "iso639p3": "tnb",
+      "latitude": 6.90704,
+      "longitude": -72.6507,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/west2651"
+    },
+    {
+      "glottocode": "woun1238",
+      "name": "Woun Meu",
+      "family": "Chocoan",
+      "iso639p3": "noa",
+      "latitude": 8.5,
+      "longitude": -78,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/woun1238"
+    },
+    {
+      "glottocode": "yagu1244",
+      "name": "Yagua",
+      "family": "Peba-Yagua",
+      "iso639p3": "yad",
+      "latitude": -3.42913,
+      "longitude": -72.2186,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/yagu1244"
+    },
+    {
+      "glottocode": "yahu1241",
+      "name": "Yahuna",
+      "family": "Tucanoan",
+      "iso639p3": "ynu",
+      "latitude": -0.505365,
+      "longitude": -70.478211,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/yahu1241"
+    },
+    {
+      "glottocode": "yana1258",
+      "name": "Yanacona",
+      "family": "Unclassifiable",
+      "iso639p3": null,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/yana1258"
+    },
+    {
+      "glottocode": "yari1235",
+      "name": "Yarí",
+      "family": "Bookkeeping",
+      "iso639p3": "yri",
+      "latitude": 1.43017,
+      "longitude": -74.3715,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/yari1235"
+    },
+    {
+      "glottocode": "yucu1253",
+      "name": "Yucuna",
+      "family": "Arawakan",
+      "iso639p3": "ycn",
+      "latitude": -0.76075,
+      "longitude": -71.0033,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/yucu1253"
+    },
+    {
+      "glottocode": "yuhu1238",
+      "name": "Yuhup",
+      "family": "Naduhup",
+      "iso639p3": "yab",
+      "latitude": 0.2485,
+      "longitude": -69.8079,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/yuhu1238"
+    },
+    {
+      "glottocode": "yukp1241",
+      "name": "Yukpa",
+      "family": "Cariban",
+      "iso639p3": "yup",
+      "latitude": 9.67534,
+      "longitude": -73.0557,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/yukp1241"
+    },
+    {
+      "glottocode": "jupu1235",
+      "name": "Yupua",
+      "family": "Tucanoan",
+      "iso639p3": null,
+      "latitude": -0.5,
+      "longitude": -70,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/jupu1235"
+    },
+    {
+      "glottocode": "yuru1243",
+      "name": "Yurumanguí",
+      "family": null,
+      "iso639p3": null,
+      "latitude": 3.436864,
+      "longitude": -76.522636,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/yuru1243"
+    },
+    {
+      "glottocode": "yuru1263",
+      "name": "Yurutí",
+      "family": "Tucanoan",
+      "iso639p3": "yui",
+      "latitude": 0.735585,
+      "longitude": -69.6955,
+      "glottologUrl": "https://glottolog.org/resource/languoid/id/yuru1263"
+    }
+  ]
+}

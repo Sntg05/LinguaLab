@@ -70,6 +70,8 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
   { path: "/en/fonemizador", name: "fonemizador (ingles)" },
   { path: "/catalogo", name: "catalogo (espanol)" },
   { path: "/en/catalogo", name: "catalogo (ingles)" },
+  { path: "/lenguas", name: "mapa de lenguas (espanol)" },
+  { path: "/en/lenguas", name: "mapa de lenguas (ingles)" },
   { path: "/visualizador", name: "visor de audio (espanol)" },
   { path: "/en/visualizador", name: "visor de audio (ingles)" },
   { path: "/glosario", name: "glosario (espanol)" },

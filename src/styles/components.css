@@ -143,8 +143,14 @@
   }
 
   /* ---- Segmented control (language) ---- */
+  /* `max-width` y `flex-wrap` no son adorno: una fila de filtros con muchas
+     opciones no cabe en 360 px, y sin esto empujaba la página entera a 428 px y
+     se podía arrastrar de lado en un teléfono. Envolver es la salida honesta;
+     recortar opciones o reducir la tipografía hasta lo ilegible, no. */
   .segmented {
     display: inline-flex;
+    flex-wrap: wrap;
+    max-width: 100%;
     padding: 2px;
     gap: 2px;
     background: var(--bg-sunken);

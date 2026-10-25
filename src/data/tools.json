@@ -159,16 +159,16 @@
     {
       "id": "mapa-lenguas-colombia",
       "name": {
-        "es": "Mapa de lenguas indígenas de Colombia",
-        "en": "Map of Colombia's Indigenous languages"
+        "es": "Mapa de lenguas de Colombia",
+        "en": "Map of Colombia's languages"
       },
       "area": "tipologia",
       "integration": "embedded",
-      "status": "planned",
+      "status": "stable",
       "languages": [],
       "notes": {
-        "es": "Mapa consultable de las lenguas de Colombia, con familia, identificadores y enlace a Glottolog. Cataloga lenguas: no procesa texto en ninguna en concreto.",
-        "en": "Browsable map of Colombia's languages, with family, identifiers and a link to Glottolog. It catalogues languages: it does not process text in any particular one."
+        "es": "Mapa consultable de las lenguas que Glottolog registra en Colombia, con familia, Glottocode, código ISO 639-3 y enlace a su ficha. El mapa es propio (sin teselas ni peticiones a terceros) y todo su contenido está también en una tabla accesible. Incluye las seis lenguas no indígenas que la fuente asigna al país: la página lo dice y el filtro por familia permite dejarlas fuera.",
+        "en": "Browsable map of the languages Glottolog records in Colombia, with family, Glottocode, ISO 639-3 code and a link to its record. The map is our own (no tiles, no third-party requests) and all its content is also in an accessible table. It includes the six non-Indigenous languages the source assigns to the country: the page says so, and the family filter can leave them out."
       },
       "citation": "Hammarström, H., Forkel, R., Haspelmath, M., & Bank, S. Glottolog [Data set]. Max Planck Institute for Evolutionary Anthropology."
     },

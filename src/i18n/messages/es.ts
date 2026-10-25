@@ -15,6 +15,7 @@ export const es = {
   "brand.tag": "Idioma · Datos · Código",
   "nav.home": "Inicio",
   "nav.tools": "Estación textual",
+  "nav.languages": "Lenguas de Colombia",
   "nav.ipa": "FonoLab",
   "nav.trees": "ArborLab",
   "nav.resources": "Bibliografía",

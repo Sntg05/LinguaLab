@@ -169,6 +169,12 @@
   }
 
   /* ---- Form controls inherit the design language ---- */
+  /* `min-width: 0` porque un control de formulario tiene un ancho intrínseco
+     —el de su `size` y, en Chrome, el de su `placeholder`— y ese ancho se
+     propaga hacia arriba como `min-content` de la rejilla: era lo que hacía
+     que /fono midiera 428 px en un teléfono de 360 y la página se pudiera
+     arrastrar de lado. Con el mínimo en cero, el campo se encoge y el texto
+     largo se sigue leyendo dentro del control. */
   input[type="text"],
   input[type="search"],
   input[type="email"],
@@ -177,6 +183,7 @@
   textarea,
   select {
     width: 100%;
+    min-width: 0;
     padding: 0.6rem 0.75rem;
     font-size: var(--step-0);
     color: var(--ink);

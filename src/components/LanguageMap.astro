@@ -1,0 +1,352 @@
+---
+/**
+ * LanguageMap: el mapa de lenguas de Colombia.
+ *
+ * UN SOLO ORIGEN, NI UNA PETICION EXTERNA
+ *
+ * El contorno del pais se lee en la compilacion de `public/mapa/colombia.json`
+ * —el archivo que extrae y simplifica `scripts/build-colombia-geometry.mjs` a
+ * partir de Natural Earth, de dominio publico— y se incrusta en el HTML. Los
+ * puntos salen de la latitud y la longitud que publica Glottolog. La pagina no
+ * pide teselas, ni fuentes, ni un JSON remoto: no hay una sola peticion a otro
+ * origen, y la verificacion de la compilacion falla si alguna aparece. La
+ * decision y lo que se pierde estan en `docs/adr/0008-mapa-de-lenguas-sin-teselas.md`.
+ *
+ * EL MAPA ES DECORATIVO Y LA TABLA ES EL CONTENIDO
+ *
+ * El SVG lleva `aria-hidden="true"`: un lector de pantalla no puede recorrer un
+ * dibujo y adivinar que punto es que lengua. Todo lo que el mapa muestra esta en
+ * la tabla —nombre, familia, Glottocode, ISO y ficha de origen— y el panel de
+ * detalle se llena leyendo esa misma fila, asi que no puede afirmar algo distinto
+ * de lo que la tabla dice.
+ *
+ * Los datos vienen del JSON versionado, validado por
+ * `src/scripts/lenguas/language-map.ts`, y no de una lectura directa del archivo.
+ */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { SITE } from "../config/site";
+import { t, type Locale } from "../i18n";
+import { NO_FAMILY } from "../scripts/lenguas/filter";
+import { LANGUAGE_DATASET } from "../scripts/lenguas/language-map";
+import {
+  fitsInViewBox,
+  geoPointOf,
+  project,
+  type MapGeometry,
+} from "../scripts/lenguas/projection";
+import { MAP_STRING_KEYS, format } from "../scripts/lenguas/strings";
+import "../styles/features/languages.css";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+/**
+ * La geometria se lee del archivo generado, en la compilacion, y no se importa:
+ * `public/` es para archivos que se sirven tal cual, y el contorno no tiene por
+ * que viajar al navegador como un JSON aparte. El SVG resultante ya lleva el
+ * `path` dentro del HTML.
+ *
+ * La ruta se arma sobre el directorio de trabajo y no sobre `import.meta.url`:
+ * al compilar, este componente se empaqueta en `dist/.prerender/chunks/`, y una
+ * ruta relativa al modulo terminaria buscando el contorno dentro de `dist`. El
+ * build corre desde la raiz del repositorio (`npm run build`), que es el mismo
+ * supuesto que ya usan los scripts de `scripts/`.
+ */
+const geometry: MapGeometry = JSON.parse(
+  readFileSync(join(process.cwd(), "public", "mapa", "colombia.json"), "utf8"),
+) as MapGeometry;
+
+const languages = LANGUAGE_DATASET.languages;
+
+/** Las lenguas con coordenadas van a la tabla; las demas, a su lista aparte. */
+const located = languages.filter((language) => language.latitude !== undefined);
+const unlocated = languages.filter((language) => language.latitude === undefined);
+
+/**
+ * Los puntos que se dibujan.
+ *
+ * Solo los que caen dentro del encuadre del pais. Glottolog publica un unico
+ * punto por lengua y a veces esta fuera de Colombia —el espanol, cuyo punto esta
+ * en Espana—, asi que dibujarlo seria inventar una ubicacion sobre el mapa de
+ * Colombia. La ficha y la tabla siguen mostrando esas lenguas.
+ */
+const dots = located.flatMap((language) => {
+  const point = geoPointOf(language);
+  const projected = point === null ? null : project(geometry, point);
+  return point !== null && fitsInViewBox(geometry, projected)
+    ? [{ glottocode: language.glottocode, x: projected?.x ?? 0, y: projected?.y ?? 0 }]
+    : [];
+});
+
+/** Las familias que el dato trae, en orden alfabetico; ninguna se escribe a mano. */
+const families = [...new Set(languages.map((language) => language.family))].filter(
+  (family): family is string => family !== null,
+);
+families.sort();
+const hasUnfiledFamily = languages.some((language) => language.family === null);
+
+const familyOf = (family: string | null): string =>
+  family ?? t(locale, "map.family.none");
+
+const familyValue = (family: string | null): string => family ?? NO_FAMILY;
+
+const isoOf = (iso: string | null): string => iso ?? t(locale, "map.iso.none");
+
+/** La fecha se formatea en la compilacion: al navegador no viaja ningun `Intl`. */
+const retrievedOn = new Intl.DateTimeFormat(locale, {
+  dateStyle: "long",
+  timeZone: "UTC",
+}).format(new Date(LANGUAGE_DATASET.retrievedAt));
+
+const total = languages.length;
+
+/* Las dos frases que el script reescribe mientras filtra, ya traducidas. */
+const mapStrings: Record<string, string> = {};
+for (const key of MAP_STRING_KEYS) {
+  mapStrings[key] = t(locale, key);
+}
+
+const viewBox = `0 0 ${geometry.viewBox[0]} ${geometry.viewBox[1]}`;
+---
+
+<section class="section" data-language-map="true">
+  <div class="shell">
+    <div data-language-strings hidden data-json={JSON.stringify(mapStrings)}></div>
+
+    <div class="u-section-head">
+      <span class="eyebrow">{t(locale, "map.eyebrow")}</span>
+      <h1>{t(locale, "map.title")}</h1>
+      <p class="u-lead">{t(locale, "map.lead")}</p>
+    </div>
+
+    <!-- El texto de respeto va antes que el mapa: lo primero que se lee de una
+         lista de nombres ajenos es que la lista no habla por sus hablantes. -->
+    <div class="callout language-map__respect">
+      <p>{t(locale, "map.respect")}</p>
+      <p>
+        <a href={`${SITE.repository}/issues/new`} target="_blank" rel="noopener noreferrer">
+          {t(locale, "map.corrections")}
+        </a>
+      </p>
+    </div>
+
+    <div class="language-map__stage">
+      <figure class="language-map__figure">
+        <svg
+          class="language-map__svg"
+          viewBox={viewBox}
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path class="language-map__outline" d={geometry.outline}></path>
+          {
+            dots.map((dot) => (
+              <circle
+                class="language-map__dot"
+                cx={dot.x.toFixed(1)}
+                cy={dot.y.toFixed(1)}
+                r="3.4"
+                data-dot-for={dot.glottocode}
+              />
+            ))
+          }
+        </svg>
+        <figcaption class="faint">{t(locale, "map.map.caption")}</figcaption>
+      </figure>
+
+      <div class="language-map__notes">
+        <p class="faint">
+          {format(t(locale, "map.data.version"), {
+            version: LANGUAGE_DATASET.glottologVersion,
+            date: retrievedOn,
+          })}
+          · <a href={LANGUAGE_DATASET.sourceUrl} target="_blank" rel="noopener noreferrer"
+            >{t(locale, "map.data.source")}</a
+          >
+        </p>
+        <p class="faint">{t(locale, "map.offline")}</p>
+        <p class="faint">{t(locale, "map.data.geometry")}</p>
+        <p class="language-map__composition">{t(locale, "map.composition")}</p>
+      </div>
+    </div>
+
+    <div class="cluster language-map__controls">
+      <label for="language-family">
+        <span class="faint">{t(locale, "map.filter.family")}</span>
+        <select id="language-family" data-language-filter="family">
+          <option value="">{t(locale, "map.filter.allFamilies")}</option>
+          {families.map((family) => <option value={family}>{family}</option>)}
+          {hasUnfiledFamily && (
+            <option value={NO_FAMILY}>{t(locale, "map.family.none")}</option>
+          )}
+        </select>
+      </label>
+
+      <label for="language-search">
+        <span class="faint">{t(locale, "map.filter.search")}</span>
+        <input
+          id="language-search"
+          type="search"
+          data-language-search
+          autocomplete="off"
+          placeholder={t(locale, "map.filter.searchPlaceholder")}
+        />
+      </label>
+    </div>
+
+    <p class="faint" role="status" aria-live="polite" data-language-count>
+      {format(t(locale, "map.count"), { count: total, total })}
+    </p>
+    <p class="callout" data-language-empty hidden>{t(locale, "map.empty")}</p>
+
+    <div class="language-map__body">
+      <div class="language-map__lists">
+        <div class="table-scroll" data-language-group>
+          <table class="language-map__table">
+            <caption class="faint">{t(locale, "map.table.caption")}</caption>
+            <thead>
+              <tr>
+                <th scope="col">{t(locale, "map.table.language")}</th>
+                <th scope="col">{t(locale, "map.table.family")}</th>
+                <th scope="col">{t(locale, "map.table.glottocode")}</th>
+                <th scope="col">{t(locale, "map.table.iso")}</th>
+                <th scope="col">{t(locale, "map.table.source")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                located.map((language) => (
+                  <tr
+                    data-language-row
+                    data-name={language.name}
+                    data-family={familyValue(language.family)}
+                    data-glottocode={language.glottocode}
+                  >
+                    <th scope="row">
+                      <button
+                        type="button"
+                        class="language-map__name"
+                        data-language-open={language.glottocode}
+                        data-cell="language"
+                      >
+                        {language.name}
+                      </button>
+                    </th>
+                    <td data-cell="family">{familyOf(language.family)}</td>
+                    <td class="mono" data-cell="glottocode">{language.glottocode}</td>
+                    <td class="mono" data-cell="iso">{isoOf(language.iso639p3)}</td>
+                    <td data-cell="source">
+                      <a
+                        href={language.glottologUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {t(locale, "map.table.sourceLink")}
+                      </a>
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Las lenguas sin coordenadas se listan aparte, con su propia
+             explicacion: no es que falten, es que la fuente no las ubica. -->
+        <section
+          class="language-map__unlocated"
+          data-language-group
+          aria-labelledby="lenguas-sin-ubicacion"
+        >
+          <h2 class="language-map__subtitle" id="lenguas-sin-ubicacion">
+            {t(locale, "map.noCoords.title")}
+          </h2>
+          <p class="faint">{t(locale, "map.noCoords.lead")}</p>
+          <ul class="language-map__unlocated-list">
+            {
+              unlocated.map((language) => (
+                <li
+                  class="language-map__unlocated-item"
+                  data-language-row
+                  data-name={language.name}
+                  data-family={familyValue(language.family)}
+                  data-glottocode={language.glottocode}
+                >
+                  <button
+                    type="button"
+                    class="language-map__name"
+                    data-language-open={language.glottocode}
+                    data-cell="language"
+                  >
+                    {language.name}
+                  </button>
+                  <span class="faint" data-cell="family">{familyOf(language.family)}</span>
+                  <span class="mono faint" data-cell="glottocode">{language.glottocode}</span>
+                  <span class="mono faint" data-cell="iso">{isoOf(language.iso639p3)}</span>
+                  <!-- El enlace va dentro de la celda, igual que en la tabla, para
+                       que el panel de detalle lea una sola estructura. -->
+                  <span data-cell="source">
+                    <a
+                      href={language.glottologUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {t(locale, "map.table.sourceLink")}
+                    </a>
+                  </span>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      </div>
+
+      <aside class="language-detail" aria-labelledby="language-detail-title">
+        <h2 class="language-map__subtitle" id="language-detail-title">
+          {t(locale, "map.detail.title")}
+        </h2>
+        <!-- La region es `aria-live`: al elegir una lengua, el lector de pantalla
+             anuncia la ficha sin mover el foco de la fila que se activo. -->
+        <div aria-live="polite">
+          <p class="faint" data-detail-placeholder>{t(locale, "map.detail.empty")}</p>
+          <div data-detail-body hidden>
+            <p class="language-detail__name" data-detail-name></p>
+            <dl class="language-detail__list">
+              <div class="language-detail__row">
+                <dt>{t(locale, "map.table.family")}</dt>
+                <dd data-detail-family></dd>
+              </div>
+              <div class="language-detail__row">
+                <dt>{t(locale, "map.table.glottocode")}</dt>
+                <dd class="mono" data-detail-glottocode></dd>
+              </div>
+              <div class="language-detail__row">
+                <dt>{t(locale, "map.table.iso")}</dt>
+                <dd class="mono" data-detail-iso></dd>
+              </div>
+              <div class="language-detail__row">
+                <dt>{t(locale, "map.detail.glottolog")}</dt>
+                <dd>
+                  <a data-detail-link target="_blank" rel="noopener noreferrer"></a>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { safeInit } from "../scripts/core/safe";
+  import { initLanguageMap } from "../scripts/lenguas/index";
+
+  // Un filtro roto no puede llevarse la pagina: safeInit contiene el fallo y
+  // nombra el widget en la consola.
+  safeInit("language map", initLanguageMap);
+</script>

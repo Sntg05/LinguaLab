@@ -514,6 +514,14 @@ const articulatoryRows = (symbol: typeof first) => [
     }
   }
 
+  /* Un elemento de rejilla tiene `min-width: auto`, o sea el ancho mínimo de su
+     contenido. El campo de búsqueda lo empujaba todo a 428 px y la página se
+     arrastraba de lado en un teléfono; con el mínimo en cero, la columna se
+     encoge y el campo con ella. */
+  .lab__chart {
+    min-width: 0;
+  }
+
   .lab__controls {
     display: flex;
     flex-wrap: wrap;
@@ -524,6 +532,7 @@ const articulatoryRows = (symbol: typeof first) => [
 
   .lab__controls .field {
     flex: 1 1 16rem;
+    min-width: 0;
   }
 
   .lab__count {
