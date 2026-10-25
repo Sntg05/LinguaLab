@@ -57,19 +57,19 @@ de una persona. Este documento cierra el trabajo técnico que no necesita a nadi
 
 | ID | Qué | Spec | Ruta | Commit |
 |---|---|---|---|---|
-| T1 | Corregir las cinco inexactitudes de P13 | S2 | inline | `docs:` |
-| T2 | `scripts/e2e.mjs`: la puerta e2e deja de depender de `env -u` | S3 | inline | `fix(e2e):` |
-| T3 | `npm audit` en CI + `npm run audit` + CodeQL | S4 | inline | `ci:` |
-| T4 | `frame-ancestors` declarado donde se afirma | S5 | inline | `docs:` |
-| T5 | `point-out-of-tier` en el codec de TextGrid | S6 | inline | `fix(textgrid):` |
-| T6 | `limits.ts` para los topes de audio | S7 | inline | `refactor(audio):` |
-| T7 | Prueba de la rama de cuota agotada | S8 | inline | `test(ortografia):` |
-| T8 | La puerta falla ante `incomplete` sin motivo | S9 | inline | `test(a11y):` |
-| T9 | El núcleo devuelve código y datos; el texto se traduce | S10 | inline | `fix(i18n):` |
-| T10 | Medir la línea base de lint y atribuir los avisos | S11 | inline | `docs:` |
-| T11 | Fijar las acciones de GitHub por SHA | S12 | inline | `ci:` |
-| T12 | Cerrar los PRs de Dependabot con su motivo | S13 | inline | — |
-| T13 | Sincronizar documentos y correr las puertas completas | S14 | inline | `docs:` |
+| T1 | Corregir las cinco inexactitudes de P13 | S2 | inline | `5c183ad` |
+| T2 | La puerta e2e arranca el preview en primer plano (`--ignore-lock`) | S3 | inline | `4022c29` |
+| T3 | `npm audit` en CI + `npm run audit` + CodeQL | S4 | inline | `862e9eb`, `61f6cc8` |
+| T4 | `frame-ancestors` declarado donde se afirma | S5 | inline | `a569d5a` |
+| T5 | `point-out-of-tier` en el codec de TextGrid | S6 | inline | `1e6c231` |
+| T6 | `limits.ts` para los topes de audio | S7 | inline | `8575385` |
+| T7 | Prueba de la rama de cuota agotada | S8 | inline | `c6c916a` |
+| T8 | La puerta falla ante `incomplete` sin motivo | S9 | inline | `5bf6e77` |
+| T9 | El núcleo devuelve código y datos; el texto se traduce | S10 | worker | pendiente |
+| T10 | Medir la línea base de lint y atribuir los avisos | S11 | inline | `2b90f06` |
+| T11 | Fijar las acciones de GitHub por SHA | S12 | inline | `59d6689` |
+| T12 | Cerrar los PRs de Dependabot con su motivo | S13 | inline | — (GitHub) |
+| T13 | Sincronizar documentos y correr las puertas completas | S14 | inline | pendiente |
 
 ## Log
 
@@ -87,3 +87,18 @@ de una persona. Este documento cierra el trabajo técnico que no necesita a nadi
   CI para que O2 se verifique en el runner y no solo en local.
 - **L4.** El `npm run build` emite tres avisos de externalización (`node:fs/promises`, `node:url`,
   `node:module`) y P15 solo nombra el primero. Se anota aquí y se corrige la redacción de P15 en T13.
+- **L5.** La puerta e2e fallaba en esta máquina por dos motivos distintos que se confundían: los
+  navegadores de Playwright no estaban instalados (`~/.cache/ms-playwright` no existía) y el proceso del
+  servidor. El segundo se resolvió con `--ignore-lock`, la bandera que el propio CLI documenta para
+  «servidor de una sola corrida, en primer plano», en vez de un `scripts/e2e.mjs` que borre variables. El
+  primero se resolvió instalando Chromium, con autorización explícita de la dueña del repositorio.
+- **L6.** Sondas y mutaciones que se corrieron antes de dar algo por cerrado: la lista de `/arboles` vacía
+  y poblada medida con axe (0 `<li>` → `incomplete`; 1 `<li>` → sin hallazgo), la puerta de accesibilidad
+  puesta roja a propósito quitando la excepción, y la degradación de cuota puesta roja quitando
+  `degradeToMemory()`.
+- **L7.** El repositorio de GitHub estaba con **siete** PRs de Dependabot abiertos, alertas de Dependabot
+  desactivadas, `secret scanning` y `push protection` desactivados y sin CodeQL. Los siete PRs se
+  cerraron con su motivo escrito, las alertas y las actualizaciones de seguridad **se activaron** —el
+  token de la sesión tiene administración, así que el «no se puede desde este entorno» del documento de
+  seguridad era falso— y el escaneo de secretos también. Eso no vive en el repositorio: vive en los
+  ajustes del proyecto y queda escrito en `docs/SECURITY-REVIEW.md` con su fecha.
