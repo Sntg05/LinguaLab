@@ -40,7 +40,16 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "npm run build && npm run preview",
+    // `--ignore-lock` es la unica pieza que no es obvia, y no es un truco: desde Astro 7 el CLI
+    // detecta que lo lanza un agente (`am-i-vibing`, que lee `AI_AGENT`, `PI_CODING_AGENT` y una
+    // veintena mas) y manda `astro preview` al fondo solo, porque asume que un agente no quiere un
+    // proceso en primer plano. Playwright exige justo lo contrario: un servidor en primer plano que
+    // viva mientras corre la suite, y si el proceso termina aborta con `Process from config.webServer
+    // exited early`, sin decir por que. La bandera significa exactamente lo que necesitamos —servidor
+    // de una sola corrida, en primer plano, sin escribir el archivo de bloqueo— y la soporta el propio
+    // CLI. Ver **P16** de `docs/PENDING.md`: las dos alternativas que se habian descartado eran
+    // reutilizar el servidor (P7) y sembrar la variable para enganar al detector.
+    command: "npm run build && npm run preview -- --ignore-lock",
     url: `http://localhost:${PORT}`,
     // POR QUE NO SE REUTILIZA UN SERVIDOR EXISTENTE, NI EN LOCAL
     //
