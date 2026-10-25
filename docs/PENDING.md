@@ -371,18 +371,26 @@ rule=aria-required-children   impact=critical
 
 Es de impacto **crítico** y la puerta pasó `/arboles` en todas las corridas.
 
-**Por qué no se cerró ya.** Cerrarlo es fácil —tratar «sin motivo» como no permitido hace fallar la
+**Por qué no se cerró entonces.** Cerrarlo es fácil —tratar «sin motivo» como no permitido hace fallar la
 prueba— pero eso deja la suite **roja** hasta decidir antes una pregunta de producto: una `<ul role="list">`
 vacía que se llena por JavaScript, ¿es un defecto real o un falso positivo de axe mirando el HTML inicial?
 La respuesta cambia el arreglo: si es real se arregla el marcado, si no se documenta la excepción con su
 razón. Decidirlo desde el código, sin mirar la página, sería adivinar.
 
-**Próximo paso exacto.** Abrí `/arboles`, mirá si esa lista se puebla en el navegador y con qué. Recién
-entonces: cambiar el marcado, o agregar la excepción nombrando este caso. Después, tratar «sin motivo» como
-no permitido en `e2e/accessibility.spec.ts` y confirmar que la suite queda verde por la razón correcta.
+**Estado: cerrado, y la pregunta se respondió midiendo.** Una sonda con Playwright sobre `/arboles`, en el
+sitio compilado, dio esto: con la página recién cargada la lista tiene **0** `<li>` y axe devuelve el
+`incomplete` de `aria-required-children` con `data: [["listitem"]]`; después de pulsar «Dibujar» hay **1**
+`<li>` y axe **deja de reportarlo**. La lista se puebla por JavaScript en la primera acción, así que lo que
+la regla mide es el estado vacío del marcado, no un defecto de la página. `role="list"` se queda: es lo que
+conserva el rol de lista en Safari cuando se quita el `list-style`, y borrarlo habría «arreglado» la
+herramienta rompiendo el lector de pantalla. La regla queda exceptuada **por nombre y con esa razón escrita
+al lado**, y la afirmación estructural ya está: quitar esa excepción pone la puerta **roja** en las cuatro
+pruebas de `/arboles` —verificado por mutación—, así que un `incomplete` sin motivo textual ya no puede
+pasar sin dejar rastro.
 
 **Criterio de aceptación.** La puerta falla si aparece un `incomplete` sin motivo textual, y el caso de
 `/arboles` está o arreglado o exceptuado **por nombre y con su razón**, nunca filtrado sin dejar rastro.
+Los dos lados están cumplidos; el detalle de la medición está en el estado de arriba.
 
 ---
 

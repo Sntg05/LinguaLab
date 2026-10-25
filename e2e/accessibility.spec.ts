@@ -146,12 +146,16 @@ const AXE_COULD_NOT_MEASURE: readonly string[] = [
  * Reglas cuya falta de motivo textual está exceptuada **por nombre**, nunca en general.
  *
  * `aria-required-children` sobre `.checks__list` en `/arboles`: axe avisa que espera un
- * hijo con rol `listitem` en una `<ul role="list">` que en el HTML inicial está vacía.
- * Impacto **crítico**, y la puerta pasaba sin verlo. No se arregla acá porque la respuesta
- * depende de algo que el código no puede decidir solo: si esa lista se puebla por
- * JavaScript después de cargar, es un falso positivo de axe mirando el marcado inicial;
- * si no se puebla, es un defecto real de la página. La decisión y su criterio están en
- * **P12** de `docs/PENDING.md`.
+ * hijo con rol `listitem` en una `<ul role="list">` que **en el HTML inicial está vacía**.
+ * Era una pregunta abierta —¿esa lista se puebla o no?— y se midió antes de decidir:
+ * con la página recién cargada hay **0** `<li>` y axe devuelve este `incomplete` con
+ * `data: [["listitem"]]`; después de pulsar «Dibujar» hay **1** `<li>` y axe **deja de
+ * reportarlo**. O sea: la lista se puebla por JavaScript en la primera acción, y lo que
+ * axe mide es el estado vacío del marcado. El `role="list"` se queda porque es lo que
+ * conserva el rol de lista en Safari cuando se quita el `list-style`, así que el arreglo
+ * no es borrarlo. La excepción queda **por nombre y con esta razón medida**, nunca en
+ * general: cualquier otra regla sin motivo textual sigue fallando. Ver **P12** de
+ * `docs/PENDING.md`.
  *
  * `label-content-name-mismatch` sobre los botones de acción de la tabla de intervalos de
  * `/visualizador`: el botón muestra «▶» o «∪» y se llama «Reproducir el intervalo 1» /
