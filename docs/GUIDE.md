@@ -292,6 +292,19 @@ subdirectorio: el código no asume la raíz, aunque hoy sea lo único que se usa
 
 ## Trampas que ya nos costaron tiempo
 
+**El lockfile se regenera con npm 10, no con el que tengas instalado.** Medido el 2026-10-25: npm 12
+`install` sobre este repositorio **poda las dependencias opcionales de plataforma** del lock
+(`@esbuild/linux-x64`, `rollup-linux-x64-gnu` y una veintena más con `0` entradas al terminar), y un lock
+así rompe `npm ci` en CI, que corre con el npm de Node 22. La forma de agregar o actualizar una
+dependencia sin ensuciar el lock es:
+
+```bash
+npx --yes npm@10.9.4 install <paquete>@<version>        # o --package-lock-only
+```
+
+Si el diff del lock muestra cientos de líneas borradas y no agregadas, es esto: revisá antes de
+commitear.
+
 Las dejo escritas para que no vuelvas a caer.
 
 **Un atributo sin valor rompe el XML.** Astro emite sus marcas de estilo como
