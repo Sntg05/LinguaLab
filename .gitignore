@@ -33,3 +33,6 @@ blob-report/
 
 # Local Pi runtime state
 .atl/
+
+# Worktrees de git para trabajo en paralelo: no son parte del proyecto.
+.worktrees/

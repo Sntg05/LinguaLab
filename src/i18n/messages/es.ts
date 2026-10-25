@@ -4,6 +4,11 @@
    Generated from legacy/data/i18n/es.js — see odd/tasks for provenance.
    ============================================================ */
 
+import { experimentsEs } from "./features/experiments.es";
+import { elanEs } from "./features/elan.es";
+import { languagesEs } from "./features/languages.es";
+import { acousticEs } from "./features/acoustic.es";
+
 export const es = {
   "skip": "Saltar al contenido",
   "brand.name": "LinguaLab",
@@ -459,4 +464,8 @@ export const es = {
   "audio.projects.cancel": "Cancelar",
   "audio.projects.cleared": "Proyectos borrados de este navegador.",
   "audio.projects.clearFailed": "No se pudieron borrar todos los proyectos: {detail}",
+  ...experimentsEs,
+  ...elanEs,
+  ...languagesEs,
+  ...acousticEs,
 } as const;
