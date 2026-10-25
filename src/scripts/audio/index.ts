@@ -54,6 +54,7 @@ import {
   type AnnotationPersistenceReason,
 } from "./annotation-storage";
 import { downloadText, readFileBytes, toFileName } from "./files";
+import { formatBytes, isOverLimit, MAX_AUDIO_BYTES } from "./limits";
 import { IPA_GROUPS, insertSymbol } from "./ipa-keyboard";
 import { createPlayback, type Playback } from "./playback";
 import {
@@ -101,23 +102,9 @@ const DEFAULT_PROJECT = "visor";
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);
 
-/**
- * Tope de bytes del audio, comprobado ANTES de leer y decodificar el archivo.
- *
- * Sale del limite que ya existe para la duracion (`MAX_DURATION_SECONDS` = 300 s)
- * llevado a su peor caso honesto: 300 s de wav sin comprimir a 96 kHz, estereo y
- * 16 bits son 115,2 MB, asi que 128 MB rechaza solo lo que no puede ser un
- * tramo de 300 s. La duracion se sigue midiendo despues de decodificar, porque
- * antes no se conoce; lo que se evita aca es entregarle a `decodeAudioData` un
- * archivo que va a llenar la memoria antes de que ningun limite lo detenga.
- */
-export const MAX_AUDIO_BYTES = 128 * 1024 * 1024;
-
-/** Tamano legible para un mensaje: MB por encima del megabyte, KB por debajo. */
-const formatBytes = (bytes: number): string =>
-  bytes >= 1024 * 1024
-    ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-    : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+/* El tope del audio, el formateo de tamanos y la decision viven en `./limits.ts`,
+   con su prueba al lado: este archivo necesita DOM y no tiene prueba unitaria.
+   Ver **P19** de `docs/PENDING.md`. */
 
 /**
  * Por que se degrada el guardado, en el idioma de la pagina.
@@ -828,7 +815,7 @@ export const initAudioLab = (): void => {
     // ANTES de leer y de decodificar: un archivo de este tamano no puede ser un
     // tramo de 300 s, y entregarselo a `decodeAudioData` llena la memoria antes
     // de que ningun limite lo detenga.
-    if (file.size > MAX_AUDIO_BYTES) {
+    if (isOverLimit(file.size, MAX_AUDIO_BYTES)) {
       say(
         format(strings.text("audio.error.tooLarge"), {
           size: formatBytes(file.size),
