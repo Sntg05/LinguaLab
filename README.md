@@ -138,11 +138,12 @@ git archive <commit> legacy/ | tar -x -C /tmp
 | Comprobación | Estado |
 |---|---|
 | `astro check` | 0 errores |
-| Pruebas unitarias | 921 en 52 archivos |
-| Pruebas de extremo a extremo | 87 sobre el sitio compilado (50 de accesibilidad) |
-| Reglas hexagonales | 193 módulos, 441 dependencias, 0 violaciones |
+| Pruebas unitarias | 943 en 55 archivos |
+| Pruebas de extremo a extremo | 88 sobre el sitio compilado (50 de accesibilidad), en su propio puerto |
+| Reglas hexagonales | 198 módulos, 452 dependencias, 0 violaciones |
 | Verificación de compilación | pasa |
-| Página más pesada | 28,9 KB gzip, sobre un presupuesto de 60 KB |
+| Página más pesada | 29,1 KB gzip, sobre un presupuesto de 60 KB |
+| Auditoría de dependencias | 0 en producción y 0 en desarrollo (`npm run audit`, también en CI) |
 
 `scripts/verify-build.mjs` comprueba el resultado compilado: cobertura de la CSP
 por script inline, ausencia de `unsafe-inline`, ausencia de subrecursos externos,
