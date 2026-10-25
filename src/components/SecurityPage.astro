@@ -36,6 +36,13 @@ const policies: { heading: string; body: string }[] = es
         heading: "Política de seguridad de contenido",
         body: "La CSP se genera en la compilación con una huella por script, de modo que no hace falta 'unsafe-inline'. Los estilos se permiten solo por huella o con 'self'.",
       },
+      {
+        // El limite se declara porque callarlo convertiria la politica en una
+        // promesa mas grande que lo que el navegador aplica. Ver O3 en
+        // `docs/SECURITY-REVIEW.md`.
+        heading: "Lo que esta política no puede hacer aquí",
+        body: "GitHub Pages no permite cabeceras de respuesta, así que la política viaja en una metaetiqueta. Los navegadores ignoran 'frame-ancestors' cuando llega así: la directiva está en la política y no se aplica. Hoy nada impide que otro sitio muestre esta página dentro de un marco; el día que el sitio se sirva desde un host que permita cabeceras, la política se emitirá como cabecera y la directiva valdrá. Se declara en vez de insinuar lo contrario.",
+      },
     ]
   : [
       {
@@ -57,6 +64,10 @@ const policies: { heading: string; body: string }[] = es
       {
         heading: "Content Security Policy",
         body: "The CSP is generated at build time with a hash per script, so 'unsafe-inline' is not needed. Styles are allowed only by hash or from 'self'.",
+      },
+      {
+        heading: "What this policy cannot do here",
+        body: "GitHub Pages does not allow response headers, so the policy travels in a meta tag. Browsers ignore 'frame-ancestors' when it arrives that way: the directive is in the policy and is not enforced. Nothing today stops another site from framing this page; the day the site is served from a host that allows headers, the policy will be emitted as a header and the directive will apply. This is declared instead of implying the opposite.",
       },
     ];
 ---

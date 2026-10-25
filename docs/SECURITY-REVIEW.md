@@ -80,9 +80,13 @@ completo, con la versión mayor en un comentario al lado para que Dependabot sig
 declara).**
 GitHub Pages no permite cabeceras de respuesta, así que la CSP viaja en una metaetiqueta. Los
 navegadores **ignoran** `frame-ancestors` cuando llega por `<meta>`: la directiva está en la política y
-no se aplica. La página `/seguridad` y `docs/STATUS.md` no deben insinuar lo contrario. *Próximo paso:*
-declararlo en `/seguridad` con esa misma redacción, y emitir la cabecera real el día que el sitio se
-sirva desde un host con cabeceras.
+no se aplica. La página `/seguridad` y `docs/STATUS.md` no deben insinuar lo contrario.
+
+*Estado: cerrado en lo que se puede cerrar desde el repositorio.* `/seguridad` tiene ahora un apartado,
+en los dos idiomas, que dice exactamente eso: la directiva está y no se aplica, hoy nada impide que otro
+sitio muestre la página en un marco, y el día que el sitio se sirva desde un host con cabeceras se
+emitirá como cabecera y valdrá. La cabecera real sigue esperando un host que la permita: eso no es
+código, es despliegue.
 
 **O4 — Las alertas de Dependabot están desactivadas en el repositorio (severidad baja).**
 La API contesta `403 «Dependabot alerts are disabled for this repository»`, que es la fuente que
