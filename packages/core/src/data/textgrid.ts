@@ -471,6 +471,19 @@ const parseTokens = (tokens: readonly Token[]): Result<ParsedTextGrid, TextGridE
         if (!mark.ok) {
           return mark;
         }
+        // La misma invariante que en los intervalos, en la otra rama: un punto
+        // fuera de su capa lo pinta el visor sobre un eje que no llega y la
+        // exportacion lo escribe fuera de rango, que es lo que Praat rechaza.
+        if (
+          time.value < tierXmin.value - TIME_EPSILON ||
+          time.value > tierXmax.value + TIME_EPSILON
+        ) {
+          return err({
+            code: "point-out-of-tier",
+            detail: `El punto ${point + 1} (${formatNumber(time.value)}) se sale de los limites de "${name.value}" (${formatNumber(tierXmin.value)}–${formatNumber(tierXmax.value)}).`,
+            line: lastLine,
+          });
+        }
         points.push({ time: time.value, text: mark.value });
       }
       tiers.push({ name: name.value, kind: "point", points });

@@ -930,6 +930,89 @@ Object class = "TextGrid"
   });
 });
 
+describe("D10 — un punto fuera de los limites de su capa se aceptaba", () => {
+  // El mismo defecto que D1, en la otra rama del analizador: la invariante se
+  // habia cerrado solo para `IntervalTier`. Un `TextTier` de 0..3 dentro de un
+  // documento de 5 s con un punto en 7 se leia sin error, el visor lo pintaba
+  // sobre un eje que no llega y la exportacion escribia el punto fuera de la
+  // capa; Praat rechaza esa capa por la misma razon que un intervalo.
+  const pointOutOfTier = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+5
+<exists>
+1
+"TextTier"
+"marks"
+0
+3
+1
+7
+"fuera de su capa"
+`;
+
+  it("parse lo rechaza con `point-out-of-tier` en vez de aceptarlo", () => {
+    expectError(parseTextGridText(pointOutOfTier), "point-out-of-tier");
+    expectError(createTextGridCodec().parse(encodeUtf8(pointOutOfTier)), "point-out-of-tier");
+  });
+
+  it("un punto antes del inicio de su capa se rechaza igual", () => {
+    const before = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+5
+<exists>
+1
+"TextTier"
+"marks"
+2
+3
+1
+1
+"antes de su capa"
+`;
+
+    expectError(parseTextGridText(before), "point-out-of-tier");
+  });
+
+  it("un punto justo en el borde de su capa sigue siendo valido", () => {
+    // La otra mitad del contrato: rechazar de mas seria peor que el defecto.
+    const atEdge = `File type = "ooTextFile"
+Object class = "TextGrid"
+
+0
+5
+<exists>
+1
+"TextTier"
+"marks"
+0
+3
+2
+0
+"inicio"
+3
+"fin"
+`;
+
+    const parsed = parseTextGridText(atEdge);
+
+    expect(isOk(parsed)).toBe(true);
+    if (isOk(parsed)) {
+      expect(parsed.value.document.tiers[0]).toEqual({
+        name: "marks",
+        kind: "point",
+        points: [
+          { time: 0, text: "inicio" },
+          { time: 3, text: "fin" },
+        ],
+      });
+    }
+  });
+});
+
 describe("el tope de tamano de un TextGrid", () => {
   it("declara 1 MB, que es holgado para un TextGrid real", () => {
     expect(MAX_TEXTGRID_BYTES).toBe(1024 * 1024);

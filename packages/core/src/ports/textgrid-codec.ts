@@ -29,6 +29,13 @@ export type TextGridError =
    */
   | { readonly code: "interval-out-of-tier"; readonly detail: string; readonly line?: number }
   /**
+   * Un punto cae fuera del `xmin`/`xmax` de SU capa. Es el gemelo de
+   * `interval-out-of-tier` para `TextTier`, y tiene codigo propio porque un
+   * consumidor del puerto merece un nombre que diga que paso: un intervalo y una
+   * marca de tiempo no se arreglan igual. Lo produce `parse`.
+   */
+  | { readonly code: "point-out-of-tier"; readonly detail: string; readonly line?: number }
+  /**
    * Una capa declara un rango que el documento no cubre (capa 0..9 dentro de un
    * documento 0..5). Lo produce `parse`; serializar despues con los limites del
    * documento escribiria intervalos fuera de su capa, o al reves.

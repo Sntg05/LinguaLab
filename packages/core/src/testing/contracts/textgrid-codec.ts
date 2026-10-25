@@ -102,6 +102,24 @@ Object class = "TextGrid"
 `,
   },
   {
+    name: "un punto fuera de los limites de su capa",
+    code: "point-out-of-tier",
+    text: `File type = "ooTextFile"
+Object class = "TextGrid"
+0
+5
+<exists>
+1
+"TextTier"
+"marks"
+0
+3
+1
+7
+"fuera"
+`,
+  },
+  {
     name: "una capa mas larga que el documento",
     code: "tier-out-of-document",
     text: `File type = "ooTextFile"
