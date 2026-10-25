@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import {
-  isTextGridTooLarge,
-  MAX_TEXTGRID_BYTES,
-} from "../../../packages/core/src/data/textgrid";
+// Por la entrada pública del paquete y no por una ruta profunda al núcleo: la
+// regla `no-reaching-into-core-internals` lo prohíbe, y tiene razón —una ruta
+// interna puede cambiar sin que nada avise—.
+import { isTextGridTooLarge, MAX_TEXTGRID_BYTES } from "@lingualab/core";
 import { formatBytes, isOverLimit, MAX_AUDIO_BYTES } from "./limits";
 
 /**
