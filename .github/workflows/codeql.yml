@@ -1,0 +1,57 @@
+name: CodeQL
+
+# POR QUE ESTA PUERTA EXISTE SI EL SITIO ES ESTATICO
+#
+# El riesgo de este repositorio es acotado y esta medido: no hay `innerHTML`, ni
+# `eval`, ni una entrada de usuario que llegue a un sink peligroso (ver §1 de
+# `docs/SECURITY-REVIEW.md`). Pero la red cuesta cero y cubre lo que una
+# revision manual no vuelve a mirar: el dia que alguien agregue un sink, esto lo
+# dice sin que nadie tenga que acordarse de buscarlo. Es el punto O5 del
+# documento de seguridad.
+#
+# `security-events: write` es lo unico que necesita para publicar los resultados
+# en la pestaña de seguridad; el resto queda en lectura.
+
+on:
+  push:
+    branches:
+      - main
+      - feat/toolbox-v3-security-languages
+      - feat/toolbox-v3-closure
+  pull_request:
+  schedule:
+    # Una vez por semana, aunque nadie toque el repositorio: las consultas de
+    # CodeQL mejoran y un hallazgo puede aparecer sin que cambie una linea.
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze JavaScript and TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # Fijada por SHA, como las del resto de los flujos: una etiqueta movible
+      # en una accion con `security-events: write` es el mismo riesgo que O2
+      # describe, con mas permisos.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # `javascript-typescript` cubre `src/`, `packages/`, `e2e/` y `scripts/`
+      # sin compilar: el analisis es del codigo fuente, y el build del sitio no
+      # cambia el resultado.
+      - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
+        with:
+          languages: javascript-typescript
+          queries: security-and-quality
+
+      - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4
+        with:
+          category: "/language:javascript-typescript"
