@@ -80,8 +80,9 @@ clases, para no romperlas arreglando otra cosa.
 
 ## Pendiente
 
-- **T16**, declarada: `OrthographyIssue` lleva la frase en prosa española pero **no el dato** (nombre de
+- **P1**, declarada: `OrthographyIssue` lleva la frase en prosa española pero **no el dato** (nombre de
   clase, símbolo), así que la interfaz no puede traducirla. Es un defecto de capas —el núcleo no debería
   generar prosa, sino devolver códigos y datos— y **merece su propio cambio y su propia revisión**, por
   la misma razón por la que no se dividió el manejador de clic delegado al cierre de un cambio ya
-  verificado: un cambio transversal al contrato de errores no se hace a las apuradas en la cola.
+  verificado: un cambio transversal al contrato de errores no se hace a las apuradas en la cola. Está en
+  `docs/PENDING.md`, con su criterio de aceptación.

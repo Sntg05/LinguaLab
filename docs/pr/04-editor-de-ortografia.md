@@ -94,7 +94,7 @@ excedido, habría cambiado el diseño, no el presupuesto.
 | Qué | Estado |
 |---|---|
 | `render.ts` (411 líneas) sin prueba unitaria | Vitest corre en entorno `node` y `vitest.config.ts` está fuera de las superficies de esta tarea. Lo cubren las 8 pruebas e2e, que es verificación real pero más lenta |
-| Las frases de validación del núcleo son solo en español | **Defecto de capas real**: `OrthographyIssue` lleva la prosa pero **no el dato** (nombre de clase, símbolo), así que la interfaz no puede traducirla sin tocar el núcleo. En `/en/ortografia` la insignia está localizada y la oración no. Está registrado como tarea T16 en vez de parcheado a medias: lo correcto es que el núcleo devuelva **códigos y datos**, y que la frase viva en la capa de presentación |
+| Las frases de validación del núcleo son solo en español | **Defecto de capas real**: `OrthographyIssue` lleva la prosa pero **no el dato** (nombre de clase, símbolo), así que la interfaz no puede traducirla sin tocar el núcleo. En `/en/ortografia` la insignia está localizada y la oración no. Está registrado como **P1** en `docs/PENDING.md` en vez de parcheado a medias: lo correcto es que el núcleo devuelva **códigos y datos**, y que la frase viva en la capa de presentación |
 | 5 avisos de complejidad cognitiva en el código nuevo | El peor es el manejador de clic delegado de `index.ts` (complejidad 40). Dividirlo es la limpieza de mayor valor y deliberadamente **no** se hizo al final de un cambio ya verificado: merece su propio commit, no una última edición sin presupuesto para estabilizarla |
 | `{V}` (clases de símbolos) se puede escribir en el JSON pero no editar en la interfaz | No hay editor de clases todavía. La sintaxis está documentada y el editor preserva las clases importadas sin tocarlas |
 | La advertencia de persistencia con motivo `open-failed` o `quota-exceeded` | No probada por ejecución: el navegador de las pruebas siempre tiene IndexedDB y la rama de cuota necesita un fallo real. Ya estaba declarada en el adaptador (registro L9) |
@@ -103,4 +103,4 @@ excedido, habría cambiado el diseño, no el presupuesto.
 
 - El editor de clases para `{V}`.
 - Dividir el manejador de clic delegado.
-- T16, la prosa del núcleo.
+- P1, la prosa del núcleo (`docs/PENDING.md`).

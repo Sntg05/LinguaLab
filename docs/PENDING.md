@@ -137,8 +137,9 @@ existía antes de esta rama: esos 4 no son heredados en sentido estricto. La sum
 y una versión anterior de este documento escribía «21 y 4» como si los 4 salieran de los 21, que no es de
 donde salen.
 
-**Por qué no se hizo.** El archivo de 40 es el manejador de un `click` **delegado**: un `switch` sobre
-veinte acciones. Partirlo en funciones con nombre es lo correcto y es una refactorización que conviene
+**Por qué no se hizo.** El archivo de 40 es el manejador de un `click` **delegado**: una cadena de `if`
+con salidas tempranas sobre unas veinte acciones. Los `switch` de ese archivo (líneas 326, 450, 518) son
+sobre `error.code` y `field`, y no tienen que ver con la complejidad. Partirlo en funciones con nombre es lo correcto y es una refactorización que conviene
 hacer **con** las pruebas de P2, no antes.
 
 **Próximo paso exacto.** Empezá por `csv.ts`, que no toca el DOM y ya tiene pruebas: extraer el analizador
@@ -308,6 +309,10 @@ que **nadie los midió**.
 verificador, **por página y tema**: `inicio` **9**, `FonoLab` **15**, `salvaguardas` **16**, `acerca` 4,
 `arboles` 2, `no-existe` 1. En total **186 nodos** sobre las 21 páginas en los dos temas.
 
+**Esa lista no se suma.** Las cifras son por página **y por tema**, y la 404 no tiene versión en inglés:
+sumarlas da 47 y el total medido es 186. Quien compare contra este párrafo tiene que repetir la medición,
+no confiar en una cuenta que parece cerrada y no lo está.
+
 De esos, axe declara motivos que significan **no pude medir**: `imgNode` («background color could not be
 determined because element contains an image node»), `bgOverlap` («...because it is overlapped by another
 element») y `nonBmp` (contenido compuesto solo de símbolos que su regex no trata como texto). Los nodos
@@ -316,10 +321,14 @@ son `<text>` y `<tspan>` de SVG, `button[data-symbol]` del teclado AFI, `.tract_
 
 **`shortTextContent` NO entra en esa categoría, y al principio sí entró.** Se creyó que significaba «no
 decide si un carácter es texto». El código de axe dice otra cosa: se asigna en una rama guardada por
-`!isValid`, o sea que axe **ya midió un ratio que no alcanza**. Un verificador lo demostró con una
-mutación: un texto a **2,63:1** —por debajo del 3:1 exigido— pasaba la puerta. Por eso ahora un
-`incomplete` falla también cuando su motivo está permitido pero axe trae un `contrastRatio` positivo menor
-que el `expectedContrastRatio`.
+`!isValid`, y esa guarda **también es verdadera cuando axe no pudo calcular nada** —de hecho, las 28
+apariciones medidas en este sitio traen `contrastRatio: 0`, que el propio spec define como «no calculó»—.
+Es decir: el motivo no garantiza ni una cosa ni la otra. Lo que sí se demostró con una mutación es que la
+rama puede traer un ratio medido e insuficiente: un texto a **2,63:1** —por debajo del 3:1 exigido— pasaba
+la puerta. Por eso la afirmación no es «este motivo está permitido» sino «este motivo no trae un contraste
+medido por debajo del exigido»: el dato se comprueba antes que el motivo, y un `incomplete` falla también
+cuando el motivo está permitido pero axe trae un `contrastRatio` positivo menor que el
+`expectedContrastRatio`.
 
 **Por qué importa.** Es la diferencia entre «verificado» y «no mirado», y el proyecto declara WCAG 2.2 AA
 como requisito. Un punto ciego declarado se puede cerrar; uno silencioso se convierte en una afirmación
@@ -381,6 +390,15 @@ no permitido en `e2e/accessibility.spec.ts` y confirmar que la suite queda verde
 
 Las encontró la cuarta verificación independiente, todas **preexistentes** a la ronda que las reportó. No
 se corrigieron por presupuesto, y quedan con su ubicación exacta para que sea cuestión de minutos.
+
+**Estado: cerrado.** Las cinco se corrigieron en la rama `feat/toolbox-v3-closure`, y cada corrección se
+comprobó contra el archivo y la línea que la entrada nombra: `grep -rn "T16" docs/ odd/ | grep -v
+docs/PENDING.md` ya no devuelve nada —las únicas apariciones que quedan son estas líneas, que están
+hablando del rename—; el manejador delegado de `src/scripts/ortografia/index.ts` es una cadena de `if` y
+los tres `switch`
+son sobre `error.code` y `field`; la redacción de P11 coincide ahora con la del spec; y
+`odd/tasks/hexagonal-v3-mix.md` ya no promete uniformidad —dice «trece entradas, de detalle desigual»—,
+que era la corrección del punto 4. La entrada se conserva porque el error importa más que la corrección.
 
 **1. Rename incompleto de `T16` a `P1`.** `docs/STATUS.md:53` ya se corrigió, pero quedan referencias
 viejas en `docs/pr/04-editor-de-ortografia.md:97,106` y `docs/pr/05-catalogo.md:83`. `T16` era el id de la
