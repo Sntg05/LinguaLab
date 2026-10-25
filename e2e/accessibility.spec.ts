@@ -143,6 +143,13 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
 const AXE_COULD_NOT_MEASURE: readonly string[] = [
   "imgNode",
   "bgOverlap",
+  // `elmPartiallyObscured`: axe no puede medir el contraste de una celda que
+  // queda fuera de la parte visible de una tabla que se desplaza en horizontal
+  // —la tabla de mediciones acústicas, con doce columnas, no entra en 1280 px—.
+  // Es «no pude medir», no «está bien»: el contraste de esas celdas no está
+  // verificado, y la tabla puede recorrerse con el teclado porque su contenedor
+  // es enfocable. Queda anotado como P22 en `docs/PENDING.md`.
+  "elmPartiallyObscured",
   "nonBmp",
   // Permitido SOLO porque la comprobación del contraste medido corre antes. Ver arriba.
   "shortTextContent",

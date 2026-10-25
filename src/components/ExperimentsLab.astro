@@ -222,7 +222,10 @@ const defaultInstructions = Object.fromEntries(
         <p class="explab__hint">{t(locale, "exp.preview.specNote")}</p>
         <p class="explab__note" data-explab-preview-count>{t(locale, "exp.preview.empty")}</p>
         <div class="table-scroll">
-          <table class="explab__table">
+          {/* Igual que en el visor: con encabezados y sin filas, axe no puede
+              decidir (`th-has-data-cells`) y la tabla no aporta nada. El conteo
+              de arriba dice cuántos ensayos hay. */}
+          <table class="explab__table" data-explab-preview-table hidden>
             <thead>
               <tr>
                 <th scope="col">{t(locale, "exp.preview.order")}</th>

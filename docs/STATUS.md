@@ -65,6 +65,9 @@ Todas ellas corren por completo en el navegador y funcionan sin conexión despu�
 | **Acerca de** | `/acerca` | **Estable** | — | — |
 | **Catálogo de herramientas** — tarjetas filtrables por área, idioma y tipo de integración, **agrupadas por nivel de análisis y con índice**, con el estado real de cada una | `/catalogo` | **Estable** | El filtrado, que una herramienta planeada no se vea como una que existe, la agrupación por nivel con su índice y su accesibilidad con axe | Ninguna herramienta lleva enlace: el prompt exige verificar cada URL publicada y no se ha verificado ninguna |
 
+| **Experimentos de psicolingüística** — cuatro plantillas con jsPsych, estímulos por CSV, semilla reproducible, resultados a CSV | `/experimentos` | **Estable** | El generador con semilla, el adaptador del puerto y una e2e que corre una plantilla y descarga el CSV. Detalle en la sección de los segmentos 7 a 11 | Los tiempos de reacción de un navegador tienen precisión limitada, y la página lo advierte antes de empezar |
+| **Conversor ELAN ↔ TextGrid** — Pyodide + pympi-ling en un worker, con informe de pérdida | `/elan` | **Experimental** | El puente Python, el adaptador en proceso y en worker, y una e2e que carga un `.eaf` y exporta un TextGrid. Detalle abajo | Que ELAN abra lo exportado no se probó: no hay ELAN aquí. La primera conversión descarga 13 MB desde este origen |
+| **Mapa de lenguas de Colombia** — mapa propio en SVG, tabla accesible, filtros y detalle | `/lenguas` | **Estable** | El dataset (con fixture CLDF), el filtrado, la proyección y una e2e en los dos idiomas. Detalle abajo | 9 de las 136 lenguas no tienen coordenadas y se listan aparte, sin inventarlas |
 | **Visor de audio** — forma de onda, espectrograma y edición de capas de intervalos, con importación y exportación de TextGrid y exportación CSV | `/visualizador` | **Experimental** | El codec de TextGrid (archivos de referencia, ida y vuelta sobre cinco documentos, truncados, codificaciones), la FFT contra una sinusoide, la edición de intervalos y la accesibilidad con axe | Si Praat abre el archivo exportado y si el espectrograma coincide con el suyo **no se probó**: necesita el programa, no el repositorio. Está en `P17` |
 
 **La barra superior ya no es una lista de herramientas.** Tiene tres entradas fijas —catálogo,
@@ -112,28 +115,24 @@ No se inventó ni un solo par grafema→AFI, y no es una limitación temporal: e
 | **Límites declarados** | El AFI de eSpeak NG es **aproximado**: es un sintetizador, no un transcriptor revisado, y la interfaz lo advierte antes de mostrar nada. La primera fonemización descarga **5,6 MB** de datos —un solo archivo para las 51 voces, sin recorte por lengua salvo el ruso, que no se publica—. Esa descarga queda fuera del presupuesto de peso por página porque se busca en tiempo de ejecución, y se sirve desde este origen: si faltara, el paquete caería en un CDN público que la CSP bloquea y la promesa de funcionar sin conexión dejaría de ser cierta |
 | **Cómo ejecutarla** | `npm run dev` y abrir `/fonemizador` |
 
-## Segmentos 7 a 11 del prompt: no disponibles
+## Herramientas D a G: los segmentos 7 a 11 del prompt
 
-| Segmento | Herramienta | Estado |
-|---|---|---|
-| 7 | Experimentos con jsPsych | **No disponible** — fuera del alcance autorizado |
-| 8 | Análisis acústico (praatfan) — **experimental** por diseño | **No disponible** — fuera del alcance autorizado |
-| 9 | ELAN ↔ TextGrid con Pyodide y pympi | **No disponible** — fuera del alcance autorizado |
-| 10 | Mapa de lenguas indígenas de Colombia | **No disponible** — fuera del alcance autorizado |
-| 11 | Catálogo de enlaces externos y puerto de reconocimiento de fonos | **No disponible** — fuera del alcance autorizado |
+Los cinco segmentos que faltaban están implementados. Cuatro son herramientas; el undécimo es el catálogo
+externo y el contrato de la fase 2. **Ninguno se declara más de lo que se midió.**
 
-El usuario autorizó los segmentos **1 a 6**. El sexto es el visor de audio, espectrograma y TextGrid, y
-llega marcado **experimental** por una razón concreta y declarada: que Praat abra el archivo exportado y
-que el espectrograma coincida con el suyo no se puede probar dentro de este repositorio. Lo que sí está
-medido —el codec de TextGrid, la FFT, la propiedad de ida y vuelta, la interacción y la accesibilidad—
-está en **P17** de `docs/PENDING.md`, con su criterio de aceptación para pasar a estable.
+| Segmento | Herramienta | Ruta | Estado | Qué se probó | Límites declarados |
+|---|---|---|---|---|---|
+| 7 | **Experimentos de psicolingüística** — cuatro plantillas con jsPsych (aceptabilidad, 2AFC, lectura autocontrolada, decisión léxica), estímulos por CSV, semilla reproducible, bloques y práctica, resultados a CSV | `/experimentos` | **Estable** | El generador de ensayos con semilla (dos corridas iguales dan el mismo orden), el adaptador del puerto con un jsPsych doble, el CSV de entrada con sus errores de línea y columna, y una e2e que corre la plantilla de aceptabilidad y descarga el CSV con participante, condición, respuesta, tiempo y semilla | Los tiempos de reacción de un navegador tienen precisión limitada, y la página lo advierte **antes** de empezar. Los estímulos de audio se ejercitaron con el doble, no con audio real: la reproducción depende de la política de autoplay del navegador |
+| 8 | **Análisis acústico** — F0 con presets de voz, F1–F3 superpuestos al espectrograma, intensidad en dB, medición por intervalo con CSV y gráfico vocálico | `/visualizador` | **Experimental** | El motor `praatfan` 0.1.13 vendoreado (611 KB de wasm) con un tono de 200 Hz en Node, la delegación al worker, la medición (media, mediana, mínimo, máximo, formantes al 25/50/75 % y en el centro), el CSV y una e2e con audio sintético | **Falta el contraste contra Praat sobre voces reales**: `e2e/fixtures/reference/` no existe, así que el arnés informa `missing-fixtures` y la etiqueta sigue puesta. El procedimiento para quitarla está en `docs/validation/acoustic.md` |
+| 9 | **Conversor ELAN ↔ TextGrid** — Pyodide + pympi-ling en un worker, informe de pérdida, ida y vuelta | `/elan` | **Experimental** | Pyodide real en Node (instala el wheel de pympi y lee un `.eaf`), el puente Python (XML mal formado, capas jerárquicas, referencias, vocabularios), el adaptador en proceso y en worker, y una e2e en Chromium que carga un `.eaf`, ve sus capas y exporta un TextGrid | Que **ELAN** abra el `.eaf` exportado y que **Praat** abra el `.TextGrid` no se probó: no hay ninguno de los dos aquí. La primera conversión descarga 13 MB de Pyodide desde este mismo origen; después funciona sin conexión |
+| 10 | **Mapa de lenguas de Colombia** — mapa propio en SVG, tabla accesible, filtros por familia y búsqueda, panel de detalle | `/lenguas` | **Estable** | El generador del dataset con un fixture CLDF (filtro por país, lenguas sin coordenadas, determinismo), el filtrado y la búsqueda, la proyección, el lector validado del JSON, y una e2e que filtra por familia y abre el detalle en los dos idiomas | 136 lenguas, 9 sin coordenadas (listadas aparte, sin inventarlas) y 6 lenguas no indígenas que Glottolog asigna al país: la página lo dice y el filtro permite dejarlas fuera. Los nombres y las ubicaciones son de la fuente y pueden no ser la autodenominación |
+| 11 | **Catálogo de enlaces externos** y **puerto de reconocimiento de fonos** | `/catalogo` | **Estable** (los enlaces) · **No disponible** (el reconocimiento, fase 2) | Que cada URL externa responda y corresponda a lo descrito antes de publicarla (medido el 2026-10-25), que el lector rechace una ficha externa sin `url` https y una ficha integrada que la declare, y que el enlace se abra con `rel="noopener noreferrer"` y su aviso de pestaña nueva | La ficha de la Universidad de los Andes queda `planned` porque **no se pudo verificar una URL pública estable**, y el catálogo no publica enlaces que no abrió. `PhoneRecognitionPort` tiene contrato, fake y propuesta de servicio (`docs/phase2/allosaurus.md`), y **nada de eso está desplegado** |
 
-Lo que sí existe de los segmentos futuros son sus **puertos
-
-y sus fakes** en el núcleo —doce puertos con su unión de errores, y un fake en memoria para cada uno—, que es lo
-que permite añadirlos después sin tocar el dominio. **No hay stubs vacíos**: `application/index.ts`
-declara en un comentario qué casos de uso pertenecen a los segmentos 7 a 9 en vez de exportar funciones
-que no hacen nada.
+**El motor del análisis acústico no es una dependencia de npm.** `praatfan` se publica como artefacto de
+una release de GitHub; se copió a `public/praatfan/` con su licencia GPL-3.0, su procedencia y sus hashes,
+porque lo que se audita tiene que ser lo que se sirve. Lo mismo con Pyodide, `micropip` y `pympi-ling` en
+`public/pyodide/` (13 MB, con hashes en su README): la CSP es `default-src 'self'` y la promesa de
+funcionar sin conexión no admite un CDN.
 
 ## Desviaciones respecto al prompt, y por qué
 
@@ -149,14 +148,16 @@ que no hacen nada.
 
 | Comprobación | Resultado |
 |---|---|
-| Pruebas unitarias | **943 en 55 archivos** |
+| Pruebas unitarias | **1168 en 78 archivos** |
 | Accesibilidad (axe, WCAG 2.2 AA) | **Sin violaciones** en las **25 páginas públicas** —las 22 rutas y la 404— en español y en inglés. Ampliar la puerta a todas encontró **una violación real más** que nadie había mirado: la 404 usaba un token de LÍNEA (`--line-strong`) como color de texto, que da 2.0:1 en claro y 2.4:1 en oscuro, donde se exigen 3:1 para texto grande. Corregido a `--ink-faint`, **medido en un navegador real**: 5.2:1 en claro y 5.4:1 en oscuro. La puerta recorre ahora **cada página en los dos temas** —50 pruebas de accesibilidad sobre `dist/`, dentro de una suite de 88— porque un contraste aprobado en una paleta no dice nada de la otra. Y la guarda quedó estructural: `reuseExistingServer` pasó a `false`, porque con `true` un `astro dev` vivo en el puerto hacía que la puerta probara el **servidor de desarrollo**, sin CSP y compilando a demanda, y casi toda la suite se caía por tiempo de espera. Un verde que no significa lo que dice no lo investiga nadie. Ahora también afirma sobre los resultados `incomplete` de axe, y ahí declaró un **punto ciego**: en los nodos que axe no puede medir —texto sobre SVG, botones de un solo carácter— la puerta no sabe nada del contraste y no lo finge. Son **186 nodos** medidos cuando la puerta cubría 21 páginas y los dos temas —`inicio` 9 por página y tema, `FonoLab` 15, `salvaguardas` 16, `acerca` 4, `arboles` 2, `no-existe` 1; **esas cifras no se suman**, son por página y por tema y la 404 no tiene versión inglesa—, y quedan como **P11** y **P12** en `docs/PENDING.md`: P11 con el aviso de que medirlos por estilos computados da resultados falsos, y P12 —**cerrado**: la puerta falla ante un `incomplete` sin motivo textual y el caso de `/arboles` quedó exceptuado **por nombre y con la medición** (0 `<li>` al cargar → axe no puede decidir; 1 `<li>` después de «Dibujar» → deja de reportarlo)— |
-| Pruebas de extremo a extremo | **88**, sobre el sitio compilado: 50 de accesibilidad (25 páginas × 2 temas) y 38 de flujo |
-| Reglas de dependencia hexagonales | 198 módulos y 452 dependencias, **0 violaciones** —la regla atajó una importación profunda al núcleo desde una prueba nueva, que se corrigió por la entrada pública— |
+| Pruebas de extremo a extremo | **117**, sobre el sitio compilado: 54 de accesibilidad (27 páginas × 2 temas) y 63 de flujo |
+| Reglas de dependencia hexagonales | 282 módulos y 646 dependencias, **0 violaciones**. La regla atajó una importación profunda al núcleo desde una prueba nueva, y `src/lib/architecture.test.ts` cubre el hueco que dejaba: dependency-cruiser no analiza plantillas `.astro` |
 | Tipos | `astro check` y los dos paquetes del workspace, **0 errores** |
-| Linter | 0 errores. **47 avisos**: 42 que ya están en `main` y **5 nuevos**, todos de complejidad, en dos archivos del segmento 6. El reparto está **medido**, no inferido, con `npm run lint:baseline` (P8) |
-| Página más pesada | 29,1 KB comprimidos, sobre un presupuesto de 60 KB |
+| Linter | 0 errores. **48 avisos**: 42 que ya están en `main` y **6 nuevos**, todos de complejidad (`textgrid.ts` ×4, `audio/index.ts` y `catalog-data.ts`). El reparto está **medido**, no inferido, con `npm run lint:baseline` (P8) |
+| Página más pesada | 31,1 KB comprimidos (`/visualizador`), sobre un presupuesto de 60 KB. Los dos motores pesados —Pyodide, 13 MB, y praatfan, 611 KB— no cuentan: se buscan en tiempo de ejecución, desde este origen |
 | Vulnerabilidades de producción | 0 (`npm run audit`, que además informa el árbol de desarrollo y corre en CI) |
+| Atributos `style` en el marcado | **0**: la CSP los bloquea y `verify-build` falla si aparece uno (eran 19 el 2026-10-25) |
+| Cabeceras de seguridad | `vercel.json` las emite: `frame-ancestors 'none'`, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, HSTS (ADR 0009) |
 
 **La puerta de accesibilidad ya se ganó su lugar:** encontró un `aria-pressed` puesto sobre los enlaces
 del selector de idioma, que ARIA no permite fuera de los roles de botón, en el sitio que ya estaba en

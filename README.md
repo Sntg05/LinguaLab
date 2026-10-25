@@ -21,7 +21,10 @@ Las filas siguen el mismo orden que el catálogo: de la fonética hacia el discu
 | `/arboles` | **ArborLab** — 23 tipos de árbol, 4 formatos de entrada, exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat |
 | `/tools` | **Estación textual** — frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad, más un **constructor de n-gramas** (n de 2 a 5) |
 | `/visualizador` | **Visor de audio** — forma de onda, espectrograma y edición de capas de intervalos, con importación y exportación de TextGrid y exportación CSV (**experimental**) |
-| `/catalogo` | **Catálogo de herramientas** — todas las herramientas ordenadas por nivel de análisis, con su estado real |
+| `/experimentos` | **Experimentos** — constructor y ejecutor de cuatro tareas de psicolingüística con jsPsych: estímulos por CSV, semilla reproducible, vista previa y resultados a CSV |
+| `/elan` | **Conversor ELAN ↔ TextGrid** — Pyodide con pympi-ling en un worker, informe de lo que no se pudo convertir (**experimental**) |
+| `/lenguas` | **Mapa de lenguas de Colombia** — 136 lenguas de Glottolog en un mapa propio (sin teselas ni terceros), con tabla accesible, filtros y ficha por lengua |
+| `/catalogo` | **Catálogo de herramientas** — todas las herramientas ordenadas por nivel de análisis, con su estado real, incluidas las alojadas fuera |
 | `/glosario` | Glosario bilingüe filtrable |
 | `/bibliografia` | Recursos con licencia y enlace de origen |
 | `/seguridad` | Verificación en vivo de las salvaguardas, leyendo el DOM real |

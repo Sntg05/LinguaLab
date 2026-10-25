@@ -861,3 +861,40 @@ estado a `experimental`, la prueba falla con `acoustic-analysis (experimental)`.
 de alcance: arranca por `praatfan` en WASM, que es lo que el prompt marcó como experimental por el estado
 del paquete. Antes de eso, decidir si el espectrograma de `/visualizador` ya cubre la necesidad real: buena
 parte de lo que se busca con «analizador acústico» en un curso de fonética es eso, y ya está medido.
+
+**Estado: cerrado, y el catálogo ya no miente.** El segmento 8 se implementó con `praatfan` 0.1.13
+—existe como build wasm en una release de GitHub, no en npm— y la ficha pasó de `planned` a
+**`experimental`**, que es su estado real: el motor mide y la interfaz lo muestra dentro del visor, y lo
+que falta es el contraste con Praat sobre voces reales. La etiqueta no es de cortesía y el procedimiento
+para quitarla está en `docs/validation/acoustic.md`.
+
+---
+
+## P22 — La tabla de mediciones acústicas no entra en 1280 px, y su contraste no se puede medir
+
+**Severidad:** baja, de accesibilidad declarada y de diseño.
+
+**Síntoma.** La tabla de mediciones del visor tiene doce columnas (etiqueta, rango, cuatro de F0, una de
+intensidad y cuatro por cada formante). A 1280 px mide **1144 px dentro de un contenedor de 1070**: la
+última columna queda fuera de la parte visible y hay que desplazarla en horizontal. En un teléfono el
+desplazamiento es la norma, no la excepción.
+
+**Evidencia.** Medido con Playwright sobre el sitio compilado (`/visualizador`, 1280 px). axe devuelve dos
+resultados que estorban a la puerta: `scrollable-region-focusable` —**corregido**: el contenedor tiene
+`tabindex="0"`, `role="region"` y nombre— y `color-contrast` con motivo `elmPartiallyObscured` sobre el
+último `th`, que la puerta ahora admite como «no pude medir» en `AXE_COULD_NOT_MEASURE` con su razón
+escrita.
+
+**Por qué no se rediseñó aún.** La forma correcta es **transponer** la tabla: una fila por medida
+(F0 media, F0 mediana, F1 al 25 %…), con una columna por intervalo medido. Así son dos columnas con una
+medición y N+1 con N, cabe en cualquier ancho y se lee como una lista en el teléfono. Es un cambio de
+marcado, de la función que arma las filas y de la prueba e2e; hacerlo a las apuradas junto con el cierre
+de la entrega habría mezclado dos historias en el mismo diff.
+
+**Próximo paso exacto.** Transponer la tabla en `src/components/AudioLab.astro` (encabezado dinámico por
+intervalo) y `src/scripts/audio/acoustic-analysis.ts` (`measurementRow` → filas por medida), ajustar
+`e2e/acoustic.spec.ts` y quitar `elmPartiallyObscured` de la lista de motivos admitidos: si la tabla
+entra, la puerta ya no debería necesitarlo.
+
+**Criterio de aceptación.** Con una, dos y tres mediciones la tabla no desborda su contenedor a 1280 px,
+`elmPartiallyObscured` desaparece de `AXE_COULD_NOT_MEASURE` y la suite sigue verde sin excepciones nuevas.

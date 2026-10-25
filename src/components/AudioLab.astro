@@ -343,7 +343,10 @@ const WINDOWS = [
           role="region"
           aria-label={t(locale, "acoustic.measure.title")}
         >
-          <table class="audiolab__table acoustic__table">
+          {/* Una tabla con encabezados y sin filas hace que axe no pueda decidir
+              (`th-has-data-cells`, sin motivo): se esconde hasta tener datos, y
+              el texto de vacío de arriba explica por qué. */}
+          <table class="audiolab__table acoustic__table" data-acoustic-measure-table hidden>
             <caption class="faint">{t(locale, "acoustic.measure.title")}</caption>
             <thead>
               <tr>

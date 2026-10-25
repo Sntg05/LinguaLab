@@ -94,6 +94,7 @@ export const initExperimentsLab = (options: ExperimentsLabOptions): void => {
   const scaleRight = element<HTMLInputElement>(root, "[data-explab-scale-right]");
   const previewButton = element<HTMLButtonElement>(root, "[data-explab-preview]");
   const previewBody = element<HTMLElement>(root, "[data-explab-preview-body]");
+  const previewTable = element<HTMLElement>(root, "[data-explab-preview-table]");
   const previewCount = element<HTMLElement>(root, "[data-explab-preview-count]");
   const specButton = element<HTMLButtonElement>(root, "[data-explab-spec]");
   const fullscreen = element<HTMLInputElement>(root, "[data-explab-fullscreen]");
@@ -243,10 +244,14 @@ export const initExperimentsLab = (options: ExperimentsLabOptions): void => {
 
   const showPreview = (prepared: Prepared): void => {
     previewCount.textContent = renderPreview(previewBody, prepared.plan, strings);
+    // Con la tabla vacía no se muestra: encabezados sin celdas es un estado que
+    // axe no puede juzgar y que no informa de nada.
+    if (previewTable !== null) previewTable.hidden = prepared.plan.trials.length === 0;
   };
 
   const clearPreview = (): void => {
     previewBody.replaceChildren();
+    if (previewTable !== null) previewTable.hidden = true;
     previewCount.textContent = strings.text("exp.preview.empty");
   };
 

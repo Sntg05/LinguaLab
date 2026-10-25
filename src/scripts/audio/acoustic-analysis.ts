@@ -160,6 +160,7 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
   const measureClear = $<HTMLButtonElement>("[data-acoustic-measure-clear]");
   const measureEmpty = $<HTMLElement>("[data-acoustic-measure-empty]");
   const measureBody = $<HTMLTableSectionElement>("[data-acoustic-measure-body]");
+  const measureTable = $<HTMLTableElement>("[data-acoustic-measure-table]");
   const f0Canvas = $<HTMLCanvasElement>("[data-acoustic-f0-canvas]");
   const intensityCanvas = $<HTMLCanvasElement>("[data-acoustic-intensity-canvas]");
   const vowelCanvas = $<HTMLCanvasElement>("[data-acoustic-vowels-canvas]");
@@ -409,6 +410,11 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
 
     if (measureEmpty !== null) {
       measureEmpty.hidden = measurements.length > 0;
+    }
+    // Sin filas, la tabla no se muestra: encabezados sin celdas es un estado que
+    // axe no puede juzgar y que a nadie le sirve.
+    if (measureTable !== null) {
+      measureTable.hidden = measurements.length === 0;
     }
     if (measureExport !== null) {
       measureExport.disabled = measurements.length === 0;
