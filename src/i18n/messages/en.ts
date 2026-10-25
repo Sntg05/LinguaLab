@@ -367,6 +367,8 @@ export const en = {
   "catalog.language.pt": "Portuguese",
   "catalog.language.guc": "Wayuunaiki",
   "catalog.open": "Open tool",
+  "catalog.externalLink": "Open the project site",
+  "catalog.externalNewTab": "(opens in a new tab)",
   "audio.title": "Audio, spectrogram and TextGrid viewer",
   "audio.sub": "Load an audio file, look at it in time and frequency, annotate intervals on tiers, and take the work away as a TextGrid that Praat opens. Everything runs in your browser.",
   "audio.privacy": "The audio never leaves your device: nothing is uploaded, nothing is sent to a service and there is no analytics. The annotation is stored in this browser, and the only thing that leaves is the file you download.",

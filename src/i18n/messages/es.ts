@@ -367,6 +367,8 @@ export const es = {
   "catalog.language.pt": "Portugués",
   "catalog.language.guc": "Wayuunaiki",
   "catalog.open": "Abrir herramienta",
+  "catalog.externalLink": "Abrir el sitio del proyecto",
+  "catalog.externalNewTab": "(se abre en otra pestaña)",
   "audio.title": "Visor de audio, espectrograma y TextGrid",
   "audio.sub": "Carga un audio, míralo en el tiempo y en la frecuencia, anota intervalos por capas y llévate el trabajo en un TextGrid que Praat abre. Todo ocurre en tu navegador.",
   "audio.privacy": "El audio no sale de tu equipo: no se sube a ningún servidor, no se envía a ningún servicio y no hay analítica. La anotación se guarda en este navegador y lo único que sale de aquí es el archivo que descargas tú.",

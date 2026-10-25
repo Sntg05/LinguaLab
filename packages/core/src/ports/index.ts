@@ -32,5 +32,11 @@ export type {
   OrthographyTableSummary,
 } from "./orthography-repository";
 export type { PhonemizerError, PhonemizerPort } from "./phonemizer";
+export type {
+  PhoneRecognitionError,
+  PhoneRecognitionParams,
+  PhoneRecognitionPort,
+  RecognizedPhone,
+} from "./phone-recognition";
 export type { TextGridCodecPort, TextGridError } from "./textgrid-codec";
 export type { ToolFilter, ToolRegistryError, ToolRegistryPort } from "./tool-registry";

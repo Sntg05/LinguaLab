@@ -15,6 +15,8 @@ export { InMemoryElanCodec } from "./in-memory-elan-codec";
 export { InMemoryExperimentRunner } from "./in-memory-experiment-runner";
 export { InMemoryLanguageCatalog } from "./in-memory-language-catalog";
 export { InMemoryOrthographyRepository } from "./in-memory-orthography-repository";
+export { InMemoryPhoneRecognition } from "./in-memory-phone-recognition";
+export type { InMemoryPhoneRecognitionOptions } from "./in-memory-phone-recognition";
 export { InMemoryPhonemizer } from "./in-memory-phonemizer";
 export type { InMemoryPhonemizerOptions } from "./in-memory-phonemizer";
 export { InMemoryTextGridCodec } from "./in-memory-textgrid-codec";

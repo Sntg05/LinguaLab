@@ -268,6 +268,23 @@ for (const key of CATALOG_STRING_KEYS) {
                   )}
 
                   {route && <p class="card__cta">{t(locale, "catalog.open")} →</p>}
+
+                  {/* Una herramienta alojada fuera se abre, no se navega: lleva su
+                      `target` y su `rel`, y el aviso de pestaña nueva va como texto
+                      oculto dentro del propio enlace para que forme parte del nombre
+                      accesible sin alargar lo que se ve. WCAG 2.5.3 se cumple porque
+                      el texto visible está contenido en el nombre. */}
+                  {tool.url && (
+                    <p class="card__cta">
+                      <a href={tool.url} target="_blank" rel="noopener noreferrer" data-external>
+                        {t(locale, "catalog.externalLink")} <span aria-hidden="true">↗</span>
+                        <span class="u-visually-hidden">
+                          {" "}
+                          {t(locale, "catalog.externalNewTab")}
+                        </span>
+                      </a>
+                    </p>
+                  )}
                 </article>
               );
             })}

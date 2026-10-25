@@ -20,15 +20,27 @@ const baseTool = () => ({
 
 describe("parseToolCatalog", () => {
   it("carga el catalogo del sitio sin perdidas", () => {
-    expect(TOOLS).toHaveLength(10);
+    expect(TOOLS).toHaveLength(20);
     expect(new Set(TOOLS.map((tool) => tool.id)).size).toBe(TOOLS.length);
   });
 
-  it("el JSON no declara url en ninguna ficha", () => {
-    // Se lee el dato crudo a proposito: el lector rechaza un `url`, asi que
-    // mirar el JSON es la unica forma de comprobar que hoy no hay ninguno.
-    for (const tool of rawCatalog.tools as readonly { id?: unknown }[]) {
-      expect(tool, `la ficha ${String(tool.id)} no deberia declarar url`).not.toHaveProperty("url");
+  it("toda ficha alojada fuera declara una url https, y ninguna otra la declara", () => {
+    // Se lee el dato crudo a proposito: el lector ya valida esto, pero mirar el
+    // JSON dice ademas QUE urls se publican, que es lo que alguien revisa a mano.
+    for (const tool of rawCatalog.tools as readonly {
+      id?: unknown;
+      integration?: unknown;
+      status?: unknown;
+      url?: unknown;
+    }[]) {
+      if (tool.integration === "external-link" && tool.status !== "planned") {
+        expect(typeof tool.url, `la ficha ${String(tool.id)} es un enlace externo`).toBe("string");
+        expect(String(tool.url), `la ficha ${String(tool.id)}`).toMatch(/^https:\/\//);
+      } else {
+        expect(tool, `la ficha ${String(tool.id)} no deberia declarar url`).not.toHaveProperty(
+          "url",
+        );
+      }
     }
   });
 
@@ -46,9 +58,35 @@ describe("parseToolCatalog", () => {
     expect(() => parseToolCatalog({ version: 1, tools: [tool] })).toThrow(/integracion desconocida/);
   });
 
-  it("rechaza una ficha con url, en lugar de publicar un enlace sin verificar", () => {
+  it("rechaza una ficha integrada que declara url", () => {
     const tool = { ...baseTool(), url: "https://ejemplo.test" };
-    expect(() => parseToolCatalog({ version: 1, tools: [tool] })).toThrow(/declara url/);
+    expect(() => parseToolCatalog({ version: 1, tools: [tool] })).toThrow(/no es un enlace externo/);
+  });
+
+  it("rechaza un enlace externo disponible sin url", () => {
+    const tool = { ...baseTool(), integration: "external-link", status: "stable" };
+    expect(() => parseToolCatalog({ version: 1, tools: [tool] })).toThrow(/no trae una url https/);
+  });
+
+  it("acepta un enlace externo previsto sin url: es una fuente sin verificar", () => {
+    const tool = { ...baseTool(), integration: "external-link", status: "planned" };
+    const parsed = parseToolCatalog({ version: 1, tools: [tool] });
+
+    expect(parsed[0]?.url).toBeUndefined();
+  });
+
+  it("rechaza un enlace externo que no es https", () => {
+    for (const url of ["http://ejemplo.test", "ftp://ejemplo.test", "ejemplo.test"]) {
+      const tool = { ...baseTool(), integration: "external-link", url };
+      expect(() => parseToolCatalog({ version: 1, tools: [tool] })).toThrow(/url https/);
+    }
+  });
+
+  it("acepta un enlace externo con su url https", () => {
+    const tool = { ...baseTool(), integration: "external-link", url: "https://ejemplo.test" };
+    const parsed = parseToolCatalog({ version: 1, tools: [tool] });
+
+    expect(parsed[0]?.url).toBe("https://ejemplo.test");
   });
 
   it("rechaza dos fichas con el mismo id", () => {

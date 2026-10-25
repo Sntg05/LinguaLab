@@ -24,14 +24,27 @@ interface CatalogTool {
 const tools = (rawCatalog as { tools: readonly CatalogTool[] }).tools;
 
 describe("SITE_ROUTES contra el catálogo", () => {
-  it("toda herramienta que no está planificada tiene ruta y página", () => {
+  it("toda herramienta integrada que no está planificada tiene ruta y página", () => {
     const missing = tools
+      // Solo lo que corre DENTRO del sitio necesita página propia. Una
+      // herramienta `external-link` vive en otro origen: su enlace es externo y
+      // exigirle una ruta local sería pedirle una copia que no existe.
+      .filter((tool) => tool.integration !== "external-link")
       .filter((tool) => tool.status !== "planned")
       .filter((tool) => SITE_ROUTES[tool.id] === undefined)
       .map((tool) => `${tool.id} (${tool.status})`);
 
     // Una ficha `stable` o `experimental` sin ruta es una promesa sin página.
     expect(missing).toEqual([]);
+  });
+
+  it("ninguna herramienta alojada fuera tiene ruta local", () => {
+    const local = tools
+      .filter((tool) => tool.integration === "external-link")
+      .filter((tool) => SITE_ROUTES[tool.id] !== undefined)
+      .map((tool) => tool.id);
+
+    expect(local).toEqual([]);
   });
 
   it("ninguna herramienta planificada tiene ruta", () => {

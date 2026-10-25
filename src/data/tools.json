@@ -171,6 +171,170 @@
         "en": "Browsable map of Colombia's languages, with family, identifiers and a link to Glottolog. It catalogues languages: it does not process text in any particular one."
       },
       "citation": "Hammarström, H., Forkel, R., Haspelmath, M., & Bank, S. Glottolog [Data set]. Max Planck Institute for Evolutionary Anthropology."
+    },
+    {
+      "id": "lexonomy",
+      "name": {
+        "es": "Lexonomy",
+        "en": "Lexonomy"
+      },
+      "area": "documentacion",
+      "integration": "external-link",
+      "status": "stable",
+      "languages": [],
+      "url": "https://lexonomy.elex.is/",
+      "notes": {
+        "es": "Servicio alojado para escribir, editar y publicar diccionarios en línea. Se abre fuera de LinguaLab: nada se instala y nada de lo que escribas acá se envía. Enlace verificado el 25 de octubre de 2026.",
+        "en": "Hosted service for writing, editing and publishing online dictionaries. It opens outside LinguaLab: nothing is installed and nothing you write here is sent. Link checked on 25 October 2026."
+      }
+    },
+    {
+      "id": "udpipe",
+      "name": {
+        "es": "UDPipe en línea",
+        "en": "UDPipe online"
+      },
+      "area": "morfosintaxis",
+      "integration": "external-link",
+      "status": "stable",
+      "languages": [],
+      "url": "https://lindat.mff.cuni.cz/services/udpipe/",
+      "notes": {
+        "es": "Servicio del LINDAT para tokenizar, lematizar, etiquetar y analizar dependencias en más de cincuenta lenguas, español e inglés incluidas. Es un servicio alojado: el texto que le envíes sale de tu equipo. Enlace verificado el 25 de octubre de 2026.",
+        "en": "LINDAT service for tokenisation, lemmatisation, tagging and dependency parsing in over fifty languages, Spanish and English included. It is a hosted service: any text you send leaves your computer. Link checked on 25 October 2026."
+      },
+      "citation": "Straka, M., & Straková, J. (2017). Tokenizing, POS Tagging, Lemmatizing and Parsing UD 2.0 with UDPipe. Proceedings of the CoNLL 2017 Shared Task."
+    },
+    {
+      "id": "ud-annotatrix",
+      "name": {
+        "es": "UD Annotatrix",
+        "en": "UD Annotatrix"
+      },
+      "area": "morfosintaxis",
+      "integration": "external-link",
+      "status": "stable",
+      "languages": [],
+      "url": "https://jonorthwash.github.io/ud-annotatrix/",
+      "notes": {
+        "es": "Editor de árboles de dependencias en el navegador, independiente de la lengua y ajustado a las guías de Universal Dependencies. Importa y exporta CoNLL-U. Enlace verificado el 25 de octubre de 2026.",
+        "en": "Browser-based dependency tree editor, language-independent and aligned with the Universal Dependencies guidelines. It imports and exports CoNLL-U. Link checked on 25 October 2026."
+      }
+    },
+    {
+      "id": "lambda-notebook",
+      "name": {
+        "es": "Lambda Notebook",
+        "en": "Lambda Notebook"
+      },
+      "area": "semantica",
+      "integration": "external-link",
+      "status": "stable",
+      "languages": [],
+      "url": "https://github.com/rawlins/lambda-notebook",
+      "notes": {
+        "es": "Cuaderno de semántica formal en Jupyter: composición tipada, lambdas y análisis composicional. Material de aprendizaje, no una herramienta integrada. Enlace verificado el 25 de octubre de 2026.",
+        "en": "Formal semantics notebook for Jupyter: typed composition, lambdas and compositional analysis. Learning material, not an integrated tool. Link checked on 25 October 2026."
+      },
+      "citation": "Rawlins, K. Lambda Notebook: Formal Semantics in Jupyter [software]."
+    },
+    {
+      "id": "problang-rsa",
+      "name": {
+        "es": "RSA en WebPPL",
+        "en": "RSA in WebPPL"
+      },
+      "area": "pragmatica",
+      "integration": "external-link",
+      "status": "stable",
+      "languages": [],
+      "url": "https://gscontras.github.io/probLang/",
+      "notes": {
+        "es": "Tutorial interactivo de Rational Speech Acts en WebPPL: pragmática bayesiana ejecutable en el navegador, con capítulos y ejercicios. Enlace verificado el 25 de octubre de 2026.",
+        "en": "Interactive Rational Speech Acts tutorial in WebPPL: Bayesian pragmatics that runs in the browser, with chapters and exercises. Link checked on 25 October 2026."
+      }
+    },
+    {
+      "id": "elan",
+      "name": {
+        "es": "ELAN",
+        "en": "ELAN"
+      },
+      "area": "documentacion",
+      "integration": "external-link",
+      "status": "stable",
+      "languages": [],
+      "url": "https://archive.mpi.nl/tla/elan",
+      "notes": {
+        "es": "Anotación de audio y video por capas, con su propio formato .eaf. Es el programa de referencia para documentación de campo; el visor de este sitio exporta TextGrid, no .eaf. Enlace verificado el 25 de octubre de 2026.",
+        "en": "Layered audio and video annotation, with its own .eaf format. It is the reference program for field documentation; this site's viewer exports TextGrid, not .eaf. Link checked on 25 October 2026."
+      },
+      "citation": "Wittenburg, P., Brugman, H., Russel, A., Klassmann, A., & Sloetjes, H. (2006). ELAN: a professional framework for multimodality research. LREC 2006."
+    },
+    {
+      "id": "fieldworks",
+      "name": {
+        "es": "FieldWorks Language Explorer",
+        "en": "FieldWorks Language Explorer"
+      },
+      "area": "documentacion",
+      "integration": "external-link",
+      "status": "stable",
+      "languages": [],
+      "url": "https://software.sil.org/fieldworks/",
+      "notes": {
+        "es": "Herramienta de SIL para léxico, paradigmas y textos de campo, con exportación a otros formatos de documentación. Enlace verificado el 25 de octubre de 2026.",
+        "en": "SIL tool for lexicon, paradigms and field texts, with export to other documentation formats. Link checked on 25 October 2026."
+      }
+    },
+    {
+      "id": "flibl",
+      "name": {
+        "es": "Flibl",
+        "en": "Flibl"
+      },
+      "area": "documentacion",
+      "integration": "external-link",
+      "status": "stable",
+      "languages": [],
+      "url": "https://github.com/amaliaskilton/flibl",
+      "notes": {
+        "es": "Scripts en Python para transferir textos entre ELAN y FieldWorks en los dos sentidos. Se ejecuta en tu equipo, no en el navegador. Enlace verificado el 25 de octubre de 2026.",
+        "en": "Python scripts to move texts between ELAN and FieldWorks in both directions. It runs on your computer, not in the browser. Link checked on 25 October 2026."
+      },
+      "citation": "Silton, A. Flibl [software]. Documentado en Language Documentation & Conservation, hdl.handle.net/10125/74815."
+    },
+    {
+      "id": "praat",
+      "name": {
+        "es": "Praat",
+        "en": "Praat"
+      },
+      "area": "fonetica",
+      "integration": "external-link",
+      "status": "stable",
+      "languages": [],
+      "url": "https://www.fon.hum.uva.nl/praat/",
+      "notes": {
+        "es": "El programa de referencia para análisis acústico y para abrir archivos TextGrid, que es justo el formato que exporta el visor de este sitio. Enlace verificado el 25 de octubre de 2026.",
+        "en": "The reference program for acoustic analysis and for opening TextGrid files, which is exactly the format this site's viewer exports. Link checked on 25 October 2026."
+      },
+      "citation": "Boersma, P., & Weenink, D. Praat: doing phonetics by computer [software]."
+    },
+    {
+      "id": "uniandes-lenguas",
+      "name": {
+        "es": "Recursos de lenguas indígenas de la Universidad de los Andes",
+        "en": "Universidad de los Andes Indigenous language resources"
+      },
+      "area": "tipologia",
+      "integration": "external-link",
+      "status": "planned",
+      "languages": [],
+      "notes": {
+        "es": "Previsto: corpus paralelos y modelos de traducción para wayuunaiki, arhuaco, inga y nasa. No se pudo verificar una URL pública estable el 25 de octubre de 2026, y este catálogo no publica enlaces sin abrirlos antes: queda como previsto hasta que la fuente confirme su dirección.",
+        "en": "Planned: parallel corpora and translation models for Wayuunaiki, Arhuaco, Inga and Nasa. No stable public URL could be verified on 25 October 2026, and this catalogue does not publish links it has not opened first: it stays planned until the source confirms its address."
+      }
     }
   ]
 }

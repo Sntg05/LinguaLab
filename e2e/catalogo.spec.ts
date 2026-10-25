@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 
 /**
@@ -20,16 +21,41 @@ const LANGUAGE = '[data-catalog-filter="language"]';
 const INTEGRATION = '[data-catalog-filter="integration"]';
 const EMPTY = "[data-catalog-empty]";
 
+/**
+ * Las tarjetas que el catalogo DEBE mostrar salen del propio catalogo de datos.
+ *
+ * POR QUE NO VAN LOS NUMEROS ESCRITOS A MANO
+ *
+ * Estaban escritos —diez fichas, dos de fonetica, cinco integradas— y cada
+ * herramienta nueva los volvia falsos en un archivo que no tiene nada que ver
+ * con la herramienta nueva. Peor: un numero desactualizado se «arregla» mirando
+ * lo que la pagina muestra, que es justo lo que la prueba tiene que juzgar. Con
+ * la expectativa derivada de `tools.json`, lo que se afirma es el invariante que
+ * importa: el catalogo enseña exactamente las fichas que declara y ninguna mas.
+ */
+interface CatalogTool {
+  readonly id: string;
+  readonly area: string;
+  readonly integration: string;
+  readonly status: string;
+}
+
+const CATALOG: readonly CatalogTool[] = JSON.parse(
+  readFileSync(new URL("../src/data/tools.json", import.meta.url), "utf8"),
+).tools;
+
+const countWhere = (predicate: (tool: CatalogTool) => boolean): number =>
+  CATALOG.filter(predicate).length;
+
 const cardsFor = (page: Page) => page.locator(VISIBLE);
 
 test("filtrar por area deja solo las herramientas de esa area", async ({ page }) => {
   await page.goto("/catalogo");
-  await expect(cardsFor(page)).toHaveCount(10);
+  await expect(cardsFor(page)).toHaveCount(CATALOG.length);
 
   await page.locator(AREA).selectOption("fonetica");
 
-  // FonoLab y el analisis acustico son las dos herramientas de fonetica.
-  await expect(cardsFor(page)).toHaveCount(2);
+  await expect(cardsFor(page)).toHaveCount(countWhere((tool) => tool.area === "fonetica"));
   await expect(page.locator(VISIBLE).filter({ hasText: "FonoLab" })).toBeVisible();
   await expect(
     page.locator(CARD).filter({ hasText: "Mapa de lenguas indígenas de Colombia" }),
@@ -70,6 +96,27 @@ test("una herramienta planificada se marca como planificada y no es un enlace", 
 
   // Y no es un enlace: no se puede abrir algo que todavia no existe.
   await expect(planned.locator("a")).toHaveCount(0);
+});
+
+test("una herramienta alojada fuera se abre en otra pestaña, con su aviso", async ({ page }) => {
+  await page.goto("/catalogo");
+
+  const hosted = page.locator(CARD).filter({ hasText: "Praat" }).first();
+  const link = hosted.locator("[data-external]");
+
+  // El enlace existe, apunta fuera y no deja la ventana abierta sin `noopener`:
+  // `rel` es lo unico que impide que el sitio de destino toque `window.opener`.
+  await expect(link).toHaveAttribute("href", /^https:\/\//);
+  await expect(link).toHaveAttribute("target", "_blank");
+  await expect(link).toHaveAttribute("rel", /noopener/);
+  await expect(link).toHaveAttribute("rel", /noreferrer/);
+
+  // Y dice que se abre en otra pestaña, dentro del nombre accesible.
+  await expect(link).toContainText("se abre en otra pestaña");
+
+  // Una ficha prevista no publica un enlace que nadie abrio.
+  const planned = page.locator(CARD).filter({ hasText: "Universidad de los Andes" });
+  await expect(planned.locator("[data-external]")).toHaveCount(0);
 });
 
 test("el estado vacio explica por que no coincide nada", async ({ page }) => {

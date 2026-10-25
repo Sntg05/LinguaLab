@@ -100,10 +100,25 @@ const parseTool = (value: unknown): ToolDescriptor => {
     invalid(`la ficha ${id} no declara su lista de lenguas`);
   }
 
-  // Se rechaza en vez de ignorarse: publicarla sin haberla comprobado es lo que
-  // el proyecto prohibe, y un `url` que no se valida es exactamente eso.
-  if (url !== undefined) {
-    invalid(`la ficha ${id} declara url; ninguna URL se ha verificado todavia`);
+  // Una ficha alojada fuera se abre en otro origen, asi que necesita su `url`;
+  // una integrada no la necesita y no debe tenerla, porque su lugar es una
+  // pagina de este sitio. Y la `url` tiene que ser `https`: publicar un enlace
+  // en claro a un servicio que recibe audio no es un detalle de estilo.
+  //
+  // La regla anterior era mas simple —«ninguna ficha declara url»— porque no
+  // habia ninguna verificada. Ahora las hay, y el guardia util no es prohibir
+  // el campo sino exigirle lo que corresponde a cada integracion.
+  if (integration === "external-link") {
+    // Una ficha `planned` puede no tener url: es justo el estado de una fuente
+    // que no se pudo verificar, y el catalogo la muestra sin enlace. Lo que no
+    // se admite es una que se anuncia como disponible sin direccion.
+    if (status === "planned" && url === undefined) {
+      // Sin url, a proposito.
+    } else if (typeof url !== "string" || !/^https:\/\/\S+$/.test(url)) {
+      invalid(`la ficha ${id} se anuncia como enlace externo y no trae una url https`);
+    }
+  } else if (url !== undefined) {
+    invalid(`la ficha ${id} no es un enlace externo y declara url`);
   }
   if (notes !== undefined && !isLocalizedText(notes)) {
     invalid(`la ficha ${id} trae notas que no estan en es y en`);
@@ -119,10 +134,14 @@ const parseTool = (value: unknown): ToolDescriptor => {
     integration: ToolIntegration;
     status: ToolStatus;
     languages: readonly string[];
+    url?: string;
     notes?: ToolLocalizedText;
     citation?: string;
   } = { id, name, area, integration, status, languages };
 
+  if (url !== undefined) {
+    descriptor.url = url;
+  }
   if (notes !== undefined) {
     descriptor.notes = notes;
   }
