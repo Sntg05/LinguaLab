@@ -85,7 +85,13 @@ const WINDOWS = [
         <h2 class="panel__title">{t(locale, "audio.load.title")}</h2>
         <p class="faint">{t(locale, "audio.load.note")}</p>
         <div class="field">
-          <label class="field__label" for="audio-file">{t(locale, "audio.load.pick")}</label>
+          {/* Un solo `label` por control: si el texto de arriba fuera un segundo
+              `label`, axe marca `form-field-multiple-labels` y el lector de
+              pantalla lee dos nombres. El nombre es el del botón («Elegir
+              archivo») y el texto de arriba queda como descripción. */}
+          <span class="field__label" id="audio-file-label">
+            {t(locale, "audio.load.pick")}
+          </span>
           <label class="btn btn--quiet u-file">
             {t(locale, "file.choose")}
             <input
@@ -93,6 +99,7 @@ const WINDOWS = [
               id="audio-file"
               type="file"
               data-audio-file
+              aria-describedby="audio-file-label"
               accept="audio/*,.wav,.mp3,.ogg,.oga,.opus,.m4a,.flac,.webm"
             />
           </label>
@@ -524,9 +531,9 @@ const WINDOWS = [
         </div>
 
         <div class="field">
-          <label class="field__label" for="audio-textgrid-file">
+          <span class="field__label" id="audio-textgrid-file-label">
             {t(locale, "audio.data.importTextGrid")}
-          </label>
+          </span>
           <label class="btn btn--quiet u-file">
             {t(locale, "file.choose")}
             <input
@@ -534,6 +541,7 @@ const WINDOWS = [
               id="audio-textgrid-file"
               type="file"
               data-audio-textgrid-file
+              aria-describedby="audio-textgrid-file-label"
               accept=".TextGrid,.textgrid,.tg,text/plain"
             />
           </label>

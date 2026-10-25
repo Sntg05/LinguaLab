@@ -98,7 +98,7 @@ const defaultInstructions = Object.fromEntries(
         </div>
 
         <div class="explab__field">
-          <label class="explab__label" for="exp-file">{t(locale, "exp.load.file")}</label>
+          <span class="explab__label" id="exp-file-label">{t(locale, "exp.load.file")}</span>
           <label class="btn btn--quiet u-file">
             {t(locale, "file.choose")}
             <input
@@ -106,6 +106,7 @@ const defaultInstructions = Object.fromEntries(
               id="exp-file"
               type="file"
               data-explab-file
+              aria-describedby="exp-file-label"
               accept=".csv,.txt,text/csv,text/plain"
             />
           </label>
@@ -118,7 +119,7 @@ const defaultInstructions = Object.fromEntries(
         </p>
 
         <div class="explab__field">
-          <label class="explab__label" for="exp-audio">{t(locale, "exp.load.audio")}</label>
+          <span class="explab__label" id="exp-audio-label">{t(locale, "exp.load.audio")}</span>
           <label class="btn btn--quiet u-file">
             {t(locale, "file.choose")}
             <input
@@ -126,6 +127,7 @@ const defaultInstructions = Object.fromEntries(
               id="exp-audio"
               type="file"
               data-explab-audio
+              aria-describedby="exp-audio-label"
               accept="audio/*"
               multiple
             />

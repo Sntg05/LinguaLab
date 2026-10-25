@@ -52,7 +52,7 @@ const runtimeStrings = Object.fromEntries(
       <!-- ---------------------------- 1. Carga ---------------------------- -->
       <section class="elan-panel" aria-labelledby="elan-load-title">
         <h2 class="elan-panel__title" id="elan-load-title">{t(locale, "elan.load.title")}</h2>
-        <label class="elan-field" for="elan-file">{t(locale, "elan.load.label")}</label>
+        <span class="elan-field" id="elan-file-label">{t(locale, "elan.load.label")}</span>
         <label class="btn btn--quiet u-file">
           {t(locale, "file.choose")}
           <input
@@ -60,6 +60,7 @@ const runtimeStrings = Object.fromEntries(
             id="elan-file"
             type="file"
             accept=".eaf,.xml,.TextGrid,.textgrid,.txt"
+            aria-describedby="elan-file-label"
             data-elan-file
           />
         </label>

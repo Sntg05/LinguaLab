@@ -46,11 +46,12 @@ npm run dev         # http://localhost:4321
 
 ---
 
-## Herramientas que existen (v3.0.0)
+## Herramientas que existen (v3.1.0)
 
 La versión vive en `package.json`; no hay etiquetas en Git todavía, porque el sitio se publica como
-una unidad y release-please quedó fuera del alcance (ADR 0003). El salto a 3.0.0 no es cosmético: la
-licencia cambió a GPL por eSpeak NG, y un cambio de licencia es incompatible hacia atrás.
+una unidad y release-please quedó fuera del alcance (ADR 0003). El salto a 3.0.0 no fue cosmético: la
+licencia cambió a GPL por eSpeak NG, y un cambio de licencia es incompatible hacia atrás. El 3.1.0 suma
+las cinco herramientas de los segmentos 7 a 11; es aditivo, así que es un cambio menor.
 
 Todas ellas corren por completo en el navegador y funcionan sin conexión después de la primera carga.
 
