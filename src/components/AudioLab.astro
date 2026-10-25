@@ -30,7 +30,9 @@
  * `innerHTML`, asi que la CSP sin `unsafe-inline` no se toca.
  */
 import { t, type Locale } from "../i18n";
+import { ACOUSTIC_STRING_KEYS } from "../scripts/audio/acoustic-strings";
 import { AUDIO_STRING_KEYS } from "../scripts/audio/strings";
+import "../styles/features/acoustic.css";
 
 interface Props {
   locale: Locale;
@@ -46,6 +48,14 @@ const es = locale === "es";
  */
 const runtimeStrings = Object.fromEntries(
   AUDIO_STRING_KEYS.map((key) => [key, t(locale, key)]),
+);
+
+/**
+ * Lo mismo para los paneles acústicos, en su propio atributo: son dos
+ * controladores distintos y cada uno recibe solo las frases que escribe.
+ */
+const acousticStrings = Object.fromEntries(
+  ACOUSTIC_STRING_KEYS.map((key) => [key, t(locale, key)]),
 );
 
 const WINDOWS = [
@@ -202,6 +212,166 @@ const WINDOWS = [
           <span class="badge badge--warn">{t(locale, "audio.experimentalBadge")}</span>
         </div>
         <p class="faint">{t(locale, "audio.spectrogram.note")}</p>
+      </div>
+
+      <!-- ----------------------- Análisis acústico --------------------- -->
+      <!--
+        El aviso de experimental va ARRIBA del panel y no al pie: la condición
+        para quitarlo es el contraste contra Praat sobre voces reales, y ese
+        contraste todavía no existe (docs/validation/acoustic.md). El texto se
+        pide al diccionario, no se escribe aquí: hay dos idiomas.
+      -->
+      <div
+        class="panel acoustic"
+        data-acoustic
+        data-acoustic-strings={JSON.stringify(acousticStrings)}
+      >
+        <h2 class="panel__title">{t(locale, "acoustic.title")}</h2>
+        <p class="faint">{t(locale, "acoustic.lead")}</p>
+        <p class="callout callout--warn">{t(locale, "acoustic.experimental")}</p>
+        <p
+          class="audiolab__status"
+          data-acoustic-status
+          role="status"
+          aria-live="polite"
+          data-state="idle"
+        >
+          {t(locale, "acoustic.status.idle")}
+        </p>
+
+        <h3 class="acoustic__subtitle">{t(locale, "acoustic.pitch.title")}</h3>
+        <div class="cluster">
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "acoustic.preset.label")}</span>
+            <select data-acoustic-preset>
+              <option value="" selected>{t(locale, "acoustic.preset.custom")}</option>
+              <option value="masculine">{t(locale, "acoustic.preset.masculine")}</option>
+              <option value="feminine">{t(locale, "acoustic.preset.feminine")}</option>
+              <option value="child">{t(locale, "acoustic.preset.child")}</option>
+            </select>
+          </label>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "acoustic.pitch.floor")}</span>
+            <input
+              type="number"
+              data-acoustic-pitch-floor
+              min="20"
+              max="2000"
+              step="5"
+              value="75"
+            />
+          </label>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "acoustic.pitch.ceiling")}</span>
+            <input
+              type="number"
+              data-acoustic-pitch-ceiling
+              min="40"
+              max="3000"
+              step="10"
+              value="600"
+            />
+          </label>
+          <button class="btn btn--primary btn--sm" type="button" data-acoustic-pitch-run>
+            {t(locale, "acoustic.pitch.run")}
+          </button>
+        </div>
+        <p class="faint">{t(locale, "acoustic.pitch.note")}</p>
+        <canvas
+          class="acoustic__plot"
+          data-acoustic-f0-canvas
+          role="img"
+          aria-label={t(locale, "acoustic.canvas.f0")}></canvas>
+
+        <h3 class="acoustic__subtitle">{t(locale, "acoustic.formant.title")}</h3>
+        <div class="cluster">
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "acoustic.formant.max")}</span>
+            <input
+              type="number"
+              data-acoustic-formant-max
+              min="1000"
+              max="12000"
+              step="100"
+              value="5500"
+            />
+          </label>
+          <button class="btn btn--primary btn--sm" type="button" data-acoustic-formant-run>
+            {t(locale, "acoustic.formant.run")}
+          </button>
+          <label class="field field--inline">
+            <input type="checkbox" data-acoustic-formant-overlay />
+            <span class="field__label">{t(locale, "acoustic.formant.overlay")}</span>
+          </label>
+        </div>
+        <p class="faint">{t(locale, "acoustic.formant.note")}</p>
+
+        <h3 class="acoustic__subtitle">{t(locale, "acoustic.intensity.title")}</h3>
+        <div class="cluster">
+          <button class="btn btn--primary btn--sm" type="button" data-acoustic-intensity-run>
+            {t(locale, "acoustic.intensity.run")}
+          </button>
+        </div>
+        <p class="faint">{t(locale, "acoustic.intensity.note")}</p>
+        <canvas
+          class="acoustic__plot"
+          data-acoustic-intensity-canvas
+          role="img"
+          aria-label={t(locale, "acoustic.canvas.intensity")}></canvas>
+
+        <h3 class="acoustic__subtitle">{t(locale, "acoustic.measure.title")}</h3>
+        <div class="cluster">
+          <button class="btn btn--primary btn--sm" type="button" data-acoustic-measure-run>
+            {t(locale, "acoustic.measure.run")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-acoustic-measure-export disabled>
+            {t(locale, "acoustic.measure.export")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-acoustic-measure-clear disabled>
+            {t(locale, "acoustic.measure.clear")}
+          </button>
+        </div>
+        <p class="faint">{t(locale, "acoustic.measure.note")}</p>
+        <p class="faint" data-acoustic-measure-empty>{t(locale, "acoustic.measure.empty")}</p>
+        <div class="audiolab__table-wrap">
+          <table class="audiolab__table acoustic__table">
+            <caption class="faint">{t(locale, "acoustic.measure.title")}</caption>
+            <thead>
+              <tr>
+                <th scope="col" rowspan="2">{t(locale, "acoustic.measure.head.label")}</th>
+                <th scope="col" rowspan="2">{t(locale, "acoustic.measure.head.range")}</th>
+                <th scope="colgroup" colspan="4">{t(locale, "acoustic.measure.head.f0")}</th>
+                <th scope="col" rowspan="2">{t(locale, "acoustic.measure.head.intensity")}</th>
+                <th scope="colgroup" colspan="4">{t(locale, "acoustic.measure.head.f1")}</th>
+                <th scope="colgroup" colspan="4">{t(locale, "acoustic.measure.head.f2")}</th>
+              </tr>
+              <tr>
+                <th scope="col">{t(locale, "acoustic.measure.head.mean")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.median")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.min")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.max")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.percent25")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.percent50")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.percent75")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.centre")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.percent25")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.percent50")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.percent75")}</th>
+                <th scope="col">{t(locale, "acoustic.measure.head.centre")}</th>
+              </tr>
+            </thead>
+            <tbody data-acoustic-measure-body></tbody>
+          </table>
+        </div>
+
+        <h3 class="acoustic__subtitle">{t(locale, "acoustic.vowels.title")}</h3>
+        <p class="faint" data-acoustic-vowels-empty>{t(locale, "acoustic.vowels.empty")}</p>
+        <canvas
+          class="acoustic__plot acoustic__plot--vowels"
+          data-acoustic-vowels-canvas
+          role="img"
+          aria-label={t(locale, "acoustic.canvas.vowels")}></canvas>
+        <p class="faint">{t(locale, "acoustic.limits")}</p>
       </div>
 
       <!-- --------------------------- Capas ----------------------------- -->

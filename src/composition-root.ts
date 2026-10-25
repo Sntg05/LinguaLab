@@ -42,8 +42,9 @@ import {
 } from "@lingualab/core";
 import {
   type PersistenceStatus,
-  createIndexedDbOrthographyRepository,
   createEspeakPhonemizer,
+  createIndexedDbOrthographyRepository,
+  createPraatfanAcousticAnalysis,
   createPyodideElanCodec,
   createStaticToolRegistry,
 } from "@lingualab/adapters";
@@ -86,8 +87,8 @@ const registry = createStaticToolRegistry(TOOLS);
  * El fonemizador es el unico adaptador que pide algo fuera de este dispositivo
  * —los datos de eSpeak NG llegan por HTTP— y por eso su ubicacion se decide aqui.
  *
- * `withBase` no es decorativo: GitHub Pages sirve el sitio bajo `/LinguaLab`, y
- * una base sin prefijo se pediria al dominio y volveria 404. Los datos viven en
+ * `withBase` no es decorativo: si el sitio se sirve bajo un subdirectorio, una
+ * base sin prefijo se pediria al dominio y volveria 404. Los datos viven en
  * `public/espeak-phonemizer/` (los copia `scripts/sync-espeak-data.mjs`), asi que
  * se buscan en tiempo de ejecucion y no viajan en el bundle: el presupuesto de
  * peso por pagina mide scripts, y estos 5,7 MB no lo son.
@@ -107,10 +108,24 @@ const phonemizer = createEspeakPhonemizer({ baseUrl: withBase("/espeak-phonemize
  * campo no sale del navegador. Pyodide usa un CDN por defecto si no se le dice
  * donde estan sus archivos, y ese CDN estaria bloqueado.
  *
- * `withBase` no es decorativo: en GitHub Pages el sitio vive bajo `/LinguaLab` y
- * una base sin prefijo se pediria al dominio y volveria 404.
+ * `withBase` no es decorativo: si el sitio se sirve bajo un subdirectorio (un
+ * fork o un espejo), una base sin prefijo se pediria al dominio y volveria 404.
  */
 const elan = createPyodideElanCodec({ indexURL: withBase("/pyodide") });
+
+/**
+ * El analisis acustico sigue el mismo criterio que el fonemizador: construir el
+ * adaptador solo anota DONDE vive el artefacto vendoreado. No descarga el wasm,
+ * no crea el worker y no compila nada hasta el primer analisis, asi que cablearlo
+ * aqui no cuesta nada a las paginas que nunca miden.
+ *
+ * `withBase` no es decorativo: bajo un subdirectorio, una ruta sin prefijo se
+ * pediria al dominio y volveria 404. El
+ * artefacto esta en `public/praatfan/`, fijado por hash, y se sirve desde este
+ * mismo origen: la CSP no admite un CDN y la promesa de funcionar sin conexion
+ * despues de la primera carga tampoco.
+ */
+const acoustic = createPraatfanAcousticAnalysis({ baseUrl: withBase("/praatfan") });
 
 /** El caso de uso solo traduce el texto a AFI; no decide que se muestra. */
 const phonemizeText = createPhonemizeText({ phonemizer });
@@ -164,6 +179,13 @@ export interface LinguaLab {
    */
   readonly elan: ReturnType<typeof createPyodideElanCodec>;
   /**
+   * El adaptador acustico, no solo el puerto, por la misma razon que el
+   * fonemizador: `isAvailable` responde por el modulo ya cargado y `dispose`
+   * cierra el worker. El puerto sigue siendo lo unico que el visor usa para
+   * medir; el tipo del adaptador solo agrega esas dos consultas.
+   */
+  readonly acoustic: ReturnType<typeof createPraatfanAcousticAnalysis>;
+  /**
    * Which store is actually holding the tables right now, and why it degraded
    * if it did. It is exposed because the editor must tell the truth about
    * persistence: silently pretending to save is the defect this exists to
@@ -183,6 +205,7 @@ export const lingualab: LinguaLab = {
   phonemizeText,
   phonemizer,
   elan,
+  acoustic,
   // `persistence` does not depend on `this`, so passing the reference is exact
   // and avoids a wrapper that would only add a stack frame.
   persistence: tables.persistence,

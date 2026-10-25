@@ -1,0 +1,80 @@
+/* ============================================================
+   LinguaLab — estilos de los paneles de análisis acústico
+
+   POR QUE ESTE ARCHIVO ES GLOBAL Y NO UN `<style>` DEL COMPONENTE
+
+   Los paneles acústicos son la única parte del visor que necesita estilos
+   propios —tres gráficos, una tabla ancha y una leyenda—, y el componente ya
+   lleva el bloque del visor entero. Separarlos deja dos archivos que se pueden
+   leer de una vez, y el nombre `acoustic__` evita que se cruce con nada.
+
+   Los valores salen de los tokens del sitio: si el tema cambia, estos paneles
+   cambian con él. El color de los trazos NO se fija aquí, se lee de las
+   variables CSS en tiempo de ejecución (ver `readPalette` en `render.ts`): un
+   canvas pintado con un color fijo queda ilegible en uno de los dos temas.
+   ============================================================ */
+
+.acoustic {
+  display: grid;
+  gap: var(--space-s);
+  min-width: 0;
+}
+
+.acoustic__subtitle {
+  margin: var(--space-s) 0 0;
+  font-family: var(--font-sans);
+  font-size: var(--step--1);
+  font-weight: 650;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.acoustic__plot {
+  display: block;
+  width: 100%;
+  height: 140px;
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-s);
+}
+
+.acoustic__plot--vowels {
+  height: 240px;
+}
+
+/* Un gráfico sin datos se muestra vacío pero presente: sigue ocupando su sitio
+   para que la página no salte cuando aparece el primer trazo. */
+.acoustic__plot[data-empty="true"] {
+  background: var(--bg-sunken);
+}
+
+.acoustic__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+}
+
+.acoustic__table th,
+.acoustic__table td {
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+  text-align: end;
+  white-space: nowrap;
+}
+
+.acoustic__table th:first-child,
+.acoustic__table td:first-child,
+.acoustic__table th:nth-child(2),
+.acoustic__table td:nth-child(2) {
+  text-align: start;
+}
+
+.acoustic__table thead th {
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}

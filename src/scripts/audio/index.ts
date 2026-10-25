@@ -49,6 +49,9 @@ import {
   startAnnotationHistory,
   undoAnnotation,
 } from "@lingualab/core";
+import { lingualab } from "../../composition-root";
+import { initAcousticPanels } from "./acoustic-analysis";
+import { createAcousticStrings, parseAcousticStrings } from "./acoustic-strings";
 import {
   createIndexedDbAnnotationStorage,
   type AnnotationPersistenceReason,
@@ -233,6 +236,48 @@ export const initAudioLab = (): void => {
 
   let audioContext: AudioContext | null = null;
   let playback: Playback | null = null;
+
+  /**
+   * Paneles de analisis acustico (segmento 8).
+   *
+   * El adaptador llega desde el composition root, que es el unico lugar de la
+   * interfaz que puede construir uno; aqui solo se le pasa el audio cargado y el
+   * intervalo activo. Se montan una sola vez y sobreviven a los cambios de
+   * archivo: `reset` descarta lo que ya no corresponde al audio nuevo.
+   */
+  const acousticRoot = $<HTMLElement>("[data-acoustic]");
+  const acoustic =
+    acousticRoot === null
+      ? null
+      : initAcousticPanels({
+          root: acousticRoot,
+          port: lingualab.acoustic,
+          strings: createAcousticStrings(
+            parseAcousticStrings(acousticRoot.dataset.acousticStrings),
+          ),
+          es,
+          getAudio: () =>
+            audio === null
+              ? null
+              : {
+                  samples: audio.samples,
+                  sampleRate: audio.sampleRate,
+                  duration: audio.duration,
+                },
+          // La seleccion es el intervalo donde esta el cursor: es el que el
+          // visor ya resalta en la onda y en las capas, asi que medir «la
+          // seleccion» no puede significar otra cosa.
+          getSelection: () => {
+            const active = activeIntervalTier();
+            const interval = active?.tier.items[activeIntervalIndex()];
+            if (active === null || interval === undefined) {
+              return null;
+            }
+            return { start: interval.start, end: interval.end, label: interval.text };
+          },
+          palette: () => palette,
+          onOverlayChange: () => renderCanvas(),
+        });
 
   const context = (): AudioContext | null => {
     if (audioContext === null) {
@@ -484,6 +529,9 @@ export const initAudioLab = (): void => {
       if (spectrogram !== null && spectrogramToggle?.checked !== false) {
         specCanvas.hidden = false;
         drawSpectrogram(specCanvas, { spectrogram, view, palette });
+        // Los formantes se dibujan ENCIMA del espectrograma ya pintado: es la
+        // unica forma de leer el formante contra su banda oscura.
+        acoustic?.drawOverlay(specCanvas, view, spectrogram.minHz, spectrogram.maxHz);
       } else {
         specCanvas.hidden = true;
       }
@@ -879,6 +927,8 @@ export const initAudioLab = (): void => {
       activeTier = 0;
     }
 
+    // Otro archivo es otro analisis: lo medido sobre el anterior no se mezcla.
+    acoustic?.reset();
     recomputeSpectrogram();
     renderAll();
     updatePersistence();

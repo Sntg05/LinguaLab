@@ -31,6 +31,7 @@ Reglas de esta tabla:
 | [@axe-core/playwright](https://www.npmjs.com/package/@axe-core/playwright) | 4.14.0 | MPL-2.0 | Comprueba accesibilidad WCAG 2.2 AA en las páginas publicadas |
 | [axe-core](https://www.npmjs.com/package/axe-core) | 4.14.0 | MPL-2.0 | El motor de reglas que usa axe |
 | [fake-indexeddb](https://www.npmjs.com/package/fake-indexeddb) | 6.2.6 | Apache-2.0 | IndexedDB en memoria, para probar el adaptador en Node sin navegador |
+| [praatfan-gpl](https://github.com/ucpresearch/praatfan-core-rs) | 0.1.13 | **GPL-3.0** | Motor de análisis acústico (F0, formantes, intensidad) con paridad con Praat, compilado a WebAssembly. Se publica en `public/praatfan/` con sus hashes y procedencia, porque no está en npm |
 | [pyodide](https://www.npmjs.com/package/pyodide) | 314.0.7 | MPL-2.0 | Entorno de Python en WebAssembly, en un worker, para el conversor ELAN. Se publica el motor completo en `public/pyodide/` (13 MB) servido desde este origen |
 | [pympi-ling](https://pypi.org/project/pympi-ling/) | 1.71 | MIT | Lee y escribe archivos ELAN `.eaf` dentro de Pyodide (`micropip` lo instala desde un wheel vendoreado) |
 | [micropip](https://pyodide.org/) | 0.11.1 | MPL-2.0 | Instalador de wheels de Pyodide; se sirve desde `public/pyodide/wheels/` |

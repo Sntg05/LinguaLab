@@ -105,6 +105,9 @@ export const SITE_ROUTES: Readonly<Record<string, string>> = {
   "textgrid-viewer": "/visualizador",
   "mapa-lenguas-colombia": "/lenguas",
   "elan-textgrid": "/elan",
+  // El analisis acustico vive DENTRO del visor: no tiene pagina propia, y su
+  // enlace es la misma ruta que la del visor.
+  "acoustic-analysis": "/visualizador",
 };
 
 /** Read a build-time environment variable without assuming Node types. */

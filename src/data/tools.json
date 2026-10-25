@@ -134,11 +134,11 @@
       },
       "area": "fonetica",
       "integration": "embedded",
-      "status": "planned",
+      "status": "experimental",
       "languages": [],
       "notes": {
-        "es": "Previsto: contorno de F0, formantes F1–F3 e intensidad en dB sobre el visor de audio. Todavía no está implementado: no hay página ni motor. El segmento 8 del prompt lo diseñó como experimental por el estado de praatfan, y esa condición se mantendrá cuando exista.",
-        "en": "Planned: F0 contour, F1–F3 formants and intensity in dB on top of the audio viewer. Not implemented yet: there is no page and no engine. Segment 8 of the prompt designed it as experimental given the state of praatfan, and that condition will stand once it exists."
+        "es": "Contorno de F0 con presets de voz, formantes F1–F3 superpuestos al espectrograma, intensidad en dB y medición de un intervalo (media, mediana, mínimo y máximo de F0; F1 y F2 al 25/50/75 %) con exportación a CSV y gráfico vocálico. Funciona dentro del visor de audio, con el motor praatfan compilado a WebAssembly en un worker. **Experimental**: el contraste con Praat sobre voces reales todavía no se hizo.",
+        "en": "F0 contour with voice presets, F1–F3 formants overlaid on the spectrogram, intensity in dB, and per-interval measurement (mean, median, min and max F0; F1 and F2 at 25/50/75 %) with CSV export and a vowel chart. It runs inside the audio viewer, with the praatfan engine compiled to WebAssembly in a worker. **Experimental**: the comparison against Praat on real voices has not been done yet."
       }
     },
     {
