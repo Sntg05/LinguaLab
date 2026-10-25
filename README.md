@@ -51,6 +51,9 @@ npm run dev        # http://localhost:4321
 | `npm run lint` | Biome sobre `packages/**` y los archivos de herramienta |
 | `npm run deps:check` | Reglas de dependencia hexagonales (dependency-cruiser) |
 | `npm test` | Pruebas unitarias (Vitest): sitio, núcleo y adaptadores |
+| `npm run test:e2e` | Playwright contra el sitio compilado: accesibilidad y flujos reales (necesita `npx playwright install chromium` una vez) |
+| `npm run audit` | Bloquea si el árbol de producción tiene una vulnerabilidad `high`; informa el de desarrollo sin cortar |
+| `npm run lint:baseline` | Atribuye cada aviso del linter a `main` o al árbol actual, en vez de inferirlo (ver P8) |
 | `npm run verify` | Tipos + pruebas + compilación + verificación del resultado |
 | `npm run verify:build` | Solo la verificación del resultado compilado |
 | `npm run verify:all` | **La puerta completa**: todo lo anterior en orden |
