@@ -1,0 +1,14 @@
+---
+import ExperimentsLab from "../components/ExperimentsLab.astro";
+import Base from "../layouts/Base.astro";
+import { t } from "../i18n";
+---
+
+<Base
+  locale="es"
+  path="/experimentos"
+  title={t("es", "exp.meta.title")}
+  description={t("es", "exp.meta.description")}
+>
+  <ExperimentsLab locale="es" />
+</Base>
