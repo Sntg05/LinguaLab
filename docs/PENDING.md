@@ -110,6 +110,14 @@ respeta el prototipo real, así que el parche llega hasta el adaptador. Es media
 tomó el relevo) y `persistence()` informa una degradación. Si el guardado se pierde en silencio, la
 prueba falla y el adaptador está mal.
 
+**Estado: cerrado.** `packages/adapters/src/orthography-repository/indexeddb-orthography-repository.quota.test.ts`
+hace exactamente eso: guarda una tabla en IndexedDB, intercepta `put` con un `QuotaExceededError`, guarda
+otra y afirma las tres cosas —la nueva se guarda, la anterior sigue exportable, y `persistence()` dice
+`{ backend: "memory", reason: "quota-exceeded" }`—. Se comprobó por mutación: quitando la degradación, la
+prueba se pone roja. Y tiene un segundo caso que no se había pedido: un `AbortError` **no** se disfraza de
+degradación; se informa el código del puerto y el adaptador sigue en IndexedDB, porque cambiar de backend
+por un error que no es de espacio taparía el problema real.
+
 ---
 
 ## P4 — Seis avisos de complejidad cognitiva, y uno es un 40
@@ -584,6 +592,14 @@ esto vuelve a costar una sesión, la solución real es un script `scripts/e2e.mj
 solo para el proceso hijo y lo explique en su cabecera. Criterio de aceptación: `npm run test:e2e` en
 verde desde una sesión de agente, sin variables a mano, y `P7` sigue valiendo (puerto ocupado = rojo).
 
+**Estado: cerrado, y sin script.** Las dos salidas que este documento consideraba —reutilizar el servidor
+o sembrar la variable— seguían siendo malas, pero hay una tercera que no se había mirado: Astro 7 acepta
+`--ignore-lock` en `preview`, y su código dice exactamente lo que necesitamos —«servidor de una sola
+corrida, en primer plano, sin escribir el archivo de bloqueo»—. Con esa bandera en `webServer.command` no
+hay variable borrada, no hay entorno mentido y no hay script que mantener: la puerta pide lo que quiere en
+vez de esconder lo que hay. `reuseExistingServer` sigue en `false`, así que **P7 sigue valiendo**: si el
+puerto está ocupado, la corrida es roja.
+
 ## P17 — El visor de audio declara experimental el TextGrid y el espectrograma, y no puede probar Praat
 
 **Severidad:** media, y es una promesa de interoperabilidad, no un fallo visible. La herramienta
@@ -716,6 +732,13 @@ donde ya se prueba el de intervalos: un caso en `textgrid.test.ts` y una entrada
 `packages/core/src/testing/contracts/textgrid-codec.ts`. Criterio de aceptación: un archivo con un punto
 fuera de su capa devuelve `point-out-of-tier` y el resto de las pruebas sigue verde.
 
+**Estado: cerrado.** `point-out-of-tier` existe en la unión, la rama `TextTier` valida con `TIME_EPSILON`
+como la de intervalos, y hay tres casos: un punto **después** de su capa, un punto **antes**, y —la otra
+mitad del contrato— dos puntos **justo en los bordes** que siguen siendo válidos, porque rechazar de más
+habría sido peor que el defecto. El rojo se observó antes del arreglo (tres pruebas: los dos casos y la
+entrada nueva de `failureFixtures`), y el mensaje de interfaz no necesitó nada: `audio.error.textgrid` ya
+viaja con el `code`, así que el código nuevo aparece solo.
+
 ## P19 — El tope de audio no tiene prueba propia
 
 **Severidad:** baja, y es una deuda de prueba, no de comportamiento.
@@ -739,6 +762,14 @@ poder probarla no estaba autorizado.
 lado (Node puro, sin DOM), y hacer que el controlador use solo esas funciones. Criterio de aceptación:
 `npx vitest run src/scripts/audio/limits.test.ts` cubre el borde (justo en el tope y un byte más) para los
 dos límites, y `verify:all` sigue verde.
+
+**Estado: cerrado, con una desviación declarada.** `src/scripts/audio/limits.ts` tiene `MAX_AUDIO_BYTES`,
+`formatBytes` e `isOverLimit`, y su prueba cubre el borde del audio (justo en el tope entra, un byte más no)
+y también el del TextGrid. Pero el controlador **no** llama a `isOverLimit` para el TextGrid: sigue
+llamando a `isTextGridTooLarge` del núcleo, que ya está probada junto al formato. Se probó cada tope a
+través de la función que el controlador usa de verdad, en vez de mover la decisión del TextGrid a la capa
+de presentación para que la prueba quedara más linda. `formatBytes` se movió sin cambiar un carácter de su
+comportamiento: los mensajes miden lo mismo que antes.
 
 ## P20 — Borrar libera todo el almacén, no un proyecto
 
