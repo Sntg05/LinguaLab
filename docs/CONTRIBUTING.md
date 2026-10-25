@@ -62,13 +62,15 @@ src/                  el sitio Astro: el adaptador primario
 servidor: `npx playwright install chromium` una vez, y después `npm run test:e2e`. Conviene correrlo
 antes de un PR que toque la interfaz; en CI llega con su propio paso.
 
-**Si tenés `npm run dev` corriendo, `test:e2e` falla —y está bien que falle.** La puerta exige el puerto
-4321 libre porque prueba el sitio **compilado** (`dist/`), no el de desarrollo. Reutilizar el servidor de
+**La puerta corre en su propio puerto, 4331, y exige tenerlo libre.** Prueba el sitio **compilado**
+(`dist/`), no el de desarrollo, y desde P7 no comparte puerto con `npm run dev` (4321): separarlos elimina
+la trampa de probar el servidor equivocado sin que nadie se entere. Si algo ocupa el 4331, la corrida
+falla diciendo que la url ya está en uso. Reutilizar el servidor de
 desarrollo parece cómodo y es una trampa: ese servidor no aplica la CSP, sirve los módulos sin empaquetar
 y compila a demanda, así que las pruebas miden un artefacto que nadie publica. Y con la suite entera
 encima, casi todas se caen por tiempo de espera, así que el fallo se lee como un problema de las pruebas
-y no como lo que es. Pará `npm run dev` antes de correr la puerta; el error te dice que hay algo ocupando
-el puerto.
+y no como lo que es. No hace falta parar `npm run dev`: son puertos distintos. Y si la puerta se queja del 4331,
+el error te dice qué url está ocupada.
 
 **Toda página pública nueva entra en `e2e/accessibility.spec.ts`.** No es una formalidad: el proyecto
 declara WCAG 2.2 AA como requisito, y una declaración que nadie comprueba se degrada sola. Esa prueba

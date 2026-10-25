@@ -9,7 +9,7 @@ para cerrarlo sin tener que redescubrirlo.
 Una entrada por sesión. Antes de empezar, leé la columna **Próximo paso exacto**: casi todas incluyen
 una decisión ya tomada, y rehacerla suele dar un resultado peor que el que está escrito.
 
-**La puerta e2e necesita el navegador instalado y el puerto 4321 libre.** `npx playwright install chromium`
+**La puerta e2e necesita el navegador instalado y el puerto 4331 libre** —el 4321 es el de `npm run dev`, ya no se comparten—. `npx playwright install chromium`
 una vez, y ningún `npm run dev` vivo: con el puerto ocupado la corrida falla a propósito (P7). Ya **no**
 hace falta `env -u AI_AGENT`: la puerta arranca el preview con `--ignore-lock` (P16).
 
@@ -25,7 +25,7 @@ cd ~/Documentos/06\ Proyectos/LinguaLab
 nvm use 22            # sin esto no corren las puertas; hay .nvmrc
 npm install
 npm run verify:all    # lint, formato, tipos, reglas hexagonales, pruebas, build verificado
-npx playwright test   # e2e; requiere el puerto 4321 LIBRE (ver P7)
+npm run test:e2e      # e2e; requiere el puerto 4331 LIBRE (ver P7)
 ```
 
 **Estado al escribir esto:** `main` es lo publicado y la entrega v3 sigue en su cadena de ramas, sin
@@ -265,6 +265,12 @@ tapado el síntoma y dejado la trampa viva. Se reprodujo antes de decidir.
 
 **Proximo paso exacto.** El puerto del e2e y el de `astro dev` siguen siendo el mismo (4321). Separarlos
 —`preview:e2e` en el 4331— elimina la clase entera de defecto en vez de solo el caso.
+
+**Estado: cerrado del todo.** El puerto de la puerta es ahora **4331** (`npm run preview:e2e`,
+`astro preview --port 4331 --ignore-lock`) y el de desarrollo sigue en 4321: convivir dejó de ser un
+problema. Medido: las 88 pruebas en verde en el puerto nuevo, y con un señuelo ocupando el 4331 la
+corrida falla con `http://localhost:4331 is already used` —nombra la url, no el proceso—, que es la
+guarda que se quería conservar.
 
 ---
 

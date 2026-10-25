@@ -12,14 +12,20 @@ import { defineConfig, devices } from "@playwright/test";
  * pagina. Por eso el `webServer` compila y sirve `dist/` — lo mismo que se
  * despliega.
  *
- * El puerto 4321 es el de `astro preview`. **No se reutiliza un servidor que ya este
- * escuchando, ni en local** —ver el comentario de `reuseExistingServer` mas abajo—:
- * reutilizar el de desarrollo probaba un artefacto que nadie publica. Una version
- * anterior de este comentario decia lo contrario, que se reutilizaba por comodidad;
- * quedo falso cuando la guarda se volvio estructural y se corrige aqui.
+ * El puerto de la puerta es 4331, distinto del 4321 de `npm run dev`, y eso es la
+ * mejora de **P7**: mientras los dos compartian puerto, la puerta dependia de que
+ * nadie estuviera mirando el sitio, y el fallo que se veia entonces —«la url ya esta
+ * en uso»— culpaba a las pruebas de una decision del entorno. Separarlos elimina la
+ * clase entera de defecto en vez de solo el caso.
+ *
+ * **No se reutiliza un servidor que ya este escuchando, ni en local** —ver el
+ * comentario de `reuseExistingServer` mas abajo—: reutilizar el de desarrollo probaba
+ * un artefacto que nadie publica. Una version anterior de este comentario decia lo
+ * contrario, que se reutilizaba por comodidad; quedo falso cuando la guarda se volvio
+ * estructural y se corrige aqui.
  */
 
-const PORT = 4321;
+const PORT = 4331;
 
 export default defineConfig({
   testDir: "e2e",
@@ -49,7 +55,7 @@ export default defineConfig({
     // de una sola corrida, en primer plano, sin escribir el archivo de bloqueo— y la soporta el propio
     // CLI. Ver **P16** de `docs/PENDING.md`: las dos alternativas que se habian descartado eran
     // reutilizar el servidor (P7) y sembrar la variable para enganar al detector.
-    command: "npm run build && npm run preview -- --ignore-lock",
+    command: "npm run build && npm run preview:e2e",
     url: `http://localhost:${PORT}`,
     // POR QUE NO SE REUTILIZA UN SERVIDOR EXISTENTE, NI EN LOCAL
     //

@@ -18,6 +18,7 @@
     "build:verify": "astro build && node scripts/verify-build.mjs",
     "verify:build": "node scripts/verify-build.mjs",
     "preview": "astro preview",
+    "preview:e2e": "astro preview --port 4331 --ignore-lock",
     "check": "astro check",
     "test": "vitest run",
     "test:watch": "vitest",

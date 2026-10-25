@@ -39,9 +39,10 @@ marcado experimental) y el **catálogo agrupado por nivel de análisis** en `/ca
 
 ### Trampas del entorno, ya pagadas
 
-1. **La puerta e2e necesita el puerto 4321 libre.** `reuseExistingServer: false`, así que con
-   `npm run dev` vivo la corrida **falla a propósito** y avisa que la url ya está en uso (ver `P7`).
-   `npx astro dev stop` y `npx astro preview stop` cierran los servidores en segundo plano.
+1. **La puerta e2e vive en su propio puerto, el 4331.** `npm run dev` usa el 4321 y los dos conviven:
+   desde P7 no comparten puerto, así que ya no hay que parar el servidor de desarrollo para correr las
+   pruebas. `reuseExistingServer` sigue en `false`: si algo ocupa el 4331, la corrida falla a propósito y
+   lo dice nombrando la url.
 2. **Ya no hace falta `env -u AI_AGENT`.** Astro 7 detecta que lo lanza un agente y manda `preview` al
    fondo, y Playwright exige un proceso en primer plano; la puerta lo resuelve con `--ignore-lock`, la
    bandera que el CLI documenta para «servidor de una sola corrida, en primer plano». Está en
