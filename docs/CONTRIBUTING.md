@@ -150,9 +150,16 @@ repositorio no debería cambiar sin que una persona la apruebe:
 3. Escribe su suite de contrato (`runXxxPortContract`) y un fake en memoria. El fake no es un adorno:
    es lo que permite probar la interfaz sin cargar un WebAssembly de veinte megas.
 4. Registra la herramienta en `tools.json` con su `status` real —`stable`, `experimental` o
-   `planned`— y añádela a la tabla de estado del README.
-5. Anota el paquete y su licencia en `THIRD_PARTY_NOTICES.md`. Una dependencia sin licencia anotada
-   no entra.
+   `planned`— y añádela a la tabla de estado del README. Si es `embedded` y no está planificada,
+   necesita además su ruta en `SITE_ROUTES` (`src/config/site.ts`) y su página en
+   `src/pages/<ruta>.astro` **y** `src/pages/en/<ruta>.astro`: una ruta sin página o una ficha
+   `stable` sin ruta es una promesa que alguien va a comprobar. `src/config/site.test.ts` cruza el
+   catálogo con las rutas en las dos direcciones.
+5. Escribe su copia en `src/i18n/messages/features/<herramienta>.{es,en}.ts` (ver la guía), no en el
+   diccionario central, y añadí la página a `PUBLIC_PAGES` de `e2e/accessibility.spec.ts`: una página
+   pública sin axe es una incógnita, no una certeza.
+6. Anota el paquete y su licencia en `THIRD_PARTY_NOTICES.md`, con la versión **instalada**. Una
+   dependencia sin licencia anotada no entra.
 
 ## Cómo escribir un ADR
 

@@ -196,19 +196,35 @@ la añade sola. Es el error más fácil de cometer.
 
 ### Añadir texto traducible
 
-Los diccionarios son objetos planos con claves de punto:
+Los diccionarios son objetos planos con claves de punto, y una herramienta nueva **no** escribe en el
+diccionario central: escribe su propio módulo en `src/i18n/messages/features/`.
 
 ```ts
-// src/i18n/messages/es.ts
-"mi.clave": "Texto en español",
-
-// src/i18n/messages/en.ts
-"mi.clave": "Text in English",
+// src/i18n/messages/features/miHerramienta.es.ts
+export const miHerramientaEs = {
+  "mia.clave": "Texto en español",
+} as const;
 ```
 
-Se usan con `t(locale, "mi.clave")`. La clave se tipa automáticamente a partir
-del diccionario español, así que **si te equivocas en el nombre, el compilador
-te avisa** en vez de mostrar la clave en pantalla.
+```ts
+// src/i18n/messages/features/miHerramienta.en.ts
+export const miHerramientaEn = {
+  "mia.clave": "Text in English",
+} as const;
+```
+
+`src/i18n/messages/es.ts` y `en.ts` ya los mezclan con `...spread`, así que no hay que tocarlos.
+
+**Por qué así.** El diccionario central es un solo objeto literal: dos personas trabajando en dos
+herramientas chocan en las mismas líneas, y el choque no tiene nada que ver con lo que están haciendo.
+Con un módulo por herramienta, cada una edita su archivo.
+
+Se usa con `t(locale, "mia.clave")`. La clave se tipa automáticamente a partir del diccionario español, así
+que **si te equivocas en el nombre, el compilador te avisa** en vez de mostrar la clave en pantalla.
+
+**El invariante lo comprueba `src/i18n/features.test.ts`:** cada módulo declara las mismas claves en los
+dos idiomas, usa su prefijo (`mia.`), no repite una clave de otro módulo y no pisa una clave base. Si el
+`spread` silenciara un duplicado, esa prueba se pone roja antes que la página muestre el texto equivocado.
 
 ### Añadir otro idioma
 
