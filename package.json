@@ -26,6 +26,7 @@
     "lint:css": "stylelint \"src/**/*.{css,astro}\"",
     "verify": "npm run check && npm run test && npm run build:verify",
     "lint": "biome lint .",
+    "lint:baseline": "node scripts/lint-baseline.mjs",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
     "format:check": "biome format .",

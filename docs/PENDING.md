@@ -116,26 +116,25 @@ prueba falla y el adaptador está mal.
 
 **Síntoma.** Ninguno hoy. Es el costo de mantenimiento de la próxima persona.
 
-**Evidencia.** `npm run lint` da **0 errores y 42 avisos**. De los 42, **27** son
-`noExcessiveCognitiveComplexity`. Seis están en código nuevo y concentrados:
+**Evidencia medida, no reconstruida (ver P8).** Con `node scripts/lint-baseline.mjs`, que extrae
+`main` con `git archive` y corre el linter sobre los dos árboles con la misma configuración: `main` da
+**0 errores y 42 avisos**, y el tip de esta entrega da **0 errores y 47**. De esos 42 heredados, **27**
+son `noExcessiveCognitiveComplexity`. Los **5 nuevos** son todos de complejidad y están concentrados:
 
-| Archivo | Complejidad |
-|---|---|
-| `src/scripts/ortografia/index.ts` | **40**, más dos de 16 y 23 |
-| `src/scripts/ortografia/csv.ts` | 23 y 21 |
-| `e2e/accessibility.spec.ts` | **30** (un aviso), introducido por la afirmación sobre `incomplete` |
+| Archivo | Complejidad | Lado |
+|---|---|---|
+| `packages/core/src/data/textgrid.ts` | 4 avisos (el codec que creció con el segmento 6) | **nuevo** |
+| `src/scripts/audio/index.ts` | 1 aviso (el controlador del visor) | **nuevo** |
+| `src/scripts/ortografia/index.ts` | **40**, más dos de 16 y 23 | heredado |
+| `src/scripts/ortografia/csv.ts` | 23 y 21 | heredado |
+| `e2e/accessibility.spec.ts` | **30** | heredado, y no lo agregó este cambio |
 
-El de la puerta de accesibilidad **lo agregó este mismo cambio**: eran 41 avisos con 26 de complejidad
-antes de la afirmación, y el anidamiento de `flatMap` más las ramas la cruzaron de umbral. Se anota en vez
-de esconderse, y baja solo si se extrae la lógica de cada comprobación a una función con nombre —que es
-lo que corresponde hacer cuando alguien toque ese archivo por otro motivo—.
-
-Los otros 21 son de código heredado de la v2.0.0, y 27 = 6 nuevos + 21 heredados. Y de los **15 avisos que no son de
-complejidad**, **4
-provienen de la regla nueva de `biome.json`** —`useBiomeIgnoreFolder`, sobre el propio `biome.json`—, que no
-existía antes de esta rama: esos 4 no son heredados en sentido estricto. La suma tiene que dar 26 + 15 = 41,
-y una versión anterior de este documento escribía «21 y 4» como si los 4 salieran de los 21, que no es de
-donde salen.
+**Corrección medida de lo que decía esta entrada.** Afirmaba que el aviso de la puerta de accesibilidad
+«lo agregó este mismo cambio», y que el reparto era 27 = 6 nuevos + 21 heredados. Las dos cosas son
+falsas: el aviso de `e2e/accessibility.spec.ts` **ya está en `main`**, y el reparto real es **32 = 5
+nuevos + 27 heredados**. Además, de los 15 avisos que no son de complejidad, los 4 de `useBiomeIgnoreFolder`
+también están en `main`: esa regla no es nueva, y por eso son heredados en sentido estricto. La medición
+está en P8 y se repite con `node scripts/lint-baseline.mjs`.
 
 **Por qué no se hizo.** El archivo de 40 es el manejador de un `click` **delegado**: una cadena de `if`
 con salidas tempranas sobre unas veinte acciones. Los `switch` de ese archivo (líneas 326, 450, 518) son
@@ -144,10 +143,15 @@ hacer **con** las pruebas de P2, no antes.
 
 **Próximo paso exacto.** Empezá por `csv.ts`, que no toca el DOM y ya tiene pruebas: extraer el analizador
 de encabezados baja los dos avisos sin riesgo. El de 40, dejalo para cuando exista la prueba del
-invariante de nodos de P2.
+invariante de nodos de P2. Los cinco nuevos —`textgrid.ts` y el controlador del visor— se tocan con las
+pruebas de esas dos piezas, que ya existen y son densas.
 
 **Criterio de aceptación.** Los avisos bajan y **ninguna prueba cambia de resultado**. Si alguna se cae,
 la refactorización cambió comportamiento y hay que revertirla.
+
+**Estado: abierto a propósito, como deuda aceptada y ahora medida.** Esta entrada no se cierra en la rama
+de cierre: partir funciones por bajar un contador, sin tocar el archivo por otro motivo, mezcla dos
+historias en un mismo diff. Lo que cambió es que el reparto ya no es una inferencia.
 
 ---
 
@@ -254,6 +258,50 @@ lados. Un aviso que aparece en los dos es heredado.
 
 **Lo que sigue sin explicarse.** El `exit=101` original no se reproduce, así que o fue un estado
 transitorio del árbol de prueba o un error de aquella medición. **No lo cuentes como un hecho.**
+
+**Estado: cerrado, y esto es la medición.** `node scripts/lint-baseline.mjs` extrae `main` con
+`git archive` a un directorio temporal, copia la `biome.json` del árbol actual y corre el linter sobre los
+dos con el mismo binario y la misma configuración. Los dos informes JSON quedan en el directorio temporal
+que imprime al final, y el reparto sale solo:
+
+```
+Base: main (42 avisos)
+Actual: árbol de trabajo (47 avisos)
+
+Heredados: 42 avisos   (0 errores en los dos lados)
+   4  useBiomeIgnoreFolder                      biome.json
+   1  noExcessiveCognitiveComplexity             e2e/accessibility.spec.ts
+   1  noExcessiveCognitiveComplexity             scripts/fetch-ipa-audio.mjs
+   1  noUnusedVariables                          scripts/fetch-ipa-audio.mjs
+   1  noExcessiveCognitiveComplexity             scripts/verify-build.mjs
+   1  noExcessiveCognitiveComplexity             src/data/articulation.ts
+   1  noExcessiveCognitiveComplexity             src/scripts/fono/vocal-tract.ts
+   2  noExcessiveCognitiveComplexity             src/scripts/ortografia/csv.ts
+   3  noExcessiveCognitiveComplexity             src/scripts/ortografia/index.ts
+   1  noExcessiveCognitiveComplexity             src/scripts/tools/analysis.ts
+   2  noExcessiveCognitiveComplexity             src/scripts/tools/readability.ts
+   1  noExcessiveCognitiveComplexity             src/scripts/tools/tokenize.ts
+   2  noExcessiveCognitiveComplexity             src/scripts/trees/checks.ts
+   3  noExcessiveCognitiveComplexity             src/scripts/trees/parse.ts
+   2  noExcessiveCognitiveComplexity             src/scripts/trees/render.ts
+   5  noGlobalIsNan                              src/scripts/trees/solvers.test.ts
+   3  useOptionalChain                           src/scripts/trees/solvers.test.ts
+   6  noExcessiveCognitiveComplexity             src/scripts/trees/solvers.ts
+   2  noGlobalIsNan                              src/scripts/trees/solvers.ts
+
+Nuevos: 5 avisos
+   4  noExcessiveCognitiveComplexity             packages/core/src/data/textgrid.ts
+   1  noExcessiveCognitiveComplexity             src/scripts/audio/index.ts
+```
+
+**Qué enseña, y corrige.** El reparto de P4 estaba mal en dos puntos: el aviso de la puerta de
+accesibilidad **ya existe en `main`** —no lo agregó esta rama— y la regla `useBiomeIgnoreFolder` sobre
+`biome.json` **también**, así que sus 4 avisos son heredados y no propios. Lo que sí es nuevo son cinco
+avisos de complejidad en dos archivos del segmento 6. Y los `useLiteralKeys` que P4 no menciona son
+**`info`**, no avisos: no cuentan en el total de 42 y por eso no aparecen en esta tabla.
+
+**Cómo se repite.** `node scripts/lint-baseline.mjs` (acepta `--base <ref>` y `--out <dir>`). No bloquea
+nada: informa. La puerta que bloquea sigue siendo `npm run lint`.
 
 ---
 
