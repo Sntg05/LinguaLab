@@ -118,11 +118,11 @@
       },
       "area": "psicolinguistica",
       "integration": "embedded",
-      "status": "planned",
+      "status": "stable",
       "languages": [],
       "notes": {
-        "es": "Constructor y ejecutor de experimentos de psicolingüística (juicios de aceptabilidad, 2AFC, lectura autocontrolada, decisión léxica). Independiente de la lengua.",
-        "en": "Builder and runner for psycholinguistics experiments (acceptability judgements, 2AFC, self-paced reading, lexical decision). Language-independent."
+        "es": "Constructor y ejecutor de cuatro experimentos (juicios de aceptabilidad, elección forzada, lectura autocontrolada y decisión léxica) con jsPsych: estímulos por CSV, aleatorización con semilla reproducible, bloques y práctica, vista previa, y descarga de resultados con participante anónimo, condición, respuesta, tiempo de reacción y semilla. Corre entero en el navegador; ningún dato sale del equipo. **Límite declarado**: los tiempos de reacción en un navegador tienen precisión limitada y la página lo advierte antes de empezar.",
+        "en": "Builder and runner for four experiments (acceptability judgements, forced choice, self-paced reading and lexical decision) with jsPsych: CSV stimuli, reproducible seeded randomisation, blocks and practice, preview, and results download with anonymous participant, condition, response, reaction time and seed. It runs entirely in the browser; no data leaves the computer. **Declared limit**: reaction times in a browser have limited precision, and the page warns about it before starting."
       },
       "citation": "de Leeuw, J. R. (2015). jsPsych: A JavaScript library for creating behavioral experiments in a Web browser. Behavior Research Methods, 47(1), 1–12."
     },

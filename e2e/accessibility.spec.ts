@@ -71,6 +71,8 @@ const PUBLIC_PAGES: readonly { readonly path: string; readonly name: string }[] 
   { path: "/catalogo", name: "catalogo (espanol)" },
   { path: "/en/catalogo", name: "catalogo (ingles)" },
   { path: "/elan", name: "conversor ELAN (espanol)" },
+  { path: "/experimentos", name: "experimentos (espanol)" },
+  { path: "/en/experimentos", name: "experimentos (ingles)" },
   { path: "/en/elan", name: "conversor ELAN (ingles)" },
   { path: "/lenguas", name: "mapa de lenguas (espanol)" },
   { path: "/en/lenguas", name: "mapa de lenguas (ingles)" },

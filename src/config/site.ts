@@ -58,6 +58,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { path: "/tools", labelKey: "nav.tools", kind: "tool", primary: false },
   { path: "/lenguas", labelKey: "nav.languages", kind: "tool", primary: false },
   { path: "/elan", labelKey: "nav.elan", kind: "tool", primary: false },
+  { path: "/experimentos", labelKey: "nav.experiments", kind: "tool", primary: false },
   // La entrada: una sola puerta a todas las herramientas.
   { path: "/catalogo", labelKey: "nav.catalogTools", kind: "tool", primary: true },
   { path: "/bibliografia", labelKey: "nav.resources", kind: "reference", primary: true },
@@ -105,6 +106,7 @@ export const SITE_ROUTES: Readonly<Record<string, string>> = {
   "textgrid-viewer": "/visualizador",
   "mapa-lenguas-colombia": "/lenguas",
   "elan-textgrid": "/elan",
+  "jspsych-experiments": "/experimentos",
   // El analisis acustico vive DENTRO del visor: no tiene pagina propia, y su
   // enlace es la misma ruta que la del visor.
   "acoustic-analysis": "/visualizador",
