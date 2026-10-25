@@ -18,7 +18,11 @@ Todo lo de abajo se midió sobre la rama `feat/toolbox-v3-security-languages`, p
 | **Sin secretos en el repositorio** | Sana | `git ls-files` no devuelve ningún `.env`, ni clave, ni credencial. No hay ficheros de entorno |
 | **Almacenamiento local acotado** | Sana | Dos claves y solo dos, `lingualab-lang` y `lingualab-theme`, con lista blanca en `src/scripts/core/guardrails.ts` y comprobación en vivo en `/seguridad` |
 | **Dependencias de producción** | Sana | `npm audit --omit=dev` → **0 vulnerabilidades**. El árbol de producción de un sitio estático son 5 entradas, ninguna con script de instalación |
-| **Permisos de CI mínimos** | Sana | `ci.yml`: `contents: read`. `deploy.yml`: `contents: read`, `pages: write`, `id-token: write` — lo mínimo que exige GitHub Pages |
+| **Permisos de CI mínimos** | Sana | `ci.yml`: `contents: read`. `deploy.yml`: `contents: read`, `pages: write`, `id-token: write` — lo mínimo que exige GitHub Pages. `codeql.yml`: `contents: read` y `security-events: write`, lo único que necesita para publicar hallazgos |
+| **Acciones fijadas por SHA** | Sana | Las ocho referencias de los tres flujos van por SHA completo con la versión mayor en un comentario al lado. Antes eran etiquetas movibles, que cualquiera con control de la acción puede reapuntar (O2) |
+| **La puerta audita dependencias** | Sana | `npm run audit` corre en cada job de CI: bloquea el árbol de **producción** desde `high` e informa el de desarrollo sin cortar. Medido: **0 vulnerabilidades** en los dos árboles (O1) |
+| **Análisis estático de código** | Sana | `.github/workflows/codeql.yml`, `javascript-typescript` con el conjunto `security-and-quality`, en push, en PR y una vez por semana. **Sin hallazgos abiertos** al activarlo (O5) |
+| **Alertas de Dependabot y escaneo de secretos** | Sana | Alertas de Dependabot **activadas** (`0` alertas abiertas al activarlas), actualizaciones de seguridad automáticas activadas, y `secret scanning` más `push protection` activados el 2026-10-25 (O4) |
 | **Sin disparadores peligrosos** | Sana | Ni `pull_request_target` ni `workflow_run` en `.github/workflows/`, así que no hay superficie de inyección de scripts desde un PR externo |
 | **Superficie de instalación** | Sana y pequeña | 493 paquetes en el lock, **2 con script de instalación**: `esbuild` (declarado en `allowScripts`) y `fsevents` (opcional, macOS) |
 
@@ -63,57 +67,69 @@ Nueve paquetes, los mismos que propone el PR #6, más lo que arrastró `npm audi
 `typescript` quedó fijado en **6.0.3 exacto**: el PR #7 propone 7.0.2 y esa es una decisión aparte
 (ver O6).
 
-## 4. Lo que sigue abierto
+## 4. Lo que estaba abierto, y en qué quedó
 
-**O1 — La puerta no audita dependencias (severidad media).**
-`npm run verify:all` no ejecuta `npm audit`, así que un aviso nuevo no rompe nada y nadie se entera
-hasta que alguien mira el panel. *Próximo paso:* añadir `npm audit --omit=dev --audit-level=high` como
-paso de CI y un script `npm run audit` que además informe el árbol de desarrollo sin bloquear.
+Los seis puntos se cerraron en la rama `feat/toolbox-v3-closure`, salvo lo que no depende de este
+repositorio. Ninguno se dio por cerrado sin la medición al lado.
 
-**O2 — Las acciones de GitHub están fijadas por etiqueta, no por SHA (severidad media).**
-`actions/checkout@v4` y sus hermanas son referencias mutables: quien controle la acción puede mover la
-etiqueta y ejecutar código en el runner con el `GITHUB_TOKEN` del proyecto. El prompt del proyecto pide
-explícitamente «fija las acciones por versión exacta o SHA». *Próximo paso:* fijar las siete por SHA
-completo, con la versión mayor en un comentario al lado para que Dependabot siga proponiendo subidas.
+**O1 — La puerta no audita dependencias (severidad media). *Cerrado*.**
+`npm run audit` ejecuta `npm audit --omit=dev --audit-level=high` y, después, informa el árbol de
+desarrollo **sin bloquear**: un aviso de desarrollo no llega al artefacto publicado y convertirlo en
+emergencia enseña a ignorar la alarma. Es un paso propio de `ci.yml`, justo después de `npm ci`, porque
+es lo más barato de arreglar y lo que más tarda en descubrirse por otro lado. Medido al cerrarlo: **0
+vulnerabilidades** en los dos árboles.
 
-**O3 — `frame-ancestors` no protege nada hoy (severidad baja, pero es una afirmación falsa si no se
-declara).**
-GitHub Pages no permite cabeceras de respuesta, así que la CSP viaja en una metaetiqueta. Los
-navegadores **ignoran** `frame-ancestors` cuando llega por `<meta>`: la directiva está en la política y
-no se aplica. La página `/seguridad` y `docs/STATUS.md` no deben insinuar lo contrario.
+**O2 — Las acciones de GitHub estaban fijadas por etiqueta, no por SHA (severidad media). *Cerrado*.**
+Las ocho referencias de `ci.yml`, `deploy.yml` y `codeql.yml` van ahora por SHA completo, con la versión
+mayor en un comentario al lado (`# v7`) para que Dependabot siga proponiendo subidas y para que un humano
+lea qué versión es. Las etiquetas elegidas son las que los PRs #1 a #5 ya habían ejercitado en verde; la
+única sin corrida propia era `cache@v6` (PR #5 cancelado), y su primera verificación es el push a
+`feat/toolbox-v3-closure`. **Esto no se puede probar en local**: lo prueba el runner.
 
-*Estado: cerrado en lo que se puede cerrar desde el repositorio.* `/seguridad` tiene ahora un apartado,
-en los dos idiomas, que dice exactamente eso: la directiva está y no se aplica, hoy nada impide que otro
-sitio muestre la página en un marco, y el día que el sitio se sirva desde un host con cabeceras se
-emitirá como cabecera y valdrá. La cabecera real sigue esperando un host que la permita: eso no es
-código, es despliegue.
+**O3 — `frame-ancestors` no protege nada hoy (severidad baja). *Cerrado en lo que el repositorio puede
+cerrar*.**
+GitHub Pages no permite cabeceras de respuesta, así que la CSP viaja en una metaetiqueta, y los
+navegadores **ignoran** `frame-ancestors` cuando llega por `<meta>`. `/seguridad` tiene ahora un apartado,
+en los dos idiomas, que dice exactamente eso: la directiva está en la política y no se aplica, hoy nada
+impide que otro sitio muestre la página en un marco, y el día que el sitio se sirva desde un host con
+cabeceras se emitirá como cabecera y valdrá. La cabecera real sigue esperando un host que la permita.
 
-**O4 — Las alertas de Dependabot están desactivadas en el repositorio (severidad baja).**
-La API contesta `403 «Dependabot alerts are disabled for this repository»`, que es la fuente que
-debería alimentar el panel de seguridad y el `dependency graph`. Lo que sí funciona son los PRs de
-versión. *Próximo paso:* activarlas en Settings → Code security (requiere permiso de administración del
-repositorio; no se puede hacer desde este entorno).
+**O4 — Las alertas de Dependabot estaban desactivadas (severidad baja). *Cerrado*.**
+El `403` era real y el diagnóstico era correcto —requiere administración del repositorio—, pero no era
+cierto que no se pudiera hacer desde aquí: el token de la sesión tiene permiso de administración y la API
+aceptó el cambio. Alertas de Dependabot **activadas** (`0` alertas abiertas en el momento de activarlas),
+actualizaciones de seguridad automáticas activadas, y de paso `secret scanning` y `push protection`, que
+estaban desactivados en un repositorio público. Es la única medición de este documento que no vive en el
+repositorio: vive en los ajustes del proyecto, y por eso queda escrita con fecha.
 
-**O5 — No hay análisis estático de código en CI (severidad baja).**
-CodeQL no está configurado. Para este sitio el riesgo es acotado —no hay entrada de usuario que llegue a
-un sink peligroso, y eso está medido en §1— pero es una red que cuesta cero. *Próximo paso:* añadir
-`.github/workflows/codeql.yml` con el idioma `javascript-typescript` y `permissions: security-events:
-write`.
+**O5 — No hay análisis estático de código en CI (severidad baja). *Cerrado*.**
+`.github/workflows/codeql.yml`: `javascript-typescript` con el conjunto `security-and-quality`, en push a
+las ramas de trabajo, en cada PR y una vez por semana por si el análisis mejora sin que cambie una línea.
+Los permisos son los mínimos (`contents: read`, `security-events: write`) y sus dos acciones también van
+fijadas por SHA, porque una etiqueta movible en un flujo con permiso de escritura es el mismo riesgo de
+O2 con más consecuencias.
 
-**O6 — `typescript` 7 no es una actualización de rutina (decisión, no vulnerabilidad).**
-El PR #7 falla en 8 segundos: `npm ci` no puede satisfacer el peer de `@astrojs/check@0.9.11`, que
-declara `typescript: ^5.0.0 || ^6.0.0`. TypeScript 7 es el compilador nuevo y Astro todavía no lo
-admite. *Próximo paso:* cerrar el PR con ese motivo y reintentarlo cuando `@astrojs/check` amplíe el
-peer.
+**O6 — `typescript` 7 no es una actualización de rutina (decisión, no vulnerabilidad). *Cerrado como
+decisión*.**
+El PR #7 cerrado, con el motivo escrito en el PR: `@astrojs/check@0.9.11` declara
+`typescript: ^5.0.0 || ^6.0.0`, así que `npm ci` no satisface el peer y el job cae en 8 segundos.
+`typescript` queda en 6.0.3 exacto y se reintenta cuando el peer lo admita; entonces el aviso de
+Dependabot vuelve solo.
 
-## 5. Respuesta a los siete PRs de Dependabot
+## 5. Los siete PRs de Dependabot: qué se decidió y qué pasó
 
-| PR | Qué propone | Decisión | Por qué |
+Los siete están **cerrados**. La decisión de cada uno se tomó antes, con su motivo, y después se ejecutó;
+la columna de la derecha dice qué quedó en el repositorio en lugar del PR.
+
+| PR | Qué proponía | Decisión | Qué se hizo |
 |---|---|---|---|
-| #1 | `upload-artifact` 4 → 7 | **No fusionar todavía** | Verde, pero deja la etiqueta mutable: fijar por SHA cubre el mismo riesgo y no caduca. Ver O2 |
-| #2 | `checkout` 4 → 7 | **No fusionar todavía** | Igual que #1 |
-| #3 | `configure-pages` 5 → 6 | **No fusionar todavía** | Igual que #1 |
-| #4 | `upload-pages-artifact` 3 → 5 | **No fusionar todavía** | Igual que #1 |
-| #5 | `cache` 4 → 6 | **No fusionar todavía** | Igual que #1 |
-| #6 | 9 paquetes minor/patch | **Cerrar: ya está aplicado aquí** | Las nueve versiones entran en esta rama junto con el arreglo del override que hacía fallar sus e2e |
-| #7 | `typescript` 6 → 7 | **Cerrar** | El peer de `@astrojs/check` no admite 7 todavía. Ver O6 |
+| #1 | `upload-artifact` 4 → 7 | No fusionar: fijar por SHA cubre el mismo riesgo y no caduca | `upload-artifact` quedó en `v7` fijado por SHA en `ci.yml` |
+| #2 | `checkout` 4 → 7 | Igual | `checkout` quedó en `v7` fijado por SHA en `ci.yml` y `deploy.yml` |
+| #3 | `configure-pages` 5 → 6 | Igual | `configure-pages` quedó en `v6` fijado por SHA en `deploy.yml` |
+| #4 | `upload-pages-artifact` 3 → 5 | Igual | Quedó en `v5` fijado por SHA en `deploy.yml` |
+| #5 | `cache` 4 → 6 | Igual | Quedó en `v6` fijado por SHA en `ci.yml`; era el único sin corrida verde propia y lo verifica el push a la rama de cierre |
+| #6 | 9 paquetes minor/patch | Cerrar: ya está aplicado | Las nueve versiones entraron con las ramas de la entrega, junto con la eliminación del `overrides` de `playwright-core` que hacía fallar su job (R2) |
+| #7 | `typescript` 6 → 7 | Cerrar: el peer de `@astrojs/check` no admite 7 todavía | `typescript` sigue en 6.0.3 exacto. Ver O6 |
+
+Cada cierre lleva su comentario en el PR, con el motivo y con qué ocupa su lugar. La razón de escribir
+esto acá además de allá es la de todo el documento: el PR cerrado se pierde de vista, y el motivo no.
