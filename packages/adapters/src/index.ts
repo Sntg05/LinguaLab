@@ -30,6 +30,30 @@ export {
   type EspeakPhonemizerOptions,
 } from "./phonemizer/espeak-phonemizer";
 
+/**
+ * El codec ELAN (Pyodide + pympi-ling).
+ *
+ * Se exporta la FACTORIA y no solo el tipo del puerto porque la interfaz
+ * necesita `onProgress`, `isReady`, `warmUp` y `dispose`, que no son parte de
+ * `ElanCodecPort`. Construirla no descarga nada: el motor arranca en la primera
+ * conversion.
+ */
+export {
+  createPyodideElanCodec,
+  PYMPI_WHEEL_FILE_NAME,
+  type PyodideElanCodecOptions,
+} from "./elan/pyodide-elan-codec";
+
+export type {
+  ElanConversionReport,
+  ElanNote,
+  ElanParseResult,
+  ElanPhase,
+  ElanProgress,
+  ElanSerializeResult,
+  PyodideElanCodec,
+} from "./elan/pyodide-elan-types";
+
 export {
   isSupportedLanguage,
   supportedLanguages,

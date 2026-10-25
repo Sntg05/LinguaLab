@@ -149,11 +149,11 @@
       },
       "area": "documentacion",
       "integration": "needs-backend",
-      "status": "planned",
+      "status": "experimental",
       "languages": [],
       "notes": {
-        "es": "Conversión entre ELAN (.eaf) y Praat (.TextGrid) con informe de lo que no se pudo convertir. Necesita descargar el entorno de Python, así que no se puede prometer que corra sin conexión.",
-        "en": "Conversion between ELAN (.eaf) and Praat (.TextGrid) with a report of what could not be converted. It needs to download the Python runtime, so it cannot be promised to run offline."
+        "es": "Conversión entre ELAN (.eaf) y Praat (.TextGrid) en el navegador, con informe de lo que no se pudo convertir. Pyodide y pympi-ling se sirven desde este mismo origen (13 MB la primera vez), así que también funciona sin conexión después de la primera carga.",
+        "en": "Conversion between ELAN (.eaf) and Praat (.TextGrid) in the browser, with a report of what could not be converted. Pyodide and pympi-ling are served from this same origin (13 MB the first time), so it also works offline after the first load."
       }
     },
     {

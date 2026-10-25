@@ -16,6 +16,7 @@ export const en = {
   "nav.home": "Home",
   "nav.tools": "Text station",
   "nav.languages": "Colombia's languages",
+  "nav.elan": "ELAN ↔ TextGrid",
   "nav.ipa": "PhonoLab",
   "nav.trees": "ArborLab",
   "nav.resources": "Bibliography",

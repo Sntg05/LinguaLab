@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Un .eaf truncado: falta el cierre de <TIER> y de <ANNOTATION_DOCUMENT>.
+
+  Existe para afirmar que un archivo invalido devuelve `malformed-xml` con la
+  linea donde se rompe, y que el conversor NO lanza una excepcion: la interfaz
+  tiene que poder decir que el archivo esta mal sin caerse.
+-->
+<ANNOTATION_DOCUMENT AUTHOR="LinguaLab" DATE="2026-01-15T10:10:00+00:00" FORMAT="2.8" VERSION="2.8">
+    <HEADER MEDIA_FILE="" TIME_UNITS="milliseconds"/>
+    <TIME_ORDER>
+        <TIME_SLOT TIME_SLOT_ID="ts1" TIME_VALUE="0"/>
+        <TIME_SLOT TIME_SLOT_ID="ts2" TIME_VALUE="1000"/>
+    </TIME_ORDER>
+    <TIER LINGUISTIC_TYPE_REF="default-lt" TIER_ID="frase">
+        <ANNOTATION>
+            <ALIGNABLE_ANNOTATION ANNOTATION_ID="a1" TIME_SLOT_REF1="ts1" TIME_SLOT_REF2="ts2">
+                <ANNOTATION_VALUE>sin cerrar</ANNOTATION_VALUE>

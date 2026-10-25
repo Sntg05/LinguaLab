@@ -57,6 +57,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { path: "/arboles", labelKey: "nav.trees", kind: "tool", primary: false },
   { path: "/tools", labelKey: "nav.tools", kind: "tool", primary: false },
   { path: "/lenguas", labelKey: "nav.languages", kind: "tool", primary: false },
+  { path: "/elan", labelKey: "nav.elan", kind: "tool", primary: false },
   // La entrada: una sola puerta a todas las herramientas.
   { path: "/catalogo", labelKey: "nav.catalogTools", kind: "tool", primary: true },
   { path: "/bibliografia", labelKey: "nav.resources", kind: "reference", primary: true },
@@ -103,6 +104,7 @@ export const SITE_ROUTES: Readonly<Record<string, string>> = {
   tools: "/tools",
   "textgrid-viewer": "/visualizador",
   "mapa-lenguas-colombia": "/lenguas",
+  "elan-textgrid": "/elan",
 };
 
 /** Read a build-time environment variable without assuming Node types. */

@@ -1,0 +1,145 @@
+---
+/**
+ * ElanLab: conversor ELAN ↔ TextGrid con Pyodide y pympi-ling.
+ *
+ * QUE DECIDE ESTE COMPONENTE Y QUE NO
+ *
+ * Aqui se decide la estructura de la pagina: los tres pasos, los encabezados de
+ * la tabla, el informe de perdida y los dos avisos que no pueden faltar —que el
+ * archivo no sale del navegador y que la herramienta es experimental—. Lo que
+ * depende del archivo que se carga lo escribe `src/scripts/elan/`, que trabaja
+ * por delegacion sobre los ganchos `data-elan-*`.
+ *
+ * NADA DE `innerHTML`. Ni aqui ni en el controlador: los nombres de capa y los
+ * textos de las anotaciones vienen de un archivo ajeno, y se insertan siempre
+ * como nodos de texto. La CSP sin `unsafe-inline` depende de eso, y tambien la
+ * promesa de que abrir un `.eaf` no ejecuta nada de lo que trae dentro.
+ *
+ * LOS TEXTOS QUE SOLO EXISTEN EN TIEMPO DE EJECUCION viajan como datos, ya
+ * traducidos, en un atributo `data-json` (ADR 0004): el diccionario completo no
+ * llega al navegador y el cliente no traduce nada.
+ */
+import { t, type Locale } from "../i18n";
+import { ELAN_STRING_KEYS } from "../scripts/elan/strings";
+import "../styles/features/elan.css";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+/** Solo las frases que el controlador escribe mientras trabaja. */
+const runtimeStrings = Object.fromEntries(
+  ELAN_STRING_KEYS.map((key) => [key, t(locale, key)]),
+);
+---
+
+<section class="section" data-elanlab data-elanlab-strings={JSON.stringify(runtimeStrings)}>
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{t(locale, "elan.eyebrow")}</span>
+      <h1>{t(locale, "elan.title")}</h1>
+      <p class="u-lead">{t(locale, "elan.sub")}</p>
+      <!-- Los dos avisos van visibles, no en una pagina de ayuda: que el archivo
+           no sale del navegador, y que esto es experimental y no sustituye al
+           archivo original. -->
+      <p class="callout">{t(locale, "elan.local")}</p>
+      <p class="callout callout--warn">{t(locale, "elan.experimental")}</p>
+    </div>
+
+    <div class="elan">
+      <!-- ---------------------------- 1. Carga ---------------------------- -->
+      <section class="elan-panel" aria-labelledby="elan-load-title">
+        <h2 class="elan-panel__title" id="elan-load-title">{t(locale, "elan.load.title")}</h2>
+        <label class="elan-field" for="elan-file">{t(locale, "elan.load.label")}</label>
+        <input
+          class="elan-field__input"
+          id="elan-file"
+          type="file"
+          accept=".eaf,.xml,.TextGrid,.textgrid,.txt"
+          data-elan-file
+        />
+        <p class="elan-hint">{t(locale, "elan.load.hint")}</p>
+
+        <p class="elan-status" data-elan-status role="status" aria-live="polite" data-state="idle">
+          {t(locale, "elan.status.idle")}
+        </p>
+        <p class="elan-detail" data-elan-detail hidden></p>
+
+        <!-- La barra cuenta fases, no bytes: Pyodide no dice cuanto le falta a su
+             propia descarga. Se muestra solo mientras hay algo que esperar. -->
+        <div class="elan-progress" data-elan-progress hidden>
+          <span class="elan-progress__label">{t(locale, "elan.progress.label")}</span>
+          <progress class="elan-progress__bar" data-elan-progress-bar max="3" value="0"></progress>
+        </div>
+      </section>
+
+      <!-- ---------------------------- 2. Capas ---------------------------- -->
+      <section class="elan-panel" aria-labelledby="elan-tiers-title">
+        <h2 class="elan-panel__title" id="elan-tiers-title">{t(locale, "elan.tiers.title")}</h2>
+        <p class="elan-hint" data-elan-tiers-empty>{t(locale, "elan.tiers.empty")}</p>
+        <div class="table-scroll" data-elan-tiers hidden>
+          <table class="elan-table">
+            <thead>
+              <tr>
+                <th scope="col">{t(locale, "elan.tiers.name")}</th>
+                <th scope="col">{t(locale, "elan.tiers.kind")}</th>
+                <th scope="col">{t(locale, "elan.tiers.items")}</th>
+                <th scope="col">{t(locale, "elan.tiers.sample")}</th>
+              </tr>
+            </thead>
+            <tbody data-elan-tier-rows></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- --------------------------- 3. Exportar -------------------------- -->
+      <section class="elan-panel" aria-labelledby="elan-export-title">
+        <h2 class="elan-panel__title" id="elan-export-title">{t(locale, "elan.export.title")}</h2>
+        <p class="elan-hint">{t(locale, "elan.export.hint")}</p>
+        <button class="btn btn--primary" type="button" data-elan-export hidden disabled></button>
+      </section>
+
+      <!-- ------------------------ Informe de perdida ---------------------- -->
+      <section class="elan-panel" aria-labelledby="elan-loss-title">
+        <h2 class="elan-panel__title" id="elan-loss-title">{t(locale, "elan.loss.title")}</h2>
+        <p class="elan-hint">{t(locale, "elan.loss.intro")}</p>
+
+        <p class="elan-hint" data-elan-loss-empty>{t(locale, "elan.loss.empty")}</p>
+
+        <div class="elan-loss" data-elan-loss hidden>
+          <p class="elan-loss__none" data-elan-loss-none hidden>{t(locale, "elan.loss.none")}</p>
+
+          <div class="elan-loss__group">
+            <h3 class="elan-loss__title">{t(locale, "elan.loss.hierarchical")}</h3>
+            <ul class="elan-loss__list" data-elan-loss-hierarchical></ul>
+          </div>
+
+          <div class="elan-loss__group">
+            <h3 class="elan-loss__title">{t(locale, "elan.loss.references")}</h3>
+            <ul class="elan-loss__list" data-elan-loss-references></ul>
+          </div>
+
+          <div class="elan-loss__group">
+            <h3 class="elan-loss__title">{t(locale, "elan.loss.vocabularies")}</h3>
+            <ul class="elan-loss__list" data-elan-loss-vocabularies></ul>
+          </div>
+
+          <div class="elan-loss__group">
+            <h3 class="elan-loss__title">{t(locale, "elan.loss.notes")}</h3>
+            <ul class="elan-loss__list" data-elan-loss-notes></ul>
+          </div>
+        </div>
+      </section>
+
+      <p class="elan-hint">{t(locale, "elan.limits")}</p>
+    </div>
+  </div>
+</section>
+
+<p class="u-visually-hidden" role="status" aria-live="polite" data-live-region></p>
+
+<script>
+  import "../scripts/elan/index";
+</script>

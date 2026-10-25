@@ -1,0 +1,211 @@
+/* ============================================================
+   LinguaLab — Estilos del conversor ELAN ↔ TextGrid (segmento 9)
+
+   POR QUE EN SU PROPIO ARCHIVO Y NO EN `components.css`
+
+   `components.css` es la capa de piezas que se repiten en varias paginas. El
+   conversor no repite nada suyo: su tabla de capas, su informe de perdida y su
+   barra de progreso existen solo aqui. Meterlas en la capa comun haria que todas
+   las paginas pagaran un CSS que ninguna otra usa.
+
+   Las clases llevan el prefijo `elan-` por la misma razon: este archivo es
+   global (lo importa el componente, no esta encapsulado como un `<style>`
+   scoped), asi que un `.panel` suelto podria chocar con el de otra herramienta.
+
+   POR QUE ESTAS REGLAS NO VAN EN UNA CAPA (`@layer`)
+
+   El orden de las capas lo fija la primera declaracion, y este archivo lo
+   importa un componente: no hay forma de garantizar que su capa quede despues de
+   `components`. Una regla sin capa, en cambio, gana siempre a las de cualquier
+   capa, y como todos los selectores de aqui son `elan-*`, no puede pisar nada
+   que no sea suyo.
+   ============================================================ */
+
+.elan {
+  display: grid;
+  gap: var(--space-m);
+  max-width: 72rem;
+}
+
+/* ---- Panel: el mismo borde y radio que las demas herramientas ---- */
+.elan-panel {
+  display: grid;
+  gap: var(--space-s);
+  align-content: start;
+  min-width: 0;
+  padding: var(--space-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+
+.elan-panel__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--step-1);
+  font-weight: 650;
+}
+
+/* ---- Carga ---- */
+.elan-field {
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.elan-field__input {
+  max-width: 100%;
+  padding: var(--space-2xs);
+  font: inherit;
+  font-size: var(--step--1);
+  color: var(--ink);
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+}
+
+.elan-field__input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.elan-hint {
+  max-width: 68ch;
+  margin: 0;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+/* ---- Estado: una frase, un color. Nunca un panel en blanco ---- */
+.elan-status {
+  min-height: 1.4em;
+  margin: 0;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.elan-status[data-state="busy"] {
+  color: var(--accent);
+}
+
+.elan-status[data-state="ok"] {
+  color: var(--ink);
+}
+
+.elan-status[data-state="error"] {
+  color: var(--warn);
+}
+
+/* El detalle tecnico es evidencia, no la frase principal: se lee si se busca. */
+.elan-detail {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--step--2);
+  color: var(--ink-faint);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Progreso de la primera carga ---- */
+.elan-progress {
+  display: grid;
+  gap: var(--space-3xs);
+}
+
+.elan-progress__label {
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.elan-progress__bar {
+  width: 100%;
+  height: 0.6rem;
+  accent-color: var(--accent);
+}
+
+/* ---- Tabla de capas ---- */
+.elan-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.elan-table th,
+.elan-table td {
+  padding: var(--space-2xs) var(--space-xs);
+  text-align: start;
+  vertical-align: top;
+  border-block-end: 1px solid var(--line);
+}
+
+.elan-table th {
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-block-end-color: var(--line-strong);
+}
+
+.elan-table__name {
+  font-weight: 600;
+}
+
+.elan-table__sample {
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ---- Informe de perdida ---- */
+.elan-loss {
+  display: grid;
+  gap: var(--space-s);
+}
+
+.elan-loss__none {
+  margin: 0;
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.elan-loss__group {
+  display: grid;
+  gap: var(--space-3xs);
+}
+
+.elan-loss__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--step--1);
+  font-weight: 650;
+}
+
+.elan-loss__list {
+  display: grid;
+  gap: var(--space-3xs);
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+  overflow-wrap: anywhere;
+}
+
+/* «Nada perdido por esta causa» no es un elemento de la lista: es la
+   explicacion de que la lista este vacia, y sin vineta se lee como tal. */
+.elan-loss__list .elan-loss__none {
+  list-style: none;
+  margin-inline-start: -1.1rem;
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+/* Un codigo de nota que esta version no conoce: feo, pero cierto. */
+.elan-loss__unknown {
+  font-family: var(--font-mono);
+  color: var(--warn);
+}
