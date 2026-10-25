@@ -16,21 +16,21 @@ Reglas de esta tabla:
 
 | Paquete | Versión | Licencia | Uso |
 |---|---|---|---|
-| [astro](https://www.npmjs.com/package/astro) | 7.3.5 | MIT | Generador del sitio estático: rutas, empaquetado y CSP con hashes |
+| [astro](https://www.npmjs.com/package/astro) | 7.4.1 | MIT | Generador del sitio estático: rutas, empaquetado y CSP con hashes |
 | [typescript](https://www.npmjs.com/package/typescript) | 6.0.3 | Apache-2.0 | Compilador y comprobación de tipos |
-| [vitest](https://www.npmjs.com/package/vitest) | 5.0.2 | MIT | Pruebas unitarias del sitio, del núcleo y de los adaptadores |
+| [vitest](https://www.npmjs.com/package/vitest) | 5.0.5 | MIT | Pruebas unitarias del sitio, del núcleo y de los adaptadores |
 | [@biomejs/biome](https://www.npmjs.com/package/@biomejs/biome) | 2.5.15 | MIT OR Apache-2.0 | Linter y formateador |
-| [dependency-cruiser](https://www.npmjs.com/package/dependency-cruiser) | 18.5.0 | MIT | Comprueba que las flechas del hexágono apunten hacia adentro (ADR 0001) |
-| [@commitlint/cli](https://www.npmjs.com/package/@commitlint/cli) | 21.2.3 | MIT | Valida los mensajes de commit |
-| [@commitlint/config-conventional](https://www.npmjs.com/package/@commitlint/config-conventional) | 21.2.3 | MIT | Conjunto de reglas de Conventional Commits |
+| [dependency-cruiser](https://www.npmjs.com/package/dependency-cruiser) | 18.7.0 | MIT | Comprueba que las flechas del hexágono apunten hacia adentro (ADR 0001) |
+| [@commitlint/cli](https://www.npmjs.com/package/@commitlint/cli) | 21.2.4 | MIT | Valida los mensajes de commit |
+| [@commitlint/config-conventional](https://www.npmjs.com/package/@commitlint/config-conventional) | 21.2.4 | MIT | Conjunto de reglas de Conventional Commits |
 | [husky](https://www.npmjs.com/package/husky) | 9.1.7 | MIT | Ganchos de git: lint de lo que se está commiteando |
 | [lint-staged](https://www.npmjs.com/package/lint-staged) | 17.6.0 | MIT | Ejecuta el linter solo sobre los archivos preparados |
 | [@astrojs/sitemap](https://www.npmjs.com/package/@astrojs/sitemap) | 3.7.4 | MIT | Genera el `sitemap.xml` en la compilación |
-| [@playwright/test](https://www.npmjs.com/package/@playwright/test) | 1.63.0 | Apache-2.0 | Recorre los flujos de la interfaz en un navegador de verdad |
-| [playwright](https://www.npmjs.com/package/playwright) | 1.63.0 | Apache-2.0 | El motor de navegador que Playwright controla |
-| [@axe-core/playwright](https://www.npmjs.com/package/@axe-core/playwright) | 4.13.0 | MPL-2.0 | Comprueba accesibilidad WCAG 2.2 AA en las páginas publicadas |
-| [axe-core](https://www.npmjs.com/package/axe-core) | 4.13.0 | MPL-2.0 | El motor de reglas que usa axe |
-| [fake-indexeddb](https://www.npmjs.com/package/fake-indexeddb) | 6.2.5 | Apache-2.0 | IndexedDB en memoria, para probar el adaptador en Node sin navegador |
+| [@playwright/test](https://www.npmjs.com/package/@playwright/test) | 1.64.1 | Apache-2.0 | Recorre los flujos de la interfaz en un navegador de verdad |
+| [playwright](https://www.npmjs.com/package/playwright) | 1.64.1 | Apache-2.0 | El motor de navegador que Playwright controla |
+| [@axe-core/playwright](https://www.npmjs.com/package/@axe-core/playwright) | 4.14.0 | MPL-2.0 | Comprueba accesibilidad WCAG 2.2 AA en las páginas publicadas |
+| [axe-core](https://www.npmjs.com/package/axe-core) | 4.14.0 | MPL-2.0 | El motor de reglas que usa axe |
+| [fake-indexeddb](https://www.npmjs.com/package/fake-indexeddb) | 6.2.6 | Apache-2.0 | IndexedDB en memoria, para probar el adaptador en Node sin navegador |
 
 ### Sobre la MPL-2.0 de axe
 
