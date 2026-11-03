@@ -33,12 +33,12 @@ Runner: `npm test` (vitest), `npm run check`, `npm run test:e2e` (accessibility,
 
 | ID | Specs | Route | Status | Commit |
 |---|---|---|---|---|
-| T1 | S1, S8 | inline | pending | |
-| T2 | S4 | inline | pending | |
-| T3 | S2, S3, S5, S7 | inline | pending | |
-| T4 | S6 | inline | pending | |
-| T5 | S2, S3 | inline | pending | |
-| T6 | S1, S3 | inline | pending | |
+| T1 | S1, S8 | inline | done | 3bc61dd |
+| T2 | S4 | inline | done | 3bc61dd |
+| T3 | S2, S3, S5, S7 | inline | done | 76c15f0 |
+| T4 | S6 | inline | done | 5dba026 |
+| T5 | S2, S3 | inline | done | 76c15f0 |
+| T6 | S1, S3 | inline | done | see Log L4 |
 
 - T1 Tokens, fonts, base and component styles (both themes).
 - T2 New logo, favicon, masthead and footer.
@@ -53,3 +53,5 @@ Route evidence: one owner, sequential units that all depend on T1's tokens; no W
 
 - L1 (2026-11-03, owner): "acabamos de hacer auditoria a la página de LinguaLab, ahora necesito que utilizando todos los plugins necesarios, arreglemos el frontend sobre todo porque siento la página poco accesible, las herramientas que están fusionadas dentro de la página y que funcionan están mezcladas con links a herramientas externas y eso genera una confusión clara, quisiera que estuvieran separados de alguna forma, adicionalmente necesito que la información contenida en los headers y demás cuadros textuales sea real, la página sigue diciendo que hay 3 herramientas no más, el logo de la página no me gusta y el arbol que aparece al comienzo está mal, quiero que revises lo del fonema del día, dale un aire más moderno, algo llamativo pero elegante, quiero que sea una caja de herramientas interactivas que den ganas de entrar a ella, que contenga información claramente organizada, si somos lingüistas los que lo vamos a usar quisiera que fuera claro con la información y con la organización que mantiene a la vista, por el momento hagamos un rework del frontend dónde nos centremos claramente en que sea más bonito, elegante y dinámico, realiza los cambios en una rama que yo pueda ver desde npm run dev en local y poder ir viendo los cambios antes de llevar a main o mergear a alguna branch nueva, para poder en cualquier caso empezar desde dónde quedamos con el último commit que consolidó la auditoria de seguridad y demás, estamos?"
 - L2 Diagnosis: the home says "Tres laboratorios" while `tools.json` holds 10 embedded and 10 external; the hero tree has NP dominating two leaves directly and an empty VP; the palette is the generic warm-cream and terracotta look; the catalog mixes embedded and external cards in one grid per area.
+- L3 (2026-11-03) Progress: T1-T5 committed. Phoneme data had content errors, fixed in 5dba026: ŋ used «canto» and wrote «banco» without the velar; schwa was called the most frequent vowel in nearly every language; the tap entry said «mínimo fonémico» and showed literal braces. Axe refused contrast it could not measure over the hero and band gradients; both use solid backgrounds now. Pending: `public/og-card.png` and `scripts/build-social-card.mjs` still use the old palette and fonts; the `@fontsource-variable/inter` and `newsreader` packages stay only for that script. Engram mirror pending: the save was blocked by a hook in auto mode.
+- L4 (2026-11-03) Gate: `npm run verify` passed (types, unit tests, build verification) and the full e2e suite passed, 182 of 182. Still pending: the social card.
