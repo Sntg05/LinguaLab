@@ -101,8 +101,9 @@ const registry = createStaticToolRegistry(TOOLS);
  *
  * Esa base no es opcional por otra razon: si los datos no estan donde se los
  * busca, el paquete cae en pedirlos a un CDN publico. La CSP del sitio
- * (`connect-src 'self'`) lo bloquearia y la promesa de que la herramienta
- * funciona sin conexion despues de la primera carga dejaria de ser cierta.
+ * (`connect-src 'self'`) lo bloquearia y la herramienta dejaria de funcionar:
+ * el texto de la persona nunca sale hacia otro servidor, y tampoco el motor
+ * entra desde uno.
  */
 const phonemizer = createEspeakPhonemizer({ baseUrl: withBase("/espeak-phonemizer") });
 
@@ -128,8 +129,7 @@ const elan = createPyodideElanCodec({ indexURL: withBase("/pyodide") });
  * `withBase` no es decorativo: bajo un subdirectorio, una ruta sin prefijo se
  * pediria al dominio y volveria 404. El
  * artefacto esta en `public/praatfan/`, fijado por hash, y se sirve desde este
- * mismo origen: la CSP no admite un CDN y la promesa de funcionar sin conexion
- * despues de la primera carga tampoco.
+ * mismo origen: la CSP no admite un CDN.
  */
 const acoustic = createPraatfanAcousticAnalysis({ baseUrl: withBase("/praatfan") });
 

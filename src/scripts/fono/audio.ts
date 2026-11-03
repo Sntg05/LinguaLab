@@ -55,7 +55,7 @@ export function sampleCount(): number {
  * unrelated language, so a French voice could be picked for Spanish.
  *
  * Among matching voices, local wins over network (it starts instantly and
- * works offline, which is what this project promises) and a common regional
+ * never sends the text to a speech service) and a common regional
  * variant wins over an arbitrary one.
  */
 export function pickVoice(
