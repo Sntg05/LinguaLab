@@ -82,10 +82,14 @@ export const createIntervalTable = (
 ): IntervalTable => {
   const { el, state, strings, es } = ctx;
 
-  /** Boton de accion de una fila. Texto corto, etiqueta larga: el icono no basta. */
-  const intervalAction = (sheet: Sheet, interval: Interval): HTMLButtonElement =>
+  /**
+   * Boton de accion de una fila. Texto corto, etiqueta larga: el icono no basta.
+   * El numero es el del INTERVALO: con el de la capa, todos los botones de una
+   * capa se llamaban igual y un lector de pantalla no los distinguia.
+   */
+  const intervalAction = (index: number, interval: Interval): HTMLButtonElement =>
     actionButton(
-      es ? `Reproducir el intervalo ${sheet.index + 1}` : `Play interval ${sheet.index + 1}`,
+      es ? `Reproducir el intervalo ${index + 1}` : `Play interval ${index + 1}`,
       "▶",
       () => {
         state.cursor = interval.start;
@@ -159,7 +163,7 @@ export const createIntervalTable = (
 
     const actions = document.createElement("td");
     actions.className = "audiolab__actions";
-    actions.append(intervalAction(sheet, interval));
+    actions.append(intervalAction(index, interval));
     if (!last) {
       actions.append(
         actionButton(
