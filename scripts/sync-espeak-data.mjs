@@ -23,7 +23,7 @@
  * fresh clone serves the tool without running this first; rerun it when the
  * pinned version changes.
  */
-import { copyFileSync, mkdirSync, readFileSync } from "node:fs";
+import { chmodSync, copyFileSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -50,6 +50,9 @@ for (const [from, to] of FILES) {
   const destination = join(TARGET, to);
   mkdirSync(dirname(destination), { recursive: true });
   copyFileSync(join(SOURCE, from), destination);
+  // copyFileSync conserva el permiso de ejecucion que trae el paquete; un archivo
+  // servido no lo necesita (src/config/engines.test.ts lo exige).
+  chmodSync(destination, 0o644);
 }
 
 console.log(`espeak-phonemizer data: ${FILES.length} files copied into public/espeak-phonemizer/${VERSION}/`);

@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -36,6 +36,20 @@ describe("las versiones de los motores", () => {
   it.each(engines)("%s vive solo dentro de la carpeta de su version", (engine) => {
     const entries = readdirSync(join(ROOT, "public", ENGINE_DIRS[engine]));
     expect(entries).toEqual([ENGINE_VERSIONS[engine]]);
+  });
+
+  it.each(engines)("%s no publica archivos ejecutables", (engine) => {
+    // `espeak-ng.wasm` y `pyodide.asm.wasm` llegaban con permiso de ejecucion
+    // copiado de node_modules: un archivo servido no tiene por que serlo.
+    const walk = (dir: string): string[] =>
+      readdirSync(dir).flatMap((entry) => {
+        const full = join(dir, entry);
+        return statSync(full).isDirectory() ? walk(full) : [full];
+      });
+    const executable = walk(join(ROOT, "public", ENGINE_DIRS[engine]))
+      .filter((file) => (statSync(file).mode & 0o111) !== 0)
+      .map((file) => file.slice(ROOT.length));
+    expect(executable).toEqual([]);
   });
 
   it.each(engines)("vercel.json declara inmutable la carpeta de %s", (engine) => {

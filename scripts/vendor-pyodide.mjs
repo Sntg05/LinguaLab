@@ -38,6 +38,7 @@
  */
 import { createHash } from "node:crypto";
 import {
+  chmodSync,
   copyFileSync,
   existsSync,
   mkdirSync,
@@ -250,6 +251,8 @@ async function vendorRuntimeFiles() {
     if (!CHECK_ONLY) {
       mkdirSync(DEST, { recursive: true });
       copyFileSync(source, target);
+      // Sin el permiso de ejecucion que trae el paquete (src/config/engines.test.ts).
+      chmodSync(target, 0o644);
     }
     entries.push(
       await place({
