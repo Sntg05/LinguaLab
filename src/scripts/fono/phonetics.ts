@@ -52,7 +52,7 @@ export const ES_RULES: readonly (readonly [RegExp, string])[] = [
   // Spanish has no /v/: orthographic b and v are both the bilabial phoneme.
   // Without this, "llave" came out as /ʎave/ with a segment Spanish lacks.
   [/v/g, "b"],
-  [/z/g, "θ"], // distinción; seseo is noted in the UI
+  [/z/g, "θ"], // distinción; FonoLab.astro says so next to the transcriber
   [/\s+/g, " "],
 ];
 

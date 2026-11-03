@@ -330,7 +330,7 @@ export const en = {
   "phon.copy": "Copy IPA",
   "phon.table": "Orthography-to-IPA tables",
   "phon.tableNote": "The same text run through the grapheme→IPA table from the orthography tool. It is not a phonological model: it shows where the two engines agree and where they do not.",
-  "phon.limits": "Two languages: Castilian Spanish and American English, the only voices verified against the data this site publishes. No lemmatisation, no syllables and no tone: just the phoneme string.",
+  "phon.limits": "Two languages: Latin American Spanish (with seseo: «zapato» gives /s/) and American English, the only voices verified against the data this site publishes. No lemmatisation, no syllables and no tone: just the phoneme string.",
   "nav.catalog": "Catalog",
   "nav.catalogTools": "Tool catalog",
   "catalog.title": "Tool catalog",

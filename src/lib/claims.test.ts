@@ -58,3 +58,37 @@ describe("las promesas del sitio", () => {
     expect(offenders).toEqual([]);
   });
 });
+
+/**
+ * La variedad de español que cada herramienta dice usar es la que usa.
+ *
+ * El fonemizador decía «español de Castilla» mientras el adaptador elegía la voz
+ * `es-419`, latinoamericana con seseo: `zapato` sale con /s/, no con /θ/. Y el
+ * transcriptor de FonoLab aplica distinción (`z` → /θ/) con un comentario que
+ * decía «seseo is noted in the UI», cuando la interfaz no lo anotaba. Las dos
+ * cosas se leían como la misma lengua y daban resultados distintos.
+ */
+describe("la variedad de español declarada", () => {
+  const read = (path: string): string => readFileSync(join(ROOT, path), "utf8");
+
+  it("el fonemizador nombra la variedad de la voz que configura su adaptador", () => {
+    const voices = read("packages/adapters/src/phonemizer/espeak-voices.ts");
+    expect(voices).toMatch(/spa:\s*"es-419"/);
+
+    const es = read("src/i18n/messages/es.ts").match(/"phon\.limits":\s*"([^"]+)"/)?.[1] ?? "";
+    const en = read("src/i18n/messages/en.ts").match(/"phon\.limits":\s*"([^"]+)"/)?.[1] ?? "";
+    expect(es).toMatch(/latinoamericano/i);
+    expect(es).not.toMatch(/Castilla/);
+    expect(en).toMatch(/Latin American/);
+    expect(en).not.toMatch(/Castilian/);
+  });
+
+  it("FonoLab anuncia en su interfaz que su transcriptor usa distinción", () => {
+    const rules = read("src/scripts/fono/phonetics.ts");
+    expect(rules).toMatch(/\[\/z\/g, "θ"\]/);
+
+    const page = read("src/components/FonoLab.astro");
+    expect(page).toMatch(/Usa distinción[^"]*seseo/);
+    expect(page).toMatch(/It uses distinción[^"]*seseo/);
+  });
+});
