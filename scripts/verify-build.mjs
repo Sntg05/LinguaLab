@@ -355,7 +355,13 @@ for (const file of pages) {
 // Every <a href> on our own origin and every self-referencing <link> must name
 // something that exists in dist/.
 function resolvesInDist(pathname) {
-  const clean = decodeURIComponent(pathname).replace(/^\//, "");
+  let decoded;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    return false; // a malformed %-escape cannot name a file; report it as a dead link
+  }
+  const clean = decoded.replace(/^\//, "");
   const candidates = clean === "" || clean.endsWith("/")
     ? [join(DIST, clean, "index.html")]
     : [join(DIST, clean), join(DIST, clean, "index.html"), join(DIST, `${clean}.html`)];

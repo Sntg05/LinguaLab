@@ -1,27 +1,24 @@
 name: CI
 
 on:
+  # main en cada push, y toda rama de trabajo por su PR (CONTRIBUTING: un PR por
+  # rebanada). Antes corria en el push de cualquier rama Y en su PR, con una
+  # concurrencia que cancelaba una de las dos: la cancelada aparecia en el PR
+  # como un «Types, tests and build» rojo, el check obligatorio de main, sin
+  # que nada hubiera fallado (PR #13, 2026-11-03).
   push:
-    # Toda rama se verifica en cada push, no solo cuando llega a main: es donde
-    # Vercel construye la vista previa, y "pasa en la maquina de quien lo
-    # escribio" no es lo mismo que "pasa en el runner". Antes habia que agregar
-    # cada rama de trabajo a mano a una lista, y la lista guardaba cuatro ramas
-    # ya fusionadas cuando se audito el 2026-11-03.
     branches:
-      - "**"
+      - main
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# Una rama con un PR abierto recibe dos eventos por commit (`push` y
-# `pull_request`), con refs distintos. Agruparlos por repositorio y nombre de
-# rama hace que corra una sola vez por commit. El repositorio va en la clave
-# para que el PR de un fork con una rama llamada igual (o `main`) no cancele la
-# CI de este repositorio.
+# Un push nuevo al mismo PR cancela la corrida anterior, que ya mira un commit
+# viejo; el numero de PR va en la clave para que dos PR no se cancelen entre si.
 concurrency:
-  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.head_ref || github.ref_name }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:

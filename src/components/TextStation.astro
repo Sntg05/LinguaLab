@@ -213,7 +213,9 @@ const SAMPLE = es
         </div>
 
         {/* Un solo panel para todas las pestañas: cambia lo que dibuja, y su
-            nombre sigue a la pestaña activa (aria-labelledby). */}
+            nombre sigue a la pestaña activa (aria-labelledby). No es una región
+            viva: con aria-live, cada cambio de pestaña hacía leer la tabla entera.
+            El fin del análisis se avisa en una línea en [data-live-region]. */}
         <div
           class="panel"
           id="station-panel"
@@ -221,7 +223,6 @@ const SAMPLE = es
           tabindex="0"
           aria-labelledby={`station-tab-${tabs[0]?.id ?? ""}`}
           data-panel
-          aria-live="polite"
         >
           <p class="faint" data-empty>
             {es ? "Pega un texto y pulsa «Analizar»." : "Paste a text and press “Analyse”."}
@@ -669,6 +670,12 @@ const SAMPLE = es
     tokens = detailed.tokens;
     sentences = detailed.sentences.length;
     render();
+    const live = document.querySelector<HTMLElement>("[data-live-region]");
+    if (live) {
+      live.textContent = es
+        ? `Análisis listo: ${tokens.length} palabras.`
+        : `Analysis ready: ${tokens.length} words.`;
+    }
   }
 
   /* ---------------- Export ---------------- */

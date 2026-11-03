@@ -106,7 +106,7 @@ grande se planea en un documento antes de escribir código.
    ```
 
    Tipos de rama: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`. CI corre en
-   cada push de **cualquier** rama: no hay lista que mantener.
+   cada push a `main` y en cada PR: una rama de trabajo se verifica al abrir su PR, sin lista que mantener.
 
 3. **Commits por unidad de trabajo, con la prueba en rojo antes del arreglo.** El código, su prueba y su
    documentación viajan juntos; un cambio de comportamiento sin la prueba que lo fija no está terminado.

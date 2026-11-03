@@ -85,7 +85,10 @@ try {
   const active = [];
   for (const file of existsSync(dir) ? readdirSync(dir) : []) {
     if (!file.endsWith(".md")) continue;
-    const head = readFileSync(join(dir, file), "utf8").slice(0, 300);
+    // Solo el encabezado YAML, termine donde termine.
+    const text = readFileSync(join(dir, file), "utf8");
+    const close = text.startsWith("---\n") ? text.indexOf("\n---", 4) : -1;
+    const head = close === -1 ? "" : `${text.slice(0, close)}\n---`;
     const status = head.match(/^---\n[\s\S]*?^status:\s*(\S+)[\s\S]*?^---$/m)?.[1];
     if (status === undefined) warnings.push(`odd/tasks/${file} no declara su estado (status:) en el encabezado`);
     if (status === "active") active.push(file);

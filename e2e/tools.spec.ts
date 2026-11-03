@@ -192,3 +192,17 @@ test("las pestañas se recorren con el teclado y nombran su panel", async ({ pag
   await expect(tabs.first()).toBeFocused();
   await expect(tabs.first()).toHaveAttribute("tabindex", "0");
 });
+
+/**
+ * El panel de pestañas no es una región viva.
+ *
+ * Con `aria-live` en el panel, cada cambio de pestaña hacía que un lector de
+ * pantalla leyera la tabla entera además del nombre de la pestaña. El aviso de
+ * que el análisis terminó va en la región de estado de la página, corto.
+ */
+test("el panel no se anuncia entero y el analisis avisa en una linea", async ({ page }) => {
+  await page.goto("/tools");
+  await expect(page.getByRole("tabpanel")).not.toHaveAttribute("aria-live", /.*/);
+  await page.locator("[data-sample]").click();
+  await expect(page.locator("[data-live-region]")).toContainText("Análisis listo");
+});
