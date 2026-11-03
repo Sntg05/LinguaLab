@@ -381,6 +381,47 @@ for (const file of pages) {
   }
 }
 
+// ---- No file ships twice ----
+// espeak-ng.wasm (305 KB) shipped in dist/assets/ as well as in its engine
+// folder: the package's own glue names it with `new URL(..., import.meta.url)`,
+// so Vite emitted a copy that nothing requests. Any large file that ships
+// twice is a copy someone pays for in every deploy.
+function allFiles(dir = DIST) {
+  return readdirSync(dir).flatMap((entry) => {
+    const full = join(dir, entry);
+    return statSync(full).isDirectory() ? allFiles(full) : [full];
+  });
+}
+const byDigest = new Map();
+for (const file of allFiles()) {
+  if (statSync(file).size < 50 * 1024) continue;
+  const digest = createHash("sha256").update(readFileSync(file)).digest("hex");
+  byDigest.set(digest, [...(byDigest.get(digest) ?? []), relative(DIST, file)]);
+}
+for (const copies of byDigest.values()) {
+  if (copies.length > 1) fail(`the same file ships ${copies.length} times: ${copies.join(", ")}`);
+}
+
+// ---- Engine budget ----
+// The page budget below counts what a page loads up front. The engines are
+// fetched only when a tool runs, so they never counted anywhere and could grow
+// without anyone seeing it. They get their own ceiling, a little above what
+// ships today: raising it is a decision, not a side effect.
+const ENGINE_BUDGET_BYTES = 21 * 1024 * 1024;
+let engineBytes = 0;
+for (const engine of ["pyodide", "espeak-phonemizer", "praatfan"]) {
+  const dir = join(DIST, engine);
+  if (!existsSync(dir)) continue;
+  const bytes = allFiles(dir).reduce((sum, file) => sum + statSync(file).size, 0);
+  engineBytes += bytes;
+  notes.push(`engine ${engine}: ${(bytes / 1024 / 1024).toFixed(2)} MB`);
+}
+if (engineBytes > ENGINE_BUDGET_BYTES) {
+  fail(
+    `engines weigh ${(engineBytes / 1024 / 1024).toFixed(2)} MB, budget is ${ENGINE_BUDGET_BYTES / 1024 / 1024} MB`,
+  );
+}
+
 // ---- 6: payload budget (worst page) ----
 // Charge each page only what IT loads: its own HTML, the scripts it
 // references, and the stylesheets it links. Counting every file in

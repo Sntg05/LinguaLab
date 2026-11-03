@@ -62,7 +62,7 @@ const ENCODER = new TextEncoder();
  *
  * Se declara aqui en vez de importar `PyodideInterface` para que este modulo no
  * dependa del paquete npm en tiempo de ejecucion: en el navegador Pyodide llega
- * por `import()` desde `public/pyodide/`, y en las pruebas lo inyecta el test.
+ * por `import()` desde `public/pyodide/<version>/`, y en las pruebas lo inyecta el test.
  * El tipo real es compatible con este, y `loadPyodide` del paquete se le pasa
  * como `PyodideLoader`.
  */

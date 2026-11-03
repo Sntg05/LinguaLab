@@ -39,7 +39,7 @@ import {
  * conversion que esta en curso.
  */
 
-/** El wheel vendorizado de pympi-ling. La version esta en `public/pyodide/README.md`. */
+/** El wheel vendorizado de pympi-ling. La version esta en `public/pyodide/<version>/README.md`. */
 export const PYMPI_WHEEL_FILE_NAME = "pympi_ling-1.71-py3-none-any.whl";
 
 /**

@@ -25,6 +25,23 @@ const SITE =
 
 const BASE = process.env.SITE_BASE ?? "/";
 
+/**
+ * eSpeak NG se sirve desde `public/espeak-phonemizer/<version>/`, y el worker le
+ * dice al motor donde esta su wasm (`locateFile`). Pero el codigo de union del
+ * paquete nombra el wasm con `new URL("espeak-ng.wasm", import.meta.url)`, y
+ * Vite emitia por eso una copia con hash en `assets/` que nadie pide: 305 KB
+ * publicados dos veces. Este plugin la quita del bundle del worker, y
+ * `verify-build` falla si un archivo grande vuelve a publicarse dos veces.
+ */
+const dropUnrequestedEspeakWasm = () => ({
+  name: "lingualab:drop-unrequested-espeak-wasm",
+  generateBundle(_options, bundle) {
+    for (const fileName of Object.keys(bundle)) {
+      if (/(^|\/)espeak-ng-[\w-]+\.wasm$/.test(fileName)) delete bundle[fileName];
+    }
+  },
+});
+
 export default defineConfig({
   site: SITE,
   base: BASE,
@@ -95,6 +112,9 @@ export default defineConfig({
   },
   devToolbar: { enabled: false },
   vite: {
+    worker: {
+      plugins: () => [dropUnrequestedEspeakWasm()],
+    },
     build: {
       target: "es2022",
       cssMinify: "lightningcss",

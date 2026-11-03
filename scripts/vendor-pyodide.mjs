@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Copia Pyodide y los wheels del conversor ELAN a `public/pyodide/`.
+ * Copia Pyodide y los wheels del conversor ELAN a `public/pyodide/<version>/`.
  *
  * POR QUE SE VENDOREA EN VEZ DE PEDIRLO A UN CDN
  *
@@ -14,7 +14,7 @@
  * POR QUE UN SCRIPT Y NO UN `postinstall`
  *
  * Esto necesita red y 13 MB de escritura, y el build del sitio no debe depender
- * de ninguna de las dos: los archivos quedan versionados en `public/pyodide/` y
+ * de ninguna de las dos: los archivos quedan versionados en `public/pyodide/<version>/` y
  * este script solo se ejecuta cuando alguien decide subir de version. Tampoco
  * es un paso de CI: si los archivos ya estan y los hashes coinciden, el script
  * no descarga nada y termina diciendolo.
@@ -29,7 +29,7 @@
  * 3. Descarga el wheel de `micropip` desde el release de Pyodide y comprueba
  *    su sha256 contra el que declara `pyodide-lock.json`; descarga el wheel de
  *    `pympi-ling` desde PyPI y lo comprueba contra el sha256 fijado aqui.
- * 4. Escribe `public/pyodide/README.md` con el tamano y el sha256 REALES de
+ * 4. Escribe `public/pyodide/<version>/README.md` con el tamano y el sha256 REALES de
  *    cada archivo. Un README escrito a mano se queda viejo en la primera
  *    actualizacion y entonces miente; por eso lo genera este script.
  *
@@ -51,7 +51,14 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const PYODIDE_NPM_DIR = join(ROOT, "node_modules", "pyodide");
-const DEST = join(ROOT, "public", "pyodide");
+/**
+ * La version va en la ruta (`public/pyodide/<version>/`) para que el servidor
+ * pueda declarar los archivos inmutables: ver `src/config/engines.ts`. La version
+ * sale de `src/config/engines.json`, y el script falla si no es la que fija
+ * `PYODIDE_VERSION`.
+ */
+const ENGINE_VERSION = JSON.parse(readFileSync(join(ROOT, "src", "config", "engines.json"), "utf8")).pyodide;
+const DEST = join(ROOT, "public", "pyodide", ENGINE_VERSION);
 const WHEELS_DIR = join(DEST, "wheels");
 
 /** Versiones fijadas. Subir cualquiera de las dos exige regenerar los hashes. */
@@ -221,10 +228,10 @@ Los cinco primeros archivos salen del paquete npm \`pyodide@${PYODIDE_VERSION}\`
   const readmePath = join(DEST, "README.md");
   if (CHECK_ONLY) {
     if (!existsSync(readmePath)) {
-      fail("falta public/pyodide/README.md; corre el script sin --check.");
+      fail("falta public/pyodide/<version>/README.md; corre el script sin --check.");
     }
     if (readFileSync(readmePath, "utf8") !== text) {
-      fail("public/pyodide/README.md no coincide con los archivos: regenera con el script.");
+      fail("public/pyodide/<version>/README.md no coincide con los archivos: regenera con el script.");
     }
     return;
   }
@@ -263,6 +270,11 @@ async function vendorWheel({ path, url, sha256: expectedSha, licence }) {
 }
 
 async function main() {
+  if (ENGINE_VERSION !== PYODIDE_VERSION) {
+    fail(
+      `src/config/engines.json dice pyodide ${ENGINE_VERSION} y este script vendoriza ${PYODIDE_VERSION}: cambia los dos juntos.`,
+    );
+  }
   const installed = readInstalledVersion();
   if (installed !== PYODIDE_VERSION) {
     fail(
@@ -304,7 +316,7 @@ async function main() {
   const expected = new Set([...RUNTIME_FILES, "README.md", "wheels"]);
   for (const entry of readdirSync(DEST)) {
     if (!expected.has(entry)) {
-      console.warn(`vendor-pyodide: sobra public/pyodide/${entry}; no lo sirve nada.`);
+      console.warn(`vendor-pyodide: sobra public/pyodide/${ENGINE_VERSION}/${entry}; no lo sirve nada.`);
     }
   }
 
@@ -312,7 +324,7 @@ async function main() {
   const missing = entries.filter((entry) => !existsSync(entry.file)).length;
   console.log(
     `${CHECK_ONLY ? "verificado" : "vendorizado"}: ${entries.length} archivos, ` +
-      `${total} bytes (${humanBytes(total)}) en public/pyodide/` +
+      `${total} bytes (${humanBytes(total)}) en public/pyodide/${ENGINE_VERSION}/` +
       (missing > 0 ? ` (${missing} sin escribir: --check no escribe)` : ""),
   );
   for (const entry of entries) {

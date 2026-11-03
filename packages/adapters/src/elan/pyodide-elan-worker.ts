@@ -18,7 +18,7 @@ import { createPyodideRuntime, loadPyodideFromUrl, type PyodideRuntime } from ".
  * segundo archivo que se convierte en la misma pagina no vuelve a descargar
  * nada.
  */
-/** El wheel vendorizado de pympi-ling. La version esta en `public/pyodide/README.md`. */
+/** El wheel vendorizado de pympi-ling. La version esta en `public/pyodide/<version>/README.md`. */
 const WHEEL_FILE_NAME = "pympi_ling-1.71-py3-none-any.whl";
 
 let runtime: PyodideRuntime | null = null;

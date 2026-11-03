@@ -16,7 +16,7 @@
  * comparables con los de Praat. Un detector de F0 escrito a mano daria valores
  * plausibles y incomparables, y «experimental» dejaria de ser una advertencia
  * para volverse una excusa. El artefacto esta vendoreado en
- * `public/praatfan/`, con su procedencia y sus hashes; no se pide a un CDN.
+ * `public/praatfan/<version>/`, con su procedencia y sus hashes; no se pide a un CDN.
  *
  * NADA DE `new WebAssembly.Module(bytes)` CON BYTES DE UN STRING: el `.wasm`
  * que se instancia es el del repositorio, y en el navegador se le pasa su URL.

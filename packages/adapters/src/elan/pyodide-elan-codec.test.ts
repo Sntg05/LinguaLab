@@ -3,6 +3,7 @@ import malformadoEaf from "../../../../e2e/fixtures/malformado.eaf?raw";
 import simpleEaf from "../../../../e2e/fixtures/simple.eaf?raw";
 import simpleTextGrid from "../../../../e2e/fixtures/simple.TextGrid?raw";
 import { type AnnotationDocument, parseTextGridBytes, serializeTextGrid } from "@lingualab/core";
+import { readFileSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { createPyodideElanCodec } from "./pyodide-elan-codec";
 import type { PyodideElanCodec } from "./pyodide-elan-types";
@@ -12,12 +13,12 @@ import type { PyodideElanCodec } from "./pyodide-elan-types";
  *
  * POR QUE ESTA PRUEBA CARGA EL PYODIDE VENDORIZADO Y NO EL DEL `node_modules`
  *
- * Lo que se sirve en produccion es `public/pyodide/`, con sus hashes en el
+ * Lo que se sirve en produccion es `public/pyodide/<version>/`, con sus hashes en el
  * README de ese directorio. Probar el del `node_modules` comprobaria que Pyodide
  * funciona, no que lo que publicamos funciona. El modulo JS se importa del
  * paquete npm porque es el mismo archivo que se sirve (y Node no puede importar
  * por HTTP), pero el wasm, la stdlib, el lock y los wheels salen todos de
- * `public/pyodide/`.
+ * `public/pyodide/<version>/`.
  *
  * POR QUE EL WHEEL SE INSTALA CON UNA URL `file://`
  *
@@ -42,8 +43,12 @@ import type { PyodideElanCodec } from "./pyodide-elan-types";
  * con espacios (`Opencode projects`), y `pathname` los entrega escapados, con lo
  * que Pyodide buscaria un archivo que no existe.
  */
+/** La version vendorizada sale de `src/config/engines.json`, la unica fuente. */
+const ENGINE_VERSIONS = JSON.parse(
+  readFileSync(new URL("../../../../src/config/engines.json", import.meta.url), "utf8"),
+) as Record<string, string>;
 const PYODIDE_DIR = decodeURIComponent(
-  new URL("../../../../public/pyodide/", import.meta.url).pathname,
+  new URL(`../../../../public/pyodide/${ENGINE_VERSIONS["pyodide"]}/`, import.meta.url).pathname,
 );
 
 /**
