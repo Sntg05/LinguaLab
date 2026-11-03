@@ -49,6 +49,9 @@ const ensureRuntime = (indexURL: string): PyodideRuntime => {
 };
 
 self.onmessage = async (event: MessageEvent<ElanWorkerRequest>) => {
+  // Un worker dedicado solo recibe mensajes de la pagina que lo creo, y el
+  // navegador les pone un origen vacio. Cualquier otro origen no es nuestro.
+  if (event.origin !== "" && event.origin !== self.location.origin) return;
   const request = event.data;
   currentId = request.id;
   const engine = ensureRuntime(request.indexURL);

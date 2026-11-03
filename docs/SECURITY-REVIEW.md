@@ -20,9 +20,9 @@ Todo lo de abajo se midió sobre la rama `feat/toolbox-v3-security-languages`, p
 | **Dependencias de producción** | Sana | `npm audit --omit=dev` → **0 vulnerabilidades**. El árbol de producción de un sitio estático son 5 entradas, ninguna con script de instalación |
 | **Permisos de CI mínimos** | Sana | `ci.yml`: `contents: read`. `codeql.yml`: `contents: read` y `security-events: write`, lo único que necesita para publicar hallazgos. El flujo con `pages: write` e `id-token: write` se retiró con el destino de GitHub Pages (ADR 0009): ya no hay ningún flujo que pueda publicar y escribir con el token del repositorio |
 | **Cabeceras de seguridad reales** | Sana | `vercel.json`: `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` sin cámara ni micrófono, HSTS de dos años y caché inmutable para los assets con hash. Vercel permite cabeceras; GitHub Pages no, y por eso durante toda la vida del destino anterior `frame-ancestors` viajaba en una metaetiqueta donde los navegadores la ignoran |
-| **Acciones fijadas por SHA** | Sana | Las **doce** referencias de los tres flujos —ocho acciones distintas— van por SHA completo con la versión mayor en un comentario al lado. Antes eran etiquetas movibles, que cualquiera con control de la acción puede reapuntar (O2) |
+| **Acciones fijadas por SHA** | Sana | Las **siete** referencias de los dos flujos que quedan (`ci.yml` y `codeql.yml`; `deploy.yml` se retiró con el ADR 0009) —seis acciones distintas— van por SHA completo con la versión mayor en un comentario al lado. Medido el 2026-11-03. Antes eran etiquetas movibles, que cualquiera con control de la acción puede reapuntar (O2) |
 | **La puerta audita dependencias** | Sana | `npm run audit` corre en cada job de CI: bloquea el árbol de **producción** desde `high` e informa el de desarrollo sin cortar. Medido: **0 vulnerabilidades** en los dos árboles (O1) |
-| **Análisis estático de código** | Sana | `.github/workflows/codeql.yml`, `javascript-typescript` con el conjunto `security-and-quality`, en push, en PR y una vez por semana. **Sin hallazgos abiertos** al activarlo (O5) |
+| **Análisis estático de código** | Sana | `.github/workflows/codeql.yml`, `javascript-typescript` con el conjunto `security-and-quality`, en push, en PR y una vez por semana. Sin hallazgos al activarlo (O5); **15 alertas** aparecieron el 2026-10-25 con los segmentos 7 a 11 y quedaron nueve días sin mirar. Cada una tiene su destino en la §6 |
 | **Alertas de Dependabot y escaneo de secretos** | Sana | Alertas de Dependabot **activadas** (`0` alertas abiertas al activarlas), actualizaciones de seguridad automáticas activadas, y `secret scanning` más `push protection` activados el 2026-10-25 (O4) |
 | **Sin disparadores peligrosos** | Sana | Ni `pull_request_target` ni `workflow_run` en `.github/workflows/`, así que no hay superficie de inyección de scripts desde un PR externo |
 | **Superficie de instalación** | Sana y pequeña | 493 paquetes en el lock, **2 con script de instalación**: `esbuild` (declarado en `allowScripts`) y `fsevents` (opcional, macOS) |
@@ -144,3 +144,27 @@ la columna de la derecha dice qué quedó en el repositorio en lugar del PR.
 
 Cada cierre lleva su comentario en el PR, con el motivo y con qué ocupa su lugar. La razón de escribir
 esto acá además de allá es la de todo el documento: el PR cerrado se pierde de vista, y el motivo no.
+
+## 6. Las quince alertas de CodeQL del 2026-10-25
+
+Aparecieron al entrar los segmentos 7 a 11 y esta revisión decía «sin hallazgos abiertos» porque se
+escribió el mismo día, antes del análisis. La auditoría del 2026-11-03 las encontró sin mirar. Diez se
+corrigen en el código en `fix/auditoria-v3-1` y CodeQL las cerrará solo al analizar `main`; cinco son el
+propósito mismo de un script de desarrollo y se descartan con su motivo.
+
+| # | Regla | Dónde | Destino |
+|---|---|---|---|
+| 1 | `bad-tag-filter` | `scripts/verify-build.mjs` | **Corregida.** La expresión no reconocía `</script >` y el verificador podía dejar pasar un script entero sin hash |
+| 2 | `incomplete-multi-character-sanitization` | `scripts/fetch-ipa-audio.mjs` | **Corregida.** Quitar etiquetas deja `<script>` en `<scr<b>ipt>`; también se quitan los ángulos sueltos |
+| 3 | `file-system-race` | `scripts/fetch-ipa-audio.mjs` | **Corregida.** Se lee la caché e intenta, sin comprobar antes si existe |
+| 4 | `indirect-command-line-injection` | `scripts/lint-baseline.mjs` | **Corregida.** `--base` se resuelve con `git rev-parse --verify` y nada pasa por `bash -c` |
+| 7, 14, 15 | `missing-origin-check` | los tres workers | **Corregidas.** Un worker dedicado recibe mensajes con origen vacío; cualquier otro se ignora. Las e2e del fonemizador, ELAN y acústica pasan con la guarda |
+| 8 | `unused-local-variable` | `scripts/fetch-ipa-audio.mjs` | **Corregida, y era un defecto.** `--force` estaba documentado en el README y la guía, se leía y no hacía nada |
+| 9 | `useless-assignment-to-local` | `src/scripts/ortografia/index.ts` | **Corregida.** |
+| 10 | `polynomial-redos` | `praatfan-acoustic-analysis.ts` | **Corregida.** `trimSlash` ya no usa una expresión regular |
+| 5, 6, 12, 13 | `http-to-file-access` | `fetch-ipa-audio.mjs`, `build-language-data.mjs`, `vendor-pyodide.mjs` | **Se descartan: es el propósito del script.** Los tres descargan a propósito lo que se va a servir, los corre una persona y no el sitio, y cada uno deja constancia: el audio, la licencia de cada archivo; Glottolog, el `sha256` del dataset; Pyodide, el `sha256` esperado de cada archivo, que hace fallar el script si no coincide |
+| 11 | `file-access-to-http` | `scripts/vendor-pyodide.mjs` | **Se descarta por lo mismo.** La URL sale del `pyodide-lock.json` de la versión fijada en `package.json` |
+
+Descartar una alerta en GitHub es un cambio en la configuración del repositorio, y lo hace su dueño. Los
+motivos de arriba son los que corresponde escribir en cada descarte.
+

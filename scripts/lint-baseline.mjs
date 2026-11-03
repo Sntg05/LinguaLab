@@ -45,10 +45,16 @@ const biome = join(process.cwd(), "node_modules", ".bin", "biome");
 
 /** Extrae `ref` a un directorio temporal y deja ahí la configuración actual. */
 const extract = (ref) => {
-  const dir = mkdtempSync(join(tmpdir(), `lingualab-${ref.replaceAll("/", "-")}-`));
-  execFileSync("bash", ["-c", `git archive ${ref} | tar -x -C ${JSON.stringify(dir)}`], {
-    stdio: "inherit",
+  // La referencia llega de la linea de comandos: se resuelve con git a un commit
+  // antes de usarla, y nada pasa por un shell que pudiera interpretarla.
+  const commit = execFileSync("git", ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`], {
+    encoding: "utf8",
+  }).trim();
+  const dir = mkdtempSync(join(tmpdir(), `lingualab-${commit.slice(0, 12)}-`));
+  const archive = execFileSync("git", ["archive", "--format=tar", commit], {
+    maxBuffer: 512 * 1024 * 1024,
   });
+  execFileSync("tar", ["-x", "-C", dir], { input: archive, stdio: ["pipe", "inherit", "inherit"] });
   copyFileSync("biome.json", join(dir, "biome.json"));
   return dir;
 };

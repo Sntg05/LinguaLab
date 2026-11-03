@@ -56,6 +56,9 @@ function toIpa(text: string): string {
 }
 
 self.onmessage = async (event: MessageEvent<PhonemizerRequest>) => {
+  // Un worker dedicado solo recibe mensajes de la pagina que lo creo, y el
+  // navegador les pone un origen vacio. Cualquier otro origen no es nuestro.
+  if (event.origin !== "" && event.origin !== self.location.origin) return;
   const { id, text, voice, baseUrl } = event.data;
 
   try {

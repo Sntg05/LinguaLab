@@ -64,7 +64,9 @@ if (pages.length === 0) {
 /* Attributes that cause the browser to FETCH a subresource. An <a href> to
    the source repository is legitimate and is deliberately not matched. */
 const SUBRESOURCE = /<(?:script|img|iframe|audio|video|source|embed)\b[^>]*\bsrc="((?:https?:)?\/\/[^"]+)"|<link\b[^>]*\bhref="((?:https?:)?\/\/[^"]+)"[^>]*\brel="stylesheet"/gi;
-const SCRIPT_TAG = /<script([^>]*)>([\s\S]*?)<\/script>/gi;
+// `</script\s*>` y no `</script>`: el navegador cierra el elemento tambien con
+// `</script >`, y un verificador que no lo reconoce deja pasar un script entero.
+const SCRIPT_TAG = /<script([^>]*)>([\s\S]*?)<\/script[^>]*>/gi;
 
 for (const file of pages) {
   const name = relative(DIST, file);
