@@ -115,13 +115,19 @@ async function lookupMany(titles) {
 
   const pages = JSON.parse(text).query?.pages ?? {};
   const byTitle = new Map();
-  // Quitar etiquetas no basta: `<scr<b>ipt>` deja `<script>` al quitar `<b>`.
-  // El resultado va a un Markdown, asi que tambien se eliminan los angulos sueltos.
-  const strip = (html) =>
-    String(html ?? "")
-      .replace(/<[^>]+>/g, "")
-      .replace(/[<>]/g, "")
-      .trim();
+  // Se queda solo con el texto que esta FUERA de cualquier etiqueta, contando
+  // la profundidad: con una expresion regular, `<scr<b>ipt>` dejaba `<script>`
+  // al quitar `<b>`. Ningun `<` ni `>` sobrevive, y el resultado va a un Markdown.
+  const strip = (html) => {
+    let text = "";
+    let depth = 0;
+    for (const char of String(html ?? "")) {
+      if (char === "<") depth += 1;
+      else if (char === ">") depth = Math.max(0, depth - 1);
+      else if (depth === 0) text += char;
+    }
+    return text.trim();
+  };
 
   for (const page of Object.values(pages)) {
     const info = page.imageinfo?.[0];

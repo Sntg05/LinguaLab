@@ -359,7 +359,13 @@ function resolvesInDist(pathname) {
   const candidates = clean === "" || clean.endsWith("/")
     ? [join(DIST, clean, "index.html")]
     : [join(DIST, clean), join(DIST, clean, "index.html"), join(DIST, `${clean}.html`)];
-  return candidates.some((candidate) => existsSync(candidate) && statSync(candidate).isFile());
+  return candidates.some((candidate) => {
+    try {
+      return statSync(candidate).isFile();
+    } catch {
+      return false;
+    }
+  });
 }
 
 const LINK_ATTR = /<a\b[^>]*\bhref="([^"#][^"]*)"|<link\b[^>]*\brel="(?:canonical|alternate|icon)"[^>]*\bhref="([^"]+)"|<meta\b[^>]*\bproperty="og:image"[^>]*\bcontent="([^"]+)"/gi;
@@ -394,8 +400,11 @@ function allFiles(dir = DIST) {
 }
 const byDigest = new Map();
 for (const file of allFiles()) {
-  if (statSync(file).size < 50 * 1024) continue;
-  const digest = createHash("sha256").update(readFileSync(file)).digest("hex");
+  // Se lee una vez y se mide lo leido: medir antes y leer despues son dos
+  // momentos distintos del mismo archivo (CodeQL js/file-system-race).
+  const bytes = readFileSync(file);
+  if (bytes.length < 50 * 1024) continue;
+  const digest = createHash("sha256").update(bytes).digest("hex");
   byDigest.set(digest, [...(byDigest.get(digest) ?? []), relative(DIST, file)]);
 }
 for (const copies of byDigest.values()) {

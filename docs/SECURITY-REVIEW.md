@@ -173,6 +173,8 @@ propósito mismo de un script de desarrollo y se descartan con su motivo.
 | 5, 6, 12, 13 | `http-to-file-access` | `fetch-ipa-audio.mjs`, `build-language-data.mjs`, `vendor-pyodide.mjs` | **Se descartan: es el propósito del script.** Los tres descargan a propósito lo que se va a servir, los corre una persona y no el sitio, y cada uno deja constancia: el audio, la licencia de cada archivo; Glottolog, el `sha256` del dataset; Pyodide, el `sha256` esperado de cada archivo, que hace fallar el script si no coincide |
 | 11 | `file-access-to-http` | `scripts/vendor-pyodide.mjs` | **Se descarta por lo mismo.** La URL sale del `pyodide-lock.json` de la versión fijada en `package.json` |
 
+El análisis del PR #13 encontró dos alertas más en el propio arreglo: **#16** (`incomplete-multi-character-sanitization`, la expresión regular de `strip` seguía siendo la que CodeQL rechaza) y **#17** (`file-system-race`, `verify-build` medía un archivo y lo leía después). Las dos se corrigieron en la misma rama: `strip` recorre el texto contando la profundidad de las etiquetas, sin expresiones regulares, y `verify-build` lee una sola vez y mide lo leído.
+
 Descartar una alerta en GitHub es un cambio en la configuración del repositorio, y lo hace su dueño. Los
 motivos de arriba son los que corresponde escribir en cada descarte.
 
