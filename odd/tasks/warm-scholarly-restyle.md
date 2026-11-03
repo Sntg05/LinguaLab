@@ -1,3 +1,7 @@
+---
+status: closed
+---
+
 # LinguaLab — Warm scholarly restyle and recentred landing
 
 Replace the site's visual identity from "cool editorial minimalist" to "warm

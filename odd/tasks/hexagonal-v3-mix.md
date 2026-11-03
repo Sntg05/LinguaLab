@@ -1,3 +1,7 @@
+---
+status: closed
+---
+
 # hexagonal-v3-mix
 
 Incrustar el núcleo hexagonal del prompt `LinguaLab_prompt_vibecoding.md` (segmentos 1–4) dentro del

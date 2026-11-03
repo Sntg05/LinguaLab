@@ -114,3 +114,11 @@ etiqueta es editar el texto después de haber medido.
 - El adaptador es la única implementación del puerto; el arnés de validación usa el
   mismo código que el navegador. Un motor distinto para las pruebas volvería a dejar
   la validación sin objeto.
+
+## Actualización del 2026-11-03
+
+Los archivos siguen siendo los mismos, con los mismos hashes, pero viven en una carpeta con su versión
+(`public/praatfan/0.1.13/`) para que el servidor los sirva como inmutables sin riesgo de entregar uno viejo
+tras una actualización. La versión sale de `src/config/engines.json` y `src/config/engines.test.ts` la
+cruza con las dependencias, la procedencia, las carpetas y `vercel.json`. Las rutas de arriba se leen
+con ese segmento de versión. La decisión de este ADR no cambia.

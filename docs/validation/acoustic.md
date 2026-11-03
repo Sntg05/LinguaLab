@@ -3,7 +3,7 @@
 - **Estado:** pendiente. El arnés está escrito y se ejecuta; las referencias no existen.
 - **Código:** `packages/adapters/src/acoustic/validation/`
 - **Adaptador:** `packages/adapters/src/acoustic/praatfan-acoustic-analysis.ts`
-- **Motor:** `public/praatfan/` (praatfan 0.1.13, GPL-3.0, fijado por hash)
+- **Motor:** `public/praatfan/0.1.13/` (praatfan 0.1.13, GPL-3.0, fijado por hash; la versión sale de `src/config/engines.json`)
 - **Decisión de arquitectura:** [`docs/adr/0006-analisis-acustico-praatfan.md`](../adr/0006-analisis-acustico-praatfan.md)
 
 ## Qué se midió y qué no

@@ -1,3 +1,7 @@
+---
+status: closed
+---
+
 # Toolbox v3: navigation by level of analysis, example languages, audio tool
 
 Three product moves that share one cause: the toolbox grew from four tools to seven, and the header

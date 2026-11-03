@@ -46,24 +46,26 @@ cierre con `npm run verify:all` y `npm run test:e2e`.
 - **S16 (metodología).** Las ocho propuestas del reporte: cifras con una sola fuente, `npm run doctor`,
   CONTRIBUTING igual a la práctica, chequeo del sitio publicado, traspaso vivo y estado en los documentos
   ODD, cola de evidencia humana, revisión semanal de alertas y documentos con resumen arriba.
+- **S18 (encontrado al cerrar).** Una herramienta con página en este sitio corre aquí y no se anuncia
+  como «requiere servidor»: el conversor ELAN seguía como `needs-backend` desde antes de implementarse.
 - **S17.** No se hace push, ni PR, ni merge, ni se borran ramas o se crean etiquetas sin una decisión
   aparte del dueño. Cambios de configuración del repositorio en GitHub los hace el dueño.
 
 ## Tasks
 
-| ID | Specs | Ruta | Estado | Commit |
+| ID | Specs | Ruta | Estado | Commit y evidencia |
 |---|---|---|---|---|
-| T1 | S2 | inline | en curso | — |
-| T2 | S3, S7, S8 | inline | pendiente | — |
-| T3 | S4, S11 | inline | pendiente | — |
-| T4 | S9, S14 | inline | pendiente | — |
-| T5 | S6 | inline | pendiente | — |
-| T6 | S5 | inline | pendiente | — |
-| T7 | S13 | inline | pendiente | — |
-| T8 | S10 | inline | pendiente | — |
-| T9 | S12, S16 | inline | pendiente | — |
+| T1 | S2 | inline | hecha | `f04e461`. `main` local avanzó por fast-forward a `965fef7` |
+| T2 | S3, S4, S7, S8 | inline | hecha | `dc4ddd6`, `3cb7ca0`. Rojo: verify-build con 31 `frame-ancestors`, robots, `/en/404` ×2 y la atribución; e2e de consola con 31 fallos por mutación; `claims.test` con 7 promesas sin conexión. Verde después |
+| T3 | S11 | inline | hecha | `827e3ee`. Rojo: las dos pruebas de variedad. Verde después |
+| T4 | S9, S14 | inline | hecha | `2e3cb9c`. Rojo: reflujo a 320 px en `/experimentos` y `/en/experimentos`; 62 faltas de icono e imagen en verify-build. Verde: 31 de 31 |
+| T5 | S6 | inline | hecha | `00b6e12`. Biome 2.6.3 y `@astrojs/check` 0.9.12; Astro queda en 7.4.1 (P23) |
+| T6 | S5 | inline | hecha | `9e7ad8f`. 10 alertas corregidas en el código, 5 justificadas en SECURITY-REVIEW §6; e2e de los tres workers en verde |
+| T7 | S13 | inline | hecha | `be29d6d`. Rojo: `engines.test` (4) y el duplicado en verify-build. Verde; e2e de motores 27 de 27 |
+| T8 | S10 | inline | hecha | `65db7ab`. Rojo: la e2e de teclado. Verde |
+| T9 | S12, S16, S18 | inline | hecha | `663f4bb`, `67694f4` y el commit de documentos. `live:check` contra producción: los 66 fallos conocidos. `docs.test` atrapa 4 de 4 mutaciones |
 | T10 | S15 | inline | pendiente | — |
-| T11 | S1–S17 | verificador independiente | pendiente | — |
+| T11 | S1–S18 | verificador independiente | pendiente | — |
 
 ## Log
 
@@ -76,3 +78,13 @@ cierre con `npm run verify:all` y `npm run test:e2e`.
   `965fef7`: `verify:all` verde (1168 pruebas en 78 archivos), e2e 117 de 118 (la que falla es intermitente),
   0 violaciones de axe en 62 pasadas en vivo.
 - **L3.** `main` local avanzó por fast-forward de `1ee15c6` a `965fef7`.
+- **L4 (T5).** Astro 7.4.2 exige Node `>=22.23.4` y la máquina tiene 22.23.3: `astro check` se niega a
+  correr. Se sube Biome y `@astrojs/check`, Astro queda en 7.4.1 y la decisión pasa a P23 y a
+  `docs/HUMAN-EVIDENCE.md`. No se toca el entorno global.
+- **L5 (T7).** Diseño: los motores van a `public/<motor>/<versión>/` con la versión en
+  `src/config/engines.json`, en vez de cachear `max-age` corto con `stale-while-revalidate`, que podía
+  mezclar archivos de dos versiones de Pyodide tras una actualización.
+- **L6 (T9).** Al cruzar el catálogo con las rutas apareció S18: se corrige en `663f4bb` con su prueba.
+- **L7.** El commit del catálogo se había llevado el renombrado del traspaso que estaba en el índice; como
+  nada estaba publicado, se rehicieron los dos commits locales para que cada uno tenga solo lo suyo.
+

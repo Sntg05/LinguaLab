@@ -112,3 +112,11 @@ ejecución, no viajan en el bundle. La página `/elan` sigue dentro de los 60 KB
 - `npx vitest run packages/adapters/src/elan/` — Pyodide vendorizado real, wheel instalado con
   `micropip`, `.eaf` leído, ida y vuelta ELAN → TextGrid → ELAN e informe de pérdida.
 - `npm run verify:build` — ninguna página pide nada a otro origen y el presupuesto de peso se respeta.
+
+## Actualización del 2026-11-03
+
+Los archivos siguen siendo los mismos, con los mismos hashes, pero viven en una carpeta con su versión
+(`public/pyodide/314.0.7/`) para que el servidor los sirva como inmutables sin riesgo de entregar uno viejo
+tras una actualización. La versión sale de `src/config/engines.json` y `src/config/engines.test.ts` la
+cruza con las dependencias, la procedencia, las carpetas y `vercel.json`. Las rutas de arriba se leen
+con ese segmento de versión. La decisión de este ADR no cambia.

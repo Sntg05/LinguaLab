@@ -128,10 +128,15 @@ git archive <commit> legacy/ | tar -x -C /tmp
 - **CSP con hashes, sin `unsafe-inline`.** Astro calcula un hash por script; el
   script anti-parpadeo del tema, que debe ser inline, obtiene el suyo a partir de
   la misma constante que se emite, de modo que no pueden divergir. La política
-  viaja como metaetiqueta —donde `frame-ancestors` no se aplica— y `vercel.json`
-  emite además las cabeceras que sí valen ahí: `frame-ancestors 'none'`,
+  viaja como metaetiqueta, y lo que solo vale como cabecera lo emite
+  `vercel.json`: `frame-ancestors 'none'`, `X-Frame-Options`,
   `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` y HSTS.
   **El sitio se publica solo en Vercel**, desde `main`.
+- **Los motores pesados llevan su versión en la ruta.** Pyodide, eSpeak NG y
+  praatfan viven en `public/<motor>/<versión>/` y se sirven como inmutables: una
+  versión nueva es una URL nueva. La versión sale de `src/config/engines.json`.
+- **Sin service worker.** Todo corre en la pestaña y nada sale de ella, pero
+  abrir o recargar una página necesita conexión, y el sitio no promete otra cosa.
 - **Fuentes autoalojadas.** No hay petición a Google Fonts. La cara del AFI
   cubre latín extendido, extensiones AFI, modificadores y griego, porque `θ` es
   U+03B8, es decir griego, no AFI.
@@ -141,20 +146,18 @@ git archive <commit> legacy/ | tar -x -C /tmp
 
 ## Verificación
 
-| Comprobación | Estado |
-|---|---|
-| `astro check` | 0 errores |
-| Pruebas unitarias | 943 en 55 archivos |
-| Pruebas de extremo a extremo | 88 sobre el sitio compilado (50 de accesibilidad), en su propio puerto |
-| Reglas hexagonales | 198 módulos, 452 dependencias, 0 violaciones |
-| Verificación de compilación | pasa |
-| Página más pesada | 29,1 KB gzip, sobre un presupuesto de 60 KB |
-| Auditoría de dependencias | 0 en producción y 0 en desarrollo (`npm run audit`, también en CI) |
+Las cifras de la última medición están en [`docs/metrics.json`](docs/metrics.json)
+y las escribe `npm run status:measure`; este archivo no las copia, porque una
+cifra copiada a mano se queda vieja. Qué garantiza cada puerta está en
+[`docs/STATUS.md`](docs/STATUS.md#qué-se-verifica-y-dónde).
 
-`scripts/verify-build.mjs` comprueba el resultado compilado: cobertura de la CSP
-por script inline, ausencia de `unsafe-inline`, ausencia de subrecursos externos,
-un solo `<h1>`, `lang` y descripción presentes, integridad del manifiesto de audio
-y presupuesto de peso.
+| Comando | Para qué |
+|---|---|
+| `npm run doctor` | Antes de empezar: Node, rama frente a `origin`, Chromium y puerto 4331 |
+| `npm run verify:all` | La puerta completa menos la e2e |
+| `npm run test:e2e` | Accesibilidad, consola, reflujo a 320 px y flujos, sobre el sitio compilado |
+| `npm run live:check [url]` | El sitio publicado: cabeceras, robots, consola, axe, 404 y caché de los motores |
+| `npm run status:measure` | Vuelve a medir y escribe `docs/metrics.json` |
 
 ## Audio
 

@@ -1,3 +1,7 @@
+---
+status: closed
+---
+
 # Cierre de la entrega v3
 
 Cerrar lo que quedó abierto en `docs/PENDING.md` (P1–P21) y `docs/SECURITY-REVIEW.md` (O1–O6) antes de
@@ -44,7 +48,7 @@ de una persona. Este documento cierra el trabajo técnico que no necesita a nadi
 - **S13.** Los siete PRs de Dependabot quedan con la disposición que `docs/SECURITY-REVIEW.md` §5 ya
   decidió, y el documento refleja lo que se hizo.
 - **S14.** `docs/STATUS.md`, `docs/PENDING.md`, `docs/SECURITY-REVIEW.md`, `README.md` y
-  `odd/handoff/toolbox-v3.md` dicen lo mismo que el código; `verify:all` y la suite e2e completa en verde
+  `odd/handoff/archivo/2026-10-25-toolbox-v3.md` dicen lo mismo que el código; `verify:all` y la suite e2e completa en verde
   dentro de lo que este entorno permite.
 - **Fuera de alcance, y por qué.** P5 (necesita una decisión de interfaz del dueño), P9 (necesita
   hablantes o fuentes citables), P14 (recompilar el wasm cambia el binario auditado), P17 (necesita

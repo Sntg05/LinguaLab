@@ -105,6 +105,14 @@ El mismo cambio corrigió un defecto peor, encontrado al revisar de dónde salí
 canónica por defecto era `https://lingualab.pages.dev`, un dominio de otra persona que sirve otro sitio, y
 **cada página publicaba un `canonical` que apuntaba allí**. Ver ADR 0009.
 
+*Actualización del 2026-11-03.* La auditoría encontró dos restos de este punto. La metaetiqueta seguía
+llevando `frame-ancestors 'self'`, que el navegador ignora y anuncia con un **error de consola en cada
+carga** (62 en 62 cargas del sitio publicado), y `/seguridad` seguía diciendo que nada impedía enmarcar la
+página, cuando la cabecera ya lo impedía. La directiva salió de la metaetiqueta, `verify-build` falla si
+vuelve, una e2e exige cero errores de consola en cada página y `/seguridad` describe lo que aplica el
+servidor. Y el `robots.txt`, escrito a mano, seguía anunciando el sitemap en `lingualab.pages.dev`: ahora se
+genera desde la misma URL que el sitemap, y `verify-build` falla ante cualquier otro origen.
+
 **O4 — Las alertas de Dependabot estaban desactivadas (severidad baja). *Cerrado*.**
 El `403` era real y el diagnóstico era correcto —requiere administración del repositorio—, pero no era
 cierto que no se pudiera hacer desde aquí: el token de la sesión tiene permiso de administración y la API

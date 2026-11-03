@@ -1,3 +1,7 @@
+---
+status: closed
+---
+
 # Segmentos 7 a 11 y cierre a `main`
 
 Completar lo que faltaba del prompt de trabajo —los segmentos 7 a 11—, pasarle a todo el sitio un escaneo
