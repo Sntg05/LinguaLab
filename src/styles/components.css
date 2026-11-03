@@ -15,18 +15,36 @@
 
   .brand__mark {
     flex: 0 0 auto;
-    width: 1.9rem;
-    height: 1.9rem;
-    color: var(--accent);
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .brand__tile {
+    fill: oklch(41% 0.19 277);
+  }
+
+  .brand__root {
+    fill: var(--saffron);
+  }
+
+  /* On the night background the light-theme indigo tile would sink. */
+  :root[data-theme="dark"] .brand__tile {
+    fill: oklch(52% 0.2 277);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .brand__tile {
+      fill: oklch(52% 0.2 277);
+    }
   }
 
   /* The wordmark is a product name, not an editorial heading: the UI face,
      tightened, with the second half picking up the accent. */
   .brand__name {
-    font-family: var(--font-sans);
+    font-family: var(--font-display);
     font-size: var(--step-1);
-    font-weight: 620;
-    letter-spacing: -0.035em;
+    font-weight: 700;
+    letter-spacing: -0.04em;
   }
 
   .brand__name-accent {
@@ -41,7 +59,7 @@
     gap: 0.5rem;
     padding: 0.7rem 1.15rem;
     font-size: var(--step--1);
-    font-weight: 550;
+    font-weight: 650;
     line-height: 1.2;
     text-decoration: none;
     white-space: nowrap;
@@ -211,15 +229,14 @@
   }
 
   /* ---- Eyebrow / kicker ---- */
+  /* A short sentence-case kicker in the accent: it names the section's
+     subject, it is not decoration. */
   .eyebrow {
     display: block;
-    margin-block-end: var(--space-s);
-    font-family: var(--font-mono);
-    font-size: var(--step--2);
-    font-weight: 500;
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-    color: var(--ink-faint);
+    margin-block-end: var(--space-2xs);
+    font-size: var(--step--1);
+    font-weight: 700;
+    color: var(--accent);
   }
 
   .lede {
@@ -262,9 +279,10 @@
   }
 
   .card__title {
-    font-family: var(--font-sans);
+    font-family: var(--font-display);
     font-size: var(--step-1);
     font-weight: 650;
+    letter-spacing: -0.02em;
     margin: 0;
   }
 
@@ -300,11 +318,10 @@
     margin: 0 0 var(--space-s);
     padding-block-end: var(--space-2xs);
     border-block-end: 1px solid var(--line);
-    font-family: var(--font-sans);
-    font-size: var(--step-0);
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    color: var(--ink-muted);
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 650;
+    color: var(--ink);
   }
 
   .card__body {
@@ -330,13 +347,10 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.15rem 0.5rem;
-    font-family: var(--font-mono);
+    padding: 0.15rem 0.6rem;
     font-size: var(--step--2);
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
+    font-weight: 650;
+    color: var(--ink-muted);
     border: 1px solid var(--line);
     border-radius: var(--radius-pill);
   }
@@ -409,5 +423,176 @@
   .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* ---- Catalog: two parts, integrated and external ---- */
+  .catalog__parts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin: var(--space-m) 0 var(--space-s);
+    padding: 0;
+    list-style: none;
+  }
+
+  .catalog__part-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: var(--radius-pill);
+  }
+
+  .catalog__part-link--here {
+    color: var(--accent-ink);
+    background: var(--accent);
+  }
+
+  .catalog__part-link--away {
+    color: var(--ext);
+    border: 2px solid currentColor;
+  }
+
+  .catalog__part-link:hover {
+    text-decoration: none;
+    filter: brightness(1.1);
+  }
+
+  .catalog__part-count {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.6em;
+    height: 1.6em;
+    padding-inline: 0.35em;
+    font-size: 0.8em;
+    font-weight: 800;
+    border-radius: var(--radius-pill);
+    background: color-mix(in oklab, currentColor 18%, transparent);
+  }
+
+  .catalog__privacy {
+    max-width: var(--measure);
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+  }
+
+  .catalog__part {
+    margin-block-start: var(--space-2xl);
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+    border-radius: var(--radius-l);
+  }
+
+  .catalog__part--here {
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+
+  .catalog__part--away {
+    background: var(--ext-wash);
+    border: 2px dashed color-mix(in oklab, var(--ext) 45%, transparent);
+  }
+
+  .catalog__part-head h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-block-end: var(--space-2xs);
+    font-size: var(--step-3);
+  }
+
+  .catalog__part--here .catalog__part-head h2 .catalog__part-count {
+    color: var(--accent-ink);
+    background: var(--accent);
+    font-size: 0.5em;
+  }
+
+  .catalog__part--away .catalog__part-head h2 {
+    color: var(--ext);
+  }
+
+  .catalog__part--away .catalog__part-head h2 .catalog__part-count {
+    font-size: 0.5em;
+    border: 2px solid currentColor;
+    background: transparent;
+  }
+
+  .catalog__part-head p {
+    max-width: var(--measure);
+    margin: 0;
+    color: var(--ink-muted);
+  }
+
+  .catalog__anchor {
+    position: relative;
+    top: -6rem;
+  }
+
+  .catalog-card {
+    position: relative;
+  }
+
+  /* The whole card opens the tool: the title link stretches over it. */
+  .catalog-card .card__title a,
+  .catalog-card [data-external] {
+    text-decoration: none;
+  }
+
+  .catalog-card .card__title a::after,
+  .catalog-card [data-external]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .catalog-card:hover {
+    border-color: var(--accent-line);
+    box-shadow: var(--shadow-m);
+  }
+
+  .catalog-card--away {
+    border-style: dashed;
+    border-color: color-mix(in oklab, var(--ext) 40%, transparent);
+  }
+
+  .catalog-card--away:hover {
+    border-color: var(--ext);
+  }
+
+  .catalog-card--away .card__title {
+    color: var(--ext);
+  }
+
+  /* The citation disclosure sits above the stretched link so it stays usable. */
+  .catalog-card__cite {
+    position: relative;
+    z-index: 1;
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+  }
+
+  .catalog-card__langs {
+    margin: 0;
+    font-size: var(--step--2);
+    font-weight: 650;
+    color: var(--ink-faint);
+  }
+
+  .card__cta--ext {
+    flex-wrap: wrap;
+    color: var(--ext);
+  }
+
+  .card__cta--ext a {
+    color: inherit;
+  }
+
+  .catalog-card__host {
+    font-size: var(--step--2);
+    font-weight: 600;
+    color: var(--ink-faint);
   }
 }
