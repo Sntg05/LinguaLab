@@ -50,8 +50,6 @@
 .elan-field {
   font-size: var(--step--2);
   font-weight: 600;
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 
@@ -116,8 +114,6 @@
 .elan-progress__label {
   font-size: var(--step--2);
   font-weight: 600;
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
   color: var(--ink-faint);
 }
 
@@ -145,8 +141,6 @@
 .elan-table th {
   font-size: var(--step--2);
   font-weight: 600;
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
   color: var(--ink-faint);
   border-block-end-color: var(--line-strong);
 }

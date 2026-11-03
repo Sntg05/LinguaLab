@@ -155,11 +155,8 @@
   }
 
   .language-map__table thead th {
-    font-family: var(--font-mono);
     font-size: var(--step--2);
     font-weight: 500;
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
     color: var(--ink-faint);
   }
 
