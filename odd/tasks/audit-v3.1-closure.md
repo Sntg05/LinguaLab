@@ -25,8 +25,9 @@ cierre con `npm run verify:all` y `npm run test:e2e`.
   cumpla. Lo que sí es cierto —una pestaña abierta sigue calculando sin red— puede decirse.
 - **S5 (H4).** Cada alerta abierta de CodeQL queda corregida en el código o justificada por escrito, y
   `docs/SECURITY-REVIEW.md` dice el número real.
-- **S6 (H5).** El repositorio pasa la puerta con Biome 2.6.3, Astro 7.4.2 y `@astrojs/check` 0.9.12, lo que
-  sustituye al PR #12 de Dependabot.
+- **S6 (H5).** El repositorio pasa la puerta con Biome 2.6.3 y `@astrojs/check` 0.9.12, lo que sustituye
+  la parte de Biome del PR #12 de Dependabot. Astro 7.4.2 queda condicionado a subir el piso de Node (L4,
+  P23).
 - **S7 (M1).** Ninguna página registra errores de consola al cargar, y una prueba lo vigila.
 - **S8 (M2).** Ningún enlace interno del build apunta a un archivo inexistente, y el enlace a la fuente del
   mapa de lenguas abre. Una comprobación del build lo vigila.
@@ -64,8 +65,8 @@ cierre con `npm run verify:all` y `npm run test:e2e`.
 | T7 | S13 | inline | hecha | `be29d6d`. Rojo: `engines.test` (4) y el duplicado en verify-build. Verde; e2e de motores 27 de 27 |
 | T8 | S10 | inline | hecha | `65db7ab`. Rojo: la e2e de teclado. Verde |
 | T9 | S12, S16, S18 | inline | hecha | `663f4bb`, `67694f4` y el commit de documentos. `live:check` contra producción: los 66 fallos conocidos. `docs.test` atrapa 4 de 4 mutaciones |
-| T10 | S15 | inline | pendiente | — |
-| T11 | S1–S18 | verificador independiente | pendiente | — |
+| T10 | S15 | dos escritores en paralelo (superficies disjuntas; disparador: paralelismo y contexto largo) | hecha | `1734af6`: happy-dom solo para `*.dom.test.ts` y 22 pruebas de los orquestadores del catálogo y del mapa (rojo: 22 fallos sin entorno). `20e62bd`: `audio/index.ts` de 1479 a 224 líneas en 15 módulos, 17 e2e del visor iguales antes y después. `88e02f8`: el defecto que encontró la partición (botones «▶» con el número de la capa). `ci.yml` sin ramas muertas en `67694f4`. `wasm` sin permiso de ejecución en el commit siguiente |
+| T11 | S1–S18 | verificador independiente | hecha | 17 de 18 pasan; un bloqueante (S12, conteo de acciones en SECURITY-REVIEW) y cinco avisos corregidos en `8622ef8`. Pendiente: revisión nativa (riesgo alto) y decisión de publicar |
 
 ## Log
 
@@ -87,4 +88,11 @@ cierre con `npm run verify:all` y `npm run test:e2e`.
 - **L6 (T9).** Al cruzar el catálogo con las rutas apareció S18: se corrige en `663f4bb` con su prueba.
 - **L7.** El commit del catálogo se había llevado el renombrado del traspaso que estaba en el índice; como
   nada estaba publicado, se rehicieron los dos commits locales para que cada uno tenga solo lo suyo.
-
+- **L8 (T10).** Dos escritores en paralelo con superficies disjuntas compartían `dist/` y el puerto 4331;
+  se coordinaron con un candado (`flock`) sobre las corridas de build y Playwright. La partición del visor
+  encontró que los botones «▶» se nombraban con el número de la capa: corregido con su e2e.
+- **L9 (T11).** La evaluación de riesgo marcó `espeak-ng.wasm` con modo 755. Ya era así en `965fef7`
+  (y `pyodide.asm.wasm` también), heredado de `node_modules`; se corrigió igual, con prueba.
+- **L10.** Puerta completa antes del verificador: `verify:all` en verde y 181 e2e en verde. La página más
+  pesada pasó de 31,2 a 32,7 KB comprimidos con la partición del visor, dentro del presupuesto de 60.
+- **L11 (T11).** Aviso no corregido: el enlace a Glottolog apunta a `master` y no a la versión fijada del dataset.
