@@ -19,6 +19,7 @@ Reglas de esta tabla:
 | [astro](https://www.npmjs.com/package/astro) | 7.4.1 | MIT | Generador del sitio estático: rutas, empaquetado y CSP con hashes |
 | [typescript](https://www.npmjs.com/package/typescript) | 6.0.3 | Apache-2.0 | Compilador y comprobación de tipos |
 | [vitest](https://www.npmjs.com/package/vitest) | 5.0.5 | MIT | Pruebas unitarias del sitio, del núcleo y de los adaptadores |
+| [happy-dom](https://www.npmjs.com/package/happy-dom) | 21.0.4 | MIT | DOM simulado solo para las pruebas `*.dom.test.ts` de los orquestadores del navegador |
 | [@biomejs/biome](https://www.npmjs.com/package/@biomejs/biome) | 2.5.15 | MIT OR Apache-2.0 | Linter y formateador |
 | [dependency-cruiser](https://www.npmjs.com/package/dependency-cruiser) | 18.7.0 | MIT | Comprueba que las flechas del hexágono apunten hacia adentro (ADR 0001) |
 | [@commitlint/cli](https://www.npmjs.com/package/@commitlint/cli) | 21.2.4 | MIT | Valida los mensajes de commit |

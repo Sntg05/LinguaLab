@@ -36,7 +36,7 @@ Lo que solo puede cerrar una persona con un programa, una comunidad o una decisi
 | Entrada | Qué | Estado | Qué la bloquea |
 |---|---|---|---|
 | P1 | La prosa vive en el núcleo | cerrada | — |
-| P2 | Los orquestadores no tienen prueba unitaria | abierta | Entorno DOM en Vitest |
+| P2 | Cuatro orquestadores sin prueba unitaria (catálogo y lenguas ya la tienen) | abierta en parte | Nada: el molde está en `*.dom.test.ts` |
 | P3 | La rama de cuota agotada nunca se ejecutó | cerrada | — |
 | P4 | Avisos de complejidad cognitiva | abierta | Deuda aceptada y medida |
 | P5 | Interfaz para las clases `{V}` | abierta | Decisión de producto |
@@ -113,7 +113,10 @@ oración.
 
 ## P2 — Los dos orquestadores y el render no tienen prueba unitaria
 
-**Estado: abierta.**
+**Estado: abierta en parte.** Desde el 2026-11-03 hay entorno DOM en Vitest y prueba unitaria de dos
+orquestadores: `src/scripts/catalogo/index.ts` y `src/scripts/lenguas/index.ts`. Siguen sin ella los de
+`src/scripts/audio/`, `src/scripts/ortografia/` (con `render.ts`), `src/scripts/experimentos/` y
+`src/scripts/elan/`.
 
 **Síntoma.** Ninguno.
 
@@ -135,6 +138,26 @@ repetición de lo que ya cubre Playwright.
 
 **Criterio de aceptación.** La prueba tiene que poder fallar: introducí un `innerHTML` a propósito y
 comprobá que se pone roja antes de darla por buena.
+
+**Avance (2026-11-03).** Se resolvió el «decidí si vale la pena» a favor, con un alcance chico:
+`happy-dom` 21.0.4 como dependencia de desarrollo y dos proyectos en `vitest.config.ts`. Solo los archivos
+`*.dom.test.ts` corren en happy-dom; todo lo demás sigue en Node, así que una prueba del núcleo que use
+`document` sigue fallando. Antes de configurar el entorno, las dos pruebas nuevas fallaron las 22 con
+`ReferenceError: document is not defined`; con el entorno, pasan.
+
+- `src/scripts/catalogo/index.dom.test.ts` (8 pruebas): las tres facetas combinadas con Y, la herramienta
+  sin lenguas que solo coincide con «todas», la sección que se oculta con su encabezado, la cuenta, el
+  estado vacío con los filtros nombrados como se leen, la selección restaurada por el navegador, el
+  diccionario ausente y la página sin catálogo.
+- `src/scripts/lenguas/index.dom.test.ts` (14 pruebas): familia, «sin familia», buscador, secciones y
+  puntos del mapa que se apagan con su fila, cuenta y aviso vacío; el panel de detalle copiado de la fila,
+  la marca de selección, las lenguas sin coordenadas y un nombre con `<` y `>` que entra como texto.
+
+Se comprobó que pueden fallar: con `innerHTML` en lugar de `textContent` en el panel de lenguas se pone
+roja la prueba del nombre con marcado, y sin el ocultamiento de secciones del catálogo se ponen rojas dos.
+Ninguno de los dos orquestadores necesitó cambios: ya leían el DOM desde `document`. Para los cuatro que
+quedan, el mismo molde —fixture armado con `createElement` que imita los `data-*` del componente— es el
+próximo paso; `ortografia/render.ts` es el que más gana con la prueba del invariante de nodos.
 
 ---
 
