@@ -96,3 +96,8 @@ cierre con `npm run verify:all` y `npm run test:e2e`.
 - **L10.** Puerta completa antes del verificador: `verify:all` en verde y 181 e2e en verde. La página más
   pesada pasó de 31,2 a 32,7 KB comprimidos con la partición del visor, dentro del presupuesto de 60.
 - **L11 (T11).** Aviso no corregido: el enlace a Glottolog apunta a `master` y no a la versión fijada del dataset.
+- **L12 (2026-11-03).** El dueño autorizó, textual: «Sí, push y PR». Rama publicada y PR
+  https://github.com/Sntg05/LinguaLab/pull/13. `npm run live:check` contra la vista previa de Vercel
+  (`lingualab-git-fix-auditoria-v3-1-lambda-un.vercel.app`): todo en orden, cabeceras y caché inmutable
+  de los motores incluidas. CodeQL del PR encontró #16 y #17 en el propio arreglo; corregidas en `00de301`.
+  Pendiente: la decisión del dueño sobre la revisión nativa (riesgo alto) y fusionar.
