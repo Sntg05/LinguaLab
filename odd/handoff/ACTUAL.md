@@ -37,12 +37,15 @@ no se planea nada hasta traerla.
 
 ## Estado de las ramas
 
-- **`main`** (`965fef7`, v3.1.0) es lo publicado en `https://lingualab-beta.vercel.app`.
-- **`fix/auditoria-v3-1`** cierra la auditoría del 2026-11-03: dominio ajeno en `robots.txt`, promesas de
-  funcionar sin conexión, error de consola en cada página, enlaces rotos, desborde a 320 px, pestañas ARIA,
-  diez alertas de CodeQL, Biome 2.6, motores en carpetas versionadas e inmutables, y las mejoras de
-  metodología (`doctor`, `status:measure`, `live:check`, esta forma de traspaso). **Sin fusionar.** Su
-  documento es [`odd/tasks/audit-v3.1-closure.md`](../tasks/audit-v3.1-closure.md).
+- **`main`** (`2eddc2b`) es lo publicado en `https://lingualab-beta.vercel.app`. Incluye el cierre de la
+  auditoría del 2026-11-03, fusionado por squash desde el PR #13: dominio ajeno en `robots.txt`, promesas
+  de funcionar sin conexión, error de consola en cada página, enlaces rotos, desborde a 320 px, pestañas
+  ARIA, alertas de CodeQL, Biome 2.6, motores en carpetas versionadas e inmutables, el visor de audio
+  partido en módulos y las mejoras de metodología. `npm run live:check` contra producción dio todo en
+  orden después del despliegue. El detalle está en
+  [`odd/tasks/audit-v3.1-closure.md`](../tasks/audit-v3.1-closure.md), ya cerrado.
+- **Lo próximo**, según el dueño: cambios de interfaz (UX/UI) y algunos del lado del código. Arranca con un
+  documento ODD nuevo en `odd/tasks/`.
 
 ## Trampas del entorno, ya pagadas
 

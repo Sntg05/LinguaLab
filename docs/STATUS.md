@@ -10,7 +10,7 @@ commits.
 | | |
 |---|---|
 | **Publicado** | `main`, versión **3.1.0**, en `https://lingualab-beta.vercel.app` (Vercel, ADR 0009) |
-| **En curso** | `fix/auditoria-v3-1`: el cierre de la auditoría del 2026-11-03, **sin fusionar**. Documento ODD: [`odd/tasks/audit-v3.1-closure.md`](../odd/tasks/audit-v3.1-closure.md) |
+| **Última entrega** | El cierre de la auditoría del 2026-11-03, fusionado desde el PR #13 (`2eddc2b`) y verificado en producción con `npm run live:check`. Documento ODD: [`odd/tasks/audit-v3.1-closure.md`](../odd/tasks/audit-v3.1-closure.md) |
 | **Cifras medidas** | [`docs/metrics.json`](metrics.json), que escribe `npm run status:measure`. Este documento no copia cifras: se quedan viejas |
 | **Qué falta** | [`docs/PENDING.md`](PENDING.md) para el código; [`docs/HUMAN-EVIDENCE.md`](HUMAN-EVIDENCE.md) para lo que solo puede cerrar una persona |
 | **Para retomar** | [`odd/handoff/ACTUAL.md`](../odd/handoff/ACTUAL.md), y antes que nada `npm run doctor` |

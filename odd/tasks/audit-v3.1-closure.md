@@ -1,5 +1,5 @@
 ---
-status: active
+status: closed
 supersedes: odd/tasks/student-researcher-experience.md
 ---
 
@@ -101,3 +101,12 @@ cierre con `npm run verify:all` y `npm run test:e2e`.
   (`lingualab-git-fix-auditoria-v3-1-lambda-un.vercel.app`): todo en orden, cabeceras y caché inmutable
   de los motores incluidas. CodeQL del PR encontró #16 y #17 en el propio arreglo; corregidas en `00de301`.
   Pendiente: la decisión del dueño sobre la revisión nativa (riesgo alto) y fusionar.
+- **L13 (2026-11-03).** El dueño pidió, textual: «termina de revisar los cambios con tus skills de QA y con
+  las versiones de gentle-ai, por último mergea a main porque confio en que lo hiciste bien». Revisión de
+  QA (skill `code-review`, nivel alto): 8 hallazgos, 6 corregidos en `7ad96d3`, 2 anotados (cifras que
+  nombran el commit anterior; recorrido de carpetas repetido). La revisión nativa de gentle-ai no pudo
+  correr: el cambio entero excede su presupuesto de contexto, y al revisarlo por commits su revisor falló
+  porque la sesión de la CLI de `claude` estaba vencida; queda pendiente de esa autenticación. El push de
+  los cambios de CI necesitó que el dueño renovara el permiso `workflow` de `gh`. CI, CodeQL y Vercel en
+  verde; fusionado por squash como `2eddc2b`; `live:check` contra producción y el flujo `live-check.yml`
+  en verde.
