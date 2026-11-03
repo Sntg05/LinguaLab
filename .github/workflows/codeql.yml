@@ -13,11 +13,11 @@ name: CodeQL
 # en la pestaña de seguridad; el resto queda en lectura.
 
 on:
+  # main y cada PR. La lista nombraba dos ramas ya fusionadas (auditoría del
+  # 2026-11-03); una rama de trabajo entra por su PR.
   push:
     branches:
       - main
-      - feat/toolbox-v3-security-languages
-      - feat/toolbox-v3-closure
   pull_request:
   schedule:
     # Una vez por semana, aunque nadie toque el repositorio: las consultas de

@@ -1,0 +1,74 @@
+name: Live check
+
+# POR QUE ESTE FLUJO EXISTE
+#
+# `ci.yml` prueba `dist/` en el runner. Lo que solo existe en el servidor
+# —cabeceras, caché, robots.txt servido, errores de consola con la CSP real—
+# no lo ve ninguna puerta, y la auditoría del 2026-11-03 encontró ahí cuatro
+# defectos que llevaban semanas publicados. Este flujo corre
+# `scripts/live-check.mjs` contra el sitio publicado.
+#
+# CUANDO CORRE
+#
+# - Cuando Vercel informa un despliegue de PRODUCCIÓN terminado. Se prueba la
+#   URL canónica y no la del despliegue: las de despliegue pueden estar detrás
+#   de la autenticación de Vercel, y la canónica es la que ve la gente.
+# - Una vez por semana, aunque nadie toque el repositorio: un certificado, una
+#   cabecera o un enlace pueden romperse solos.
+# - A mano, con una URL opcional (por ejemplo, una vista previa abierta).
+#
+# La URL entra por `env`, nunca interpolada en el script: así un valor externo
+# no puede convertirse en un comando.
+
+on:
+  deployment_status:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "URL a revisar (por defecto, la canónica)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-check
+  cancel-in-progress: true
+
+jobs:
+  live-check:
+    name: Published site
+    if: >-
+      github.event_name != 'deployment_status' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LIVE_URL: ${{ inputs.url || 'https://lingualab-beta.vercel.app' }}
+
+    steps:
+      # Fijadas por SHA, como en ci.yml (O2 en docs/SECURITY-REVIEW.md).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Check the published site
+        run: node scripts/live-check.mjs "$LIVE_URL"
