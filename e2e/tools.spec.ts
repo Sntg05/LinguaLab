@@ -146,3 +146,63 @@ test("el export declara los ajustes que produjeron el resultado", async ({ page 
   expect(Array.isArray(exportado.bigrams)).toBe(true);
   expect(Array.isArray(exportado.trigrams)).toBe(true);
 });
+
+/**
+ * Las pestañas de la estación siguen el patrón de pestañas de WAI-ARIA.
+ *
+ * axe no lo detecta: ve `role="tab"` con nombre y lo da por bueno. Pero sin
+ * `tabpanel`, sin `aria-controls` y sin flechas, un lector de pantalla anuncia
+ * «pestaña 1 de 5» y después nada se comporta como tal.
+ */
+test("las pestañas se recorren con el teclado y nombran su panel", async ({ page }) => {
+  await page.goto("/tools");
+  const tabs = page.getByRole("tab");
+  const panel = page.getByRole("tabpanel");
+  const count = await tabs.count();
+  expect(count).toBeGreaterThan(2);
+
+  // Una sola pestaña entra en el orden de Tab: la seleccionada.
+  await expect(page.locator('[role="tab"][tabindex="0"]')).toHaveCount(1);
+  await expect(tabs.first()).toHaveAttribute("aria-selected", "true");
+  const controls = await tabs.first().getAttribute("aria-controls");
+  expect(controls).toBeTruthy();
+  await expect(panel).toHaveAttribute("id", controls ?? "");
+
+  await tabs.first().focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(tabs.nth(1)).toBeFocused();
+  await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
+  await expect(tabs.first()).toHaveAttribute("aria-selected", "false");
+  await expect(panel).toHaveAttribute(
+    "aria-labelledby",
+    (await tabs.nth(1).getAttribute("id")) ?? "",
+  );
+
+  await page.keyboard.press("End");
+  await expect(tabs.nth(count - 1)).toBeFocused();
+  await expect(tabs.nth(count - 1)).toHaveAttribute("aria-selected", "true");
+
+  await page.keyboard.press("ArrowRight");
+  await expect(tabs.first()).toBeFocused();
+
+  await page.keyboard.press("ArrowLeft");
+  await expect(tabs.nth(count - 1)).toBeFocused();
+
+  await page.keyboard.press("Home");
+  await expect(tabs.first()).toBeFocused();
+  await expect(tabs.first()).toHaveAttribute("tabindex", "0");
+});
+
+/**
+ * El panel de pestañas no es una región viva.
+ *
+ * Con `aria-live` en el panel, cada cambio de pestaña hacía que un lector de
+ * pantalla leyera la tabla entera además del nombre de la pestaña. El aviso de
+ * que el análisis terminó va en la región de estado de la página, corto.
+ */
+test("el panel no se anuncia entero y el analisis avisa en una linea", async ({ page }) => {
+  await page.goto("/tools");
+  await expect(page.getByRole("tabpanel")).not.toHaveAttribute("aria-live", /.*/);
+  await page.locator("[data-sample]").click();
+  await expect(page.locator("[data-live-region]")).toContainText("Análisis listo");
+});

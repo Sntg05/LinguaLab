@@ -330,7 +330,7 @@ export const es = {
   "phon.copy": "Copiar AFI",
   "phon.table": "Tablas de Ortografía a AFI",
   "phon.tableNote": "El mismo texto pasado por la tabla grafema→AFI de la herramienta de ortografía. No es un modelo fonológico: sirve para ver dónde coinciden los dos motores y dónde no.",
-  "phon.limits": "Dos lenguas: español de Castilla e inglés estadounidense, las únicas voces verificadas contra los datos que se publican. Sin lematización, sin sílabas y sin tono: solo la cadena de fonemas.",
+  "phon.limits": "Dos lenguas: español latinoamericano (con seseo: «zapato» da /s/) e inglés estadounidense, las únicas voces verificadas contra los datos que se publican. Sin lematización, sin sílabas y sin tono: solo la cadena de fonemas.",
   "nav.catalog": "Catálogo",
   "nav.catalogTools": "Catálogo de herramientas",
   "catalog.title": "Catálogo de herramientas",

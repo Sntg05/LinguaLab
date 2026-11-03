@@ -100,7 +100,12 @@ const toMono = (audio: DecodedAudio): Float64Array => {
   return mono;
 };
 
-const trimSlash = (value: string): string => value.replace(/\/+$/, "");
+/** Quita las barras finales sin una expresion regular que crezca con la entrada. */
+const trimSlash = (value: string): string => {
+  let end = value.length;
+  while (end > 0 && value[end - 1] === "/") end -= 1;
+  return value.slice(0, end);
+};
 
 /**
  * Crea el worker del analisis.

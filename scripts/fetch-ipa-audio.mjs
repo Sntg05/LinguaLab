@@ -115,7 +115,19 @@ async function lookupMany(titles) {
 
   const pages = JSON.parse(text).query?.pages ?? {};
   const byTitle = new Map();
-  const strip = (html) => String(html ?? "").replace(/<[^>]+>/g, "").trim();
+  // Se queda solo con el texto que esta FUERA de cualquier etiqueta, contando
+  // la profundidad: con una expresion regular, `<scr<b>ipt>` dejaba `<script>`
+  // al quitar `<b>`. Ningun `<` ni `>` sobrevive, y el resultado va a un Markdown.
+  const strip = (html) => {
+    let text = "";
+    let depth = 0;
+    for (const char of String(html ?? "")) {
+      if (char === "<") depth += 1;
+      else if (char === ">") depth = Math.max(0, depth - 1);
+      else if (depth === 0) text += char;
+    }
+    return text.trim();
+  };
 
   for (const page of Object.values(pages)) {
     const info = page.imageinfo?.[0];
@@ -167,13 +179,13 @@ async function main() {
   const entries = Object.entries(SOURCES);
   console.log(`Looking up ${entries.length} samples on Wikimedia Commons in one batch...\n`);
 
+  // Leer e intentar, sin comprobar antes si existe: entre la comprobacion y la
+  // lectura el archivo puede cambiar. Un archivo ausente o roto es caché vacía.
   let cache = {};
-  if (existsSync(CACHE)) {
-    try {
-      cache = JSON.parse(readFileSync(CACHE, "utf8"));
-    } catch {
-      cache = {};
-    }
+  try {
+    cache = JSON.parse(readFileSync(CACHE, "utf8"));
+  } catch {
+    cache = {};
   }
 
   const unknown = entries.map(([, title]) => title).filter((t) => !(t in cache));
@@ -210,15 +222,16 @@ async function main() {
     const oggPath = join(OUT_DIR, oggName);
 
     try {
-      if (existsSync(oggPath)) {
-        // Already normalised from an earlier run.
+      if (!FORCE && existsSync(oggPath)) {
+        // Already normalised from an earlier run. `--force` (documented in the
+        // README) re-downloads instead; it used to be parsed and then ignored.
         manifest[symbol] = oggName;
         attribution.push({ symbol, filename: oggName, title, ...info });
         console.log(`  keep  ${symbol.padEnd(3)} ${oggName.padEnd(10)} already present`);
         continue;
       }
 
-      if (existsSync(join(OUT_DIR, wavName))) {
+      if (!FORCE && existsSync(join(OUT_DIR, wavName))) {
         // Converted in place, so no re-download is needed.
         if (toOgg(join(OUT_DIR, wavName), oggPath)) {
           unlinkSync(join(OUT_DIR, wavName));

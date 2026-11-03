@@ -200,6 +200,9 @@ const SAMPLE = es
                 class="tabs__tab"
                 type="button"
                 role="tab"
+                id={`station-tab-${tab.id}`}
+                aria-controls="station-panel"
+                tabindex={index === 0 ? "0" : "-1"}
                 data-tab={tab.id}
                 aria-selected={index === 0 ? "true" : "false"}
               >
@@ -209,7 +212,18 @@ const SAMPLE = es
           }
         </div>
 
-        <div class="panel" data-panel aria-live="polite">
+        {/* Un solo panel para todas las pestañas: cambia lo que dibuja, y su
+            nombre sigue a la pestaña activa (aria-labelledby). No es una región
+            viva: con aria-live, cada cambio de pestaña hacía leer la tabla entera.
+            El fin del análisis se avisa en una línea en [data-live-region]. */}
+        <div
+          class="panel"
+          id="station-panel"
+          role="tabpanel"
+          tabindex="0"
+          aria-labelledby={`station-tab-${tabs[0]?.id ?? ""}`}
+          data-panel
+        >
           <p class="faint" data-empty>
             {es ? "Pega un texto y pulsa «Analizar»." : "Paste a text and press “Analyse”."}
           </p>
@@ -247,6 +261,7 @@ const SAMPLE = es
   import { download } from "../scripts/trees/export";
   import { byteLength, validateFile, validateText } from "../scripts/core/guardrails";
   import { safeInitAll } from "../scripts/core/safe";
+  import { nextTabIndex } from "../scripts/tools/tabs";
   import type { Locale } from "../i18n";
 
   const locale = (document.documentElement.lang === "en" ? "en" : "es") as Locale;
@@ -655,6 +670,12 @@ const SAMPLE = es
     tokens = detailed.tokens;
     sentences = detailed.sentences.length;
     render();
+    const live = document.querySelector<HTMLElement>("[data-live-region]");
+    if (live) {
+      live.textContent = es
+        ? `Análisis listo: ${tokens.length} palabras.`
+        : `Analysis ready: ${tokens.length} words.`;
+    }
   }
 
   /* ---------------- Export ---------------- */
@@ -702,17 +723,45 @@ const SAMPLE = es
       const root = $<HTMLElement>("[data-station]");
       if (!root) return;
 
+      const tabButtons = (): HTMLButtonElement[] => [
+        ...root.querySelectorAll<HTMLButtonElement>("[data-tab]"),
+      ];
+
+      // Patrón de pestañas de WAI-ARIA: solo la pestaña activa entra en el orden
+      // de Tab, el panel toma su nombre, y el foco sigue a la selección.
+      const selectTab = (tab: HTMLButtonElement, focus = false): void => {
+        const id = tab.dataset["tab"];
+        if (!id) return;
+        activeTab = id;
+        for (const other of tabButtons()) {
+          const selected = other === tab;
+          other.setAttribute("aria-selected", selected ? "true" : "false");
+          other.tabIndex = selected ? 0 : -1;
+        }
+        $("[data-panel]")?.setAttribute("aria-labelledby", tab.id);
+        if (focus) tab.focus();
+        render();
+      };
+
+      root.querySelector('[role="tablist"]')?.addEventListener("keydown", (event) => {
+        if (!(event instanceof KeyboardEvent)) return;
+        const tabs = tabButtons();
+        const current = tabs.findIndex((tab) => tab === document.activeElement);
+        if (current === -1) return;
+        const next = nextTabIndex(current, tabs.length, event.key);
+        const target = next === null ? undefined : tabs[next];
+        if (target === undefined) return;
+        event.preventDefault();
+        selectTab(target, true);
+      });
+
       root.addEventListener("click", (event) => {
         const target = event.target;
         if (!(target instanceof Element)) return;
 
         const tab = target.closest<HTMLButtonElement>("[data-tab]");
         if (tab?.dataset["tab"]) {
-          activeTab = tab.dataset["tab"];
-          for (const other of root.querySelectorAll<HTMLButtonElement>("[data-tab]")) {
-            other.setAttribute("aria-selected", other === tab ? "true" : "false");
-          }
-          render();
+          selectTab(tab);
           return;
         }
 

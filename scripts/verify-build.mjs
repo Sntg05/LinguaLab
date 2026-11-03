@@ -8,6 +8,8 @@
  *   3. no page references a third-party origin
  *   4. the compressed payload stays inside the performance budget
  *   5. no page carries a `style` attribute, which the CSP blocks
+ *   6. robots.txt, the sitemaps and each page's identity links name only our origin
+ *   7. every internal link and every self-referencing <link> resolves in dist/
  *
  * Run with: node scripts/verify-build.mjs
  */
@@ -62,7 +64,9 @@ if (pages.length === 0) {
 /* Attributes that cause the browser to FETCH a subresource. An <a href> to
    the source repository is legitimate and is deliberately not matched. */
 const SUBRESOURCE = /<(?:script|img|iframe|audio|video|source|embed)\b[^>]*\bsrc="((?:https?:)?\/\/[^"]+)"|<link\b[^>]*\bhref="((?:https?:)?\/\/[^"]+)"[^>]*\brel="stylesheet"/gi;
-const SCRIPT_TAG = /<script([^>]*)>([\s\S]*?)<\/script>/gi;
+// `</script\s*>` y no `</script>`: el navegador cierra el elemento tambien con
+// `</script >`, y un verificador que no lo reconoce deja pasar un script entero.
+const SCRIPT_TAG = /<script([^>]*)>([\s\S]*?)<\/script[^>]*>/gi;
 
 for (const file of pages) {
   const name = relative(DIST, file);
@@ -83,6 +87,12 @@ for (const file of pages) {
     }
     if (!/object-src 'none'/.test(csp)) {
       fail(`${name}: CSP is missing object-src 'none'`);
+    }
+    // A browser IGNORES frame-ancestors in a <meta> policy and logs a console
+    // error on every page load. The real protection is the response header that
+    // vercel.json sends, so the directive must not travel here.
+    if (/frame-ancestors/.test(csp)) {
+      fail(`${name}: the meta CSP declares frame-ancestors, which browsers ignore there and report as an error`);
     }
 
     const allowed = new Set(
@@ -126,6 +136,10 @@ for (const file of pages) {
   if (!/<meta name="description"/.test(html)) {
     fail(`${name}: no meta description`);
   }
+  // Without these a browser tab shows a blank icon and a shared link shows no
+  // picture, while twitter:card still promised a large one.
+  if (!/<link[^>]*rel="icon"/.test(html)) fail(`${name}: no <link rel="icon">`);
+  if (!/<meta[^>]*property="og:image"/.test(html)) fail(`${name}: no og:image`);
 
   // ---- No inline style attributes ----
   //
@@ -276,6 +290,151 @@ for (const [page, spec] of Object.entries(DELEGATION)) {
       );
     }
   }
+}
+
+// ---- Own domain only ----
+// robots.txt announced the sitemap on a domain that belongs to someone else
+// for weeks after every canonical link had been corrected (ADR 0009), because
+// it was a hand-written file that no check read. What a crawler takes as the
+// site's identity must name the site's own origin: every URL in robots.txt and
+// in the sitemaps, and canonical, hreflang, og:url and og:image in each page.
+// Ordinary <a> links to other sites (the catalogue's external tools) are fine.
+const indexHtml = readFileSync(join(DIST, "index.html"), "utf8");
+const siteOrigin = new URL(
+  indexHtml.match(/<link[^>]*rel="canonical"[^>]*href="([^"]+)"/i)?.[1] ?? "https://invalid.local",
+).origin;
+
+const crawlerFiles = readdirSync(DIST).filter((entry) => /^(robots\.txt|sitemap.*\.xml)$/.test(entry));
+if (!crawlerFiles.includes("robots.txt")) fail("robots.txt is missing from the build");
+for (const entry of crawlerFiles) {
+  const text = readFileSync(join(DIST, entry), "utf8");
+  // Only the addresses a crawler follows: <loc> in a sitemap, Sitemap: in
+  // robots.txt. XML namespace URIs are identifiers, not addresses.
+  const urls = entry.endsWith(".xml")
+    ? [...text.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
+    : [...text.matchAll(/^\s*sitemap:\s*(\S+)/gim)].map((m) => m[1]);
+  if (urls.length === 0) fail(`${entry}: declares no URL at all`);
+  for (const url of urls) {
+    if (new URL(url).origin !== siteOrigin) fail(`${entry}: names ${url}, which is not this site (${siteOrigin})`);
+  }
+}
+
+// The sitemap and the canonical links must name the same addresses: a page
+// listed as `/acerca/` and declared canonical as `/acerca` hands a crawler two
+// URLs for one page.
+const sitemapUrls = new Set(
+  crawlerFiles
+    .filter((entry) => entry !== "sitemap-index.xml" && entry.endsWith(".xml"))
+    .flatMap((entry) => [...readFileSync(join(DIST, entry), "utf8").matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])),
+);
+const canonicalUrls = new Set(
+  pages
+    .map((file) => readFileSync(file, "utf8").match(/<link[^>]*rel="canonical"[^>]*href="([^"]+)"/i)?.[1])
+    .filter((url) => url !== undefined),
+);
+for (const url of canonicalUrls) {
+  if (!sitemapUrls.has(url)) fail(`canonical ${url} is not in the sitemap (check the trailing slash)`);
+}
+for (const url of sitemapUrls) {
+  if (!canonicalUrls.has(url)) fail(`sitemap lists ${url}, which no page declares as canonical`);
+}
+
+const IDENTITY = /<link\b[^>]*\brel="(?:canonical|alternate)"[^>]*\bhref="([^"]+)"|<meta\b[^>]*\bproperty="og:(?:url|image)"[^>]*\bcontent="([^"]+)"/gi;
+for (const file of pages) {
+  for (const match of readFileSync(file, "utf8").matchAll(IDENTITY)) {
+    const url = match[1] ?? match[2] ?? "";
+    if (new URL(url, `${siteOrigin}/`).origin !== siteOrigin) {
+      fail(`${relative(DIST, file)}: declares ${url} as itself, which is not this site (${siteOrigin})`);
+    }
+  }
+}
+
+// ---- Internal links resolve ----
+// A static file passed through the locale prefix (/en/audio/ATTRIBUTION.md)
+// and an English 404 that was never built (/en/404) shipped as dead links.
+// Every <a href> on our own origin and every self-referencing <link> must name
+// something that exists in dist/.
+function resolvesInDist(pathname) {
+  let decoded;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    return false; // a malformed %-escape cannot name a file; report it as a dead link
+  }
+  const clean = decoded.replace(/^\//, "");
+  const candidates = clean === "" || clean.endsWith("/")
+    ? [join(DIST, clean, "index.html")]
+    : [join(DIST, clean), join(DIST, clean, "index.html"), join(DIST, `${clean}.html`)];
+  return candidates.some((candidate) => {
+    try {
+      return statSync(candidate).isFile();
+    } catch {
+      return false;
+    }
+  });
+}
+
+const LINK_ATTR = /<a\b[^>]*\bhref="([^"#][^"]*)"|<link\b[^>]*\brel="(?:canonical|alternate|icon)"[^>]*\bhref="([^"]+)"|<meta\b[^>]*\bproperty="og:image"[^>]*\bcontent="([^"]+)"/gi;
+for (const file of pages) {
+  const name = relative(DIST, file);
+  const html = readFileSync(file, "utf8");
+  for (const match of html.matchAll(LINK_ATTR)) {
+    const href = match[1] ?? match[2] ?? match[3] ?? "";
+    let url;
+    try {
+      url = new URL(href, `${siteOrigin}/`);
+    } catch {
+      fail(`${name}: unparseable link ${href}`);
+      continue;
+    }
+    if (url.origin !== siteOrigin) continue;
+    const pathname = BASE !== "" && url.pathname.startsWith(BASE) ? url.pathname.slice(BASE.length) : url.pathname;
+    if (!resolvesInDist(pathname)) fail(`${name}: links to ${url.pathname}, which is not in the build`);
+  }
+}
+
+// ---- No file ships twice ----
+// espeak-ng.wasm (305 KB) shipped in dist/assets/ as well as in its engine
+// folder: the package's own glue names it with `new URL(..., import.meta.url)`,
+// so Vite emitted a copy that nothing requests. Any large file that ships
+// twice is a copy someone pays for in every deploy.
+function allFiles(dir = DIST) {
+  return readdirSync(dir).flatMap((entry) => {
+    const full = join(dir, entry);
+    return statSync(full).isDirectory() ? allFiles(full) : [full];
+  });
+}
+const byDigest = new Map();
+for (const file of allFiles()) {
+  // Se lee una vez y se mide lo leido: medir antes y leer despues son dos
+  // momentos distintos del mismo archivo (CodeQL js/file-system-race).
+  const bytes = readFileSync(file);
+  if (bytes.length < 50 * 1024) continue;
+  const digest = createHash("sha256").update(bytes).digest("hex");
+  byDigest.set(digest, [...(byDigest.get(digest) ?? []), relative(DIST, file)]);
+}
+for (const copies of byDigest.values()) {
+  if (copies.length > 1) fail(`the same file ships ${copies.length} times: ${copies.join(", ")}`);
+}
+
+// ---- Engine budget ----
+// The page budget below counts what a page loads up front. The engines are
+// fetched only when a tool runs, so they never counted anywhere and could grow
+// without anyone seeing it. They get their own ceiling, a little above what
+// ships today: raising it is a decision, not a side effect.
+const ENGINE_BUDGET_BYTES = 21 * 1024 * 1024;
+let engineBytes = 0;
+for (const engine of ["pyodide", "espeak-phonemizer", "praatfan"]) {
+  const dir = join(DIST, engine);
+  if (!existsSync(dir)) continue;
+  const bytes = allFiles(dir).reduce((sum, file) => sum + statSync(file).size, 0);
+  engineBytes += bytes;
+  notes.push(`engine ${engine}: ${(bytes / 1024 / 1024).toFixed(2)} MB`);
+}
+if (engineBytes > ENGINE_BUDGET_BYTES) {
+  fail(
+    `engines weigh ${(engineBytes / 1024 / 1024).toFixed(2)} MB, budget is ${ENGINE_BUDGET_BYTES / 1024 / 1024} MB`,
+  );
 }
 
 // ---- 6: payload budget (worst page) ----

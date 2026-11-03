@@ -1,3 +1,7 @@
+---
+status: closed
+---
+
 # Security review, dependency response and document drift
 
 Two halves of one delivery: make the project's own claims true again (the documents drifted after

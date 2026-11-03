@@ -1,3 +1,7 @@
+---
+status: closed
+---
+
 # LinguaLab — Astro port
 
 Full port of the legacy vanilla-JS LinguaLab site to Astro 7 + strict

@@ -423,3 +423,27 @@ test("borrar los proyectos guardados deja la lista vacia y la persistencia dice 
   );
   expect(remaining).toBe(0);
 });
+
+/**
+ * Cada botón «▶» nombra SU intervalo.
+ *
+ * El nombre accesible se armaba con el número de la CAPA y no con el del
+ * intervalo: en la capa 1, los tres botones de tres intervalos decían
+ * «Reproducir el intervalo 1». Un lector de pantalla los anunciaba iguales y no
+ * había forma de saber cuál se iba a reproducir. Lo encontró la partición del
+ * orquestador del visor, el 2026-11-03.
+ */
+test("cada boton de reproducir nombra su propio intervalo", async ({ page }) => {
+  await loadAudio(page);
+  await moveCursor(page, 0.25);
+  await page.locator(SPLIT).click();
+  await moveCursor(page, 0.5);
+  await page.locator(SPLIT).click();
+  await expect(page.locator(ROWS)).toHaveCount(3);
+
+  for (const [index, row] of (await page.locator(ROWS).all()).entries()) {
+    await expect(
+      row.getByRole("button", { name: `Reproducir el intervalo ${index + 1}` }),
+    ).toHaveCount(1);
+  }
+});

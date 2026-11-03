@@ -1,3 +1,7 @@
+---
+status: closed
+---
+
 # Bibliography integrity
 
 Add a computational linguistics reading list, and repair the records that were

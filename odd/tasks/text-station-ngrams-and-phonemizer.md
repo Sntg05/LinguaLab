@@ -1,3 +1,7 @@
+---
+status: closed
+---
+
 # text-station-ngrams-and-phonemizer
 
 Continuar el prompt `LinguaLab_prompt_vibecoding.md` donde quedó quieto: implementar la Herramienta B

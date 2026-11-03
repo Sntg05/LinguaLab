@@ -13,6 +13,7 @@ import Masthead from "../components/Masthead.astro";
 import Footer from "../components/Footer.astro";
 import { DEFAULT_LOCALE, LOCALES, htmlLang, localePath, t, type Locale } from "../i18n";
 import { SITE } from "../config/site";
+import { withBase } from "../lib/paths";
 
 interface Props {
   locale?: Locale;
@@ -22,6 +23,14 @@ interface Props {
   path?: string;
   /** Suppress indexing for utility pages if ever needed. */
   noindex?: boolean;
+  /**
+   * A page with no address of its own: the 404, which the host serves for ANY
+   * unknown path. It declares no canonical, no language alternates and no
+   * og:url, because each of those would name an address that is not it (the
+   * old 404 pointed hreflang at `/en/404`, which was never built). Its language
+   * switch leads to each locale's home instead.
+   */
+  standalone?: boolean;
 }
 
 const {
@@ -30,6 +39,7 @@ const {
   description,
   path = "/",
   noindex = false,
+  standalone = false,
 } = Astro.props;
 
 const siteName = "LinguaLab";
@@ -38,6 +48,12 @@ const fullTitle = path === "/" ? `${siteName} — ${title}` : `${title} · ${sit
 // canonicos apuntando a un dominio ajeno cuando el sitio se mudo.
 const siteUrl = Astro.site ?? SITE.url;
 const canonical = new URL(localePath(locale, path), siteUrl);
+// The share card is drawn by scripts/build-social-card.mjs from the site's own
+// mark, fonts and palette. An og:image must be absolute.
+const socialCard = new URL(withBase("/og-card.png"), siteUrl).href;
+const socialCardAlt = locale === "es"
+  ? "LinguaLab: herramientas de análisis lingüístico que corren en el navegador"
+  : "LinguaLab: linguistic analysis tools that run in the browser";
 
 /* The anti-flash script has to be inline (it runs before first paint), so
    the CSP needs its hash. Hashing the exact constant we emit keeps the two
@@ -56,11 +72,12 @@ Astro.csp?.insertScriptHash({ hash: antiFlashHash, kind: "default" });
 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical.href} />
+    <link rel="icon" href={withBase("/favicon.svg")} type="image/svg+xml" />
+    {!standalone && <link rel="canonical" href={canonical.href} />}
     {noindex && <meta name="robots" content="noindex, follow" />}
 
     {/* Language alternates point at the same route in every locale. */}
-    {LOCALES.map((l) => (
+    {!standalone && LOCALES.map((l) => (
       <link
         rel="alternate"
         hreflang={l === DEFAULT_LOCALE ? "x-default" : l}
@@ -72,9 +89,14 @@ Astro.csp?.insertScriptHash({ hash: antiFlashHash, kind: "default" });
     <meta property="og:site_name" content={siteName} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical.href} />
+    {!standalone && <meta property="og:url" content={canonical.href} />}
     <meta property="og:locale" content={htmlLang(locale)} />
+    <meta property="og:image" content={socialCard} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={socialCardAlt} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={socialCard} />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
 
@@ -90,7 +112,7 @@ Astro.csp?.insertScriptHash({ hash: antiFlashHash, kind: "default" });
   <body>
     <a class="skip-link" href="#main">{t(locale, "skip")}</a>
 
-    <Masthead locale={locale} path={path} />
+    <Masthead locale={locale} path={standalone ? "/" : path} />
 
     <main id="main">
       <slot />

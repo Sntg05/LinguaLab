@@ -13,6 +13,7 @@ import { TREE_TYPES } from "../data/trees/types";
 import { GLOSSARY } from "../data/glossary";
 import { BIBLIOGRAPHY } from "../data/bibliography";
 import { localePath, type Locale } from "../i18n";
+import { withBase } from "../lib/paths";
 
 interface Props {
   locale: Locale;
@@ -31,7 +32,7 @@ const audiences: { heading: string; body: string }[] = es
       },
       {
         heading: "Docentes",
-        body: "Para preparar ejemplos en clase sin depender de una conexión ni de una licencia de software.",
+        body: "Para preparar ejemplos en clase sin instalar programas ni pagar una licencia de software.",
       },
       {
         heading: "Investigación",
@@ -45,7 +46,7 @@ const audiences: { heading: string; body: string }[] = es
       },
       {
         heading: "Teachers",
-        body: "To prepare examples for class without depending on a connection or on a software licence.",
+        body: "To prepare examples for class without installing programs or paying for a software licence.",
       },
       {
         heading: "Research",
@@ -77,7 +78,7 @@ const faq: { q: string; a: string }[] = es
       },
       {
         q: "¿La transcripción AFI es exacta?",
-        a: "No, y la interfaz lo dice. Es una transcripción grafema a fonema con reglas ordenadas: sirve para practicar, no sustituye a un transcriptor morfológico ni a un diccionario de pronunciación. Por ejemplo, el inglés no marca la tensión vocálica y el español no distingue seseo de distinción.",
+        a: "No, y la interfaz lo dice. Es una transcripción grafema a fonema con reglas ordenadas: sirve para practicar, no sustituye a un transcriptor morfológico ni a un diccionario de pronunciación. Por ejemplo, el inglés no marca la tensión vocálica, y el español de FonoLab usa distinción (/θ/ en «zapato») aunque en Colombia se pronuncie con seseo.",
       },
       {
         q: "¿Qué significan log-Dice, PMI y G²?",
@@ -107,7 +108,7 @@ const faq: { q: string; a: string }[] = es
       },
       {
         q: "Is the IPA transcription exact?",
-        a: "No, and the interface says so. It is a grapheme-to-phoneme transcription with ordered rules: it is for practice, and it does not replace a morphological transcriber or a pronunciation dictionary. English vowel tenseness is not marked, for instance.",
+        a: "No, and the interface says so. It is a grapheme-to-phoneme transcription with ordered rules: it is for practice, and it does not replace a morphological transcriber or a pronunciation dictionary. English vowel tenseness is not marked, for instance, and FonoLab's Spanish uses distinción (/θ/ in «zapato») even though Colombian Spanish has seseo.",
       },
       {
         q: "What do log-Dice, PMI and G² mean?",
@@ -264,7 +265,8 @@ const numbers: [string, string][] = es
     </div>
 
     <div class="cluster u-mt-m">
-      <a class="btn" href={localePath(locale, "/audio/ATTRIBUTION.md")}>
+      {/* Un archivo estatico existe una sola vez: no lleva prefijo de idioma. */}
+      <a class="btn" href={withBase("/audio/ATTRIBUTION.md")}>
         {es ? "Tabla de atribución de audio" : "Audio attribution table"}
       </a>
       {

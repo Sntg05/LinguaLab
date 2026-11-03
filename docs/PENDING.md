@@ -15,7 +15,7 @@ hace falta `env -u AI_AGENT`: la puerta arranca el preview con `--ignore-lock` (
 
 **Si llegás a este documento desde otra máquina o otra sesión:** el estado de la rama de trabajo, el mapa
 de archivos nuevos y las trampas del entorno están en
-[`odd/handoff/toolbox-v3.md`](../odd/handoff/toolbox-v3.md). Este archivo dice qué falta; ese otro dice
+[`odd/handoff/ACTUAL.md`](../odd/handoff/ACTUAL.md). Este archivo dice qué falta; ese otro dice
 dónde está todo.
 
 **Antes de tocar nada:**
@@ -28,17 +28,39 @@ npm run verify:all    # lint, formato, tipos, reglas hexagonales, pruebas, build
 npm run test:e2e      # e2e; requiere el puerto 4331 LIBRE (ver P7)
 ```
 
-**Estado al escribir esto:** `main` es lo publicado y la entrega v3 sigue en su cadena de ramas, sin
-fusionar. Sobre la rama de cierre (`feat/toolbox-v3-closure`): `verify:all` en verde —**943 pruebas
-unitarias en 55 archivos**, 0 errores de tipos, 198 módulos y 452 dependencias sin violaciones—,
-**88 e2e** en verde (50 de accesibilidad sobre 25 páginas × 2 temas), `npm run audit` en 0 y
-`npm run lint` con 0 errores y 47 avisos, de los cuales 42 ya están en `main`. Los números exactos del día
-viven en `docs/STATUS.md`, no acá; estas cifras se midieron el 2026-10-25.
+**Resumen.** Una fila por entrada, en el mismo orden que el detalle de abajo. `src/lib/docs.test.ts`
+falla si una entrada falta aquí o si esta tabla y la línea `**Estado:` de su detalle no dicen lo mismo.
+Lo que solo puede cerrar una persona con un programa, una comunidad o una decisión está además en
+[`docs/HUMAN-EVIDENCE.md`](HUMAN-EVIDENCE.md).
 
-**Qué está cerrado y qué no.** De P1 a P21, están cerradas con su medición al lado: P1, P3, P8, P12, P13,
-P16, P18 y P19. Siguen abiertas P2, P4, P5, P6, P7, P9, P10, P11, P14, P15, P17, P20 y P21, por los
-motivos que cada una declara —decisión de producto, hablantes o fuentes, un programa externo, un binario
-que se recompila, o un método de medición que todavía no existe—.
+| Entrada | Qué | Estado | Qué la bloquea |
+|---|---|---|---|
+| P1 | La prosa vive en el núcleo | cerrada | — |
+| P2 | Cuatro orquestadores sin prueba unitaria (catálogo y lenguas ya la tienen) | abierta en parte | Nada: el molde está en `*.dom.test.ts` |
+| P3 | La rama de cuota agotada nunca se ejecutó | cerrada | — |
+| P4 | Avisos de complejidad cognitiva | abierta | Deuda aceptada y medida |
+| P5 | Interfaz para las clases `{V}` | abierta | Decisión de producto |
+| P6 | La rama acumulada no entra en una revisión | abierta | Proceso: un PR por rebanada |
+| P7 | La puerta probaba contra el servidor de desarrollo | cerrada | — |
+| P8 | La línea base de lint | cerrada | — |
+| P9 | Cuatro plantillas indígenas vacías | abierta | Hablantes o fuentes citables |
+| P10 | Dos detalles que no son defectos | informativa | — |
+| P11 | Los nodos que axe no mide | abierta | Método de medición por píxeles |
+| P12 | `incomplete` sin motivo textual | cerrada | — |
+| P13 | Cinco inexactitudes documentales | cerrada | — |
+| P14 | eSpeak trae 49 voces que no se ofrecen | abierta | Recompilar el WASM |
+| P15 | Aviso de `node:fs/promises` en el build | abierta | Paquete de terceros |
+| P16 | La puerta e2e y los agentes de IA | cerrada | — |
+| P17 | TextGrid y espectrograma contra Praat | abierta | Praat y una persona |
+| P18 | Puntos fuera de su capa | cerrada | — |
+| P19 | El tope de audio sin prueba propia | cerrada | — |
+| P20 | Borrar un proyecto y no todo el almacén | abierta | Decisión de producto |
+| P21 | «Análisis acústico» anunciado sin existir | cerrada | — |
+| P22 | La tabla de mediciones acústicas no entra | abierta | Nada: el paso exacto está escrito |
+| P23 | Astro 7.4.2 exige Node 22.23.4 | abierta | Decisión: subir el piso de Node |
+
+Las cifras del día no viven aquí: están en [`docs/metrics.json`](metrics.json). Las que aparecen dentro de
+cada entrada son mediciones con su fecha, y se dejan como historia.
 
 ---
 
@@ -91,6 +113,11 @@ oración.
 
 ## P2 — Los dos orquestadores y el render no tienen prueba unitaria
 
+**Estado: abierta en parte.** Desde el 2026-11-03 hay entorno DOM en Vitest y prueba unitaria de dos
+orquestadores: `src/scripts/catalogo/index.ts` y `src/scripts/lenguas/index.ts`. Siguen sin ella los de
+`src/scripts/audio/`, `src/scripts/ortografia/` (con `render.ts`), `src/scripts/experimentos/` y
+`src/scripts/elan/`.
+
 **Síntoma.** Ninguno.
 
 **Evidencia.** `grep -rn "scripts/ortografia\|scripts/catalogo" --include='*.test.ts'` no devuelve nada.
@@ -111,6 +138,26 @@ repetición de lo que ya cubre Playwright.
 
 **Criterio de aceptación.** La prueba tiene que poder fallar: introducí un `innerHTML` a propósito y
 comprobá que se pone roja antes de darla por buena.
+
+**Avance (2026-11-03).** Se resolvió el «decidí si vale la pena» a favor, con un alcance chico:
+`happy-dom` 21.0.4 como dependencia de desarrollo y dos proyectos en `vitest.config.ts`. Solo los archivos
+`*.dom.test.ts` corren en happy-dom; todo lo demás sigue en Node, así que una prueba del núcleo que use
+`document` sigue fallando. Antes de configurar el entorno, las dos pruebas nuevas fallaron las 22 con
+`ReferenceError: document is not defined`; con el entorno, pasan.
+
+- `src/scripts/catalogo/index.dom.test.ts` (8 pruebas): las tres facetas combinadas con Y, la herramienta
+  sin lenguas que solo coincide con «todas», la sección que se oculta con su encabezado, la cuenta, el
+  estado vacío con los filtros nombrados como se leen, la selección restaurada por el navegador, el
+  diccionario ausente y la página sin catálogo.
+- `src/scripts/lenguas/index.dom.test.ts` (14 pruebas): familia, «sin familia», buscador, secciones y
+  puntos del mapa que se apagan con su fila, cuenta y aviso vacío; el panel de detalle copiado de la fila,
+  la marca de selección, las lenguas sin coordenadas y un nombre con `<` y `>` que entra como texto.
+
+Se comprobó que pueden fallar: con `innerHTML` en lugar de `textContent` en el panel de lenguas se pone
+roja la prueba del nombre con marcado, y sin el ocultamiento de secciones del catálogo se ponen rojas dos.
+Ninguno de los dos orquestadores necesitó cambios: ya leían el DOM desde `document`. Para los cuatro que
+quedan, el mismo molde —fixture armado con `createElement` que imita los `data-*` del componente— es el
+próximo paso; `ortografia/render.ts` es el que más gana con la prueba del invariante de nodos.
 
 ---
 
@@ -191,6 +238,8 @@ historias en un mismo diff. Lo que cambió es que el reparto ya no es una infere
 
 ## P5 — El motor resuelve las clases `{V}`; el editor no tiene interfaz para ellas
 
+**Estado: abierta, a la espera de una decisión de producto.**
+
 **Síntoma.** El prompt original describe clases de contexto con la forma `{V}`. Se pueden escribir en el
 JSON de la tabla y el motor las resuelve, pero en el editor no hay forma de crearlas ni de editarlas.
 
@@ -218,6 +267,8 @@ escribirla a mano, y el `trace` nombra la clase que coincidió. Sin lo segundo n
 ---
 
 ## P6 — La revisión de la rama acumulada no entra por tamaño
+
+**Estado: abierta.**
 
 **Síntoma.** `gentle_review` con `inspect` ofrece `review.start` sobre la rama entera, y el arranque se
 rechaza a sí mismo.
@@ -347,6 +398,8 @@ nada: informa. La puerta que bloquea sigue siendo `npm run lint`.
 
 ## P9 — Cuatro plantillas indígenas vacías, a propósito
 
+**Estado: abierta.**
+
 **Síntoma.** Elegir inga, wayuunaiki, nasa yuwe o arhuaco muestra una tabla sin reglas.
 
 **Evidencia.** `packages/core/src/data/indigenous-templates.ts` declara las cuatro con un aviso de
@@ -373,6 +426,8 @@ fuente, la tabla entra con su cita; si no, se queda vacía.
 
 ## P10 — Dos detalles que no son defectos y conviene no confundir con defectos
 
+**Estado: informativa: no hay nada que corregir.**
+
 **`incomplete` de axe en `.btn__arrow`** (`messageKey: nonBmp`). axe saltea el contraste de un contenido
 compuesto solo de caracteres que su regex trata como símbolos, y esa regex cubre flechas, operadores y
 dingbats **dentro** del plano básico: la flecha es `→`, U+2192. O sea que **no** es «un carácter fuera del
@@ -388,6 +443,8 @@ lea el cambio.
 ---
 
 ## P11 — El punto ciego de la puerta: los nodos que axe no mide
+
+**Estado: abierta.**
 
 **Síntoma.** La puerta pasa y no dice nada sobre el contraste de ciertos nodos. No es que estén bien: es
 que **nadie los midió**.
@@ -542,6 +599,8 @@ sino verificar la que hay.
 
 ## P14 — El bundle del fonemizador pesa 5,6 MB y trae 49 voces que no se ofrecen
 
+**Estado: abierta.**
+
 **Severidad:** la primera fonemización tarda lo que tarda una descarga de 5,6 MB, y el 96 % de esos
 bytes son lenguas que la interfaz no muestra.
 
@@ -571,6 +630,8 @@ fonemiza igual, `npm run build:verify` sigue en verde y lo servido bajo `public/
 baja al menos un 80 %.
 
 ## P15 — El build avisa que `node:fs/promises` se externalizó para el navegador
+
+**Estado: abierta.**
 
 **Severidad:** baja. La herramienta funciona —está probada en navegador real— pero el build emite una
 advertencia que alguien va a leer algún día y va a querer entender.
@@ -640,6 +701,8 @@ vez de esconder lo que hay. `reuseExistingServer` sigue en `false`, así que **P
 puerto está ocupado, la corrida es roja.
 
 ## P17 — El visor de audio declara experimental el TextGrid y el espectrograma, y no puede probar Praat
+
+**Estado: abierta.**
 
 **Severidad:** media, y es una promesa de interoperabilidad, no un fallo visible. La herramienta
 funciona; lo que no está medido es que el archivo exportado abra en el programa de otra persona.
@@ -812,6 +875,8 @@ comportamiento: los mensajes miden lo mismo que antes.
 
 ## P20 — Borrar libera todo el almacén, no un proyecto
 
+**Estado: abierta, a la espera de una decisión de producto.**
+
 **Severidad:** baja. La promesa que hace el control se cumple —«borrar los proyectos guardados»—, pero
 `AnnotationStoragePort.remove(projectId)` sigue sin usarse para lo que su firma permite.
 
@@ -872,6 +937,8 @@ para quitarla está en `docs/validation/acoustic.md`.
 
 ## P22 — La tabla de mediciones acústicas no entra en 1280 px, y su contraste no se puede medir
 
+**Estado: abierta.**
+
 **Severidad:** baja, de accesibilidad declarada y de diseño.
 
 **Síntoma.** La tabla de mediciones del visor tiene doce columnas (etiqueta, rango, cuatro de F0, una de
@@ -898,3 +965,20 @@ entra, la puerta ya no debería necesitarlo.
 
 **Criterio de aceptación.** Con una, dos y tres mediciones la tabla no desborda su contenedor a 1280 px,
 `elmPartiallyObscured` desaparece de `AXE_COULD_NOT_MEASURE` y la suite sigue verde sin excepciones nuevas.
+
+## P23 — Astro 7.4.2 exige Node 22.23.4
+
+**Estado: abierta, a la espera de una decisión.**
+
+**Síntoma.** El PR #12 de Dependabot subía Astro de 7.4.1 a 7.4.2 junto con Biome. Con 7.4.2,
+`astro check` se niega a correr en Node 22.23.3 —«Node.js v22.23.3 is not supported by Astro! Please
+upgrade Node.js to a supported version: ">=22.23.4"»—, que es el Node de la máquina de trabajo, y
+`package.json` declara `engines.node` `>=22.12.0`. Medido el 2026-11-03 en `fix/auditoria-v3-1`.
+
+**Qué se hizo.** Biome 2.6.3 y `@astrojs/check` 0.9.12 entraron; Astro se quedó en 7.4.1, porque subir el
+piso de Node es una decisión sobre el entorno de quien contribuye y no se toma de paso.
+
+**Próximo paso exacto.** Si se decide subir: `nvm install 22.23.4` (o el último 22), `.nvmrc` y
+`engines.node` a `>=22.23.4`, `npm install -D astro@7.4.2` y `npm run verify:all`. Dependabot volverá a
+proponerlo solo mientras tanto.
+

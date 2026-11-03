@@ -18,6 +18,10 @@
 
 .explab {
   display: grid;
+  /* Una pista implicita mide lo que pide su contenido mas ancho: a 320 px el
+     panel quedaba en 336 y la pagina se desplazaba de lado (WCAG 1.4.10).
+     `minmax(0, 1fr)` deja que la pista se encoja al ancho disponible. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-m);
   align-items: start;
 }
@@ -34,12 +38,23 @@
 
 .explab__panel {
   display: grid;
+  min-width: 0;
   gap: var(--space-s);
   padding: var(--space-m);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-m);
   box-shadow: var(--shadow-s);
+}
+
+/* Los botones del sitio no parten linea (`.btn` lleva `nowrap`), y aqui hay
+   rotulos largos como «Descargar la especificación en JSON»: a 320 px ese solo
+   boton media 286 px y empujaba el panel fuera de la pantalla. Dentro de un
+   panel del constructor se permite partirlo. */
+.explab__panel .btn {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
 }
 
 .explab__title {

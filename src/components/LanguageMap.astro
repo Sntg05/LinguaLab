@@ -28,7 +28,7 @@ import { join } from "node:path";
 import { SITE } from "../config/site";
 import { t, type Locale } from "../i18n";
 import { NO_FAMILY } from "../scripts/lenguas/filter";
-import { LANGUAGE_DATASET } from "../scripts/lenguas/language-map";
+import { LANGUAGE_DATASET, browsableSourceUrl } from "../scripts/lenguas/language-map";
 import {
   fitsInViewBox,
   geoPointOf,
@@ -164,7 +164,7 @@ const viewBox = `0 0 ${geometry.viewBox[0]} ${geometry.viewBox[1]}`;
             version: LANGUAGE_DATASET.glottologVersion,
             date: retrievedOn,
           })}
-          · <a href={LANGUAGE_DATASET.sourceUrl} target="_blank" rel="noopener noreferrer"
+          · <a href={browsableSourceUrl(LANGUAGE_DATASET.sourceUrl)} target="_blank" rel="noopener noreferrer"
             >{t(locale, "map.data.source")}</a
           >
         </p>

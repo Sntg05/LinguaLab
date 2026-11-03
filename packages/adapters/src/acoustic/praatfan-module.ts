@@ -3,7 +3,7 @@
  *
  * POR QUE UNA DECLARACION PROPIA Y NO LA DEL PAQUETE
  *
- * `public/praatfan/praatfan_gpl.d.ts` es la fuente de verdad de la API —la
+ * `public/praatfan/<version>/praatfan_gpl.d.ts` es la fuente de verdad de la API —la
  * escribe wasm-bindgen y por eso no se desincroniza—, pero vive en `public/`,
  * fuera de los `include` de cualquier `tsconfig`, y un adaptador no puede
  * importar tipos desde ahi sin sacar el artefacto de su carpeta fijada por

@@ -31,8 +31,13 @@ estructura de datos. Este documento cubre el flujo de trabajo alrededor del cód
 
 ```bash
 npm install
+npm run doctor     # antes de tocar nada: Node, rama frente a origin, Chromium, puerto 4331
 npm run dev        # http://localhost:4321
 ```
+
+`npm run doctor` no es una formalidad: el 2026-11-03 una sesión planeó cuatro herramientas que ya
+existían porque su copia estaba 59 commits detrás de `origin/main`. Si dice que la rama está atrás, se
+trae antes de planear.
 
 El repositorio es un **npm workspace**. El sitio Astro vive en la raíz y el hexágono en `packages/`:
 
@@ -55,6 +60,8 @@ src/                  el sitio Astro: el adaptador primario
 | `npm run build:verify` | Compila y verifica el resultado (CSP, peso, subrecursos) |
 | `npm run format:check` | Formato con Biome. Dentro de `verify:all` y de CI desde este cambio |
 | `npm run verify:all` | Todas las anteriores menos `test:e2e`, en orden |
+| `npm run live:check [url]` | El sitio **publicado**: cabeceras, robots, consola, axe, 404 y caché de los motores |
+| `npm run status:measure` | Mide y escribe `docs/metrics.json`, la única fuente de las cifras |
 
 `npm run verify:all` es la puerta completa. Si pasa, el cambio es publicable.
 
@@ -81,49 +88,71 @@ producción.
 
 ## Flujo de trabajo
 
-1. **Rama corta**, desde `main`, con un nombre que diga qué hace y dónde:
+El proyecto trabaja con **ODD** (*Organic Driven Development*): el cambio pequeño se hace directo, y el
+grande se planea en un documento antes de escribir código.
+
+1. **Documento de la entrega**, si el trabajo no se puede retomar solo con el pedido y el `git diff`:
+   `odd/tasks/<nombre>.md`, con un encabezado `status:` (`active`, `closed`, `superseded` o
+   `reference`), `## Specs` con lo pedido **textual**, `## Tasks` con su commit y `## Log` con el pedido
+   original y cada corrección. Hay un solo documento `active` a la vez; `npm run doctor` avisa del que no
+   declara estado.
+
+2. **Rama corta desde `main`**, con un nombre que diga qué hace:
 
    ```
    feat/g2p-table-engine
-   feat/ortografia-editor
    fix/textgrid-utf16
    docs/adr-acustica
    ```
 
-   Tipos de rama: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`.
+   Tipos de rama: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`. CI corre en
+   cada push a `main` y en cada PR: una rama de trabajo se verifica al abrir su PR, sin lista que mantener.
 
-2. **Un cambio, una idea.** Si tu rama toca dos cosas que un revisor evaluaría por separado,
-   sepáralas en dos ramas. Una excepción: el código, sus pruebas y su documentación viajan juntos.
-   Un cambio de comportamiento sin la prueba que lo fija no está terminado.
+3. **Commits por unidad de trabajo, con la prueba en rojo antes del arreglo.** El código, su prueba y su
+   documentación viajan juntos; un cambio de comportamiento sin la prueba que lo fija no está terminado.
+   Conventional Commits en español o en inglés, consistentes dentro del mismo cambio; `commitlint` los
+   valida con los ganchos de Husky.
 
-3. **Commits con Conventional Commits**, en español o en inglés, pero consistentes dentro del mismo
-   cambio:
+4. **Un PR por rebanada, aunque trabajes solo.** Unas 400 líneas como guía, no como tope. El PR dispara
+   CI y la vista previa de Vercel, que es el guion de prueba manual. «Cómo se probó» lleva los comandos
+   que corriste, no «funciona». La entrega v3 entró a `main` empujando la cadena de ramas sin PR, y por
+   eso nadie la revisó en el sitio antes de publicarla: eso es lo que esta regla evita.
 
-   ```
-   feat(core): implementa motor de reglas ortografia-ipa
-   fix(web): corrige el foco del editor al borrar una regla
-   docs: documenta el formato JSON de tablas
-   ```
+5. **Merge por squash**, con el título del PR como mensaje convencional, para que cada entrada del
+   historial de `main` corresponda a un cambio revisado. Fusionar lo decide una persona: una verificación
+   en verde no autoriza a fusionar.
 
-   Tipos: `feat`, `fix`, `docs`, `test`, `refactor`, `perf`, `build`, `ci`, `chore`, `revert`.
-   `commitlint` los valida si tienes los ganchos de Husky instalados.
+6. **Después del despliegue**, `live-check.yml` revisa el sitio publicado. Un rojo ahí es un defecto de
+   producción, no una prueba inestable.
 
-4. **Pull request.** Usa la plantilla. Rellena «Cómo se probó» con los comandos que corriste, no con
-   «funciona». Si el cambio supera unas 400 líneas, probablemente haya que partirlo: un PR que no se
-   puede leer en una sentada no se revisa, se aprueba por cansancio.
+### Documentos que se mantienen, y cómo
 
-5. **Merge por squash**, con el título del PR como mensaje convencional. Así `main` queda lineal y
-   cada entrada del historial corresponde a un cambio revisado.
+| Documento | Regla |
+|---|---|
+| `docs/metrics.json` | Única fuente de las cifras. Se regenera con `npm run status:measure`; ningún otro documento las copia, y `src/lib/docs.test.ts` lo hace cumplir en README, STATUS y el traspaso |
+| `docs/STATUS.md` | En qué se puede confiar hoy. Resumen arriba, detalle abajo |
+| `docs/PENDING.md` | Qué falta en el código. La tabla resumen y la línea `**Estado:` de cada entrada dicen lo mismo, o falla `docs.test.ts` |
+| `docs/HUMAN-EVIDENCE.md` | Lo que solo cierra una persona: un programa, una comunidad, un usuario o una decisión |
+| `odd/handoff/ACTUAL.md` | El traspaso vigente. Se **reescribe** en cada entrega; el anterior se archiva con fecha en `odd/handoff/archivo/` |
+
+### Revisión semanal de alertas
+
+Una vez por semana, quince minutos: las alertas de CodeQL y de Dependabot, los PR de Dependabot y la última
+corrida de `live-check.yml`. Cada alerta se corrige o se descarta **con su motivo escrito** en
+`docs/SECURITY-REVIEW.md`. Las quince alertas del 2026-10-25 estuvieron nueve días sin que nadie las mirara
+mientras la revisión de seguridad decía que no había ninguna.
 
 ### Configuración recomendada de `main`
 
-Aplicada a mano en GitHub (**Settings → Branches → Add branch protection rule**), porque una regla de
-repositorio no debería cambiar sin que una persona la apruebe:
+Aplicada a mano en GitHub (**Settings → Branches**), porque una regla de repositorio no debería cambiar
+sin que una persona la apruebe:
 
 - Require a pull request before merging.
-- Require status checks to pass, con el job `verify` del workflow `CI` como obligatorio.
+- Require status checks to pass, con el job `Types, tests and build` del workflow `CI` como obligatorio.
 - Require linear history.
 - Do not allow force pushes.
+- **Do not allow bypassing the above settings**, para que valga también para administradores: hoy no está
+  activado, y así entró la entrega v3 sin PR.
 
 ---
 
@@ -160,6 +189,9 @@ repositorio no debería cambiar sin que una persona la apruebe:
    pública sin axe es una incógnita, no una certeza.
 6. Anota el paquete y su licencia en `THIRD_PARTY_NOTICES.md`, con la versión **instalada**. Una
    dependencia sin licencia anotada no entra.
+7. Si trae un motor pesado que se sirve desde `public/`, va en `public/<motor>/<versión>/`, con su versión
+   en `src/config/engines.json` y su carpeta en `vercel.json` como inmutable: `src/config/engines.test.ts`
+   exige las tres cosas.
 
 ## Cómo escribir un ADR
 
@@ -182,8 +214,8 @@ Normas: numera en secuencia sin reutilizar huecos; las decisiones que ya no vale
 «sustituida por ADR NNNN» en vez de borrarse — el valor de un ADR es que también registra los
 caminos que se descartaron y por qué.
 
-Antes de escribir uno, mira si tu decisión es en realidad una consecuencia de uno de los tres
-existentes. Si lo es, no necesita ADR propio: necesita un comentario donde se note.
+Antes de escribir uno, mira si tu decisión es en realidad una consecuencia de uno de los que ya
+existen. Si lo es, no necesita ADR propio: necesita un comentario donde se note.
 
 ---
 

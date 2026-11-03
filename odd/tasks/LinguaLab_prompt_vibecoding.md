@@ -1,3 +1,7 @@
+---
+status: reference
+---
+
 # LinguaLab — Prompt de vibe-coding por segmentos
 
 Caja de herramientas web y open source para estudiantes de lingüística y lingüística computacional.

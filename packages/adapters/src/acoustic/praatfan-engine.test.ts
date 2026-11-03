@@ -3,7 +3,7 @@
  *
  * SE EJECUTA EN NODE CON EL WASM REAL, NO CONTRA UN DOBLE
  *
- * El artefacto de `public/praatfan/` es un modulo ES del target `web` de
+ * El artefacto de `public/praatfan/<version>/` es un modulo ES del target `web` de
  * wasm-pack, y su `init` acepta los bytes compilados ademas de una URL. Por eso
  * se puede cargar en Node sin navegador: se leen los bytes con `readFile` y se
  * los pasa tal cual. Probar contra un doble habria demostrado que el adaptador
@@ -19,17 +19,25 @@
  * midio con Praat.
  */
 
+import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { isErr, isOk } from "@lingualab/core";
 import { createPraatfanEngine, MIN_ANALYSIS_SECONDS } from "./praatfan-engine";
 
-const VENDOR = new URL("../../../../public/praatfan/", import.meta.url);
+/** La version vendorizada sale de `src/config/engines.json`, la unica fuente. */
+const ENGINE_VERSIONS = JSON.parse(
+  readFileSync(new URL("../../../../src/config/engines.json", import.meta.url), "utf8"),
+) as Record<string, string>;
+const VENDOR = new URL(
+  `../../../../public/praatfan/${ENGINE_VERSIONS["praatfan"]}/`,
+  import.meta.url,
+);
 
 /**
  * Rutas al artefacto vendoreado. La prueba las lee del repositorio porque es el
  * mismo archivo que se sirve en el navegador, fijado por hash en
- * `public/praatfan/PROVENANCE.txt`.
+ * `public/praatfan/<version>/PROVENANCE.txt`.
  */
 const sources = async () => ({
   moduleUrl: new URL("praatfan_gpl.js", VENDOR).href,

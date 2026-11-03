@@ -55,7 +55,7 @@ import type {
 } from "./scripts/experimentos/runner";
 import sitePackage from "../package.json";
 import { TOOLS } from "./scripts/catalogo/catalog-data";
-import { withBase } from "./lib/paths";
+import { enginePath } from "./config/engines";
 
 /**
  * The ports below are trivial but still injected rather than called inline:
@@ -93,31 +93,33 @@ const registry = createStaticToolRegistry(TOOLS);
  * El fonemizador es el unico adaptador que pide algo fuera de este dispositivo
  * —los datos de eSpeak NG llegan por HTTP— y por eso su ubicacion se decide aqui.
  *
- * `withBase` no es decorativo: si el sitio se sirve bajo un subdirectorio, una
+ * `enginePath` pasa la ruta por `withBase`, y no es decorativo: si el sitio se sirve bajo un subdirectorio, una
  * base sin prefijo se pediria al dominio y volveria 404. Los datos viven en
- * `public/espeak-phonemizer/` (los copia `scripts/sync-espeak-data.mjs`), asi que
+ * `public/espeak-phonemizer/<version>/` (los copia `scripts/sync-espeak-data.mjs`;
+ * la version en la ruta se explica en `src/config/engines.ts`), asi que
  * se buscan en tiempo de ejecucion y no viajan en el bundle: el presupuesto de
  * peso por pagina mide scripts, y estos 5,7 MB no lo son.
  *
  * Esa base no es opcional por otra razon: si los datos no estan donde se los
  * busca, el paquete cae en pedirlos a un CDN publico. La CSP del sitio
- * (`connect-src 'self'`) lo bloquearia y la promesa de que la herramienta
- * funciona sin conexion despues de la primera carga dejaria de ser cierta.
+ * (`connect-src 'self'`) lo bloquearia y la herramienta dejaria de funcionar:
+ * el texto de la persona nunca sale hacia otro servidor, y tampoco el motor
+ * entra desde uno.
  */
-const phonemizer = createEspeakPhonemizer({ baseUrl: withBase("/espeak-phonemizer") });
+const phonemizer = createEspeakPhonemizer({ baseUrl: enginePath("espeakPhonemizer") });
 
 /**
  * El codec ELAN (Pyodide + pympi-ling) del conversor del segmento 9.
  *
- * La base es `public/pyodide/` por la misma razon que la del fonemizador: la CSP
+ * La base es `public/pyodide/<version>/` por la misma razon que la del fonemizador: la CSP
  * es `default-src 'self'` y la promesa de la herramienta es que el archivo de
  * campo no sale del navegador. Pyodide usa un CDN por defecto si no se le dice
  * donde estan sus archivos, y ese CDN estaria bloqueado.
  *
- * `withBase` no es decorativo: si el sitio se sirve bajo un subdirectorio (un
+ * `enginePath` pasa la ruta por `withBase`, y no es decorativo: si el sitio se sirve bajo un subdirectorio (un
  * fork o un espejo), una base sin prefijo se pediria al dominio y volveria 404.
  */
-const elan = createPyodideElanCodec({ indexURL: withBase("/pyodide") });
+const elan = createPyodideElanCodec({ indexURL: enginePath("pyodide") });
 
 /**
  * El analisis acustico sigue el mismo criterio que el fonemizador: construir el
@@ -125,13 +127,12 @@ const elan = createPyodideElanCodec({ indexURL: withBase("/pyodide") });
  * no crea el worker y no compila nada hasta el primer analisis, asi que cablearlo
  * aqui no cuesta nada a las paginas que nunca miden.
  *
- * `withBase` no es decorativo: bajo un subdirectorio, una ruta sin prefijo se
+ * `enginePath` pasa la ruta por `withBase`, y no es decorativo: bajo un subdirectorio, una ruta sin prefijo se
  * pediria al dominio y volveria 404. El
- * artefacto esta en `public/praatfan/`, fijado por hash, y se sirve desde este
- * mismo origen: la CSP no admite un CDN y la promesa de funcionar sin conexion
- * despues de la primera carga tampoco.
+ * artefacto esta en `public/praatfan/<version>/`, fijado por hash, y se sirve desde este
+ * mismo origen: la CSP no admite un CDN.
  */
-const acoustic = createPraatfanAcousticAnalysis({ baseUrl: withBase("/praatfan") });
+const acoustic = createPraatfanAcousticAnalysis({ baseUrl: enginePath("praatfan") });
 
 /**
  * El ejecutor de experimentos, construido por corrida.

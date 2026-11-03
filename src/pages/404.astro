@@ -2,23 +2,23 @@
 /**
  * Not found.
  *
- * GitHub Pages serves 404.html for any unknown path, so this page has to
- * stand alone: it uses the Spanish copy because that is the default locale,
- * and offers both language entry points.
+ * Vercel serves 404.html for any unknown path, so this page has to stand
+ * alone: it has no address of its own (`standalone`), uses the Spanish copy
+ * because that is the default locale, and offers both language entry points.
+ *
+ * The list used to be written by hand and had fallen six tools behind. It now
+ * comes from the primary navigation, the same source as the masthead: the
+ * catalogue is the one door that always lists every tool.
  */
 import Base from "../layouts/Base.astro";
+import { PRIMARY_NAV_ITEMS } from "../config/site";
+import { localePath, t } from "../i18n";
 import { baseRoot, withBase } from "../lib/paths";
 
-/* A 404 page must link to real locations, which under a subpath base means
-   every path needs the prefix. */
-const links = [
-  { href: withBase("/tools"), label: "Estación textual", note: "análisis de corpus" },
-  { href: withBase("/fono"), label: "FonoLab", note: "alfabeto fonético con corte sagital" },
-  { href: withBase("/arboles"), label: "ArborLab", note: "árboles sintácticos y de datos" },
-  { href: withBase("/glosario"), label: "Glosario", note: "términos de lingüística" },
-  { href: withBase("/bibliografia"), label: "Bibliografía", note: "recursos con licencia" },
-  { href: withBase("/seguridad"), label: "Seguridad", note: "verificación en vivo" },
-];
+const links = PRIMARY_NAV_ITEMS.map(({ path, labelKey }) => ({
+  href: localePath("es", path),
+  label: t("es", labelKey),
+}));
 ---
 
 <Base
@@ -27,21 +27,22 @@ const links = [
   title="Página no encontrada"
   description="La página que buscas no existe en LinguaLab."
   noindex
+  standalone
 >
   <section class="section">
     <div class="shell notfound">
       <p class="notfound__code mono" aria-hidden="true">404</p>
       <h1>Esta página no existe</h1>
       <p class="u-lead">
-        Puede que el enlace esté mal escrito o que la página se haya movido. Estas son las
-        herramientas disponibles:
+        Puede que el enlace esté mal escrito o que la página se haya movido. Desde aquí puedes
+        seguir:
       </p>
 
       <ul class="notfound__list" role="list">
         {
           links.map((link) => (
             <li>
-              <a href={link.href}>{link.label}</a> — {link.note}
+              <a href={link.href}>{link.label}</a>
             </li>
           ))
         }

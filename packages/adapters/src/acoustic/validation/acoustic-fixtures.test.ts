@@ -10,6 +10,7 @@
  * arnes produzca filas comparadas. Lo que no acepta es un «passed» sin filas.
  */
 
+import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -17,7 +18,13 @@ import { createPraatfanEngine } from "../praatfan-engine";
 import { validateAgainstReference } from "./acoustic-validation";
 
 const REFERENCE = new URL("../../../../../e2e/fixtures/reference/", import.meta.url);
-const VENDOR = new URL("../../../../../public/praatfan/", import.meta.url);
+/** La version vendorizada sale de `src/config/engines.json`, la unica fuente. */
+const PRAATFAN_VERSION = (
+  JSON.parse(
+    readFileSync(new URL("../../../../../src/config/engines.json", import.meta.url), "utf8"),
+  ) as Record<string, string>
+)["praatfan"];
+const VENDOR = new URL(`../../../../../public/praatfan/${PRAATFAN_VERSION}/`, import.meta.url);
 
 describe("las referencias de Praat del repositorio", () => {
   it("no se dan por buenas por ausencia: o hay filas comparadas, o falta la carpeta", async () => {

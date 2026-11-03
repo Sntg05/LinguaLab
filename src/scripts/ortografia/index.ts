@@ -514,7 +514,7 @@ const start = async (): Promise<void> => {
       return;
     }
 
-    let next = rule;
+    let next: typeof rule;
     switch (field) {
       case "grapheme":
       case "ipa":

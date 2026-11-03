@@ -1,0 +1,35 @@
+{
+  "$comment": "Generado por `npm run status:measure`. No se edita a mano: los documentos citan este archivo en vez de copiar las cifras.",
+  "version": "3.1.0",
+  "commit": "7ad96d3",
+  "measuredAt": "2026-11-03",
+  "unitTests": {
+    "tests": 1292,
+    "passed": 1292,
+    "files": 89
+  },
+  "e2e": {
+    "tests": 182,
+    "files": 10
+  },
+  "hexagon": {
+    "modules": 312,
+    "dependencies": 737
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 44
+  },
+  "build": {
+    "pages": 31,
+    "files": 146,
+    "bytes": 22911968,
+    "worstPageKbGz": 32.7,
+    "worstPage": "visualizador/index.html",
+    "enginesMb": {
+      "pyodide": 13.04,
+      "espeakPhonemizer": 5.67,
+      "praatfan": 0.69
+    }
+  }
+}

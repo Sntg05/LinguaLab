@@ -24,6 +24,20 @@ interface CatalogTool {
 const tools = (rawCatalog as { tools: readonly CatalogTool[] }).tools;
 
 describe("SITE_ROUTES contra el catálogo", () => {
+  it("una herramienta con página en este sitio corre aquí, y no se anuncia como «requiere servidor»", () => {
+    // El conversor ELAN quedó como `needs-backend` desde antes de existir, cuando
+    // se dudaba de poder servir Python sin servidor. Se implementó con Pyodide en
+    // el navegador y la etiqueta siguió: el filtro «Requiere servidor» del catálogo
+    // lo mostraba, contradiciendo la promesa de que el archivo no sale de la
+    // pestaña (auditoría del 2026-11-03).
+    const mislabelled = tools
+      .filter((tool) => SITE_ROUTES[tool.id] !== undefined)
+      .filter((tool) => tool.integration !== "embedded")
+      .map((tool) => `${tool.id} (${tool.integration})`);
+
+    expect(mislabelled).toEqual([]);
+  });
+
   it("toda herramienta integrada que no está planificada tiene ruta y página", () => {
     const missing = tools
       // Solo lo que corre DENTRO del sitio necesita página propia. Una

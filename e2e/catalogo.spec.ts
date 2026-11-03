@@ -62,13 +62,16 @@ test("filtrar por area deja solo las herramientas de esa area", async ({ page })
   ).toBeHidden();
 });
 
-test("filtrar por tipo de integracion aisla lo que necesita servidor", async ({ page }) => {
+test("ninguna herramienta del sitio se anuncia como «requiere servidor»", async ({ page }) => {
+  // El conversor ELAN aparecia aqui desde antes de implementarse; corre con
+  // Pyodide en el navegador y es `embedded` (auditoria del 2026-11-03). Hoy
+  // ninguna herramienta necesita servidor, y el filtro lo dice con su aviso.
   await page.goto("/catalogo");
 
   await page.locator(INTEGRATION).selectOption("needs-backend");
 
-  await expect(cardsFor(page)).toHaveCount(1);
-  await expect(page.locator(VISIBLE)).toContainText("Conversor ELAN");
+  await expect(cardsFor(page)).toHaveCount(0);
+  await expect(page.locator(EMPTY)).toBeVisible();
 });
 
 test("filtrar por lengua deja fuera las herramientas independientes de la lengua", async ({
@@ -128,8 +131,8 @@ test("una herramienta alojada fuera se abre en otra pestaña, con su aviso", asy
 test("el estado vacio explica por que no coincide nada", async ({ page }) => {
   await page.goto("/catalogo");
 
-  // Tipologia y "requiere servidor" no se cruzan: el mapa esta incrustado y el
-  // conversor ELAN es de documentacion.
+  // Tipologia y "requiere servidor" no se cruzan: ninguna herramienta del sitio
+  // necesita servidor.
   await page.locator(AREA).selectOption("tipologia");
   await page.locator(INTEGRATION).selectOption("needs-backend");
 
@@ -143,8 +146,9 @@ test("el estado vacio explica por que no coincide nada", async ({ page }) => {
 test("el catalogo en ingles filtra con sus propias etiquetas", async ({ page }) => {
   await page.goto("/en/catalogo");
 
+  // Diez: las nueve de antes y el conversor ELAN, que corre en el navegador.
   await page.locator(INTEGRATION).selectOption("embedded");
-  await expect(cardsFor(page)).toHaveCount(9);
+  await expect(cardsFor(page)).toHaveCount(10);
 
   await page.locator(AREA).selectOption("fonetica");
   await expect(cardsFor(page)).toHaveCount(2);

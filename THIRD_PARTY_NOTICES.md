@@ -19,6 +19,7 @@ Reglas de esta tabla:
 | [astro](https://www.npmjs.com/package/astro) | 7.4.1 | MIT | Generador del sitio estático: rutas, empaquetado y CSP con hashes |
 | [typescript](https://www.npmjs.com/package/typescript) | 6.0.3 | Apache-2.0 | Compilador y comprobación de tipos |
 | [vitest](https://www.npmjs.com/package/vitest) | 5.0.5 | MIT | Pruebas unitarias del sitio, del núcleo y de los adaptadores |
+| [happy-dom](https://www.npmjs.com/package/happy-dom) | 21.0.4 | MIT | DOM simulado solo para las pruebas `*.dom.test.ts` de los orquestadores del navegador |
 | [@biomejs/biome](https://www.npmjs.com/package/@biomejs/biome) | 2.5.15 | MIT OR Apache-2.0 | Linter y formateador |
 | [dependency-cruiser](https://www.npmjs.com/package/dependency-cruiser) | 18.7.0 | MIT | Comprueba que las flechas del hexágono apunten hacia adentro (ADR 0001) |
 | [@commitlint/cli](https://www.npmjs.com/package/@commitlint/cli) | 21.2.4 | MIT | Valida los mensajes de commit |
@@ -41,7 +42,7 @@ Reglas de esta tabla:
 | [praatfan-gpl](https://github.com/ucpresearch/praatfan-core-rs) | 0.1.13 | **GPL-3.0** | Motor de análisis acústico (F0, formantes, intensidad) con paridad con Praat, compilado a WebAssembly. Se publica en `public/praatfan/` con sus hashes y procedencia, porque no está en npm |
 | [pyodide](https://www.npmjs.com/package/pyodide) | 314.0.7 | MPL-2.0 | Entorno de Python en WebAssembly, en un worker, para el conversor ELAN. Se publica el motor completo en `public/pyodide/` (13 MB) servido desde este origen |
 | [pympi-ling](https://pypi.org/project/pympi-ling/) | 1.71 | MIT | Lee y escribe archivos ELAN `.eaf` dentro de Pyodide (`micropip` lo instala desde un wheel vendoreado) |
-| [micropip](https://pyodide.org/) | 0.11.1 | MPL-2.0 | Instalador de wheels de Pyodide; se sirve desde `public/pyodide/wheels/` |
+| [micropip](https://pyodide.org/) | 0.11.1 | MPL-2.0 | Instalador de wheels de Pyodide; se sirve desde `public/pyodide/<versión>/wheels/` |
 
 ### Sobre la MPL-2.0 de axe
 
