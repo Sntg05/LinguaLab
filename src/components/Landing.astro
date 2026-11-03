@@ -70,13 +70,13 @@ const summaryOf = (tool: ToolDescriptor): string =>
 const hero = es
   ? {
       title: "Transcribe, anota y mide la lengua sin salir del navegador.",
-      lede: `${integrated.length} herramientas integradas, de la fonética a la documentación, y un directorio de ${externalLinked.length} programas externos que la disciplina usa a diario. Pensada para estudiantes de lingüística de la Universidad Nacional de Colombia.`,
+      lede: `${integrated.length} herramientas integradas, de la fonética a la documentación, y un directorio de ${external.length} programas externos que la disciplina usa a diario. Pensada para estudiantes de lingüística de la Universidad Nacional de Colombia.`,
       primary: "Explorar las herramientas",
       secondary: "Ver el catálogo completo",
     }
   : {
       title: "Transcribe, annotate and measure language without leaving your browser.",
-      lede: `${integrated.length} integrated tools, from phonetics to documentation, and a directory of ${externalLinked.length} external programs the discipline uses every day. Built for linguistics students at Universidad Nacional de Colombia.`,
+      lede: `${integrated.length} integrated tools, from phonetics to documentation, and a directory of ${external.length} external programs the discipline uses every day. Built for linguistics students at Universidad Nacional de Colombia.`,
       primary: "Explore the tools",
       secondary: "See the full catalog",
     };
@@ -118,14 +118,14 @@ const facts: { label: string; value: number }[] = es
   ? [
       { label: "herramientas integradas", value: integrated.length },
       { label: "programas externos enlazados", value: externalLinked.length },
-      { label: "símbolos AFI con audio y descripción", value: ipaCount },
+      { label: "símbolos en la tabla AFI", value: ipaCount },
       { label: "tipos de árbol", value: treeCount },
       { label: "referencias bibliográficas", value: bibliographyCount },
     ]
   : [
       { label: "integrated tools", value: integrated.length },
       { label: "linked external programs", value: externalLinked.length },
-      { label: "IPA symbols with audio and description", value: ipaCount },
+      { label: "symbols in the IPA chart", value: ipaCount },
       { label: "tree types", value: treeCount },
       { label: "bibliography entries", value: bibliographyCount },
     ];

@@ -27,7 +27,11 @@ const isView = (value: unknown): value is PhonemeView =>
   "symbol" in value &&
   typeof value.symbol === "string" &&
   "ctx" in value &&
-  typeof value.ctx === "string";
+  typeof value.ctx === "string" &&
+  "features" in value &&
+  Array.isArray(value.features) &&
+  "related" in value &&
+  Array.isArray(value.related);
 
 /** Replaces an element's children with a sentence whose {targets} are marked. */
 function renderMarked(el: HTMLElement, sentence: string): void {
