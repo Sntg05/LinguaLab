@@ -16,6 +16,7 @@ import rawDataset from "../../data/languages-co.json";
 import {
   GlottologLanguageCatalog,
   LANGUAGE_DATASET,
+  browsableSourceUrl,
   kindOf,
   parseLanguageDataset,
 } from "./language-map";
@@ -213,5 +214,23 @@ describe("GlottologLanguageCatalog", () => {
     if (found.ok) {
       expect(found.value).toBeNull();
     }
+  });
+});
+
+describe("el enlace a la fuente que ve una persona", () => {
+  // `sourceUrl` es la base de DESCARGA del script: un directorio en
+  // raw.githubusercontent.com, que responde 404 si se abre en el navegador.
+  it("convierte la base cruda de GitHub en la carpeta navegable del repositorio", () => {
+    expect(
+      browsableSourceUrl("https://raw.githubusercontent.com/glottolog/glottolog-cldf/master/cldf/"),
+    ).toBe("https://github.com/glottolog/glottolog-cldf/tree/master/cldf");
+  });
+
+  it("deja intacta una URL que ya es navegable", () => {
+    expect(browsableSourceUrl("https://glottolog.org/")).toBe("https://glottolog.org/");
+  });
+
+  it("el dataset publicado enlaza una pagina que existe, no un directorio crudo", () => {
+    expect(browsableSourceUrl(LANGUAGE_DATASET.sourceUrl)).not.toContain("raw.githubusercontent.com");
   });
 });

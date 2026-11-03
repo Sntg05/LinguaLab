@@ -22,6 +22,14 @@ interface Props {
   path?: string;
   /** Suppress indexing for utility pages if ever needed. */
   noindex?: boolean;
+  /**
+   * A page with no address of its own: the 404, which the host serves for ANY
+   * unknown path. It declares no canonical, no language alternates and no
+   * og:url, because each of those would name an address that is not it (the
+   * old 404 pointed hreflang at `/en/404`, which was never built). Its language
+   * switch leads to each locale's home instead.
+   */
+  standalone?: boolean;
 }
 
 const {
@@ -30,6 +38,7 @@ const {
   description,
   path = "/",
   noindex = false,
+  standalone = false,
 } = Astro.props;
 
 const siteName = "LinguaLab";
@@ -56,11 +65,11 @@ Astro.csp?.insertScriptHash({ hash: antiFlashHash, kind: "default" });
 
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical.href} />
+    {!standalone && <link rel="canonical" href={canonical.href} />}
     {noindex && <meta name="robots" content="noindex, follow" />}
 
     {/* Language alternates point at the same route in every locale. */}
-    {LOCALES.map((l) => (
+    {!standalone && LOCALES.map((l) => (
       <link
         rel="alternate"
         hreflang={l === DEFAULT_LOCALE ? "x-default" : l}
@@ -72,7 +81,7 @@ Astro.csp?.insertScriptHash({ hash: antiFlashHash, kind: "default" });
     <meta property="og:site_name" content={siteName} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical.href} />
+    {!standalone && <meta property="og:url" content={canonical.href} />}
     <meta property="og:locale" content={htmlLang(locale)} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
@@ -90,7 +99,7 @@ Astro.csp?.insertScriptHash({ hash: antiFlashHash, kind: "default" });
   <body>
     <a class="skip-link" href="#main">{t(locale, "skip")}</a>
 
-    <Masthead locale={locale} path={path} />
+    <Masthead locale={locale} path={standalone ? "/" : path} />
 
     <main id="main">
       <slot />

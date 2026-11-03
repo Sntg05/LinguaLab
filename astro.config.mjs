@@ -46,11 +46,25 @@ export default defineConfig({
       redirectToDefaultLocale: false,
     },
   },
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      // Las paginas se enlazan y se declaran canonicas SIN barra final
+      // (`/acerca`, ver `localePath`). El sitemap las listaba con barra
+      // (`/acerca/`), y con `trailingSlash: "ignore"` las dos responden 200: el
+      // buscador recibia dos direcciones para la misma pagina. verify-build
+      // exige ahora que el sitemap y los canonicos coincidan.
+      serialize(item) {
+        const url = new URL(item.url);
+        if (url.pathname !== "/") url.pathname = url.pathname.replace(/\/+$/, "");
+        return { ...item, url: url.href };
+      },
+    }),
+  ],
   security: {
-    // GitHub Pages cannot set response headers, so the policy ships as a meta
-    // tag. Astro hashes each inline script and style it emits, which lets us
-    // drop 'unsafe-inline' from both directives.
+    // The policy ships as a meta tag because Astro hashes each inline script
+    // and style it emits at build time, which lets us drop 'unsafe-inline'
+    // from both directives. Headers that only work as headers
+    // (frame-ancestors, HSTS, X-Frame-Options) live in vercel.json.
     csp: {
       algorithm: "SHA-256",
       // script-src and style-src are owned by Astro so it can append the
@@ -65,7 +79,10 @@ export default defineConfig({
         "object-src 'none'",
         "base-uri 'self'",
         "form-action 'self'",
-        "frame-ancestors 'self'",
+        // frame-ancestors NO va aqui: en una metaetiqueta el navegador la ignora
+        // y registra un error de consola en cada pagina. La aplica la cabecera
+        // que envia vercel.json (`frame-ancestors 'none'`), y verify-build falla
+        // si vuelve a aparecer en la metaetiqueta.
       ],
       // `wasm-unsafe-eval` permite COMPILAR WebAssembly, y solo eso: sin ella el
       // navegador se niega a instanciar el motor del fonemizador (eSpeak NG

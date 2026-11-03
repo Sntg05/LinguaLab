@@ -204,6 +204,27 @@ export const parseLanguageDataset = (value: unknown): LanguageDataset => {
 export const LANGUAGE_DATASET: LanguageDataset = parseLanguageDataset(rawDataset);
 
 /**
+ * La URL de la fuente que puede abrir una persona.
+ *
+ * `sourceUrl` es la base desde la que el script DESCARGA los archivos, y para
+ * Glottolog es un directorio de `raw.githubusercontent.com`: ese servidor solo
+ * sirve archivos, y un directorio abierto en el navegador responde 404. Se
+ * traduce a la misma carpeta en la vista navegable del repositorio. El dato
+ * guardado no cambia, porque es la procedencia exacta de lo que se descargo.
+ */
+const RAW_GITHUB = /^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\/([^/]+)\/(.*?)\/?$/;
+
+export const browsableSourceUrl = (sourceUrl: string): string => {
+  const match = RAW_GITHUB.exec(sourceUrl);
+  if (match === null) {
+    return sourceUrl;
+  }
+  const [, owner, repo, ref, path] = match;
+  const tail = path === "" ? "" : `/${path}`;
+  return `https://github.com/${owner}/${repo}/tree/${ref}${tail}`;
+};
+
+/**
  * Familias que Glottolog no considera indigenas de America.
  *
  * La fuente clasifica lenguas por familia genealogica, no por si son indigenas:

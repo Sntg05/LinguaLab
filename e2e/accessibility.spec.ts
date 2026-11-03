@@ -215,6 +215,39 @@ test("ninguna página pública se desborda a 360 px de ancho", async ({ page }) 
   }
 });
 
+/**
+ * Ninguna página registra errores de consola al cargar.
+ *
+ * POR QUE
+ *
+ * La CSP llevaba `frame-ancestors` en la metaetiqueta, donde el navegador la
+ * ignora y lo anuncia con un error en CADA carga: 62 errores en 62 cargas del
+ * sitio publicado, y ninguna prueba lo veía porque axe no mira la consola. Un
+ * error de consola permanente entrena a quien depura a no leerla, y entonces el
+ * error que importa pasa de largo.
+ *
+ * La única excepción es la propia respuesta 404 de la página de error: el
+ * navegador informa que el documento llegó con ese estado, y es lo correcto.
+ */
+for (const { path, name } of PUBLIC_PAGES) {
+  test(`${name} carga sin errores de consola`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() !== "error") return;
+      const ownStatus =
+        path === "/no-existe" &&
+        message.location().url.endsWith(path) &&
+        /404/.test(message.text());
+      if (!ownStatus) errors.push(message.text());
+    });
+    page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
+
+    await page.goto(path, { waitUntil: "load" });
+
+    expect(errors).toEqual([]);
+  });
+}
+
 for (const { scheme, name: themeName } of THEMES) {
   for (const { path, name } of PUBLIC_PAGES) {
     test(`${name} no tiene violaciones de accesibilidad en tema ${themeName}`, async ({ page }) => {

@@ -13,6 +13,7 @@ import { TREE_TYPES } from "../data/trees/types";
 import { GLOSSARY } from "../data/glossary";
 import { BIBLIOGRAPHY } from "../data/bibliography";
 import { localePath, type Locale } from "../i18n";
+import { withBase } from "../lib/paths";
 
 interface Props {
   locale: Locale;
@@ -264,7 +265,8 @@ const numbers: [string, string][] = es
     </div>
 
     <div class="cluster u-mt-m">
-      <a class="btn" href={localePath(locale, "/audio/ATTRIBUTION.md")}>
+      {/* Un archivo estatico existe una sola vez: no lleva prefijo de idioma. */}
+      <a class="btn" href={withBase("/audio/ATTRIBUTION.md")}>
         {es ? "Tabla de atribución de audio" : "Audio attribution table"}
       </a>
       {
