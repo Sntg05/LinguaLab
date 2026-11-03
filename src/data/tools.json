@@ -148,7 +148,7 @@
         "en": "ELAN ↔ TextGrid converter"
       },
       "area": "documentacion",
-      "integration": "needs-backend",
+      "integration": "embedded",
       "status": "experimental",
       "languages": [],
       "notes": {
