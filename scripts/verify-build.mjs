@@ -134,6 +134,10 @@ for (const file of pages) {
   if (!/<meta name="description"/.test(html)) {
     fail(`${name}: no meta description`);
   }
+  // Without these a browser tab shows a blank icon and a shared link shows no
+  // picture, while twitter:card still promised a large one.
+  if (!/<link[^>]*rel="icon"/.test(html)) fail(`${name}: no <link rel="icon">`);
+  if (!/<meta[^>]*property="og:image"/.test(html)) fail(`${name}: no og:image`);
 
   // ---- No inline style attributes ----
   //
@@ -356,12 +360,12 @@ function resolvesInDist(pathname) {
   return candidates.some((candidate) => existsSync(candidate) && statSync(candidate).isFile());
 }
 
-const LINK_ATTR = /<a\b[^>]*\bhref="([^"#][^"]*)"|<link\b[^>]*\brel="(?:canonical|alternate)"[^>]*\bhref="([^"]+)"/gi;
+const LINK_ATTR = /<a\b[^>]*\bhref="([^"#][^"]*)"|<link\b[^>]*\brel="(?:canonical|alternate|icon)"[^>]*\bhref="([^"]+)"|<meta\b[^>]*\bproperty="og:image"[^>]*\bcontent="([^"]+)"/gi;
 for (const file of pages) {
   const name = relative(DIST, file);
   const html = readFileSync(file, "utf8");
   for (const match of html.matchAll(LINK_ATTR)) {
-    const href = match[1] ?? match[2] ?? "";
+    const href = match[1] ?? match[2] ?? match[3] ?? "";
     let url;
     try {
       url = new URL(href, `${siteOrigin}/`);

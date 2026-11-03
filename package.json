@@ -16,6 +16,7 @@
     "start": "astro dev",
     "build": "astro build",
     "build:verify": "astro build && node scripts/verify-build.mjs",
+    "build:social-card": "node scripts/build-social-card.mjs",
     "verify:build": "node scripts/verify-build.mjs",
     "preview": "astro preview",
     "preview:e2e": "astro preview --port 4331 --ignore-lock",

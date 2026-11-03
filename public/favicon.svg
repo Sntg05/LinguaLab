@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The LinguaLab mark (src/components/Brand.astro), in the accent of each theme. -->
+  <style>
+    .m { color: #8f4a2f; }
+    @media (prefers-color-scheme: dark) { .m { color: #e0a17a; } }
+  </style>
+  <g class="m" fill="none" stroke="currentColor">
+    <rect x="3" y="3" width="26" height="26" rx="8.5" stroke-width="2" opacity=".45"/>
+    <path d="M11.8 11.2h7.4a1.8 1.8 0 0 1 1.8 1.8v7.4" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="11.8" cy="11.2" r="2.6" fill="currentColor" stroke="none"/>
+    <circle cx="21" cy="20.4" r="2.6" fill="currentColor" stroke="none"/>
+  </g>
+</svg>
