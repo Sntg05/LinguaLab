@@ -47,7 +47,7 @@ const biome = join(process.cwd(), "node_modules", ".bin", "biome");
 const extract = (ref) => {
   // La referencia llega de la linea de comandos: se resuelve con git a un commit
   // antes de usarla, y nada pasa por un shell que pudiera interpretarla.
-  const commit = execFileSync("git", ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`], {
+  const commit = execFileSync("git", ["rev-parse", "--verify", "--quiet", "--end-of-options", `${ref}^{commit}`], {
     encoding: "utf8",
   }).trim();
   const dir = mkdtempSync(join(tmpdir(), `lingualab-${commit.slice(0, 12)}-`));

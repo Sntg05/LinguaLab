@@ -34,10 +34,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: live-check
-  cancel-in-progress: true
-
 jobs:
   live-check:
     name: Published site
@@ -47,6 +43,14 @@ jobs:
        github.event.deployment.environment == 'Production')
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # La concurrencia va en el JOB y no en el flujo: a nivel de flujo, cada
+    # despliegue de vista previa (que dispara deployment_status y despues se
+    # salta por el `if`) cancelaba el chequeo de produccion en curso, y el
+    # resultado era un «cancelado» en vez de un veredicto. Tampoco se cancela un
+    # chequeo empezado: el siguiente espera.
+    concurrency:
+      group: live-check
+      cancel-in-progress: false
     env:
       LIVE_URL: ${{ inputs.url || 'https://lingualab-beta.vercel.app' }}
 

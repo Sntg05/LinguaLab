@@ -38,7 +38,7 @@ const walk = (dir: string, found: string[] = []): string[] => {
  * después se copia a la interfaz.
  */
 const OFFLINE_PROMISE =
-  /(funcionan?|sigue funcionando|abrir[^.]{0,40})[^.]{0,60}sin conexi[oó]n|(works?|keeps working)[^.]{0,40}offline/i;
+  /(funcionan?|sigue funcionando|abrir[^.]{0,40})[^.]{0,60}sin conexi[oó]n|(works?|keeps working)[^.]{0,40}offline|sin depender de (una |la )?conexi[oó]n|without depending on (a |the )?connection/i;
 
 const hasServiceWorker = (): boolean =>
   ["public/sw.js", "public/service-worker.js", "src/sw.ts"].some((path) => existsSync(join(ROOT, path)));

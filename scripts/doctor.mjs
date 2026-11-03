@@ -86,7 +86,7 @@ try {
   for (const file of existsSync(dir) ? readdirSync(dir) : []) {
     if (!file.endsWith(".md")) continue;
     const head = readFileSync(join(dir, file), "utf8").slice(0, 300);
-    const status = head.match(/^---\n[\s\S]*?^status:\s*(\S+)/m)?.[1];
+    const status = head.match(/^---\n[\s\S]*?^status:\s*(\S+)[\s\S]*?^---$/m)?.[1];
     if (status === undefined) warnings.push(`odd/tasks/${file} no declara su estado (status:) en el encabezado`);
     if (status === "active") active.push(file);
   }

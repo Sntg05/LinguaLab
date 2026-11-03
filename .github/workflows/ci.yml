@@ -16,10 +16,12 @@ permissions:
   contents: read
 
 # Una rama con un PR abierto recibe dos eventos por commit (`push` y
-# `pull_request`), con refs distintos. Agruparlos por el nombre de la rama hace
-# que corra una sola vez por commit.
+# `pull_request`), con refs distintos. Agruparlos por repositorio y nombre de
+# rama hace que corra una sola vez por commit. El repositorio va en la clave
+# para que el PR de un fork con una rama llamada igual (o `main`) no cancele la
+# CI de este repositorio.
 concurrency:
-  group: ci-${{ github.head_ref || github.ref_name }}
+  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
