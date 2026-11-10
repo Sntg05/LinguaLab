@@ -51,7 +51,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 - **D1 (resuelta el 2026-11-10: navegador, con Rust a WebAssembly donde se mida que hace falta).** Dónde corren los motores: en el navegador (TypeScript, y Rust compilado a
   WebAssembly donde una medición lo justifique, lo que pide instalar Rust en esta máquina) o en un
   servidor propio (Go o Rust), que rompería la regla «los datos no salen del navegador» (ADR 0002).
-- **D2 (T3).** Qué lenguas entran primero al fonemizador.
+- **D2 (resuelta el 2026-11-10).** «déjalo en español e inglés no más entonces».
 - **D3 (T4).** Qué hacer con los formalismos que hoy son solo una etiqueta: rehacerlos con su notación
   propia o retirarlos hasta hacerlos bien; y si las estructuras de datos (AVL, heap, trie…) siguen en un
   sitio para lingüistas.
@@ -65,8 +65,8 @@ Se preguntan de a una, al empezar la fase que las necesita.
 |---|---|---|---|---|---|
 | T0 | S10 | Rama, este documento y diagnóstico medido | inline | hecha | — |
 | T1 | S5, S6 | Modelo de referencias por herramienta en el núcleo; apartado en Acerca; bloque «¿De dónde sale esto?» en cada herramienta; prueba que exige teoría y al menos una referencia verificada por herramienta | inline | hecha | `bf93d89` y el commit siguiente. Rojo: la prueba del núcleo sin el módulo; mutación: una herramienta sin referencias hace fallar la regla. 22 obras verificadas en Crossref o en su página |
-| T2 | S1, S2 | Fonemizador por capas: reglas, diccionario y eSpeak como respaldo declarado; salida normalizada al AFI; corpus de evaluación con tasa de error medida antes y después | por decidir (D1) | pendiente | — |
-| T3 | S3 | Lenguas nuevas, cada una con su fuente y su medición | por decidir (D2) | pendiente | — |
+| T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | en curso | `03ec0d8`: motores en `packages/core/src/g2p/` con rojo y verde. Español contra ipa-dict es_MX (5006 palabras): 96,6 % propio, 76,9 % eSpeak. Falta empaquetar CMUdict, el adaptador, conectar la página, retirar eSpeak y medir el inglés (pasos en `odd/handoff/ACTUAL.md` §5) |
+| T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
 | T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat 6.4.06 (cierra P17) | por decidir (D1) | pendiente | — |
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
@@ -145,3 +145,9 @@ Se preguntan de a una, al empezar la fase que las necesita.
   integradas; `TheoryNote.astro` cierra cada página de herramienta en los dos idiomas y Acerca tiene el
   apartado `#referencias`. Puerta completa y e2e en verde. T2 cambia de alcance por pedido del dueño: un
   transcriptor propio (reglas para el español, diccionario publicado para el inglés) en lugar de eSpeak.
+- **L10 (2026-11-10).** El dueño, textual: «déjalo en español e inglés no más entonces, intenta optimizar
+  el rework lo más que puedas». T3 sale del alcance. Los dos motores quedan escritos y medidos (`03ec0d8`).
+- **L11 (2026-11-10).** El dueño pidió un traspaso minucioso para continuar con otro agente u otro modelo:
+  `odd/handoff/ACTUAL.md` se reescribió con el estado, las reglas, los pasos exactos de lo que falta de T2
+  y las decisiones abiertas; el traspaso anterior quedó en `odd/handoff/archivo/`.
+
