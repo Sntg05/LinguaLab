@@ -171,7 +171,7 @@ describe("phoneme of the day", () => {
 
   it("always returns an entry, including for dates before the epoch", () => {
     expect(phonemeForDate(new Date("1969-01-01"))).toBeDefined();
-    expect(PHONEMES.length).toBe(5);
+    expect(PHONEMES.length).toBe(10);
   });
 
   it("marks {target} words in a context sentence", () => {

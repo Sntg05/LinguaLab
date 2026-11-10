@@ -11,10 +11,10 @@
  * as a product name instead of a chapter heading, tightened, with the second
  * half in the accent colour.
  *
- * The mark is a geometric glyph: a rounded container holding two nodes joined
- * by an orthogonal edge. It reads as structure (a syntactic edge, a graph) and
- * as a self-contained tool, and it stays legible at the 1.9rem it renders at
- * in the masthead because every stroke sits on the pixel grid.
+ * The mark joins the two notations a linguist reads first: square brackets,
+ * which enclose a phonetic transcription, around a small syntax tree whose
+ * root is lit in the highlighter colour. It sits on a solid tile so it keeps
+ * its shape at favicon size; public/favicon.svg carries the same drawing.
  */
 import { localePath, type Locale } from "../i18n";
 
@@ -27,25 +27,23 @@ const { locale } = Astro.props;
 
 <a class="brand" href={localePath(locale, "/")}>
   <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-    <rect
-      x="3"
-      y="3"
-      width="26"
-      height="26"
-      rx="8.5"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      opacity=".4"></rect>
+    <rect class="brand__tile" width="32" height="32" rx="9"></rect>
     <path
-      d="M11.8 11.2h7.4a1.8 1.8 0 0 1 1.8 1.8v7.4"
+      d="M10 7.5H7v17h3M22 7.5h3v17h-3"
       fill="none"
-      stroke="currentColor"
-      stroke-width="2.4"
+      stroke="#fff"
+      stroke-width="2.2"
       stroke-linecap="round"
       stroke-linejoin="round"></path>
-    <circle cx="11.8" cy="11.2" r="2.6" fill="currentColor"></circle>
-    <circle cx="21" cy="20.4" r="2.6" fill="currentColor"></circle>
+    <path
+      d="M16 11.5 11.8 20.5M16 11.5l4.2 9"
+      fill="none"
+      stroke="#fff"
+      stroke-width="1.8"
+      stroke-linecap="round"></path>
+    <circle class="brand__root" cx="16" cy="11" r="2.6"></circle>
+    <circle cx="11.8" cy="21" r="2.1" fill="#fff"></circle>
+    <circle cx="20.2" cy="21" r="2.1" fill="#fff"></circle>
   </svg>
   <span class="brand__name">Lingua<span class="brand__name-accent">Lab</span></span>
 </a>

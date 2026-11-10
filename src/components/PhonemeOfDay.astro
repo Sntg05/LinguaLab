@@ -1,164 +1,391 @@
 ---
 /**
  * Phoneme of the day.
- * The first entry is rendered at build time so the section is never empty;
- * a small inline script advances it to the entry for the current day.
+ *
+ * Every entry is resolved at build time for the page's locale: its
+ * articulatory features come from the IPA chart that FonoLab uses, and its
+ * recording from the same licensed samples. The first entry is rendered as
+ * HTML so the card is complete without JavaScript; a small script moves it to
+ * today's entry and lets the reader step through the rest.
  */
 import { PHONEMES, markContext, type PhonemeOfDay } from "../data/phoneme-of-day";
+import { IPA_CHART } from "../data/ipa-chart";
 import { localePath, type Locale } from "../i18n";
+import { sampleUrl } from "../scripts/fono/audio";
+import type { PhonemeView } from "../scripts/home/phoneme";
 
 interface Props {
   locale: Locale;
-  /** Pre-selected entry (defaults to the first). */
-  entry?: PhonemeOfDay;
-  heading: string;
-  /** Inline JSON payload consumed by the client-side daily rotation. */
-  payload?: string;
 }
 
-const { locale, entry = PHONEMES[0]!, heading, payload } = Astro.props;
+const { locale } = Astro.props;
+const es = locale === "es";
 
-const ctx = locale === "es" ? entry.ctx_es : entry.ctx_en;
-const why = locale === "es" ? entry.why_es : entry.why_en;
-const ipa = locale === "es" ? entry.ipa_es : entry.ipa_en;
-const name = locale === "es" ? entry.name_es : entry.name_en;
-const related = locale === "es" ? entry.rel_es : entry.rel_en;
+const SYMBOLS = IPA_CHART.categories.flatMap((category) =>
+  category.symbols.map((symbol) => ({ symbol, vowel: category.id.includes("vowel") })),
+);
+
+/** The chart writes affricates with a tie bar (t͡ʃ); the entries do not. */
+const variants = (glyph: string): string[] =>
+  glyph.length === 2 ? [glyph, `${glyph[0]}͡${glyph.slice(1)}`] : [glyph];
+
+const chartEntry = (glyph: string) =>
+  variants(glyph)
+    .map((candidate) => SYMBOLS.find((entry) => entry.symbol.ipa === candidate))
+    .find((entry) => entry !== undefined);
+
+const audioFor = (glyph: string): string | null =>
+  variants(glyph)
+    .map((candidate) => sampleUrl(candidate))
+    .find((url) => url !== null) ?? null;
+
+const VOICING: Readonly<Record<string, string>> = es
+  ? { sorda: "Sorda", sonora: "Sonora" }
+  : { sorda: "Voiceless", sonora: "Voiced" };
+
+const viewOf = (entry: PhonemeOfDay): PhonemeView => {
+  const chart = chartEntry(entry.symbol);
+  // Vowels are described by height and backness, not by place and manner,
+  // and the chart does not split them that way: they show no feature rows.
+  const features =
+    chart && !chart.vowel
+      ? [
+          { label: es ? "Lugar" : "Place", value: es ? chart.symbol.place_es : chart.symbol.place_en },
+          { label: es ? "Modo" : "Manner", value: es ? chart.symbol.manner_es : chart.symbol.manner_en },
+          {
+            label: es ? "Sonoridad" : "Voicing",
+            value: VOICING[chart.symbol.voicing] ?? chart.symbol.voicing,
+          },
+        ]
+      : [];
+  return {
+    symbol: entry.symbol,
+    ipa: es ? entry.ipa_es : entry.ipa_en,
+    name: es ? entry.name_es : entry.name_en,
+    ctx: es ? entry.ctx_es : entry.ctx_en,
+    why: es ? entry.why_es : entry.why_en,
+    related: es ? entry.rel_es : entry.rel_en,
+    features,
+    audio: audioFor(entry.symbol),
+  };
+};
+
+const views = PHONEMES.map(viewOf);
+const first = views[0]!;
+
+const copy = es
+  ? {
+      heading: "Fonema del día",
+      context: "En contexto",
+      why: "Por qué importa",
+      listen: "Escuchar",
+      next: "Otro fonema",
+      fono: "Explorar la tabla AFI completa",
+    }
+  : {
+      heading: "Phoneme of the day",
+      context: "In context",
+      why: "Why it matters",
+      listen: "Listen",
+      next: "Another phoneme",
+      fono: "Explore the full IPA chart",
+    };
 ---
 
-<section class="section section--sunken" aria-labelledby="phoneme-heading" data-phoneme>
-  <div class="shell">
-    <div class="u-section-head u-section-head--center">
-      <span class="eyebrow">{heading}</span>
+<section class="phoneme-band" aria-labelledby="phoneme-heading" data-phoneme data-index="0">
+  <div class="shell phoneme">
+    <div class="phoneme__specimen">
+      <p class="phoneme__glyph ipa-display" data-phoneme-symbol aria-hidden="true">
+        {first.symbol}
+      </p>
+      <div class="phoneme__controls">
+        <button class="phoneme__btn" type="button" data-phoneme-play hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M8 5.5v13l10.5-6.5z" fill="currentColor"></path>
+          </svg>
+          {copy.listen}
+        </button>
+        <button class="phoneme__btn phoneme__btn--ghost" type="button" data-phoneme-next hidden>
+          {copy.next}
+        </button>
+        <span class="phoneme__position" data-phoneme-position aria-hidden="true"></span>
+      </div>
     </div>
 
-    <div class="phoneme">
-      <p class="phoneme__glyph ipa-display" data-phoneme-symbol aria-hidden="true">{entry.symbol}</p>
+    <div class="phoneme__body" data-phoneme-body>
+      <h2 class="phoneme__heading" id="phoneme-heading">{copy.heading}</h2>
+      <p class="phoneme__name">
+        <span class="ipa phoneme__ipa" data-phoneme-ipa>{first.ipa}</span>
+        <span data-phoneme-name>{first.name}</span>
+      </p>
 
-      <p class="phoneme__ipa ipa" data-phoneme-ipa>{ipa}</p>
-      <p class="phoneme__name" data-phoneme-name>{name}</p>
+      <dl class="phoneme__features" data-phoneme-features hidden={first.features.length === 0}>
+        {
+          first.features.map((feature) => (
+            <div>
+              <dt>{feature.label}</dt>
+              <dd>{feature.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
 
-      <div class="phoneme__body">
+      <div class="phoneme__texts">
         <div>
-          <h2 class="phoneme__label" id="phoneme-heading">{locale === "es" ? "En contexto" : "In context"}</h2>
+          <h3 class="phoneme__label">{copy.context}</h3>
           <p class="phoneme__text" data-phoneme-ctx>
-            {markContext(ctx).map((part) => (part.hit ? <em>{part.word}</em> : part.word))}
+            {markContext(first.ctx).map((part) => (part.hit ? <em>{part.word}</em> : part.word))}
           </p>
         </div>
         <div>
-          <h2 class="phoneme__label">
-            {locale === "es" ? "Por qué importa" : "Why it matters"}
-          </h2>
-          <p class="phoneme__text" data-phoneme-why>{why}</p>
+          <h3 class="phoneme__label">{copy.why}</h3>
+          <p class="phoneme__text" data-phoneme-why>
+            {markContext(first.why).map((part) => (part.hit ? <em>{part.word}</em> : part.word))}
+          </p>
         </div>
       </div>
 
-      {
-        related.length > 0 && (
-          <ul class="phoneme__related" data-phoneme-related>
-            {related.map((term) => (
-              <li>
-                <a class="badge" href={localePath(locale, "/glosario")}>{term}</a>
-              </li>
-            ))}
-          </ul>
-        )
-      }
+      <ul class="phoneme__related" data-phoneme-related role="list">
+        {first.related.map((term) => <li class="badge">{term}</li>)}
+      </ul>
+
+      <a class="phoneme__more" href={localePath(locale, "/fono")}>{copy.fono}</a>
     </div>
   </div>
 
-  {
-    payload && (
-      <script is:inline type="application/json" data-phoneme-data set:html={payload} />
-    )
-  }
+  <script is:inline type="application/json" data-phoneme-data set:html={JSON.stringify(views)} />
 
   <script>
     import { rotatePhoneme } from "../scripts/home/phoneme";
+    import { safeInit } from "../scripts/core/safe";
 
-    rotatePhoneme();
+    safeInit("phoneme of the day", rotatePhoneme);
   </script>
 </section>
 
 <style>
+  /* An inverted band: the one place the page turns to indigo. Its own ink
+     values keep AA contrast against that background in both themes. */
+  .phoneme-band {
+    --band-bg: oklch(31% 0.14 277);
+    --band-ink: oklch(98% 0.01 277);
+    --band-muted: oklch(87% 0.035 277);
+    --band-line: oklch(46% 0.12 277);
+
+    padding-block: var(--section-y);
+    color: var(--band-ink);
+    background: var(--band-bg);
+  }
+
+  :global(:root[data-theme="dark"]) .phoneme-band {
+    --band-bg: oklch(24% 0.09 277);
+    --band-line: oklch(38% 0.1 277);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme="light"])) .phoneme-band {
+      --band-bg: oklch(24% 0.09 277);
+      --band-line: oklch(38% 0.1 277);
+    }
+  }
+
   .phoneme {
-    max-width: 46rem;
-    margin-inline: auto;
-    text-align: center;
+    display: grid;
+    gap: var(--space-xl);
+    align-items: center;
+  }
+
+  @media (width >= 56rem) {
+    .phoneme {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      gap: var(--space-3xl);
+    }
+  }
+
+  .phoneme__specimen {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-m);
   }
 
   .phoneme__glyph {
+    display: grid;
+    place-items: center;
+    width: min(17rem, 70vw);
+    aspect-ratio: 1;
     margin: 0;
-    color: var(--accent);
+    font-size: clamp(6rem, 4rem + 9vw, 10rem);
     line-height: 1;
+    color: oklch(22% 0.08 277);
+    background: var(--saffron);
+    border-radius: 50%;
+    box-shadow:
+      0 0 0 10px oklch(83% 0.15 80 / 0.18),
+      0 30px 60px -30px oklch(10% 0.05 277 / 0.8);
   }
 
-  .phoneme__ipa {
-    margin: var(--space-s) 0 0;
-    font-size: var(--step-1);
-    color: var(--mark);
+  .phoneme__controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .phoneme__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.1rem;
+    font: inherit;
+    font-size: var(--step--1);
+    font-weight: 700;
+    color: oklch(22% 0.08 277);
+    background: var(--band-ink);
+    border: 2px solid var(--band-ink);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+  }
+
+  .phoneme__btn svg {
+    width: 1.1em;
+    height: 1.1em;
+  }
+
+  .phoneme__btn--ghost {
+    color: var(--band-ink);
+    background: transparent;
+  }
+
+  .phoneme__btn:hover {
+    background: var(--saffron);
+    border-color: var(--saffron);
+    color: oklch(22% 0.08 277);
+  }
+
+  .phoneme__btn:focus-visible,
+  .phoneme__more:focus-visible {
+    outline: 3px solid var(--saffron);
+    outline-offset: 3px;
+  }
+
+  .phoneme__position {
+    min-width: 3.5em;
+    font-size: var(--step--1);
+    font-weight: 650;
+    color: var(--band-muted);
+    text-align: center;
+  }
+
+  .phoneme__heading {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-0);
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--saffron);
   }
 
   .phoneme__name {
-    margin: var(--space-3xs) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2em 0.5em;
+    margin: 0;
     font-family: var(--font-display);
-    font-size: var(--step-2);
-    color: var(--ink);
+    font-size: var(--step-4);
+    font-weight: 680;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    color: var(--band-ink);
+    text-wrap: balance;
   }
 
-  .phoneme__body {
+  .phoneme__ipa {
+    font-size: 0.8em;
+    letter-spacing: 0;
+    color: var(--saffron);
+  }
+
+  .phoneme__features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin: var(--space-m) 0 0;
+  }
+
+  .phoneme__features > :global(div) {
+    display: flex;
+    gap: 0.4em;
+    padding: 0.35rem 0.8rem;
+    font-size: var(--step--1);
+    border: 1px solid var(--band-line);
+    border-radius: var(--radius-pill);
+  }
+
+  .phoneme__features :global(dt) {
+    color: var(--band-muted);
+  }
+
+  .phoneme__features :global(dd) {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .phoneme__texts {
     display: grid;
     gap: var(--space-m);
-    margin-block-start: var(--space-xl);
-    text-align: start;
+    margin-block-start: var(--space-l);
   }
 
-  @media (width >= 48rem) {
-    .phoneme__body {
+  @media (width >= 40rem) {
+    .phoneme__texts {
       grid-template-columns: 1fr 1fr;
-      gap: var(--space-xl);
+      gap: var(--space-l);
     }
   }
 
   .phoneme__label {
+    margin-block-end: var(--space-3xs);
     font-family: var(--font-sans);
-    font-size: var(--step--2);
-    font-weight: 600;
-    letter-spacing: var(--tracking-wide);
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-block-end: var(--space-2xs);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--band-muted);
   }
 
   .phoneme__text {
     margin: 0;
-    color: var(--ink-muted);
-    line-height: var(--leading-relaxed);
+    line-height: var(--leading-normal);
+    color: var(--band-ink);
   }
 
-  .phoneme__text em {
+  .phoneme__text :global(em) {
     font-style: normal;
-    color: var(--ink);
-    background: var(--mark-wash);
-    padding: 0.05em 0.3em;
-    border-radius: var(--radius-xs);
+    font-weight: 700;
+    color: var(--saffron);
   }
 
   .phoneme__related {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: var(--space-2xs);
-    list-style: none;
     margin: var(--space-l) 0 0;
     padding: 0;
+    list-style: none;
   }
 
-  .phoneme__related .badge {
-    text-decoration: none;
+  .phoneme__related :global(.badge) {
+    color: var(--band-ink);
+    border-color: var(--band-line);
   }
 
-  .phoneme__related .badge:hover {
-    color: var(--accent);
-    border-color: var(--accent);
+  .phoneme__more {
+    display: inline-block;
+    margin-block-start: var(--space-m);
+    font-weight: 700;
+    color: var(--band-ink);
+    text-decoration-color: var(--saffron);
+    text-underline-offset: 0.25em;
   }
 </style>

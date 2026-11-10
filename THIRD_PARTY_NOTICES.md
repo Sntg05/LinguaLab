@@ -58,8 +58,8 @@ Autoalojada: no hay petición a Google Fonts en ningún momento.
 
 | Paquete | Versión | Licencia | Uso |
 |---|---|---|---|
-| [@fontsource-variable/inter](https://www.npmjs.com/package/@fontsource-variable/inter) | 5.3.0 | OFL-1.1 | Texto de la interfaz |
-| [@fontsource-variable/newsreader](https://www.npmjs.com/package/@fontsource-variable/newsreader) | 5.3.0 | OFL-1.1 | Titulares |
+| [@fontsource-variable/atkinson-hyperlegible-next](https://www.npmjs.com/package/@fontsource-variable/atkinson-hyperlegible-next) | 5.3.0 | OFL-1.1 | Texto de la interfaz |
+| [@fontsource-variable/bricolage-grotesque](https://www.npmjs.com/package/@fontsource-variable/bricolage-grotesque) | 5.3.0 | OFL-1.1 | Titulares |
 | [@fontsource-variable/jetbrains-mono](https://www.npmjs.com/package/@fontsource-variable/jetbrains-mono) | 5.3.0 | OFL-1.1 | Transcripciones y código |
 | [@fontsource/noto-sans](https://www.npmjs.com/package/@fontsource/noto-sans) | 5.3.0 | OFL-1.1 | Cobertura de los símbolos del AFI |
 

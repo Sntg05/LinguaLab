@@ -35,10 +35,10 @@ export const PHONEMES: readonly PhonemeOfDay[] = [
     "ipa_en": "/θ/",
     "name_es": "fricativa dental sorda",
     "name_en": "voiceless dental fricative",
-    "ctx_es": "El sonido de «c» en cierta pronunciación: {cielo}, {zapato}.",
-    "ctx_en": "The sound of «th» in English: {think}, {path}.",
-    "why_es": "Es uno de los rasgos más estudiados del español: su realización varía [θ]~[s] según región (distinción y seseo).",
-    "why_en": "One of the most studied Spanish features: its realisation varies [θ]~[s] by region (distinción and seseo).",
+    "ctx_es": "La «z» y la «c» ante e, i en el centro y el norte de España: {zapato} [θaˈpato], {cielo} [ˈθjelo].",
+    "ctx_en": "English «th» in {think} [θɪŋk] and {path} [pæθ].",
+    "why_es": "Es uno de los rasgos más estudiados del español: la distinción entre [θ] y [s] es peninsular, y en Colombia, como en toda América, se usa [s] (seseo).",
+    "why_en": "One of the most studied Spanish features: the [θ]–[s] distinction is Peninsular, while Colombia, like all of Latin America, uses [s] (seseo).",
     "rel_es": [
       "sibilantes",
       "seseo",
@@ -57,12 +57,12 @@ export const PHONEMES: readonly PhonemeOfDay[] = [
     "sound": "uh",
     "ipa_es": "/ə/",
     "ipa_en": "/ə/",
-    "name_es": "vocal neutra (schwa)",
+    "name_es": "vocal media central (schwa)",
     "name_en": "mid central vowel (schwa)",
-    "ctx_es": "En inglés átono: {about}, {sofa}. En español solo en articulación relajada.",
-    "ctx_en": "Unstressed English: {about}, {sofa}. In Spanish only in casual speech.",
-    "why_es": "La vocal más frecuente del mundo: aparece en casi todas las lenguas en posición átona.",
-    "why_en": "The most frequent vowel worldwide: it appears in almost every language unstressed.",
+    "ctx_es": "En inglés, en sílabas átonas: {about} [əˈbaʊt], {sofa} [ˈsoʊfə].",
+    "ctx_en": "Unstressed English syllables: {about} [əˈbaʊt], {sofa} [ˈsoʊfə].",
+    "why_es": "Es la vocal más frecuente del inglés y el resultado típico de la reducción vocálica. El español no la tiene como fonema: sus cinco vocales conservan en gran medida su timbre aunque sean átonas.",
+    "why_en": "It is the most frequent vowel in English and the typical result of vowel reduction. Spanish has no schwa phoneme: its five vowels largely keep their quality even when unstressed.",
     "rel_es": [
       "reducción vocálica",
       "átono"
@@ -81,37 +81,37 @@ export const PHONEMES: readonly PhonemeOfDay[] = [
     "ipa_en": "/ŋ/",
     "name_es": "nasal velar sonora",
     "name_en": "voiced velar nasal",
-    "ctx_es": "Final de sílaba: {canto} [ˈkanto], y en inglés {sing} [sɪŋ].",
-    "ctx_en": "Syllable-final: {sing} [sɪŋ], Spanish {canto} [ˈkanto].",
-    "why_es": "Existe en español solo como alófono ante /k, g/: «banco» [ˈbanko]. Es un caso claro de alofonía condicionada.",
-    "why_en": "In Spanish only as an allophone before /k, g/: «banco» [ˈbanko]. A clear case of conditioned alophony.",
+    "ctx_es": "La «n» ante consonante velar: {banco} [ˈbaŋko], {tengo} [ˈteŋɡo]; en inglés, {sing} [sɪŋ].",
+    "ctx_en": "Spanish «n» before a velar: {banco} [ˈbaŋko], {tengo} [ˈteŋɡo]; English {sing} [sɪŋ].",
+    "why_es": "En inglés es fonema ({sin} frente a {sing}); en español es el alófono de /n/ ante velar, y en la costa caribe colombiana aparece también a final de palabra: «pan» [paŋ].",
+    "why_en": "In English it is a phoneme ({sin} vs {sing}); in Spanish it is the allophone of /n/ before a velar, and on the Colombian Caribbean coast it also appears word-finally: «pan» [paŋ].",
     "rel_es": [
       "nasales",
       "alófono",
-      "catalanismo"
+      "asimilación"
     ],
     "rel_en": [
       "nasals",
       "allophone",
-      "velar"
+      "assimilation"
     ],
     "viz": "nasal"
   },
   {
     "id": "tap",
     "symbol": "ɾ",
-    "sound": "rr",
+    "sound": "r",
     "ipa_es": "/ɾ/",
     "ipa_en": "/ɾ/",
-    "name_es": "vibrante simple",
-    "name_en": "tap",
-    "ctx_es": "La «r» intervocálica: {caro} [ˈkaɾo] frente a {carro} [ˈkaro].",
-    "ctx_en": "Intervocalic Spanish «r»: {caro} [ˈkaɾo] vs {carro} [ˈkaro].",
-    "why_es": "Contrasta con la vibrante múltiple /r/: {caro} vs {carro}. Un mínimo fonémico clásico.",
-    "why_en": "Contrasts with the trill /r/: {caro} vs {carro}. A classic phonemic minimal pair.",
+    "name_es": "vibrante simple alveolar",
+    "name_en": "alveolar tap",
+    "ctx_es": "La «r» entre vocales: {caro} [ˈkaɾo], {pero} [ˈpeɾo].",
+    "ctx_en": "Spanish «r» between vowels: {caro} [ˈkaɾo]; American English «tt» in {butter} [ˈbʌɾɚ].",
+    "why_es": "Contrasta con la vibrante múltiple /r/ solo entre vocales: {caro} frente a {carro} es un par mínimo clásico.",
+    "why_en": "It contrasts with the trill /r/ only between vowels: {caro} vs {carro} is a classic minimal pair.",
     "rel_es": [
       "vibrantes",
-      "mínimo fonémico"
+      "par mínimo"
     ],
     "rel_en": [
       "rhotics",
@@ -125,19 +125,131 @@ export const PHONEMES: readonly PhonemeOfDay[] = [
     "sound": "ch",
     "ipa_es": "/tʃ/",
     "ipa_en": "/tʃ/",
-    "name_es": "africada post-alveolar sorda",
-    "name_en": "voiceless post-alveolar affricate",
-    "ctx_es": "La «ch» de {chico} [ˈtʃiko].",
-    "ctx_en": "The «ch» of {chair} [tʃɛə].",
-    "why_es": "Fonema en español y catalán, pero no en portugués: buena entrada al estudio contrastivo.",
-    "why_en": "A phoneme in Spanish and Catalan, but not Portuguese: a good entry into contrastive study.",
+    "name_es": "africada postalveolar sorda",
+    "name_en": "voiceless postalveolar affricate",
+    "ctx_es": "La «ch» de {chico} [ˈtʃiko] y {noche} [ˈnotʃe].",
+    "ctx_en": "The «ch» of {cheese} [tʃiːz] and Spanish {chico} [ˈtʃiko].",
+    "why_es": "En español es fonema. En portugués brasileño el mismo sonido es alófono de /t/ ante [i]: {tia} [ˈtʃiɐ]. Un mismo sonido puede tener distinto estatus fonológico.",
+    "why_en": "In Spanish it is a phoneme. In Brazilian Portuguese the same sound is an allophone of /t/ before [i]: {tia} [ˈtʃiɐ]. One sound can have a different phonological status.",
     "rel_es": [
       "africadas",
-      "contrastivo"
+      "alófono"
     ],
     "rel_en": [
       "affricates",
-      "contrastive"
+      "allophone"
+    ],
+    "viz": "affricate"
+  },
+  {
+    "id": "enye",
+    "symbol": "ɲ",
+    "sound": "ny",
+    "ipa_es": "/ɲ/",
+    "ipa_en": "/ɲ/",
+    "name_es": "nasal palatal sonora",
+    "name_en": "voiced palatal nasal",
+    "ctx_es": "La «ñ» de {año} [ˈaɲo] y {niño} [ˈniɲo].",
+    "ctx_en": "Spanish «ñ» in {año} [ˈaɲo]; English {canyon} has the sequence [nj] instead.",
+    "why_es": "Es fonema en español: {cana} frente a {caña} es un par mínimo. El inglés no lo tiene y lo aproxima con la secuencia [nj].",
+    "why_en": "It is a Spanish phoneme: {cana} vs {caña} is a minimal pair. English lacks it and approximates it with the sequence [nj].",
+    "rel_es": [
+      "nasales",
+      "palatal",
+      "par mínimo"
+    ],
+    "rel_en": [
+      "nasals",
+      "palatal",
+      "minimal pair"
+    ],
+    "viz": "nasal"
+  },
+  {
+    "id": "jota",
+    "symbol": "x",
+    "sound": "kh",
+    "ipa_es": "/x/",
+    "ipa_en": "/x/",
+    "name_es": "fricativa velar sorda",
+    "name_en": "voiceless velar fricative",
+    "ctx_es": "La «j», y la «g» ante e, i: {jamón} [xaˈmon], {gente} [ˈxente].",
+    "ctx_en": "Spanish «j»: {jamón} [xaˈmon]; Scottish {loch} [lɔx].",
+    "why_es": "En el Caribe y en buena parte de Colombia se realiza como glotal [h]: «jamón» [haˈmon]. Es la misma unidad fonológica con realizaciones regionales distintas.",
+    "why_en": "In the Caribbean and much of Colombia it is realised as glottal [h]: «jamón» [haˈmon]. One phonological unit, different regional realisations.",
+    "rel_es": [
+      "fricativas",
+      "variación dialectal"
+    ],
+    "rel_en": [
+      "fricatives",
+      "dialect variation"
+    ],
+    "viz": "dental"
+  },
+  {
+    "id": "trill",
+    "symbol": "r",
+    "sound": "rr",
+    "ipa_es": "/r/",
+    "ipa_en": "/r/",
+    "name_es": "vibrante múltiple alveolar sonora",
+    "name_en": "voiced alveolar trill",
+    "ctx_es": "La «rr» y la «r» inicial: {perro} [ˈpero], {rosa} [ˈrosa].",
+    "ctx_en": "Spanish «rr» and word-initial «r»: {perro} [ˈpero], {rosa} [ˈrosa].",
+    "why_es": "Solo contrasta con /ɾ/ entre vocales ({pero} frente a {perro}); a principio de palabra solo aparece la múltiple. Es un caso de neutralización.",
+    "why_en": "It only contrasts with /ɾ/ between vowels ({pero} vs {perro}); word-initially only the trill occurs. A case of neutralisation.",
+    "rel_es": [
+      "vibrantes",
+      "neutralización"
+    ],
+    "rel_en": [
+      "rhotics",
+      "neutralisation"
+    ],
+    "viz": "liquid"
+  },
+  {
+    "id": "eth",
+    "symbol": "ð",
+    "sound": "dh",
+    "ipa_es": "[ð]",
+    "ipa_en": "[ð]",
+    "name_es": "fricativa dental sonora",
+    "name_en": "voiced dental fricative",
+    "ctx_es": "La «d» entre vocales: {nada} [ˈnaða], {todo} [ˈtoðo].",
+    "ctx_en": "English «th» in {this} [ðɪs] and {mother} [ˈmʌðɚ].",
+    "why_es": "En español no es fonema sino alófono de /d/, más exactamente una aproximante [ð̞]. En inglés sí es fonema: {they} frente a {day}.",
+    "why_en": "In Spanish it is not a phoneme but an allophone of /d/, more precisely an approximant [ð̞]. In English it is a phoneme: {they} vs {day}.",
+    "rel_es": [
+      "alófono",
+      "lenición"
+    ],
+    "rel_en": [
+      "allophone",
+      "lenition"
+    ],
+    "viz": "dental"
+  },
+  {
+    "id": "yeismo",
+    "symbol": "ʝ",
+    "sound": "y",
+    "ipa_es": "/ʝ/",
+    "ipa_en": "/ʝ/",
+    "name_es": "fricativa palatal sonora",
+    "name_en": "voiced palatal fricative",
+    "ctx_es": "La «y» y, con yeísmo, la «ll»: {yo} [ʝo], {lluvia} [ˈʝuβja].",
+    "ctx_en": "Spanish «y» and, with yeísmo, «ll»: {yo} [ʝo], {lluvia} [ˈʝuβja].",
+    "why_es": "Con el yeísmo, mayoritario en Colombia y en casi todo el mundo hispanohablante, {haya} y {halla} suenan igual: dos grafías, un solo fonema.",
+    "why_en": "With yeísmo, the majority pattern in Colombia and most of the Spanish-speaking world, {haya} and {halla} sound the same: two spellings, one phoneme.",
+    "rel_es": [
+      "yeísmo",
+      "palatales"
+    ],
+    "rel_en": [
+      "yeísmo",
+      "palatals"
     ],
     "viz": "affricate"
   }
@@ -147,11 +259,15 @@ export const PHONEMES: readonly PhonemeOfDay[] = [
  * Pick the entry for a given day, deterministically and without bias.
  * Days since the Unix epoch keep the rotation stable across reloads.
  */
-export function phonemeForDate(date: Date): PhonemeOfDay {
+/** Index of the entry for a given day, out of `length`, stable across reloads. */
+export function dayIndex(date: Date, length: number): number {
   const day = Math.floor(date.getTime() / 86_400_000);
-  const index = ((day % PHONEMES.length) + PHONEMES.length) % PHONEMES.length;
+  return ((day % length) + length) % length;
+}
+
+export function phonemeForDate(date: Date): PhonemeOfDay {
   // PHONEMES is non-empty by construction, but guard anyway.
-  return PHONEMES[index] ?? PHONEMES[0]!;
+  return PHONEMES[dayIndex(date, PHONEMES.length)] ?? PHONEMES[0]!;
 }
 
 /** Highlight {target} words in a context sentence. */

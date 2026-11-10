@@ -62,7 +62,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   // La entrada: una sola puerta a todas las herramientas.
   { path: "/catalogo", labelKey: "nav.catalogTools", kind: "tool", primary: true },
   { path: "/bibliografia", labelKey: "nav.resources", kind: "reference", primary: true },
-  { path: "/glosario", labelKey: "nav.glossary", kind: "reference", primary: false },
+  { path: "/glosario", labelKey: "nav.glossary", kind: "reference", primary: true },
   { path: "/acerca", labelKey: "nav.about", kind: "about", primary: true },
 ];
 
