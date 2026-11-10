@@ -48,7 +48,7 @@ validar: **Praat 6.4.06** y **R 4.3.3**.
 
 Se preguntan de a una, al empezar la fase que las necesita.
 
-- **D1 (antes de T2 y T5).** Dónde corren los motores: en el navegador (TypeScript, y Rust compilado a
+- **D1 (resuelta el 2026-11-10: navegador, con Rust a WebAssembly donde se mida que hace falta).** Dónde corren los motores: en el navegador (TypeScript, y Rust compilado a
   WebAssembly donde una medición lo justifique, lo que pide instalar Rust en esta máquina) o en un
   servidor propio (Go o Rust), que rompería la regla «los datos no salen del navegador» (ADR 0002).
 - **D2 (T3).** Qué lenguas entran primero al fonemizador.
@@ -64,7 +64,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | ID | Specs | Qué | Ruta | Estado | Commit |
 |---|---|---|---|---|---|
 | T0 | S10 | Rama, este documento y diagnóstico medido | inline | hecha | — |
-| T1 | S5, S6 | Modelo de referencias por herramienta en el núcleo; apartado en Acerca; enlace «teoría» en cada herramienta; prueba que exige al menos una referencia verificada por herramienta | inline | pendiente | — |
+| T1 | S5, S6 | Modelo de referencias por herramienta en el núcleo; apartado en Acerca; bloque «¿De dónde sale esto?» en cada herramienta; prueba que exige teoría y al menos una referencia verificada por herramienta | inline | hecha | `bf93d89` y el commit siguiente. Rojo: la prueba del núcleo sin el módulo; mutación: una herramienta sin referencias hace fallar la regla. 22 obras verificadas en Crossref o en su página |
 | T2 | S1, S2 | Fonemizador por capas: reglas, diccionario y eSpeak como respaldo declarado; salida normalizada al AFI; corpus de evaluación con tasa de error medida antes y después | por decidir (D1) | pendiente | — |
 | T3 | S3 | Lenguas nuevas, cada una con su fuente y su medición | por decidir (D2) | pendiente | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
@@ -141,3 +141,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
   `theory` y `references`. Falta: volver a escribir la teoría y las referencias de cada herramienta en
   `tools.json` (se perdieron al revertir el archivo por error durante una prueba de mutación), la prueba
   que lo exige, el bloque «teoría» en cada página y el apartado en Acerca.
+- **L9 (T1 cerrada).** Teoría y referencias reescritas en `tools.json` para las diez herramientas
+  integradas; `TheoryNote.astro` cierra cada página de herramienta en los dos idiomas y Acerca tiene el
+  apartado `#referencias`. Puerta completa y e2e en verde. T2 cambia de alcance por pedido del dueño: un
+  transcriptor propio (reglas para el español, diccionario publicado para el inglés) en lugar de eSpeak.

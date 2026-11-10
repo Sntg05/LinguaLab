@@ -1,0 +1,92 @@
+---
+/**
+ * «¿De dónde sale esto?»: la teoría detrás de una herramienta y sus fuentes.
+ *
+ * Regla del proyecto: nada está «porque sí». Cada página de herramienta termina
+ * con este bloque, que dice en lenguaje claro de qué teoría o método sale lo que
+ * la persona acaba de usar, y enlaza las obras donde puede leerlo completo. El
+ * texto y las referencias vienen de `tools.json` y `references.json`;
+ * `references.test.ts` impide que una herramienta integrada llegue sin ellos.
+ */
+import { localePath, type Locale } from "../i18n";
+import { referencesOf, toolById } from "../scripts/referencias/references";
+import ReferenceList from "./ReferenceList.astro";
+
+interface Props {
+  locale: Locale;
+  /** Identificadores de `tools.json`; una página puede alojar más de una herramienta. */
+  tools: readonly string[];
+}
+
+const { locale, tools } = Astro.props;
+const es = locale === "es";
+
+const entries = tools.flatMap((id) => {
+  const tool = toolById(id);
+  return tool?.theory ? [{ tool, theory: tool.theory, references: referencesOf(tool) }] : [];
+});
+---
+
+{
+  entries.length > 0 && (
+    <section class="section section--sunken theory" aria-labelledby="theory-title">
+      <div class="shell theory__inner">
+        <div class="u-section-head">
+          <span class="eyebrow">{es ? "Fundamento" : "Background"}</span>
+          <h2 id="theory-title">{es ? "¿De dónde sale esto?" : "Where does this come from?"}</h2>
+        </div>
+
+        {entries.map(({ tool, theory, references }) => (
+          <article class="theory__entry">
+            {entries.length > 1 && <h3 class="theory__name">{tool.name[locale]}</h3>}
+            <p class="theory__text">{theory[locale]}</p>
+            <h4 class="theory__label">{es ? "Para leer la teoría completa" : "To read the full theory"}</h4>
+            <ReferenceList locale={locale} references={references} />
+          </article>
+        ))}
+
+        <p class="theory__more">
+          <a href={`${localePath(locale, "/acerca")}#referencias`}>
+            {es ? "Ver todas las referencias del sitio" : "See every reference on the site"}
+          </a>
+        </p>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .theory__inner {
+    display: grid;
+    gap: var(--space-m);
+    max-width: 52rem;
+  }
+
+  .theory__entry {
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  .theory__name {
+    margin: 0;
+    font-size: var(--step-1);
+  }
+
+  .theory__text {
+    margin: 0;
+    font-size: var(--step-0);
+    line-height: var(--leading-normal);
+  }
+
+  .theory__label {
+    margin: 0;
+    font-size: var(--step--1);
+    font-weight: 600;
+    color: var(--ink-muted);
+  }
+
+  .theory__more {
+    margin: 0;
+    font-size: var(--step--1);
+  }
+</style>

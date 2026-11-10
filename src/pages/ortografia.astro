@@ -1,4 +1,5 @@
 ---
+import TheoryNote from "../components/TheoryNote.astro";
 import OrthographyLab from "../components/OrthographyLab.astro";
 import Base from "../layouts/Base.astro";
 ---
@@ -10,4 +11,5 @@ import Base from "../layouts/Base.astro";
   description="Editor de tablas de reglas grafema a AFI: prueba palabras en vivo, mira qué regla ganó en cada posición, revisa la cobertura y exporta la tabla como JSON o CSV."
 >
   <OrthographyLab locale="es" />
+  <TheoryNote locale="es" tools={["ortografia"]} />
 </Base>

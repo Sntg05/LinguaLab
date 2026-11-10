@@ -17,7 +17,16 @@
       "notes": {
         "es": "Alfabeto AFI con descripción articulatoria, corte sagital y audio, más un transcriptor grafema→AFI para español e inglés. Corre entero en el navegador.",
         "en": "IPA chart with articulatory description, sagittal section and audio, plus a grapheme→IPA transcriber for Spanish and English. Runs entirely in the browser."
-      }
+      },
+      "theory": {
+        "es": "La tabla sigue el Alfabeto Fonético Internacional en su revisión de 2020: cada símbolo se describe por modo, punto de articulación y sonoridad (consonantes) o por altura, posición y redondeamiento (vocales). El transcriptor aplica reglas de grafema a fonema y es un apoyo didáctico, no un análisis fonológico.",
+        "en": "The chart follows the International Phonetic Alphabet as revised to 2020: each symbol is described by manner, place and voicing (consonants) or by height, backness and rounding (vowels). The transcriber applies grapheme-to-phoneme rules and is a teaching aid, not a phonological analysis."
+      },
+      "references": [
+        "ipa1999",
+        "ipa-chart2020",
+        "hualde2013"
+      ]
     },
     {
       "id": "arboles",
@@ -35,7 +44,16 @@
       "notes": {
         "es": "Editor de árboles sintácticos y de estructuras de datos: 23 tipos, cuatro formatos de entrada y exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat.",
         "en": "Syntax and data-structure tree editor: 23 types, four input formats, and export to SVG, PNG, JSON, Newick, CoNLL-U and Brat."
-      }
+      },
+      "theory": {
+        "es": "Dibuja dos familias de análisis sintáctico: dependencias, donde cada palabra depende de otra con una relación (Universal Dependencies), y constituyentes, donde las palabras se agrupan en sintagmas (gramática generativa: Rección y Ligamiento, Programa Minimalista). La herramienta dibuja el análisis que escribes; no lo decide por ti.",
+        "en": "It draws two families of syntactic analysis: dependencies, where each word depends on another through a relation (Universal Dependencies), and constituency, where words group into phrases (generative grammar: Government and Binding, the Minimalist Program). The tool draws the analysis you write; it does not decide it for you."
+      },
+      "references": [
+        "demarneffe2021",
+        "chomsky1981",
+        "chomsky1995"
+      ]
     },
     {
       "id": "tools",
@@ -53,7 +71,19 @@
       "notes": {
         "es": "Análisis de corpus: frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad. No hay lematización.",
         "en": "Corpus analysis: frequency with dispersion, collocations with log-Dice and PMI, KWIC concordances, lexical statistics and readability. There is no lemmatisation."
-      }
+      },
+      "theory": {
+        "es": "Aplica medidas de la lingüística de corpus: asociación entre palabras (información mutua, razón de verosimilitud G², log-Dice), dispersión de una palabra a lo largo del texto e índices de legibilidad (Flesch para el inglés; la escala INFLESZ y sus antecesoras para el español). Sin lematizar, cada forma flexionada cuenta por separado.",
+        "en": "It applies corpus-linguistics measures: word association (mutual information, the G² likelihood ratio, log-Dice), dispersion of a word across the text, and readability indices (Flesch for English; the INFLESZ scale and its predecessors for Spanish). Without lemmatisation, each inflected form counts separately."
+      },
+      "references": [
+        "church1990",
+        "dunning1993",
+        "rychly2008",
+        "gries2008",
+        "flesch1948",
+        "barrio2008"
+      ]
     },
     {
       "id": "ortografia",
@@ -73,7 +103,16 @@
       "notes": {
         "es": "Editor de tablas grafema→AFI con coincidencia por contexto y prioridad, capa alofónica, rastro por carácter y cobertura. Trae demos en español, inglés, portugués brasileño y wayuunaiki, y plantillas indígenas vacías que hay que validar con hablantes.",
         "en": "Grapheme→IPA rule-table editor with context and priority matching, an allophonic layer, per-character tracing and coverage. Ships Spanish, English, Brazilian Portuguese and Wayuunaiki demos, plus empty indigenous templates to be validated with speakers."
-      }
+      },
+      "theory": {
+        "es": "Convierte ortografía en AFI con reglas ordenadas de grafema a fonema que tienen contexto y prioridad, el mismo enfoque de los sistemas de reglas para lenguas de ortografía regular. La tabla de español sigue la descripción fonológica de Hualde; una tabla nueva es tan fiable como la fuente con la que se construya.",
+        "en": "It converts spelling into IPA with ordered grapheme-to-phoneme rules that carry context and priority, the same approach as rule-based systems for languages with regular spelling. The Spanish table follows Hualde's phonological description; a new table is only as reliable as the source it is built from."
+      },
+      "references": [
+        "hualde2013",
+        "mortensen2018",
+        "ipa1999"
+      ]
     },
     {
       "id": "phonemizer",
@@ -92,7 +131,16 @@
         "es": "Texto a AFI con eSpeak NG compilado a WebAssembly, dentro de un Web Worker que se descarga la primera vez que fonemizas. Admite solo español latinoamericano e inglés estadounidense, y su AFI es aproximado: no sustituye una transcripción revisada. Al lado muestra la tabla grafema→AFI de la herramienta de ortografía.",
         "en": "Text to IPA with eSpeak NG compiled to WebAssembly, inside a Web Worker that is downloaded the first time you phonemize. It admits only Latin American Spanish and American English, and its IPA is approximate: it does not replace a reviewed transcription. The grapheme→IPA table from the orthography tool sits next to it."
       },
-      "citation": "eSpeak NG contributors. eSpeak NG [Computer software]."
+      "citation": "eSpeak NG contributors. eSpeak NG [Computer software].",
+      "theory": {
+        "es": "Usa eSpeak NG, un sintetizador de voz que convierte texto en fonemas con reglas y diccionarios de excepciones por lengua. Herramientas de investigación como Phonemizer usan el mismo motor, pero su salida es una aproximación: no sigue todas las convenciones del AFI y puede fallar en palabras poco frecuentes.",
+        "en": "It uses eSpeak NG, a speech synthesizer that turns text into phonemes with per-language rules and exception dictionaries. Research tools such as Phonemizer use the same engine, but its output is an approximation: it does not follow every IPA convention and can fail on infrequent words."
+      },
+      "references": [
+        "espeakng2024",
+        "bernard2021",
+        "ipa1999"
+      ]
     },
     {
       "id": "textgrid-viewer",
@@ -108,7 +156,15 @@
         "es": "Experimental: visor de audio con forma de onda, espectrograma (ventana y rango de frecuencia ajustables) y capas de intervalos que importan y exportan TextGrid de Praat, además de exportar CSV. El audio no se sube a ningún servidor. El código de TextGrid está probado con archivos de referencia y de ida y vuelta; que Praat abra el archivo exportado no se puede medir desde una prueba automática, así que ábrelo una vez antes de confiarle una sesión larga. No incluye análisis acústico, ELAN ni alineación automática.",
         "en": "Experimental: audio viewer with a waveform, a spectrogram (adjustable window and frequency range) and annotation tiers that import and export Praat TextGrid, plus CSV export. The audio is never uploaded to a server. The TextGrid code is tested against reference files and round trips; whether Praat opens the exported file cannot be measured from an automated test, so open it once before trusting it with a long session. No acoustic analysis, ELAN or automatic alignment."
       },
-      "citation": "Boersma, P., & Weenink, D. Praat: doing phonetics by computer [Computer software]."
+      "citation": "Boersma, P., & Weenink, D. Praat: doing phonetics by computer [Computer software].",
+      "theory": {
+        "es": "Muestra la señal como forma de onda y como espectrograma (energía por frecuencia a lo largo del tiempo) y permite segmentar y etiquetar en capas, con el formato TextGrid de Praat, el programa de referencia en fonética acústica.",
+        "en": "It shows the signal as a waveform and as a spectrogram (energy per frequency over time) and lets you segment and label in tiers, using the TextGrid format of Praat, the reference program in acoustic phonetics."
+      },
+      "references": [
+        "praat",
+        "ipa1999"
+      ]
     },
     {
       "id": "jspsych-experiments",
@@ -124,7 +180,16 @@
         "es": "Constructor y ejecutor de cuatro experimentos (juicios de aceptabilidad, elección forzada, lectura autocontrolada y decisión léxica) con jsPsych: estímulos por CSV, aleatorización con semilla reproducible, bloques y práctica, vista previa, y descarga de resultados con participante anónimo, condición, respuesta, tiempo de reacción y semilla. Corre entero en el navegador; ningún dato sale del equipo. **Límite declarado**: los tiempos de reacción en un navegador tienen precisión limitada y la página lo advierte antes de empezar.",
         "en": "Builder and runner for four experiments (acceptability judgements, forced choice, self-paced reading and lexical decision) with jsPsych: CSV stimuli, reproducible seeded randomisation, blocks and practice, preview, and results download with anonymous participant, condition, response, reaction time and seed. It runs entirely in the browser; no data leaves the computer. **Declared limit**: reaction times in a browser have limited precision, and the page warns about it before starting."
       },
-      "citation": "de Leeuw, J. R. (2015). jsPsych: A JavaScript library for creating behavioral experiments in a Web browser. Behavior Research Methods, 47(1), 1–12."
+      "citation": "de Leeuw, J. R. (2015). jsPsych: A JavaScript library for creating behavioral experiments in a Web browser. Behavior Research Methods, 47(1), 1–12.",
+      "theory": {
+        "es": "Construye tareas clásicas de psicolingüística (juicios de aceptabilidad, elección forzada, lectura autoadministrada y decisión léxica) sobre jsPsych. Los tiempos de reacción medidos en un navegador tienen una precisión limitada, estudiada por Bridges y colaboradores (2020).",
+        "en": "It builds classic psycholinguistics tasks (acceptability judgments, forced choice, self-paced reading and lexical decision) on jsPsych. Reaction times measured in a browser have limited precision, studied by Bridges and colleagues (2020)."
+      },
+      "references": [
+        "deleeuw2015",
+        "deleeuw2023",
+        "bridges2020"
+      ]
     },
     {
       "id": "acoustic-analysis",
@@ -139,7 +204,15 @@
       "notes": {
         "es": "Contorno de F0 con presets de voz, formantes F1–F3 superpuestos al espectrograma, intensidad en dB y medición de un intervalo (media, mediana, mínimo y máximo de F0; F1 y F2 al 25/50/75 %) con exportación a CSV y gráfico vocálico. Funciona dentro del visor de audio, con el motor praatfan compilado a WebAssembly en un worker. **Experimental**: el contraste con Praat sobre voces reales todavía no se hizo.",
         "en": "F0 contour with voice presets, F1–F3 formants overlaid on the spectrogram, intensity in dB, and per-interval measurement (mean, median, min and max F0; F1 and F2 at 25/50/75 %) with CSV export and a vowel chart. It runs inside the audio viewer, with the praatfan engine compiled to WebAssembly in a worker. **Experimental**: the comparison against Praat on real voices has not been done yet."
-      }
+      },
+      "theory": {
+        "es": "Mide la frecuencia fundamental (F0) con el método de autocorrelación de Boersma (1993), los formantes por predicción lineal y la intensidad, con una reimplementación de los algoritmos de Praat. Sigue marcado como experimental hasta contrastar sus valores con Praat sobre voces reales.",
+        "en": "It measures fundamental frequency (F0) with Boersma's (1993) autocorrelation method, formants by linear prediction, and intensity, using a reimplementation of Praat's algorithms. It stays marked experimental until its values are checked against Praat on real voices."
+      },
+      "references": [
+        "boersma1993",
+        "praat"
+      ]
     },
     {
       "id": "elan-textgrid",
@@ -154,7 +227,15 @@
       "notes": {
         "es": "Conversión entre ELAN (.eaf) y Praat (.TextGrid) en el navegador, con informe de lo que no se pudo convertir. Pyodide y pympi-ling se sirven desde este mismo origen (13 MB la primera vez): el archivo nunca sale del navegador.",
         "en": "Conversion between ELAN (.eaf) and Praat (.TextGrid) in the browser, with a report of what could not be converted. Pyodide and pympi-ling are served from this same origin (13 MB the first time): the file never leaves the browser."
-      }
+      },
+      "theory": {
+        "es": "Convierte entre los dos formatos de anotación más usados en documentación lingüística: el .eaf de ELAN, con capas jerárquicas, y el TextGrid de Praat, con capas planas. Lo que un formato no puede representar se informa en vez de perderse en silencio.",
+        "en": "It converts between the two most used annotation formats in language documentation: ELAN's .eaf, with hierarchical tiers, and Praat's TextGrid, with flat tiers. Whatever one format cannot represent is reported instead of being silently lost."
+      },
+      "references": [
+        "wittenburg2006",
+        "praat"
+      ]
     },
     {
       "id": "mapa-lenguas-colombia",
@@ -170,7 +251,14 @@
         "es": "Mapa consultable de las lenguas que Glottolog registra en Colombia, con familia, Glottocode, código ISO 639-3 y enlace a su ficha. El mapa es propio (sin teselas ni peticiones a terceros) y todo su contenido está también en una tabla accesible. Incluye las seis lenguas no indígenas que la fuente asigna al país: la página lo dice y el filtro por familia permite dejarlas fuera.",
         "en": "Browsable map of the languages Glottolog records in Colombia, with family, Glottocode, ISO 639-3 code and a link to its record. The map is our own (no tiles, no third-party requests) and all its content is also in an accessible table. It includes the six non-Indigenous languages the source assigns to the country: the page says so, and the family filter can leave them out."
       },
-      "citation": "Hammarström, H., Forkel, R., Haspelmath, M., & Bank, S. Glottolog [Data set]. Max Planck Institute for Evolutionary Anthropology."
+      "citation": "Hammarström, H., Forkel, R., Haspelmath, M., & Bank, S. Glottolog [Data set]. Max Planck Institute for Evolutionary Anthropology.",
+      "theory": {
+        "es": "Los nombres, las familias y las coordenadas vienen de Glottolog, el catálogo bibliográfico de las lenguas del mundo. La clasificación es la de esa fuente y puede no coincidir con la autodenominación de cada pueblo.",
+        "en": "Names, families and coordinates come from Glottolog, the bibliographic catalogue of the world's languages. The classification is that source's and may not match each people's own name for their language."
+      },
+      "references": [
+        "glottolog2025"
+      ]
     },
     {
       "id": "lexonomy",
