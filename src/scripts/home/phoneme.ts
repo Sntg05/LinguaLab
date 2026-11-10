@@ -71,6 +71,9 @@ export function rotatePhoneme(): void {
   const nextButton = get<HTMLButtonElement>("[data-phoneme-next]");
   const position = get("[data-phoneme-position]");
   let player: HTMLAudioElement | null = null;
+  // The current entry's recording. Kept here, not in a data attribute, so the
+  // URL never round-trips through the DOM.
+  let audioSrc: string | null = null;
 
   const show = (index: number): void => {
     const view = views[index];
@@ -117,17 +120,16 @@ export function rotatePhoneme(): void {
       player?.pause();
       player = null;
       audioButton.hidden = view.audio === null;
-      audioButton.dataset["src"] = view.audio ?? "";
     }
+    audioSrc = view.audio;
     if (position) position.textContent = `${index + 1} / ${views.length}`;
     root.dataset["index"] = String(index);
   };
 
   audioButton?.addEventListener("click", () => {
-    const src = audioButton.dataset["src"];
-    if (!src) return;
+    if (!audioSrc) return;
     player?.pause();
-    player = new Audio(src);
+    player = new Audio(audioSrc);
     void player.play().catch(() => {
       // A blocked or missing file leaves the card as it is: the button is a
       // convenience, and the transcription above is the content.
