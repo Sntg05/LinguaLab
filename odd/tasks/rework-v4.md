@@ -132,3 +132,12 @@ Se preguntan de a una, al empezar la fase que las necesita.
   con la GPL-3.0 del proyecto).
 - **L6.** `odd/tasks/frontend-rework.md` pasa a `closed`: sus seis tareas estaban hechas y fusionadas en
   el PR #17, pero el documento seguía como activo.
+- **L7 (2026-11-10).** D1 resuelta por el dueño: «Navegador + Rust». Rust 1.99.1 instalado en la carpeta
+  de usuario con el destino `wasm32-unknown-unknown`. El dueño pidió además un transcriptor propio («si
+  Espeak ng no es necesario entonces creemos un transcriptor propio») y que la rama se publique para
+  trabajarla desde otro equipo, sin fusionar.
+- **L8 (T1, a medias).** Hecho: modelo `Reference` y `checkScholarlySupport` en el núcleo (rojo y verde),
+  `src/data/references.json` con 22 referencias verificadas una por una y el lector del catálogo acepta
+  `theory` y `references`. Falta: volver a escribir la teoría y las referencias de cada herramienta en
+  `tools.json` (se perdieron al revertir el archivo por error durante una prueba de mutación), la prueba
+  que lo exige, el bloque «teoría» en cada página y el apartado en Acerca.

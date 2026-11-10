@@ -58,4 +58,8 @@ export interface ToolDescriptor {
   readonly notes?: ToolLocalizedText;
   /** Referencia bibliografica de la herramienta o del metodo que implementa. */
   readonly citation?: string;
+  /** En una o dos frases, de que teoria o metodo sale la herramienta y que limites tiene. */
+  readonly theory?: ToolLocalizedText;
+  /** Identificadores de la bibliografia (`Reference.id`) que respaldan la herramienta. */
+  readonly references?: readonly string[];
 }

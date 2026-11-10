@@ -79,7 +79,8 @@ const parseTool = (value: unknown): ToolDescriptor => {
     invalid("una ficha no es un objeto");
   }
 
-  const { id, name, area, integration, status, languages, url, notes, citation } = value;
+  const { id, name, area, integration, status, languages, url, notes, citation, theory, references } =
+    value;
 
   if (typeof id !== "string" || id === "") {
     invalid("una ficha no declara un id");
@@ -127,6 +128,13 @@ const parseTool = (value: unknown): ToolDescriptor => {
     invalid(`la ficha ${id} trae una cita que no es texto`);
   }
 
+  if (theory !== undefined && !isLocalizedText(theory)) {
+    invalid(`la ficha ${id} trae una teoria que no esta en es y en`);
+  }
+  if (references !== undefined && !isStringList(references)) {
+    invalid(`la ficha ${id} trae referencias que no son una lista de identificadores`);
+  }
+
   const descriptor: {
     id: string;
     name: ToolLocalizedText;
@@ -137,6 +145,8 @@ const parseTool = (value: unknown): ToolDescriptor => {
     url?: string;
     notes?: ToolLocalizedText;
     citation?: string;
+    theory?: ToolLocalizedText;
+    references?: readonly string[];
   } = { id, name, area, integration, status, languages };
 
   if (url !== undefined) {
@@ -147,6 +157,12 @@ const parseTool = (value: unknown): ToolDescriptor => {
   }
   if (citation !== undefined) {
     descriptor.citation = citation;
+  }
+  if (theory !== undefined) {
+    descriptor.theory = theory;
+  }
+  if (references !== undefined) {
+    descriptor.references = references;
   }
   return descriptor;
 };
