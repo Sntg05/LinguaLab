@@ -72,15 +72,17 @@ describe("la variedad de español declarada", () => {
   const read = (path: string): string => readFileSync(join(ROOT, path), "utf8");
 
   it("el fonemizador nombra la variedad de la voz que configura su adaptador", () => {
-    const voices = read("packages/adapters/src/phonemizer/espeak-voices.ts");
-    expect(voices).toMatch(/spa:\s*"es-419"/);
+    // El seseo es el valor por defecto del motor: quien no elige variedad
+    // obtiene /s/, y eso es lo que el texto tiene que anunciar primero.
+    const engine = read("packages/core/src/g2p/spanish.ts");
+    expect(engine).toMatch(/variety \?\? "latin-american"|variety = "latin-american"/);
 
     const es = read("src/i18n/messages/es.ts").match(/"phon\.limits":\s*"([^"]+)"/)?.[1] ?? "";
     const en = read("src/i18n/messages/en.ts").match(/"phon\.limits":\s*"([^"]+)"/)?.[1] ?? "";
     expect(es).toMatch(/latinoamericano/i);
-    expect(es).not.toMatch(/Castilla/);
+    expect(es.indexOf("latinoamericano")).toBeLessThan(es.indexOf("peninsular"));
     expect(en).toMatch(/Latin American/);
-    expect(en).not.toMatch(/Castilian/);
+    expect(en.indexOf("Latin American")).toBeLessThan(en.indexOf("Peninsular"));
   });
 
   it("FonoLab anuncia en su interfaz que su transcriptor usa distinción", () => {

@@ -71,17 +71,15 @@ también es una decisión que conviene poder auditar.
 
 | Paquete | Versión | Licencia | Uso | Estado |
 |---|---|---|---|---|
-| [espeak-phonemizer](https://www.npmjs.com/package/espeak-phonemizer) | 0.2.0 | **GPL-3.0-only** | Fonemizador es/en: eSpeak NG compilado a WebAssembly, en un Web Worker. Se publican `wasm/espeak-ng.wasm`, `data/manifest.json` y `data/data.data` del propio paquete, copiados por `scripts/sync-espeak-data.mjs` | Integrado |
+| [CMUdict](https://github.com/cmusphinx/cmudict) | commit `74790861f652` (2025-10-24) | **BSD de dos cláusulas**, © 1993-2015 Carnegie Mellon University | Transcriptor de inglés: diccionario de pronunciación en ARPABET. Se publica reformateado en `public/cmudict/<versión>/en-us.tsv` junto con su `LICENSE` (la licencia obliga a conservar el aviso) y un `README.md` con la procedencia y los `sha256`. Lo genera `scripts/build-cmudict.mts` | Integrado |
 
-> **Este paquete cambió la licencia del proyecto.** Antes de integrarlo, LinguaLab era MIT. eSpeak NG
-> es GPL-3.0-only y su binario viaja al navegador dentro del bundle, así que la distribución
-> completa pasó a GPL-3.0-only —no a `-or-later`, porque el paquete no concede esa opción—. Los
-> `LICENSE` de las versiones anteriores siguen siendo MIT: el cambio no se aplica hacia atrás. La
-> decisión está anotada en `odd/tasks/text-station-ngrams-and-phonemizer.md`, spec S4.
->
-> Coste declarado: el bundle de datos pesa **5,6 MB** y no se puede recortar por lengua (el paquete
-> trae un solo archivo para sus 51 voces). Se descarga en tiempo de ejecución, solo al abrir la
-> herramienta, y por eso no entra en el presupuesto de peso por página.
+> **eSpeak NG se retiró en el rework v4.** El fonemizador usaba `espeak-phonemizer` 0.2.0
+> (GPL-3.0-only), que fue el paquete que llevó el proyecto de MIT a GPL-3.0-only. Se reemplazó por un
+> transcriptor propio (reglas para el español, CMUdict para el inglés) porque, medido contra un
+> diccionario revisado, eSpeak acertaba el 76,9 % de las palabras del español y las reglas propias
+> el 96,6 % (`odd/tasks/rework-v4.md`). **La licencia del proyecto no cambia por esto:** siguen
+> integrados otros componentes GPL (praatfan), y volver a una licencia más permisiva sería una
+> decisión del dueño, no una consecuencia de quitar una dependencia.
 
 ## Descartadas
 

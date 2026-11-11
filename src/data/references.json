@@ -38,24 +38,6 @@
       "verifiedOn": "2026-11-10"
     },
     {
-      "id": "bernard2021",
-      "authors": "Bernard, M., & Titeux, H.",
-      "year": 2021,
-      "title": "Phonemizer: Text to phones transcription for multiple languages in Python",
-      "source": "Journal of Open Source Software, 6(68), 3958",
-      "doi": "10.21105/joss.03958",
-      "verifiedOn": "2026-11-10"
-    },
-    {
-      "id": "espeakng2024",
-      "authors": "eSpeak NG contributors",
-      "year": 2024,
-      "title": "eSpeak NG (version 1.52.0) [Computer software]",
-      "source": "GitHub",
-      "url": "https://github.com/espeak-ng/espeak-ng",
-      "verifiedOn": "2026-11-10"
-    },
-    {
       "id": "demarneffe2021",
       "authors": "de Marneffe, M.-C., Manning, C. D., Nivre, J., & Zeman, D.",
       "year": 2021,
@@ -197,6 +179,15 @@
       "title": "Glottolog 5.2.1 [Data set]",
       "source": "Max Planck Institute for Evolutionary Anthropology",
       "url": "https://glottolog.org/",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "cmudict2015",
+      "authors": "Carnegie Mellon University",
+      "year": 2015,
+      "title": "The CMU Pronouncing Dictionary [Data set]",
+      "source": "Carnegie Mellon University, Speech Group",
+      "url": "https://github.com/cmusphinx/cmudict",
       "verifiedOn": "2026-11-10"
     }
   ]

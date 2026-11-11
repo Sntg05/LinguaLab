@@ -65,7 +65,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 |---|---|---|---|---|---|
 | T0 | S10 | Rama, este documento y diagnóstico medido | inline | hecha | — |
 | T1 | S5, S6 | Modelo de referencias por herramienta en el núcleo; apartado en Acerca; bloque «¿De dónde sale esto?» en cada herramienta; prueba que exige teoría y al menos una referencia verificada por herramienta | inline | hecha | `bf93d89` y el commit siguiente. Rojo: la prueba del núcleo sin el módulo; mutación: una herramienta sin referencias hace fallar la regla. 22 obras verificadas en Crossref o en su página |
-| T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | en curso | `03ec0d8`: motores en `packages/core/src/g2p/` con rojo y verde. Español contra ipa-dict es_MX (5006 palabras): 96,6 % propio, 76,9 % eSpeak. Falta empaquetar CMUdict, el adaptador, conectar la página, retirar eSpeak y medir el inglés (pasos en `odd/handoff/ACTUAL.md` §5) |
+| T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | hecha | `03ec0d8`: motores con rojo y verde. Commit siguiente: CMUdict empaquetado (`scripts/build-cmudict.mts`), adaptador `createNativePhonemizer` (rojo: suite sin módulo; verde: 9 pruebas), página conectada con variedad, nivel, palabras sin transcribir y variantes, y eSpeak retirado. `verify:all` y e2e completa en verde. Español: 96,6 % propio frente a 76,9 % de eSpeak |
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
 | T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat 6.4.06 (cierra P17) | por decidir (D1) | pendiente | — |
@@ -150,4 +150,15 @@ Se preguntan de a una, al empezar la fase que las necesita.
 - **L11 (2026-11-10).** El dueño pidió un traspaso minucioso para continuar con otro agente u otro modelo:
   `odd/handoff/ACTUAL.md` se reescribió con el estado, las reglas, los pasos exactos de lo que falta de T2
   y las decisiones abiertas; el traspaso anterior quedó en `odd/handoff/archivo/`.
-
+- **L12 (2026-11-10).** T2 cerrada. Decisiones: (a) el puerto `PhonemizerPort` gana opciones (`variety`,
+  `level`) y el resultado lleva `skipped` y `variants`, opcionales, para no esconder lo que el motor no
+  resolvió; (b) el adaptador no usa worker: indexar 126 052 palabras tarda decenas de milisegundos una
+  vez; (c) la versión de CMUdict es la fecha de su commit fijo (`2025.10.24`), con `sha256` comprobado
+  al empaquetar; (d) el presupuesto de motores baja de 21 a 19 MB (hoy pesan 17,1). Medición del inglés
+  contra ipa-dict `en_US`: 4697 de 4698 palabras, pero es **coherencia y no acierto**: esa referencia
+  deriva del mismo CMUdict, así que solo valida la conversión de ARPABET a AFI. La referencia
+  `cmudict2015` se verificó abriendo el repositorio oficial y su `LICENSE`; `espeakng2024` y
+  `bernard2021` salieron de la bibliografía. **Sin hacer, anotado:** el transcriptor de FonoLab
+  (`src/scripts/fono/phonetics.ts`) y el de la portada siguen con sus reglas propias; unificarlos con
+  este motor queda para T9. La licencia del proyecto sigue en GPL-3.0-only: quitar eSpeak no la cambia
+  (praatfan es GPL) y volver a una más permisiva sería decisión del dueño.

@@ -1,5 +1,9 @@
-import type { PhonemeSequence } from "../domain/ipa";
-import type { PhonemizerError, PhonemizerPort } from "../ports/phonemizer";
+import type {
+  PhonemizedText,
+  PhonemizeOptions,
+  PhonemizerError,
+  PhonemizerPort,
+} from "../ports/phonemizer";
 import type { Result } from "../result";
 
 /**
@@ -14,9 +18,10 @@ import type { Result } from "../result";
 export interface PhonemizeTextInput {
   readonly text: string;
   readonly languageCode: string;
+  readonly options?: PhonemizeOptions;
 }
 
 export const createPhonemizeText =
   (deps: { readonly phonemizer: PhonemizerPort }) =>
-  (input: PhonemizeTextInput): Promise<Result<PhonemeSequence, PhonemizerError>> =>
-    deps.phonemizer.phonemize(input.text, input.languageCode);
+  (input: PhonemizeTextInput): Promise<Result<PhonemizedText, PhonemizerError>> =>
+    deps.phonemizer.phonemize(input.text, input.languageCode, input.options);

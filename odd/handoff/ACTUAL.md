@@ -43,7 +43,7 @@ Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya es
 | `npx vitest run <carpeta>` | Mientras se trabaja, sobre lo que se toca |
 | `npm run verify:all` | Antes de cada commit de código: lint, formato, tipos, hexágono, pruebas y build verificado |
 | `npm run test:e2e` | Antes de cada commit que toque páginas, estilos o motores (necesita el puerto 4331 libre) |
-| `node --experimental-strip-types --no-warnings scripts/eval-g2p-es.mts` | Al tocar el transcriptor de español; descarga antes el diccionario (ver §5) |
+| `node --experimental-strip-types --no-warnings scripts/eval-g2p.mts` | Al tocar un transcriptor; descarga antes los diccionarios de referencia (cabecera del script) |
 
 ## 3. Reglas que no se negocian (y que ya costaron errores)
 
@@ -94,74 +94,28 @@ Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya es
 | `1ae6e36` | **T1 cerrada.** Teoría y referencias de las diez herramientas integradas en `tools.json`; `src/components/TheoryNote.astro` cierra cada página de herramienta (es y en); `src/components/ReferenceList.astro`; apartado `#referencias` en `src/components/About.astro` |
 | `03ec0d8` | **T2, primera mitad.** Motores propios en `packages/core/src/g2p/`: `spanish.ts` y `english.ts`, con sus pruebas, exportados desde `@lingualab/core`. **Todavía no están conectados a la página** |
 
-Puerta completa y e2e en verde al cerrar T1. Los motores de `03ec0d8` pasan sus pruebas, tipos, lint y
-reglas del hexágono; **no** se corrió la e2e completa después de ese commit (no tocan páginas).
+El commit siguiente a `03ec0d8` cierra **T2** (ver §5). Puerta completa (`verify:all`) y e2e completa en
+verde al cerrarla.
 
-## 5. Tarea en curso: T2, el transcriptor propio
+## 5. T2 cerrada: el transcriptor propio
 
-**Por qué:** el dueño notó errores de transcripción. Se midió el motor anterior (`espeak-phonemizer`
-0.2.0): no está desactualizado (eSpeak NG 1.52.0 es la última versión), pero es la entrada de un
-sintetizador de voz. Fallos medidos: «allá» → `ajjˈa`, «pingüino» → `pˌiŋɡuˈino`, «México» → `mˈɛxiko`,
-«bird» → `bˈɜːd`; acento delante de la vocal y no de la sílaba; símbolo `ᵻ`, que no es del AFI. El dueño
-pidió: «si Espeak ng no es necesario entonces creemos un transcriptor propio» y, después, «déjalo en
-español e inglés no más».
+eSpeak NG se retiró (dependencia, archivos publicados, worker y plugin de Astro). Lo reemplaza:
 
-### Lo que hay
+- **Motores** en `packages/core/src/g2p/`: `transcribeSpanish` (reglas según Hualde 2013; variedad
+  latinoamericana o peninsular; nivel fonémico o fonético) y `transcribeEnglish` (consulta CMUdict y
+  convierte ARPABET a AFI; lo que no conoce sale como `⟨palabra⟩`).
+- **Diccionario** en `public/cmudict/<versión>/`, generado por `scripts/build-cmudict.mts` desde un commit
+  fijo con `sha256` comprobado. No se edita a mano. Para actualizarlo: cambiar `COMMIT`, `VERSION` y los
+  hashes en el script, la versión en `src/config/engines.json`, borrar la carpeta vieja y correrlo.
+- **Adaptador** `createNativePhonemizer` (`packages/adapters/src/phonemizer/native-phonemizer.ts`): el
+  español no toca la red; el inglés descarga el diccionario una vez, al primer uso.
+- **Página** `src/components/PhonemizerLab.astro`: selectores de variedad y nivel (solo español), lista de
+  palabras sin transcribir y de palabras con varias pronunciaciones.
+- **Medición:** `scripts/eval-g2p.mts` (instrucciones en su cabecera). Español: 96,6 % de acierto. Inglés:
+  coincide con ipa-dict, pero es coherencia y no acierto (misma fuente).
 
-- **`transcribeSpanish(text, { variety, level })`** (`packages/core/src/g2p/spanish.ts`). Reglas según
-  Hualde (2013): grafema a fonema, diptongos, silabeo por ataque máximo y acento. `variety`:
-  `"latin-american"` (seseo, por defecto) o `"castilian"` (`θ`). `level`: `"phonemic"` (por defecto) o
-  `"phonetic"` (`β ð ɣ` y nasales asimiladas, sobre la frase entera). Salida: acento delante de la sílaba,
-  punto entre sílabas, monosílabos sin marca. Devuelve `{ ipa, skipped }`.
-- **`transcribeEnglish(text, lookup)`** y **`arpabetToIpa(phones)`** (`english.ts`). `lookup` es una
-  función `(palabra) => pronunciaciones ARPABET | undefined`: el núcleo **no** carga el diccionario.
-  Inglés americano general (`ɝ`/`ɚ`, `ə` átona, sin marcas de duración), acento primario y secundario
-  delante de la sílaba. Devuelve `{ ipa, skipped, variants }`; `variants` lista las palabras con varias
-  pronunciaciones («read»). Lo que no está en el diccionario sale como `⟨palabra⟩`. Deriva solo el plural
-  y el posesivo regulares.
-- **Medición del español** (`scripts/eval-g2p-es.mts`): contra `es_MX.txt` de `open-dict-data/ipa-dict`
-  (MIT), una muestra determinista de 5006 palabras, comparando solo segmentos (sin acento ni sílabas) y
-  con la notación igualada (deslizadas, `s` sonora, aproximantes). **Motor propio: 96,6 %; eSpeak:
-  76,9 %.** El resto son nasales asimiladas que el diccionario anota y el nivel fonémico no. Para
-  repetirla:
-  `curl -o node_modules/.cache/es_MX.txt https://raw.githubusercontent.com/open-dict-data/ipa-dict/master/data/es_MX.txt`
-  y después el comando de §2.
-
-### Lo que falta de T2, en orden
-
-1. **Empaquetar CMUdict.** Fuente: `https://raw.githubusercontent.com/cmusphinx/cmudict/master/cmudict.dict`
-   (commit `74790861f652`, 2025-10-24; 135 166 líneas; licencia BSD de Carnegie Mellon, que obliga a
-   conservar el aviso de copyright). Formato: `palabra FONOS…`, variantes como `palabra(2)`, comentarios
-   tras `#`. Escribir `scripts/build-cmudict.mts` que lo descargue, compruebe su `sha256`, quite
-   comentarios, agrupe variantes y escriba `public/cmudict/<versión>/en-us.tsv`
-   (`palabra<TAB>pron1|pron2`) junto con `LICENSE` y un `README.md` con procedencia y hash. Como versión,
-   la fecha del commit (`2025.10.24`). Registrar el motor según la regla 9 de §3 y anotarlo en
-   `THIRD_PARTY_NOTICES.md`. El presupuesto de motores de `scripts/verify-build.mjs` (21 MB) baja cuando
-   salga eSpeak (5,7 MB).
-2. **Adaptador.** En `packages/adapters/src/phonemizer/`, un `createNativePhonemizer({ dictionaryUrl })`
-   que implemente `PhonemizerPort` (`packages/core/src/ports/phonemizer.ts`): `spa` llama a
-   `transcribeSpanish`; `eng` descarga el `.tsv` la primera vez (bajo demanda, nunca al cargar la página),
-   arma un `Map` y llama a `transcribeEnglish`. Debe pasar la suite de contrato
-   `runPhonemizerPortContract` (`packages/core/src/testing/contracts/phonemizer.ts`). `PhonemeSequence`
-   está en `packages/core/src/domain/ipa.ts`: revisar su forma antes de mapear. Si el resultado necesita
-   llevar `skipped` y `variants` hasta la interfaz, se amplía el puerto **y** su contrato y su fake.
-3. **Conectar.** En `src/composition-root.ts`, reemplazar `createEspeakPhonemizer` por el nuevo. En
-   `src/components/PhonemizerLab.astro` (atributos `data-phon-*`): selector de variedad y de nivel para el
-   español, lista de palabras no encontradas y de variantes para el inglés, y textos nuevos en
-   `src/i18n/messages/{es,en}.ts` (claves `phon.*`; `phon.limits` y `phon.sub` hoy hablan de eSpeak).
-   Actualizar `e2e/phonemizer.spec.ts` (hoy espera `kˈasa`; pasará a `ˈka.sa`).
-4. **Retirar eSpeak** cuando lo anterior esté en verde: dependencia `espeak-phonemizer`, sus archivos del
-   adaptador, `public/espeak-phonemizer/`, `scripts/sync-espeak-data.mjs`, la entrada en `engines.json`,
-   `ENGINE_DIRS`, `vercel.json`, `scripts/live-check.mjs`, el plugin `dropUnrequestedEspeakWasm` de
-   `astro.config.mjs`, `wasm-unsafe-eval` **no** se quita de la CSP (lo usan Pyodide y praatfan), y las
-   referencias: en `tools.json`, la herramienta `phonemizer` pasa a citar `hualde2013`, `ipa1999` y una
-   referencia nueva y verificada de CMUdict; `espeakng2024` y `bernard2021` salen de `references.json` si
-   nadie más las cita (la prueba avisa con `unused-reference`). El transcriptor de la portada y el de
-   FonoLab (`src/scripts/fono/phonetics.ts`) deberían usar el motor nuevo para no tener tres
-   transcriptores distintos.
-5. **Medir el inglés** igual que el español, contra `en_US.txt` de ipa-dict, y anotar la cifra en el Log.
-6. Actualizar `docs/STATUS.md`, la entrada P14 de `docs/PENDING.md` (queda resuelta al salir eSpeak) y la
-   fila T2 del documento ODD.
+**Quedó sin hacer, a propósito:** FonoLab (`src/scripts/fono/phonetics.ts`) y la portada siguen con sus
+transcriptores propios. Unificarlos con este motor es parte de T9.
 
 ## 6. Tareas siguientes (ver la tabla del documento ODD)
 
@@ -193,7 +147,7 @@ español e inglés no más».
 - **Revisión de gentle-ai.** El repositorio tiene activo el desarrollo guiado por recibos: al terminar un
   turno con commits nuevos, un gancho pide correr `gentle-ai review start …` tal como lo entrega. Si
   devuelve una consulta de consentimiento (`consent_required`), **se le traslada completa al dueño y no se
-  responde por él**. Hay una consulta sin responder sobre el cambio de las referencias (riesgo medio). El
+  responde por él**. El
   revisor falló antes porque la sesión de la CLI de `claude` estaba vencida.
 - **Memoria Engram:** en esta máquina las escrituras fallaron (el modo automático no pudo revisarlas). El
   registro completo está en el repositorio, no en la memoria.

@@ -11,7 +11,7 @@
  *   —declarandolo— cuando IndexedDB no esta o no responde.
  * - `tool-registry`, el registro de herramientas sobre las fichas que recibe;
  *   los datos del catalogo viven en `src/data/tools.json`, no en el adaptador.
- * - `phonemizer`, eSpeak NG en WebAssembly dentro de un worker.
+ * - `phonemizer`, el transcriptor propio (reglas para el espanol, CMUdict para el ingles).
  * - `acoustic`, el analisis de F0, formantes e intensidad con praatfan, tambien
  *   en un worker. Es experimental: el contraste contra Praat sobre voces reales
  *   sigue pendiente (ver `docs/validation/acoustic.md`).
@@ -29,10 +29,9 @@ export {
 } from "./tool-registry/static-tool-registry";
 
 export {
-  createEspeakPhonemizer,
-  type EspeakPhonemizer,
-  type EspeakPhonemizerOptions,
-} from "./phonemizer/espeak-phonemizer";
+  createNativePhonemizer,
+  type NativePhonemizerOptions,
+} from "./phonemizer/native-phonemizer";
 
 /**
  * El codec ELAN (Pyodide + pympi-ling).
@@ -57,13 +56,6 @@ export type {
   ElanSerializeResult,
   PyodideElanCodec,
 } from "./elan/pyodide-elan-types";
-
-export {
-  isSupportedLanguage,
-  supportedLanguages,
-  toEspeakVoice,
-  type SupportedLanguageCode,
-} from "./phonemizer/espeak-voices";
 
 export {
   createPraatfanAcousticAnalysis,

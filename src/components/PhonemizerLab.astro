@@ -2,23 +2,20 @@
 /**
  * PhonemizerLab: text → IPA for Spanish and English.
  *
- * Two engines answer the same text and the page shows both. eSpeak NG,
- * compiled to WebAssembly and running inside a Web Worker, is approximate: it
- * applies pronunciation rules, not a reviewed reading. Next to it sits the
- * grapheme-to-IPA rule table from the orthography tool, one demo table per
- * language. Putting them side by side is the honest way to present an
- * approximate transcription: the disagreement is visible instead of argued
- * away in a footnote.
+ * Two methods answer the same text and the page shows both. The site's own
+ * transcriber (rules for Spanish, the CMUdict dictionary for English) gives the
+ * reference transcription. Next to it sits the grapheme-to-IPA rule table from
+ * the orthography tool, one demo table per language: the disagreement between
+ * the two is visible instead of argued away in a footnote.
  *
- * Everything except the transcription itself is decided here, at build time.
  * The language list is asked of the port (`listLanguages`) rather than written
  * into the markup, so the selector cannot offer a language the engine would
- * refuse.
+ * refuse. Variety and level only exist for Spanish, so their selectors are
+ * hidden for any other language.
  *
- * The engine is not imported here — `src/composition-root.ts` wires it, and the
- * engine itself only exists inside the worker. This page therefore ships no
- * wasm and no dictionary: they are fetched the first time someone presses
- * Fonemizar.
+ * The engine is not imported here: `src/composition-root.ts` wires it. This
+ * page ships no dictionary; it is fetched the first time someone transcribes
+ * English.
  */
 import { DEMO_TABLES } from "@lingualab/core";
 import { lingualab } from "../composition-root";
@@ -90,6 +87,22 @@ const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.
             </select>
           </label>
 
+          <label class="field field--inline" data-phon-spanish-only>
+            <span class="field__label">{t(locale, "phon.variety")}</span>
+            <select data-phon-variety>
+              <option value="latin-american">{t(locale, "phon.varietyLatam")}</option>
+              <option value="castilian">{t(locale, "phon.varietyCastilian")}</option>
+            </select>
+          </label>
+
+          <label class="field field--inline" data-phon-spanish-only>
+            <span class="field__label">{t(locale, "phon.level")}</span>
+            <select data-phon-level>
+              <option value="phonemic">{t(locale, "phon.levelPhonemic")}</option>
+              <option value="phonetic">{t(locale, "phon.levelPhonetic")}</option>
+            </select>
+          </label>
+
           <button class="btn btn--primary" type="button" data-phon-run>
             {t(locale, "phon.run")}
           </button>
@@ -108,10 +121,21 @@ const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.
       <div class="phon__outputs" data-phon-outputs>
         <div class="panel">
           <div class="cluster">
-            <h2 class="panel__title">{t(locale, "phon.espeak")}</h2>
+            <h2 class="panel__title">{t(locale, "phon.engine")}</h2>
             <span class="badge" data-phon-engine></span>
           </div>
           <output class="data-surface ipa phon__ipa" data-phon-ipa aria-live="polite">—</output>
+          <!-- What the engine could not resolve is shown, never hidden: a word
+               outside the dictionary has no transcription, and a word with two
+               readings does not have just one. -->
+          <div class="phon__notes" data-phon-skipped-box hidden>
+            <h3 class="phon__notes-title">{t(locale, "phon.skipped")}</h3>
+            <p class="faint" data-phon-skipped></p>
+          </div>
+          <div class="phon__notes" data-phon-variants-box hidden>
+            <h3 class="phon__notes-title">{t(locale, "phon.variants")}</h3>
+            <ul class="phon__variants ipa" data-phon-variants></ul>
+          </div>
           <div class="cluster">
             <button class="btn btn--quiet btn--sm" type="button" data-phon-copy disabled>
               {t(locale, "phon.copy")}
@@ -145,16 +169,12 @@ const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.
   const es = document.documentElement.lang !== "en";
 
   /**
-   * Roughly what the first phonemization downloads: the wasm binary (305 KB),
-   * the language manifest (9 KB) and the dictionary bundle (5.6 MB). It is a
-   * size, not a promise — the point is that the wait has a reason the person can
-   * see, and that ~5.9 MB is too much to fetch while saying nothing.
-   *
-   * Why a single bundle and not one dictionary per language: this engine ships
-   * one archive for all 51 of its voices, so there is no per-language slice that
-   * would make Spanish and English cheaper to serve.
+   * What the first English transcription downloads: the CMUdict dictionary,
+   * 3.4 MB on disk and about 0.9 MB over the wire. Spanish downloads nothing.
+   * It is a size, not a promise: the point is that the wait has a reason the
+   * person can see.
    */
-  const DATA_APPROX = "~5.9 MB";
+  const DATA_APPROX = "~1 MB";
 
   safeInit("phonemizer", () => {
     const root = document.querySelector<HTMLElement>("[data-phonemizer]");
@@ -164,6 +184,12 @@ const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.
 
     const input = $<HTMLTextAreaElement>("[data-phon-text]");
     const lang = $<HTMLSelectElement>("[data-phon-lang]");
+    const variety = $<HTMLSelectElement>("[data-phon-variety]");
+    const level = $<HTMLSelectElement>("[data-phon-level]");
+    const skippedBox = $<HTMLElement>("[data-phon-skipped-box]");
+    const skippedOut = $<HTMLElement>("[data-phon-skipped]");
+    const variantsBox = $<HTMLElement>("[data-phon-variants-box]");
+    const variantsOut = $<HTMLElement>("[data-phon-variants]");
     const runButton = $<HTMLButtonElement>("[data-phon-run]");
     const clearButton = $<HTMLButtonElement>("[data-phon-clear]");
     const ipaOut = $<HTMLOutputElement>("[data-phon-ipa]");
@@ -194,11 +220,42 @@ const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.
       if (ipaOut) ipaOut.textContent = "—";
       if (copyButton) copyButton.disabled = true;
       if (copyNote) copyNote.textContent = "";
+      if (skippedBox) skippedBox.hidden = true;
+      if (variantsBox) variantsBox.hidden = true;
+    };
+
+    /** Variety and level are Spanish-only: offering them for English would be a lie. */
+    const syncLanguageControls = (): void => {
+      for (const control of root.querySelectorAll<HTMLElement>("[data-phon-spanish-only]")) {
+        control.hidden = lang.value !== "spa";
+      }
+    };
+    syncLanguageControls();
+    lang.addEventListener("change", syncLanguageControls);
+
+    const renderUnresolved = (
+      skipped: readonly string[],
+      variants: readonly { readonly word: string; readonly ipa: readonly string[] }[],
+    ): void => {
+      if (skippedBox && skippedOut) {
+        skippedOut.textContent = [...new Set(skipped)].join(", ");
+        skippedBox.hidden = skipped.length === 0;
+      }
+      if (variantsBox && variantsOut) {
+        variantsOut.replaceChildren(
+          ...variants.map((entry) => {
+            const item = document.createElement("li");
+            item.textContent = `${entry.word}: ${entry.ipa.join(" ~ ")}`;
+            return item;
+          }),
+        );
+        variantsBox.hidden = variants.length === 0;
+      }
     };
 
     /**
      * The comparison runs synchronously and needs no engine, so it is rendered
-     * before the wasm call: if eSpeak NG is unavailable, the page still shows
+     * before the engine call: if the dictionary cannot be fetched, the page still shows
      * an honest answer instead of an empty column.
      *
      * `convertLayer` is used directly instead of the `convertOrthographyToIpa`
@@ -250,8 +307,8 @@ const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.
             : `The engine does not support the language “${error.languageCode ?? lang.value}”. There is no invented result to show.`;
         case "engine-unavailable":
           return es
-            ? `El motor no está disponible en este navegador: puede que no admita WebAssembly, que la política de seguridad lo bloquee o que los datos de eSpeak NG no se hayan podido descargar.${error.detail ? ` (${error.detail})` : ""}`
-            : `The engine is not available in this browser: it may not support WebAssembly, the security policy may block it, or the eSpeak NG data could not be downloaded.${error.detail ? ` (${error.detail})` : ""}`;
+            ? `El diccionario de inglés no está disponible: no se pudo descargar desde este sitio. Revisa la conexión y vuelve a intentarlo; el español no lo necesita.${error.detail ? ` (${error.detail})` : ""}`
+            : `The English dictionary is not available: it could not be downloaded from this site. Check the connection and try again; Spanish does not need it.${error.detail ? ` (${error.detail})` : ""}`;
         default:
           return es
             ? `El motor falló al fonemizar: ${error.detail ?? "sin detalle"}.`
@@ -272,16 +329,27 @@ const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.
       setBusy(true);
       clearResult();
       say(
-        es
-          ? `Cargando el motor… la primera vez se descargan unos ${DATA_APPROX} de datos de eSpeak NG y el resto de veces se reutilizan.`
-          : `Loading the engine… the first run downloads about ${DATA_APPROX} of eSpeak NG data; later runs reuse it.`,
+        lang.value === "eng"
+          ? es
+            ? `Transcribiendo… la primera vez se descarga el diccionario de inglés (${DATA_APPROX}); después se reutiliza.`
+            : `Transcribing… the first run downloads the English dictionary (${DATA_APPROX}); later runs reuse it.`
+          : es
+            ? "Transcribiendo…"
+            : "Transcribing…",
         "busy",
       );
 
       // The table engine is local and synchronous, so render it first.
       renderTable(text, lang.value);
 
-      const result = await lingualab.phonemizeText({ text, languageCode: lang.value });
+      const result = await lingualab.phonemizeText({
+        text,
+        languageCode: lang.value,
+        options: {
+          variety: variety?.value === "castilian" ? "castilian" : "latin-american",
+          level: level?.value === "phonetic" ? "phonetic" : "phonemic",
+        },
+      });
       setBusy(false);
 
       if (!result.ok) {
@@ -294,7 +362,10 @@ const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.
         return;
       }
 
+      const skipped = result.value.skipped ?? [];
+      const variants = result.value.variants ?? [];
       if (ipaOut) ipaOut.textContent = result.value.ipa;
+      renderUnresolved(skipped, variants);
       if (copyButton) copyButton.disabled = false;
       if (engineBadge) {
         engineBadge.textContent = es ? "motor cargado" : "engine loaded";
@@ -302,8 +373,12 @@ const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.
       }
       say(
         es
-          ? "Listo. Transcripción aproximada de eSpeak NG: revísala antes de usarla como dato."
-          : "Done. eSpeak NG's approximate transcription: review it before using it as data.",
+          ? skipped.length > 0
+            ? `Listo, con ${skipped.length} palabra(s) sin transcribir: están marcadas entre ⟨ ⟩.`
+            : "Listo. Es una transcripción de referencia: revísala antes de usarla como dato."
+          : skipped.length > 0
+            ? `Done, with ${skipped.length} word(s) left untranscribed: they are marked between ⟨ ⟩.`
+            : "Done. This is a reference transcription: review it before using it as data.",
         "ok",
       );
     };
@@ -426,6 +501,24 @@ const comparisonLanguages = [...new Set(DEMO_TABLES.map((table) => nameOf(table.
     min-height: 3.5rem;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+  }
+
+  .phon__notes {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .phon__notes-title {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: var(--step--1);
+    font-weight: 600;
+    color: var(--ink-muted);
+  }
+
+  .phon__variants {
+    margin: 0;
+    padding-left: var(--space-m);
   }
 
   .phon__status {

@@ -21,10 +21,9 @@
    module in a page script is cheap and cannot throw. No singleton globals, no
    service locator: if an adapter has to be replaced, there is one file to read.
 
-   The phonemizer follows the same rule for a subtler reason: its engine is
-   WebAssembly behind a Web Worker, and constructing the adapter only records
-   WHERE the data lives. Nothing is downloaded, no worker is spawned and no wasm
-   is compiled until the first `phonemize`, so wiring it here costs the pages
+   The phonemizer follows the same rule for a subtler reason: constructing the
+   adapter only records WHERE the English dictionary lives. Nothing is
+   downloaded until the first English `phonemize`, so wiring it here costs the pages
    that never use it nothing at all.
    ============================================================ */
 
@@ -42,7 +41,7 @@ import {
 } from "@lingualab/core";
 import {
   type PersistenceStatus,
-  createEspeakPhonemizer,
+  createNativePhonemizer,
   createIndexedDbOrthographyRepository,
   createPraatfanAcousticAnalysis,
   createPyodideElanCodec,
@@ -90,23 +89,20 @@ const tables = createIndexedDbOrthographyRepository();
 const registry = createStaticToolRegistry(TOOLS);
 
 /**
- * El fonemizador es el unico adaptador que pide algo fuera de este dispositivo
- * —los datos de eSpeak NG llegan por HTTP— y por eso su ubicacion se decide aqui.
+ * El fonemizador es el unico adaptador que pide algo fuera de este dispositivo:
+ * el diccionario CMUdict del ingles llega por HTTP, y por eso su ubicacion se
+ * decide aqui. El espanol se transcribe por reglas y no pide nada.
  *
- * `enginePath` pasa la ruta por `withBase`, y no es decorativo: si el sitio se sirve bajo un subdirectorio, una
- * base sin prefijo se pediria al dominio y volveria 404. Los datos viven en
- * `public/espeak-phonemizer/<version>/` (los copia `scripts/sync-espeak-data.mjs`;
- * la version en la ruta se explica en `src/config/engines.ts`), asi que
- * se buscan en tiempo de ejecucion y no viajan en el bundle: el presupuesto de
- * peso por pagina mide scripts, y estos 5,7 MB no lo son.
- *
- * Esa base no es opcional por otra razon: si los datos no estan donde se los
- * busca, el paquete cae en pedirlos a un CDN publico. La CSP del sitio
- * (`connect-src 'self'`) lo bloquearia y la herramienta dejaria de funcionar:
- * el texto de la persona nunca sale hacia otro servidor, y tampoco el motor
- * entra desde uno.
+ * `enginePath` pasa la ruta por `withBase`: si el sitio se sirve bajo un
+ * subdirectorio, una base sin prefijo se pediria al dominio y volveria 404. El
+ * diccionario vive en `public/cmudict/<version>/` (lo genera
+ * `scripts/build-cmudict.mts`), se descarga la primera vez que alguien
+ * transcribe ingles y no viaja en el bundle. Siempre se pide al propio sitio:
+ * la CSP (`connect-src 'self'`) no dejaria pedirlo a otro.
  */
-const phonemizer = createEspeakPhonemizer({ baseUrl: enginePath("espeakPhonemizer") });
+const phonemizer = createNativePhonemizer({
+  dictionaryUrl: `${enginePath("cmudict")}/en-us.tsv`,
+});
 
 /**
  * El codec ELAN (Pyodide + pympi-ling) del conversor del segmento 9.
@@ -190,7 +186,7 @@ export interface LinguaLab {
    */
   readonly listTools: ReturnType<typeof createListTools>;
   /**
-   * Texto → AFI con eSpeak NG. Devuelve `Result` y no lanza: que el motor no
+   * Texto → AFI con el transcriptor propio. Devuelve `Result` y no lanza: que el motor no
    * este disponible es una respuesta, y la interfaz tiene que poder mostrarla.
    *
    * La firma deriva de la factoria, como todas las de arriba, para que un
@@ -204,7 +200,7 @@ export interface LinguaLab {
    * worker. Nada de esto se reexporta para que la interfaz siga sin conocer
    * `@lingualab/adapters`.
    */
-  readonly phonemizer: ReturnType<typeof createEspeakPhonemizer>;
+  readonly phonemizer: ReturnType<typeof createNativePhonemizer>;
   /**
    * El codec ELAN, y no solo su puerto.
    *

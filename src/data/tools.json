@@ -128,17 +128,17 @@
         "en"
       ],
       "notes": {
-        "es": "Texto a AFI con eSpeak NG compilado a WebAssembly, dentro de un Web Worker que se descarga la primera vez que fonemizas. Admite solo español latinoamericano e inglés estadounidense, y su AFI es aproximado: no sustituye una transcripción revisada. Al lado muestra la tabla grafema→AFI de la herramienta de ortografía.",
-        "en": "Text to IPA with eSpeak NG compiled to WebAssembly, inside a Web Worker that is downloaded the first time you phonemize. It admits only Latin American Spanish and American English, and its IPA is approximate: it does not replace a reviewed transcription. The grapheme→IPA table from the orthography tool sits next to it."
+        "es": "Texto a AFI con un transcriptor propio. Español: reglas fonológicas con sílabas y acento, variedad latinoamericana o peninsular, nivel fonémico o fonético. Inglés estadounidense: diccionario CMUdict, que se descarga la primera vez que se usa; lo que no está en el diccionario queda marcado, no inventado. Al lado muestra la tabla grafema→AFI de la herramienta de ortografía.",
+        "en": "Text to IPA with our own transcriber. Spanish: phonological rules with syllables and stress, Latin American or Peninsular variety, phonemic or phonetic level. American English: the CMUdict dictionary, downloaded on first use; whatever is not in the dictionary is marked, not made up. The grapheme→IPA table from the orthography tool sits next to it."
       },
-      "citation": "eSpeak NG contributors. eSpeak NG [Computer software].",
+      "citation": "Carnegie Mellon University. The CMU Pronouncing Dictionary [Data set].",
       "theory": {
-        "es": "Usa eSpeak NG, un sintetizador de voz que convierte texto en fonemas con reglas y diccionarios de excepciones por lengua. Herramientas de investigación como Phonemizer usan el mismo motor, pero su salida es una aproximación: no sigue todas las convenciones del AFI y puede fallar en palabras poco frecuentes.",
-        "en": "It uses eSpeak NG, a speech synthesizer that turns text into phonemes with per-language rules and exception dictionaries. Research tools such as Phonemizer use the same engine, but its output is an approximation: it does not follow every IPA convention and can fail on infrequent words."
+        "es": "El español tiene una ortografía casi fonémica, así que se transcribe con reglas ordenadas de grafema a fonema, silabeo por ataque máximo y las reglas de acento, según la descripción de Hualde. La ortografía del inglés no determina la pronunciación: por eso se consulta un diccionario revisado (CMUdict) y se convierte su notación ARPABET a los símbolos del AFI.",
+        "en": "Spanish spelling is nearly phonemic, so it is transcribed with ordered grapheme-to-phoneme rules, maximal-onset syllabification and the stress rules, following Hualde's description. English spelling does not determine pronunciation: a reviewed dictionary (CMUdict) is looked up instead, and its ARPABET notation is converted to IPA symbols."
       },
       "references": [
-        "espeakng2024",
-        "bernard2021",
+        "hualde2013",
+        "cmudict2015",
         "ipa1999"
       ]
     },
