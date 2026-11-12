@@ -114,7 +114,8 @@ Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya es
 | `03ec0d8`, `69e7cbb` | **T2.** Transcriptor propio (`packages/core/src/g2p/`): español por reglas, inglés con CMUdict (`public/cmudict/<versión>/`, generado por `scripts/build-cmudict.mts`). eSpeak NG retirado. Medición: `scripts/eval-g2p.mts` |
 | `0b514b7` | **T5, primera parte.** F0, F1 y F2 validados contra Praat 6.4.49 en tres vocales (`scripts/build-acoustic-reference.mjs`, `e2e/fixtures/reference/`, `docs/validation/acoustic.md`). **T9, primera parte:** FonoLab usa el transcriptor del sitio. Ficha de X-barra corregida |
 
-| (este commit) | **T5, unidad 5.2 en parte:** espectrograma en grises, 5 ms, 0–5000 Hz, 70 dB, lienzos más altos |
+| `c9a8b1a` | **T5, unidad 5.2 en parte:** espectrograma en grises, 5 ms, 0–5000 Hz, 70 dB, lienzos más altos |
+| (commit siguiente) | **Corrige los formantes de la página:** se analizaba con 3 formantes en vez de los 5 de Praat |
 
 Puerta completa y e2e en verde en el último commit de código.
 
@@ -153,7 +154,7 @@ desde `public/`, regla 9 de §3. Si se puede escribir en menos de ~200 líneas p
 
 | Tarea | Estado | Bloqueada por | Tamaño |
 |---|---|---|---|
-| T5 Visor acústico estilo Praat | validación hecha; falta la interfaz | nada | grande |
+| T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | validación hecha; falta la interfaz | nada | grande |
 | T9 Contrato único de herramienta | empezada | nada | mediana |
 | T7 Análisis cualitativo | sin empezar | nada | grande |
 | T4 Árboles | ficha corregida; falta lo demás | D3 | grande |
@@ -211,15 +212,62 @@ manual, ver búsquedas):
 | 5.6 | **Intensidad contra Praat.** Añadir `intensity` al arnés y al script de referencias (`To Intensity: 100, 0, "yes"`, `Get value at time`) | `packages/adapters/src/acoustic/validation/`, `scripts/build-acoustic-reference.mjs` | La intensidad pasa a «validada» en la interfaz y en el documento, o se documenta la diferencia |
 | 5.7 | **TextGrid contra Praat (cierra P17).** Script que exporta un TextGrid del visor, lo abre con `praat --run` (`Read from file`, `Get number of tiers`, `Get number of intervals`, etiquetas) y compara | `scripts/`, `src/scripts/audio/textgrid-io.ts`, `docs/PENDING.md` P17 | La ida y vuelta por Praat da las mismas capas, intervalos y etiquetas; se quita el aviso «experimental» del visor |
 
-**Hallazgo sin resolver, para la unidad 5.3 (comprobar antes de construir encima):** en una captura del
-visor con `e2e/fixtures/reference/vocal-a.wav` y los formantes superpuestos, las líneas **no parecen**
-caer donde Praat mide. Praat da, en t = 0,214 s, F1 = 914 Hz y F2 = 1328 Hz; a ojo, la línea azul («F1»)
-queda cerca de 1150 Hz y la roja («F2») cerca de 2600 Hz, que es donde estaría F3. Puede ser la escala
-vertical de la superposición, el orden o color de las pistas, o que el panel analiza con techo de 5500 Hz
-y no de 5000. **No está diagnosticado.** Cómo comprobarlo: una prueba de `acoustic-render.ts` que pinte
-una pista constante de 1000 Hz sobre un lienzo de 0 a 5000 Hz y exija la fila `0,8 × alto`; y una e2e que
-lea de la tabla de medidas el F1 y el F2 de un intervalo sobre esa vocal y los compare con el JSON de
-referencia. La validación numérica del motor (§4) **no** cubre lo que se dibuja ni la tabla de la página.
+**Defecto encontrado y corregido al mirar la captura:** la página pedía tres formantes y ese número se
+pasaba a Praat como «número máximo de formantes», que fija el orden del modelo. Con 3 en vez de 5, la
+misma [a] daba F1 ≈ 1141 Hz en la página mientras Praat mide 919 Hz; la validación, que pedía 5, pasaba.
+Ahora el motor analiza siempre con al menos 5 y devuelve las pistas pedidas
+(`packages/adapters/src/acoustic/praatfan-engine.ts`, con prueba). **Lección para lo que sigue:** validar
+el motor no valida la página. Falta una e2e que lea F1 y F2 de la tabla de medidas de la página sobre
+`vocal-a.wav` y los compare con el JSON de referencia (unidad 5.5).
+
+#### 5.8 — Segmentación sencilla, como en Praat y para enseñar
+
+**Pedido textual (2026-11-12):** «revisa que también la segmentación sea un poco más sencillan y acorde
+con el programa original, necesitamos que sea sencillo e intuitivo de usar así no tenga todas las
+funcionalidades, la idea es que se pueda usar pedagógicamente».
+
+**Criterio:** menos funciones y más claras. Si algo complica la primera clase, se quita o se esconde.
+
+**Lo que hay hoy:** capas con nombre, añadir, quitar, subir y bajar; botón «dividir intervalo»; anterior y
+siguiente; una tabla de intervalos con campos de texto; teclado AFI; deshacer y rehacer; importar y
+exportar TextGrid; relleno de huecos. Todo en tarjetas separadas, lejos de la onda.
+
+**Cómo segmenta Praat (TextGridEditor; verificar atajos en el manual):** se hace clic en la onda o el
+espectrograma para poner el cursor; aparece un círculo en cada capa y un clic en él (o Intro) pone un
+**límite** ahí; se hace clic dentro de un intervalo y **se escribe** la etiqueta directamente; un límite
+se **arrastra** para corregirlo; Alt+Retroceso lo quita; Tab reproduce el intervalo seleccionado.
+
+**Flujo objetivo, en cuatro gestos:**
+
+1. **Clic** en la onda o el espectrograma: pone el cursor.
+2. **Intro** (o un botón grande «Poner límite aquí»): corta la capa activa en el cursor.
+3. **Clic en un intervalo y escribir:** la etiqueta se edita ahí mismo, sobre la capa, no en una tabla
+   aparte. El teclado AFI queda a un clic.
+4. **Arrastrar un límite** para moverlo; **Supr** sobre un límite seleccionado lo quita y une los dos
+   intervalos. **Tab** reproduce el intervalo.
+
+**Qué se simplifica:**
+
+- Una capa creada al cargar el audio, ya activa. «Añadir capa» queda, pero subir y bajar capas, y el
+  renombrado, van a un menú secundario.
+- La tabla de intervalos pasa a un panel plegable «Ver como tabla» (se conserva: es el equivalente
+  accesible del lienzo y la vía de exportar).
+- Un **modo guiado** opcional para la primera vez: tres pasos con un audio de ejemplo ya cargado («1.
+  Escucha. 2. Pon un límite donde cambia el sonido. 3. Escribe qué sonido es»), que se puede cerrar.
+- Un botón «Cargar ejemplo» con una palabra corta y su TextGrid ya hecho, para ver un resultado antes de
+  hacer uno. El audio debe tener licencia verificada (como los de `public/audio/ATTRIBUTION.md`).
+- Capas de puntos, capas jerárquicas y varias pistas a la vez: **fuera** por ahora, dicho en la página.
+
+**Archivos:** `src/scripts/audio/annotation-commands.ts` (dividir, unir, mover: ya son órdenes con
+deshacer), `interval-table.ts`, `render.ts` (`drawTierStrips`), `selection.ts`, `viewer-controls.ts`,
+`src/components/AudioLab.astro`. La lógica de dominio está en `packages/core` (documento de anotación).
+
+**Hecho cuando:** una e2e hace el flujo entero solo con teclado y otra solo con ratón (cargar, tres
+límites, tres etiquetas, exportar) y el TextGrid resultante es el esperado; una persona que no conoce la
+herramienta lo consigue sin leer ayuda (queda como evidencia humana en `docs/HUMAN-EVIDENCE.md`).
+
+**Va antes que 5.3–5.7:** el dueño lo pidió explícitamente; orden sugerido 5.1 → 5.8 → 5.2 (resto) →
+5.3 → 5.4 → 5.5 → 5.6 → 5.7.
 
 **Accesibilidad que no se puede perder:** hoy el cursor y los intervalos se manejan con teclado y hay una
 tabla de intervalos equivalente al lienzo. Un lienzo no es accesible por sí solo: cada cosa que se haga

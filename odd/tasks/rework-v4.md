@@ -184,3 +184,13 @@ Se preguntan de a una, al empezar la fase que las necesita.
   dibujo queda en bloques por la poca resolución en frecuencia de una FFT de 128 puntos, y las líneas de
   formantes superpuestas no parecen coincidir con los valores de Praat (detalle y forma de comprobarlo en
   el traspaso, T5). La validación contra Praat cubre el motor, no el dibujo.
+- **L16 (2026-11-12).** Defecto real encontrado al mirar la captura y corregido con rojo y verde: la
+  página pedía 3 formantes y ese número llegaba a Praat como «número máximo de formantes»; la misma [a]
+  daba F1 = 1141 Hz en la página y 919 Hz en Praat. El motor analiza ahora con al menos 5 y devuelve las
+  pistas pedidas. La validación de `0b514b7` era cierta para el motor y no para la página: falta una e2e
+  que compare la tabla de medidas con la referencia.
+- **L17 (2026-11-12).** El dueño, textual: «revisa que también la segmentación sea un poco más sencillan y
+  acorde con el programa original, necesitamos que sea sencillo e intuitivo de usar así no tenga todas las
+  funcionalidades, la idea es que se pueda usar pedagógicamente». Se añade a S7 como unidad 5.8 de T5, con
+  prioridad sobre 5.3–5.7; el flujo objetivo y qué se simplifica están en el traspaso. No se implementó
+  en esta sesión.

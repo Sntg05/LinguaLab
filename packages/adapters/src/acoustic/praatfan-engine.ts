@@ -36,6 +36,8 @@ export const MIN_ANALYSIS_SECONDS = 0.05;
 
 /** Praat usa 0 para «paso automatico»: lo deriva del piso de F0. */
 const AUTOMATIC_TIME_STEP = 0;
+/** «Maximum number of formants» por defecto en Praat (`To Formant (burg)`). */
+const PRAAT_STANDARD_FORMANTS = 5;
 const FORMANT_WINDOW_SECONDS = 0.025;
 const PRE_EMPHASIS_FROM_HZ = 50;
 
@@ -212,9 +214,13 @@ export const createPraatfanEngine = (sources: PraatfanSources): PraatfanEngine =
 
       return run((loaded: PraatfanModule) => {
         const tone: PraatfanSound = sound(loaded, samples, sampleRate);
+        // `params.count` es cuantas pistas se devuelven, NO el «numero maximo
+        // de formantes» de Praat. Ese fija el orden del modelo (dos polos por
+        // formante): con 3 en vez de 5, la misma vocal da otros formantes. Se
+        // analiza siempre con al menos el valor estandar de Praat.
         const analysis = tone.to_formant_burg(
           AUTOMATIC_TIME_STEP,
-          Math.max(1, Math.round(params.count)),
+          Math.max(PRAAT_STANDARD_FORMANTS, Math.round(params.count)),
           params.maxFormantHz,
           FORMANT_WINDOW_SECONDS,
           PRE_EMPHASIS_FROM_HZ,
