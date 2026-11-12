@@ -68,11 +68,11 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | hecha | `03ec0d8`: motores con rojo y verde. Commit siguiente: CMUdict empaquetado (`scripts/build-cmudict.mts`), adaptador `createNativePhonemizer` (rojo: suite sin módulo; verde: 9 pruebas), página conectada con variedad, nivel, palabras sin transcribir y variantes, y eSpeak retirado. `verify:all` y e2e completa en verde. Español: 96,6 % propio frente a 76,9 % de eSpeak |
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
-| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat 6.4.06 (cierra P17) | por decidir (D1) | pendiente | — |
+| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline, TypeScript; Rust solo si se mide | en curso | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). Falta la interfaz: unidades 5.1 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
-| T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | pendiente | — |
+| T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | en curso | `0b514b7`: FonoLab usa el transcriptor del sitio (rojo: `claims.test` y una e2e que esperaba /s/ en «zapato»). Falta el resto: `odd/handoff/ACTUAL.md` §6 |
 | T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
 
 ## Log
@@ -162,3 +162,18 @@ Se preguntan de a una, al empezar la fase que las necesita.
   (`src/scripts/fono/phonetics.ts`) y el de la portada siguen con sus reglas propias; unificarlos con
   este motor queda para T9. La licencia del proyecto sigue en GPL-3.0-only: quitar eSpeak no la cambia
   (praatfan es GPL) y volver a una más permisiva sería decisión del dueño.
+- **L13 (2026-11-12).** El dueño, textual: «continua con el trabajo, vamos a seguir mejorando esta
+  aplicación, quiero que dejes un documento de handoff al terminar la sesión con el 70% del limite de 5
+  horas, en este handoff tienes que dejar una estructuración completa de cómo se planean hacer las
+  siguientes tareas de implementación, las búsquedas, el deck de tecnología y demás cuestiones para que
+  sea extremadamente sencillo continuar con opus o con otra tecnología de código».
+- **L14 (2026-11-12).** Hecho en `0b514b7`: (a) validación acústica. En la máquina hay Praat **6.4.49**,
+  no 6.4.06 como decían los documentos. `scripts/build-acoustic-reference.mjs` mide con Praat tres
+  vocales del AFI ya publicadas (CC BY-SA) en tres marcos del tramo con voz; las 27 comparaciones de F0,
+  F1 y F2 dan el mismo valor con cuatro decimales. La interfaz deja de decir «experimental» y dice qué
+  se validó y qué no (intensidad, voces agudas, habla continua). (b) FonoLab usa
+  `lingualab.phonemizeText`; se borra `src/scripts/fono/phonetics.ts`, que aplicaba distinción y reglas
+  de expresiones regulares para el inglés. (c) Ficha de X-barra: decía «espéculo» y que toda proyección
+  **tiene** complemento, adjunto y especificador; son opcionales. Diagnóstico del visor para T5: la
+  página mide unos 8000 px de alto y los lienzos unos 80 px; el plan por unidades está en el traspaso.
+  La portada conserva a propósito la tabla de Ortografía.
