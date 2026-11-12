@@ -124,9 +124,12 @@ export const listenToViewerControls = (ctx: ViewerContext, deps: ViewerControlsD
     });
   }
 
-  el.spectrogramToggle?.addEventListener("change", () => {
-    deps.renderCanvas();
-  });
+  // Ni mostrar u ocultar ni cambiar la paleta recalculan nada: solo se repinta.
+  for (const control of [el.spectrogramToggle, el.scaleSelect]) {
+    control?.addEventListener("change", () => {
+      deps.renderCanvas();
+    });
+  }
 
   const repaint = (): void => {
     state.palette = readPalette(root);

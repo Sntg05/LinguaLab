@@ -177,3 +177,10 @@ Se preguntan de a una, al empezar la fase que las necesita.
   **tiene** complemento, adjunto y especificador; son opcionales. Diagnóstico del visor para T5: la
   página mide unos 8000 px de alto y los lienzos unos 80 px; el plan por unidades está en el traspaso.
   La portada conserva a propósito la tabla de Ortografía.
+- **L15 (2026-11-12).** T5, unidad 5.2 en parte (rojo: `spectrogram-color.test.ts`, cuatro fallos): el
+  espectrograma sigue por defecto a Praat (grises, ventana de 5 ms, 0 a 5000 Hz, 70 dB) con la paleta de
+  color como opción, y los lienzos crecen con la altura de la ventana. La ventana sigue siendo de Hann y
+  la de Praat es gaussiana: la interfaz lo dice. **Hallazgos al mirar la captura, sin resolver:** el
+  dibujo queda en bloques por la poca resolución en frecuencia de una FFT de 128 puntos, y las líneas de
+  formantes superpuestas no parecen coincidir con los valores de Praat (detalle y forma de comprobarlo en
+  el traspaso, T5). La validación contra Praat cubre el motor, no el dibujo.

@@ -114,7 +114,9 @@ Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya es
 | `03ec0d8`, `69e7cbb` | **T2.** Transcriptor propio (`packages/core/src/g2p/`): español por reglas, inglés con CMUdict (`public/cmudict/<versión>/`, generado por `scripts/build-cmudict.mts`). eSpeak NG retirado. Medición: `scripts/eval-g2p.mts` |
 | `0b514b7` | **T5, primera parte.** F0, F1 y F2 validados contra Praat 6.4.49 en tres vocales (`scripts/build-acoustic-reference.mjs`, `e2e/fixtures/reference/`, `docs/validation/acoustic.md`). **T9, primera parte:** FonoLab usa el transcriptor del sitio. Ficha de X-barra corregida |
 
-Puerta completa y e2e en verde en `0b514b7`.
+| (este commit) | **T5, unidad 5.2 en parte:** espectrograma en grises, 5 ms, 0–5000 Hz, 70 dB, lienzos más altos |
+
+Puerta completa y e2e en verde en el último commit de código.
 
 ## 5. Tecnología: lo que hay y lo que se propone
 
@@ -202,12 +204,22 @@ manual, ver búsquedas):
 | # | Unidad | Archivos principales | Hecho cuando |
 |---|---|---|---|
 | 5.1 | **Editor de una pantalla.** Rehacer el marcado: zona de lienzos alta (onda ~25 %, espectrograma ~45 %, capas el resto de `min(70vh, 640px)`), barra de herramientas arriba, y todo lo demás (proyecto, exportar, tabla de medidas, gráfico vocálico) en pestañas o paneles plegables debajo | `src/components/AudioLab.astro`, `src/scripts/audio/elements.ts`, `canvas-view.ts`, `render.ts` | Con audio cargado, onda + espectrograma + capas + transporte caben en 900 px de alto; e2e nueva que lo mide con `boundingBox()`; reflujo a 320 px sigue en verde |
-| 5.2 | **Espectrograma como el de Praat.** Ventana por defecto 5 ms, rango 0–5000 Hz, rango dinámico 70 dB, paleta de grises por defecto (la de color queda como opción), eje de frecuencia rotulado | `src/scripts/audio/spectrogram.ts`, `render.ts`, `viewer-state.ts` | Pruebas del núcleo del espectrograma con los valores por defecto nuevos; captura comparada a ojo con Praat sobre `e2e/fixtures/reference/vocal-a.wav` y anotada en `docs/validation/acoustic.md` |
+| 5.2 | **Espectrograma como el de Praat.** *Hecho en parte:* grises por defecto con selector de paleta, ventana de 5 ms, 0–5000 Hz, 70 dB, lienzos más altos. **Falta:** (a) el dibujo queda en bloques: 5 ms a 22 kHz son 110 muestras y la FFT de 128 da bandas de ~172 Hz; rellenar con ceros hasta 512 o 1024 puntos e interpolar entre bandas al pintar; (b) eje de frecuencia rotulado en Hz; (c) ventana gaussiana como la de Praat, si se quiere el mismo dibujo | `src/scripts/audio/spectrogram.ts` (`spectrogramColumns`: `fftSize`), `render.ts` (`drawSpectrogram`) | Prueba: un tono de 1000 Hz cae en la fila correcta con error menor de 50 Hz; captura junto a la de Praat en `docs/validation/acoustic.md` |
 | 5.3 | **Curvas superpuestas.** Tono, formantes e intensidad sobre el espectrograma, con casillas «mostrar», y análisis automático del tramo visible (con el límite de duración que Praat también aplica: no analizar si se ven más de 10 s) | `acoustic-render.ts`, `acoustic-analysis.ts` (725 líneas: partirlo por magnitud al tocarlo) | e2e: al cargar un audio corto las tres curvas se dibujan sin pulsar nada; se pueden ocultar |
 | 5.4 | **Selección y lecturas.** Arrastre para seleccionar, lectura de inicio/fin/duración, cursor con Hz, barras de reproducción, zoom a la selección | `selection.ts` (existe y tiene pruebas), `transport.ts`, `playback.ts`, `viewer-controls.ts` | Pruebas unitarias de la geometría de la selección; e2e de arrastre con `page.mouse` |
 | 5.5 | **Consultas y atajos.** «Obtener tono / F1 / F2 / intensidad» en el cursor o en la selección; atajos de Praat; ayuda de atajos visible | `acoustic-measure.ts`, `viewer-controls.ts` | Los valores de consulta coinciden con los de `e2e/fixtures/reference/*.json`; e2e de teclado |
 | 5.6 | **Intensidad contra Praat.** Añadir `intensity` al arnés y al script de referencias (`To Intensity: 100, 0, "yes"`, `Get value at time`) | `packages/adapters/src/acoustic/validation/`, `scripts/build-acoustic-reference.mjs` | La intensidad pasa a «validada» en la interfaz y en el documento, o se documenta la diferencia |
 | 5.7 | **TextGrid contra Praat (cierra P17).** Script que exporta un TextGrid del visor, lo abre con `praat --run` (`Read from file`, `Get number of tiers`, `Get number of intervals`, etiquetas) y compara | `scripts/`, `src/scripts/audio/textgrid-io.ts`, `docs/PENDING.md` P17 | La ida y vuelta por Praat da las mismas capas, intervalos y etiquetas; se quita el aviso «experimental» del visor |
+
+**Hallazgo sin resolver, para la unidad 5.3 (comprobar antes de construir encima):** en una captura del
+visor con `e2e/fixtures/reference/vocal-a.wav` y los formantes superpuestos, las líneas **no parecen**
+caer donde Praat mide. Praat da, en t = 0,214 s, F1 = 914 Hz y F2 = 1328 Hz; a ojo, la línea azul («F1»)
+queda cerca de 1150 Hz y la roja («F2») cerca de 2600 Hz, que es donde estaría F3. Puede ser la escala
+vertical de la superposición, el orden o color de las pistas, o que el panel analiza con techo de 5500 Hz
+y no de 5000. **No está diagnosticado.** Cómo comprobarlo: una prueba de `acoustic-render.ts` que pinte
+una pista constante de 1000 Hz sobre un lienzo de 0 a 5000 Hz y exija la fila `0,8 × alto`; y una e2e que
+lea de la tabla de medidas el F1 y el F2 de un intervalo sobre esa vocal y los compare con el JSON de
+referencia. La validación numérica del motor (§4) **no** cubre lo que se dibuja ni la tabla de la página.
 
 **Accesibilidad que no se puede perder:** hoy el cursor y los intervalos se manejan con teclado y hay una
 tabla de intervalos equivalente al lienzo. Un lienzo no es accesible por sí solo: cada cosa que se haga

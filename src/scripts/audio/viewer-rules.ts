@@ -9,8 +9,11 @@
 
 import { clamp } from "./selection";
 
-export const DEFAULT_WINDOW_SECONDS = 0.025;
-export const DEFAULT_MAX_HZ = 5500;
+// Los valores por defecto del espectrograma son los de Praat («Spectrogram
+// settings»: ventana de 5 ms, de 0 a 5000 Hz): banda ancha, la que deja ver los
+// formantes. Con 25 ms se veian los armonicos y no los formantes.
+export const DEFAULT_WINDOW_SECONDS = 0.005;
+export const DEFAULT_MAX_HZ = 5000;
 export const WAVEFORM_BUCKETS = 1600;
 export const SPECTROGRAM_MAX_COLUMNS = 480;
 export const AUTOSAVE_DELAY_MS = 700;
