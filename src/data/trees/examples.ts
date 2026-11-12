@@ -85,7 +85,7 @@ export const TREE_EXAMPLES: Readonly<Record<string, readonly TreeExample[]>> = {
       "text": "[NP [Spec [Det the]] [N' [N student] [N' [PP of physics] [PP with long hair]]]]"
     },
     {
-      "name_es": "Espéculo y núcleo",
+      "name_es": "Especificador y núcleo",
       "name_en": "Specifier and head",
       "text": "[VP [Spec [DP María]] [V' [V' [V lee] [DP un libro]] [AdvP often]]]"
     }

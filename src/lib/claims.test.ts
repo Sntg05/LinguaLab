@@ -85,12 +85,14 @@ describe("la variedad de español declarada", () => {
     expect(en.indexOf("Latin American")).toBeLessThan(en.indexOf("Peninsular"));
   });
 
-  it("FonoLab anuncia en su interfaz que su transcriptor usa distinción", () => {
-    const rules = read("src/scripts/fono/phonetics.ts");
-    expect(rules).toMatch(/\[\/z\/g, "θ"\]/);
-
+  it("FonoLab usa el mismo transcriptor que el resto del sitio y anuncia su variedad", () => {
+    // FonoLab tenía reglas propias con distinción (`z` → /θ/) mientras el
+    // transcriptor del sitio usaba seseo: la misma palabra daba dos resultados
+    // según la página. Ahora hay un solo motor, y el de FonoLab es ese.
     const page = read("src/components/FonoLab.astro");
-    expect(page).toMatch(/Usa distinción[^"]*seseo/);
-    expect(page).toMatch(/It uses distinción[^"]*seseo/);
+    expect(page).not.toMatch(/scripts\/fono\/phonetics/);
+    expect(page).toMatch(/lingualab\.phonemizeText/);
+    expect(page).toMatch(/seseo[^"]*«zapato»/);
+    expect(page).toMatch(/seseo[^"]*«zapato»[^"]*\/s\//);
   });
 });

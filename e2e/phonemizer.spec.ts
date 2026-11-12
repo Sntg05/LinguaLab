@@ -90,3 +90,13 @@ test("el aviso de que es una transcripción de referencia se ve antes de transcr
 
   await expect(page.locator("[data-phonemizer]")).toContainText(/no sustituye/i);
 });
+
+test("FonoLab transcribe con el mismo motor que esta página", async ({ page }) => {
+  // FonoLab tenía reglas propias con distinción: «zapato» daba /θ/ allá y /s/
+  // aquí. Un solo motor significa una sola respuesta.
+  await page.goto("/fono");
+  await page.locator("[data-tx-input]").fill("zapato");
+  await page.locator("[data-tx-run]").click();
+
+  await expect(page.locator("[data-tx-out]")).toHaveText("sa.ˈpa.to");
+});

@@ -27,7 +27,7 @@ const PRAATFAN_VERSION = (
 const VENDOR = new URL(`../../../../../public/praatfan/${PRAATFAN_VERSION}/`, import.meta.url);
 
 describe("las referencias de Praat del repositorio", () => {
-  it("no se dan por buenas por ausencia: o hay filas comparadas, o falta la carpeta", async () => {
+  it("F0, F1 y F2 de las tres vocales coinciden con Praat dentro de la tolerancia", async () => {
     const engine = createPraatfanEngine({
       moduleUrl: new URL("praatfan_gpl.js", VENDOR).href,
       wasmBytes: new Uint8Array(await readFile(new URL("praatfan_gpl_bg.wasm", VENDOR))),
@@ -40,15 +40,22 @@ describe("las referencias de Praat del repositorio", () => {
       engine,
     });
 
-    if (report.status === "missing-fixtures") {
-      // El estado real del repositorio mientras nadie haya medido con Praat.
-      expect(report.message).toContain("no hay fixtures de referencia");
-      return;
+    // Las referencias existen desde el rework v4 (tres vocales medidas con
+    // Praat por `scripts/build-acoustic-reference.mjs`). Que vuelvan a faltar
+    // seria perder la validacion en silencio, asi que ya no se acepta.
+    if (report.status !== "passed") {
+      const failed = "rows" in report ? report.rows.filter((row) => !row.passed) : [];
+      throw new Error(`${report.message}\n${JSON.stringify(failed, null, 2)}`);
     }
-
-    expect(report.status === "passed" || report.status === "failed").toBe(true);
-    if (report.status === "passed" || report.status === "failed") {
-      expect(report.rows.length).toBeGreaterThan(0);
-    }
+    // Tres audios, tres instantes y tres magnitudes (F0, F1, F2) cada uno.
+    expect(report.rows).toHaveLength(27);
+    console.info(
+      report.rows
+        .map((row) => {
+          const diff = ((row.measured - row.reference) / row.reference) * 100;
+          return `${row.file} ${row.time.toFixed(3)} ${row.kind} praat=${row.reference} medido=${row.measured.toFixed(4)} (${diff.toFixed(3)} %)`;
+        })
+        .join("\n"),
+    );
   });
 });

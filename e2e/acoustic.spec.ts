@@ -80,12 +80,12 @@ const moveCursor = async (page: Page, seconds: number): Promise<void> => {
   await page.locator(CURSOR).dispatchEvent("input");
 };
 
-test("el aviso de experimental se ve antes de analizar nada", async ({ page }) => {
+test("lo que se validó contra Praat y lo que no se ve antes de analizar nada", async ({ page }) => {
   await page.goto("/visualizador");
 
   const panel = page.locator("[data-acoustic]");
-  await expect(panel).toContainText(/Experimental/i);
-  await expect(panel).toContainText(/contrasta tus resultados con Praat/i);
+  await expect(panel).toContainText(/contrastados con Praat/i);
+  await expect(panel).toContainText(/la intensidad todavía no/i);
 });
 
 test("calcula el contorno de F0 de un wav y lo dibuja", async ({ page }) => {

@@ -15,16 +15,16 @@
 
    AQUI NO SE PROMETE NADA QUE NO SE HAYA MEDIDO
 
-   El aviso de «Experimental» no es cortesia: la condicion para quitarlo es el
-   contraste contra Praat sobre voces reales, y ese contraste todavia no existe.
-   El texto de `acoustic.limits` lo dice con esas palabras.
+   El aviso dice exactamente lo que se contrasto contra Praat y lo que no
+   (`docs/validation/acoustic.md`): F0, F1 y F2 en tres vocales de una voz. No
+   se amplia sin ampliar antes las referencias de `e2e/fixtures/reference/`.
    ============================================================ */
 
 export const acousticEs = {
-  "acoustic.title": "Análisis acústico (experimental)",
+  "acoustic.title": "Análisis acústico",
   "acoustic.lead":
     "Tono, formantes e intensidad de la grabación cargada. Los números salen de praatfan, una reimplementación de los algoritmos de Praat que corre en tu navegador y en un worker aparte: la página sigue respondiendo mientras analiza.",
-  "acoustic.experimental": "Experimental: contrasta tus resultados con Praat antes de publicarlos.",
+  "acoustic.experimental": "Tono y formantes contrastados con Praat; la intensidad todavía no. Mira abajo qué se validó y qué no antes de publicar una medición.",
 
   "acoustic.preset.label": "Preset de voz",
   "acoustic.preset.custom": "Personalizado",
@@ -100,5 +100,5 @@ export const acousticEs = {
   "acoustic.error.failed": "El análisis falló: {detail}",
 
   "acoustic.limits":
-    "Todavía no hay audios de referencia para contrastar este análisis con Praat sobre voces reales: mientras falten, estos números sirven para mirar la señal, no para publicarlos como mediciones.",
+    "Validado contra Praat 6.4.49: F0, F1 y F2 de tres vocales sostenidas ([a], [e], [i]) de una voz masculina dan el mismo valor que Praat con los mismos ajustes. Todavía sin contrastar: la intensidad, las voces agudas o infantiles, el habla continua y las grabaciones con ruido. En esos casos, comprueba tus resultados con Praat.",
 } as const;
