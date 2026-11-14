@@ -23,7 +23,7 @@
  * Uso: node --experimental-strip-types --no-warnings scripts/build-cmudict.mts
  */
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -41,22 +41,30 @@ const sha256 = (data: Uint8Array): string => createHash("sha256").update(data).d
 
 const obtain = async (name: keyof typeof SOURCES): Promise<Buffer> => {
   const cached = join(CACHE, name);
-  let data: Buffer;
-  if (existsSync(cached)) {
+  // Se lee de una vez, sin preguntar antes si existe: comprobar y despues leer
+  // son dos momentos distintos del mismo archivo (CodeQL js/file-system-race).
+  let data: Buffer | null = null;
+  try {
     data = readFileSync(cached);
-  } else {
-    const url = `https://raw.githubusercontent.com/cmusphinx/cmudict/${COMMIT}/${name}`;
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`build-cmudict: ${url} responde ${response.status}`);
-    data = Buffer.from(await response.arrayBuffer());
-    mkdirSync(CACHE, { recursive: true });
-    writeFileSync(cached, data);
+  } catch {
+    data = null;
   }
-  const hash = sha256(data);
+  // Una cache que no coincide con el hash se ignora y se vuelve a descargar.
+  if (data !== null && sha256(data) === SOURCES[name]) return data;
+
+  const url = `https://raw.githubusercontent.com/cmusphinx/cmudict/${COMMIT}/${name}`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`build-cmudict: ${url} responde ${response.status}`);
+  const downloaded = Buffer.from(await response.arrayBuffer());
+  // El hash se comprueba ANTES de escribir nada: lo que llega por la red no toca
+  // el disco hasta demostrar que es el archivo esperado.
+  const hash = sha256(downloaded);
   if (hash !== SOURCES[name]) {
     throw new Error(`build-cmudict: ${name} tiene sha256 ${hash}, se esperaba ${SOURCES[name]}`);
   }
-  return data;
+  mkdirSync(CACHE, { recursive: true });
+  writeFileSync(cached, downloaded);
+  return downloaded;
 };
 
 const dictionary = (await obtain("cmudict.dict")).toString("utf8");

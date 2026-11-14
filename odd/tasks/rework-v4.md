@@ -194,3 +194,13 @@ Se preguntan de a una, al empezar la fase que las necesita.
   funcionalidades, la idea es que se pueda usar pedagógicamente». Se añade a S7 como unidad 5.8 de T5, con
   prioridad sobre 5.3–5.7; el flujo objetivo y qué se simplifica están en el traspaso. No se implementó
   en esta sesión.
+- **L18 (2026-11-13).** El dueño, textual: «haz la implementación en la rama main de todos los cambios que
+  se han hecho hasta el momento, continuaremos trabajando en la branch de pruebas luego». PR
+  https://github.com/Sntg05/LinguaLab/pull/20. CodeQL del PR marcó cinco alertas nuevas, corregidas antes
+  de fusionar: (a) dos de ReDoS en los transcriptores, reales: quitar signos de los bordes con una regex
+  anclada al final era cuadrático; una palabra de 50 000 signos tardaba 4,2 s (rojo medido) y ahora se
+  recorre en tiempo lineal (`packages/core/src/g2p/trim-edges.ts`); (b) tres en `scripts/build-cmudict.mts`:
+  el script guardaba la descarga antes de comprobar su hash; ahora comprueba y después escribe, y lee la
+  caché sin preguntar antes si existe. `scripts/eval-g2p.mts` se corre ahora con `node scripts/run-ts.mjs`,
+  porque Node no resuelve las importaciones sin extensión del núcleo. Se fusiona con merge commit para que
+  `feat/rework-v4` siga en uso.

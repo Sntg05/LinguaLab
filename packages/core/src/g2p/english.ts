@@ -25,6 +25,7 @@
  */
 
 import type { Transcription } from "./spanish";
+import { trimEdges } from "./trim-edges";
 
 /** Las pronunciaciones de una palabra en ARPABET («B ER1 D»), o `undefined`. */
 export type PronunciationLookup = (word: string) => readonly string[] | undefined;
@@ -169,7 +170,8 @@ const pronunciationsOf = (
 };
 
 const WORD = /^[a-z]+(?:'[a-z]+)*$/;
-const EDGE_PUNCTUATION = /^[^a-z0-9']+|[^a-z0-9']+$/gi;
+/** Lo que no es letra, cifra ni apóstrofo se quita de los bordes, en tiempo lineal. */
+const isEdgePunctuation = (char: string): boolean => !/[a-z0-9']/i.test(char);
 
 export const transcribeEnglish = (
   text: string,
@@ -180,7 +182,7 @@ export const transcribeEnglish = (
   const variants: { word: string; ipa: string[] }[] = [];
 
   for (const raw of text.normalize("NFC").replace(/[’‘]/g, "'").split(/\s+/)) {
-    const token = raw.replace(EDGE_PUNCTUATION, "");
+    const token = trimEdges(raw, isEdgePunctuation);
     if (token === "") continue;
     const word = token.toLowerCase();
     const found = WORD.test(word) ? pronunciationsOf(word, lookup) : undefined;

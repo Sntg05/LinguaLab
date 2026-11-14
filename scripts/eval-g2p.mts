@@ -24,7 +24,7 @@
  * Uso:
  *   curl -o node_modules/.cache/es_MX.txt https://raw.githubusercontent.com/open-dict-data/ipa-dict/master/data/es_MX.txt
  *   curl -o node_modules/.cache/en_US.txt https://raw.githubusercontent.com/open-dict-data/ipa-dict/master/data/en_US.txt
- *   node --experimental-strip-types --no-warnings scripts/eval-g2p.mts
+ *   node scripts/run-ts.mjs scripts/eval-g2p.mts
  */
 import { existsSync, readFileSync } from "node:fs";
 import { transcribeEnglish } from "../packages/core/src/g2p/english.ts";

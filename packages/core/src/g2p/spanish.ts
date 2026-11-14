@@ -27,6 +27,8 @@
  * inventar una lectura.
  */
 
+import { trimEdges } from "./trim-edges";
+
 export type SpanishVariety = "latin-american" | "castilian";
 export type TranscriptionLevel = "phonemic" | "phonetic";
 
@@ -57,7 +59,15 @@ interface Syllable {
 }
 
 const WORD = /^[a-zñáéíóúü]+$/;
-const PUNCTUATION = /^[¿¡"'«»([—–-]+|[?!.,;:"'«»)\]…—–-]+$/g;
+const LEADING_PUNCTUATION = new Set(Array.from("¿¡\"'«»([—–-"));
+const TRAILING_PUNCTUATION = new Set(Array.from("?!.,;:\"'«»)]…—–-"));
+/** Quita los signos de los bordes en tiempo lineal (ver `trimEdges`). */
+const stripPunctuation = (raw: string): string =>
+  trimEdges(
+    raw,
+    (char) => LEADING_PUNCTUATION.has(char),
+    (char) => TRAILING_PUNCTUATION.has(char),
+  );
 const FRONT = "eiéí";
 const STRONG: Readonly<Record<string, string>> = { a: "a", e: "e", o: "o", á: "a", é: "e", ó: "o" };
 const WEAK: Readonly<Record<string, string>> = { i: "i", u: "u", í: "i", ú: "u", ü: "u" };
@@ -261,7 +271,7 @@ export const transcribeSpanish = (text: string, options: SpanishOptions = {}): T
   const analysed: { syllables: Syllable[]; stressed: number | null }[] = [];
 
   for (const raw of text.normalize("NFC").split(/\s+/)) {
-    const token = raw.replace(PUNCTUATION, "");
+    const token = stripPunctuation(raw);
     if (token === "") continue;
     const word = token.toLowerCase();
     if (!WORD.test(word)) {
