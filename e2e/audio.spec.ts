@@ -66,10 +66,19 @@ const wavBuffer = (seconds = 1, sampleRate = 8000): Buffer => {
 
 const audioFile = { name: "tono.wav", mimeType: "audio/wav", buffer: wavBuffer() };
 
+/** La tabla de intervalos va plegada en «Ver como tabla»: se abre como lo haria una persona. */
+const openIntervalTable = async (page: Page): Promise<void> => {
+  const table = page.locator("[data-audio-table]");
+  if ((await table.getAttribute("open")) === null) {
+    await table.locator("summary").click();
+  }
+};
+
 const loadAudio = async (page: Page): Promise<void> => {
   await page.goto("/visualizador");
   await page.locator(AUDIO_INPUT).setInputFiles(audioFile);
   await expect(page.locator(STATUS)).toContainText("listo para anotar", { timeout: 15_000 });
+  await openIntervalTable(page);
 };
 
 /** Mueve el cursor con el control de teclado, que es la via accesible. */
@@ -474,6 +483,26 @@ test("con audio cargado, transporte, onda, espectrograma y capas caben en una pa
   expect(spec.height).toBeGreaterThan(wave.height);
   expect(wave.height).toBeGreaterThanOrEqual(120);
   expect(tiers.height).toBeGreaterThanOrEqual(120);
+});
+
+test("al cargar el audio el editor queda a la vista y la tabla y las opciones de capa, plegadas", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1360, height: 900 });
+  await page.goto("/visualizador");
+  await page.locator(AUDIO_INPUT).setInputFiles(audioFile);
+  await expect(page.locator(STATUS)).toContainText("listo para anotar", { timeout: 15_000 });
+
+  const play = await page.locator("[data-audio-play]").boundingBox();
+  const tiers = await page.locator("[data-audio-tiers]").boundingBox();
+  expect(play?.y ?? -1).toBeGreaterThanOrEqual(0);
+  expect((tiers?.y ?? 0) + (tiers?.height ?? 0)).toBeLessThanOrEqual(900);
+
+  // Lo de la primera clase, a la vista; lo demas, plegado.
+  await expect(page.locator(SPLIT)).toBeVisible();
+  await expect(page.locator("[data-audio-table]")).not.toHaveAttribute("open", "");
+  await expect(page.locator("[data-audio-tier-more]")).not.toHaveAttribute("open", "");
+  await expect(page.locator("[data-audio-tier-name]")).toBeHidden();
 });
 
 /* ---------------- 5.8: segmentar como en Praat, con raton o con teclado ---------------- */

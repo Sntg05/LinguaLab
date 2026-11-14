@@ -29,6 +29,8 @@ export interface AudioLabElements {
   readonly specCanvas: HTMLCanvasElement | null;
   readonly tiersCanvas: HTMLCanvasElement | null;
   readonly canvasFrame: HTMLElement | null;
+  /** Barra de carga y transporte, el borde de arriba del editor. */
+  readonly editorBar: HTMLElement | null;
   /** Ventana de texto del intervalo seleccionado, como la de Praat. */
   readonly labelInput: HTMLInputElement | null;
   readonly tierSelect: HTMLSelectElement | null;
@@ -98,6 +100,7 @@ export const queryAudioLabElements = (root: HTMLElement): AudioLabElements => {
     specCanvas: $<HTMLCanvasElement>("[data-audio-spec]"),
     tiersCanvas: $<HTMLCanvasElement>("[data-audio-tiers]"),
     canvasFrame: $<HTMLElement>("[data-audio-canvas]"),
+    editorBar: $<HTMLElement>("[data-audio-bar]"),
     labelInput: $<HTMLInputElement>("[data-audio-label]"),
     tierSelect: $<HTMLSelectElement>("[data-audio-tier]"),
     tierNameInput: $<HTMLInputElement>("[data-audio-tier-name]"),

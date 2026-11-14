@@ -185,6 +185,11 @@ export const createAudioLoading = (ctx: ViewerContext, deps: AudioLoadingDeps): 
     deps.renderAll();
     deps.updatePersistence();
     reportLoaded(audio, previousXmax);
+    // Con el audio listo, el editor entero queda a la vista: la cabecera de la
+    // pagina lo deja debajo del primer pliegue. `instant` y no `auto`: `auto`
+    // hereda el `scroll-behavior: smooth` del sitio y la animacion se nota como
+    // un salto lento. No mueve el foco: solo desplaza.
+    el.editorBar?.scrollIntoView({ block: "start", behavior: "instant" });
     void deps.saveNow();
   };
 

@@ -72,6 +72,8 @@ const loadAudio = async (page: Page): Promise<void> => {
   await page.goto("/visualizador");
   await page.locator(AUDIO_INPUT).setInputFiles(audioFile);
   await expect(page.locator(STATUS)).toContainText("listo para anotar", { timeout: 15_000 });
+  // La tabla de intervalos va plegada en «Ver como tabla» (unidad 5.8).
+  await page.locator("[data-audio-table] summary").click();
 };
 
 /** Mueve el cursor con el control de teclado, que es la vía accesible. */
