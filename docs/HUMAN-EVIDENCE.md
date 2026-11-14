@@ -22,6 +22,7 @@ la evidencia queda en el documento que la pedía (P17, `docs/validation/`, el AD
 | Qué | Con quién | Cómo se sabe que quedó | Se anota en |
 |---|---|---|---|
 | Recorrer tres herramientas con **NVDA** u **Orca** | Una persona que use lector de pantalla a diario, idealmente | Notas con lector, versión, navegador y fecha | Un archivo en `docs/validation/` |
+| Que alguien que **no conoce el visor** segmente «pato» sin leer la ayuda: «Practicar con «pato»», tres límites y tres etiquetas | Una persona que nunca usó Praat ni LinguaLab | Lo consigue sin preguntar; se anotan dónde dudó y cuánto tardó | Log de `odd/tasks/rework-v4.md` (unidad 5.8) |
 | Prueba de uso con **estudiantes** de lingüística | 3 a 5 estudiantes, tareas guiadas | Qué se entendió y qué no, por herramienta | Un archivo en `docs/validation/` |
 | Revisar a mano los enlaces de editoriales que rechazan robots (DOI de Wiley y Oxford, Packt) | Un navegador | Cada enlace abre la obra que dice la ficha | `src/data/bibliography.ts` |
 

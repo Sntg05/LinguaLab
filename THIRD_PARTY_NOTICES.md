@@ -10,7 +10,8 @@ Reglas de esta tabla:
 - Las versiones son las instaladas de verdad, no un rango. Se comprueban con
   `node -e "console.log(require('<paquete>/package.json').version)"`.
 - El audio y las fuentes tienen su propio registro: `public/audio/ATTRIBUTION.md` para las
-  grabaciones y `src/styles/fonts.css` para las familias tipográficas. No se duplican aquí.
+  grabaciones del AFI, `public/audio/ejemplos/ATTRIBUTION.md` para la palabra de ejemplo del visor y
+  `src/styles/fonts.css` para las familias tipográficas. No se duplican aquí.
 
 ## Herramientas de construcción y calidad
 

@@ -622,3 +622,45 @@ test("segmenta solo con el teclado: cursor, Intro, etiqueta arriba, coma y Supr"
   const textGrid = await exportTextGrid(page);
   expect(intervalTexts(textGrid)).toEqual(["p", "a", "t"]);
 });
+
+/* ---------------- 5.8: palabra de ejemplo y modo guiado ---------------- */
+
+test("«Ver pato resuelto» carga el audio con su TextGrid y dice de donde sale", async ({
+  page,
+}) => {
+  await page.goto("/visualizador");
+  await page.locator("[data-audio-example-solved]").click();
+
+  await expect(page.locator(STATUS)).toContainText("importado", { timeout: 15_000 });
+  await openIntervalTable(page);
+  await expect(page.locator(ROWS)).toHaveCount(6);
+  const texts = await page
+    .locator(`${ROWS} input[type=text]`)
+    .evaluateAll((inputs) => inputs.map((input) => (input as HTMLInputElement).value));
+  expect(texts).toEqual(["", "p", "a", "t", "o", ""]);
+  await expect(page.locator("[data-audio-example-credit]")).toBeVisible();
+  await expect(page.locator("[data-audio-example-credit]")).toContainText("CC BY-SA 4.0");
+});
+
+test("«Practicar con pato» guia tres pasos en la linea de estado y avanza con cada gesto", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1360, height: 900 });
+  await page.goto("/visualizador");
+  await page.locator("[data-audio-example-practice]").click();
+  await expect(page.locator(STATUS)).toContainText("Paso 1 de 3", { timeout: 15_000 });
+  await expect(page.locator(ROWS)).toHaveCount(1);
+
+  await page.locator("[data-audio-play]").click();
+  await expect(page.locator(STATUS)).toContainText("Paso 2 de 3");
+
+  const wave = await pointOn(page, "[data-audio-wave]", 0.5);
+  await page.mouse.click(wave.x, wave.y);
+  await page.keyboard.press("Enter");
+  await expect(page.locator(STATUS)).toContainText("Paso 3 de 3");
+
+  const tier = await pointOn(page, "[data-audio-tiers]", 0.25, await firstTierY(page));
+  await page.mouse.click(tier.x, tier.y);
+  await page.locator(LABEL).fill("p");
+  await expect(page.locator(STATUS)).toContainText("Listo");
+});

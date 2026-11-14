@@ -68,7 +68,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | hecha | `03ec0d8`: motores con rojo y verde. Commit siguiente: CMUdict empaquetado (`scripts/build-cmudict.mts`), adaptador `createNativePhonemizer` (rojo: suite sin módulo; verde: 9 pruebas), página conectada con variedad, nivel, palabras sin transcribir y variantes, y eSpeak retirado. `verify:all` y e2e completa en verde. Español: 96,6 % propio frente a 76,9 % de eSpeak |
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
-| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline, TypeScript; Rust solo si se mide | en curso | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 en curso (gestos de Praat L23, simplificación L24). Falta el resto de 5.8, 5.2 (resto) y 5.3 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
+| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline, TypeScript; Rust solo si se mide | en curso | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana). Falta el resto de 5.8, 5.2 (resto) y 5.3 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
@@ -246,3 +246,14 @@ Se preguntan de a una, al empezar la fase que las necesita.
   falló con las capas en 1730 px; las e2e que tocan la tabla la abren primero, como una persona.
   Textos más cortos en la barra («Ver antes», «Ver después», «Repetir intervalo»); los formatos de audio
   van en el mensaje inicial. Falta de 5.8: «Cargar ejemplo» y el modo guiado.
+- **L25 (2026-11-13). T5, unidad 5.8, tercera parte: ejemplo y modo guiado.** «Practicar con «pato»»
+  carga el audio sin anotar y guía tres pasos en la línea de estado (escuchar, poner un límite, escribir
+  la etiqueta), que avanzan solos con cada gesto (`src/scripts/audio/guide.ts`, pura y probada). «Ver
+  «pato» resuelto» carga el mismo audio con su TextGrid. Audio: «pato» de Lingua Libre, hablante Millars,
+  CC BY-SA 4.0, original sin cambios (SHA-1 igual al de Commons), en `public/audio/ejemplos/` con su
+  `ATTRIBUTION.md`; el crédito se ve en la página al cargarlo. El TextGrid lo segmentó LinguaLab a mano
+  sobre la energía en ventanas de 5 ms y un espectrograma, y lo dice: no es una referencia de Praat
+  (en este equipo no hay Praat). Rojo: seis pruebas de la guía sin módulo; las dos e2e se comprobaron por
+  mutación (la guía que no avanza y el ejemplo sin TextGrid fallan). Queda como evidencia humana, en
+  `docs/HUMAN-EVIDENCE.md`, que alguien que no conoce el visor lo consiga sin leer la ayuda.
+  Con esto 5.8 queda hecha en código. Siguen 5.2 (resto), 5.3–5.7.

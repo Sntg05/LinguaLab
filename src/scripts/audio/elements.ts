@@ -33,6 +33,10 @@ export interface AudioLabElements {
   readonly editorBar: HTMLElement | null;
   /** Ventana de texto del intervalo seleccionado, como la de Praat. */
   readonly labelInput: HTMLInputElement | null;
+  readonly exampleSolvedButton: HTMLButtonElement | null;
+  readonly examplePracticeButton: HTMLButtonElement | null;
+  /** Credito del audio de ejemplo; se muestra al cargarlo. */
+  readonly exampleCredit: HTMLElement | null;
   readonly tierSelect: HTMLSelectElement | null;
   readonly tierNameInput: HTMLInputElement | null;
   readonly tierAddButton: HTMLButtonElement | null;
@@ -102,6 +106,9 @@ export const queryAudioLabElements = (root: HTMLElement): AudioLabElements => {
     canvasFrame: $<HTMLElement>("[data-audio-canvas]"),
     editorBar: $<HTMLElement>("[data-audio-bar]"),
     labelInput: $<HTMLInputElement>("[data-audio-label]"),
+    exampleSolvedButton: $<HTMLButtonElement>("[data-audio-example-solved]"),
+    examplePracticeButton: $<HTMLButtonElement>("[data-audio-example-practice]"),
+    exampleCredit: $<HTMLElement>("[data-audio-example-credit]"),
     tierSelect: $<HTMLSelectElement>("[data-audio-tier]"),
     tierNameInput: $<HTMLInputElement>("[data-audio-tier-name]"),
     tierAddButton: $<HTMLButtonElement>("[data-audio-tier-add]"),

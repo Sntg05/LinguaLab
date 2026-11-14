@@ -51,6 +51,7 @@ import { listenForShortcuts, type ShortcutCommand } from "./shortcuts";
 import { createAudioStrings, parseAudioStrings } from "./strings";
 import { createTextGridIo } from "./textgrid-io";
 import { listenToTierPointer } from "./tier-pointer";
+import { annotationCounts, createExample } from "./example";
 import { createTransport } from "./transport";
 import { listenToViewerControls } from "./viewer-controls";
 import {
@@ -135,7 +136,15 @@ export const initAudioLab = (): void => {
     isPlaying: () => transport.isPlaying(),
   });
   const acoustic = mountAcoustic(ctx, canvas.renderCanvas);
-  const transport = createTransport(ctx, canvas);
+  const transport = createTransport(ctx, {
+    ...canvas,
+    updateTransport: () => {
+      canvas.updateTransport();
+      if (transport.isPlaying()) {
+        example.notify("played");
+      }
+    },
+  });
   const persistence = createProjectPersistence(ctx);
 
   const commands = createAnnotationCommands(ctx, {
@@ -147,6 +156,16 @@ export const initAudioLab = (): void => {
     updateCursor: canvas.updateCursor,
     updateHistory: canvas.updateHistory,
     scheduleAutosave: persistence.scheduleAutosave,
+    onChange: (previous, next) => {
+      const before = annotationCounts(previous);
+      const after = annotationCounts(next);
+      if (after.intervals > before.intervals) {
+        example.notify("boundary-added");
+      }
+      if (after.labels > before.labels) {
+        example.notify("label-written");
+      }
+    },
   });
 
   const table = createIntervalTable(ctx, {
@@ -209,6 +228,15 @@ export const initAudioLab = (): void => {
     "play-interval": () => transport.toggleRegion(loopRegionOf(state)),
   };
   listenForShortcuts((command) => shortcuts[command](), el.canvasFrame);
+
+  const example = createExample(ctx, {
+    loadAudioFile: loading.loadAudioFile,
+    importTextGrid: textGrid.importTextGrid,
+  });
+  el.exampleSolvedButton?.addEventListener("click", () => void example.loadSolved());
+  el.examplePracticeButton?.addEventListener("click", () => void example.loadPractice());
+  // Un audio elegido a mano termina la guia: ya no habla de «pato».
+  el.audioInput.addEventListener("change", () => example.cancel());
 
   listenToTierPointer(ctx, {
     applyDocument: commands.applyDocument,

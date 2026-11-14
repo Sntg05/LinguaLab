@@ -17,6 +17,11 @@ import type { MessageKey } from "../../i18n";
 
 const KEYS = [
   "audio.status.idle",
+  "audio.guide.listen",
+  "audio.guide.boundary",
+  "audio.guide.label",
+  "audio.guide.done",
+  "audio.example.error",
   "audio.status.loading",
   "audio.status.loaded",
   "audio.status.imported",

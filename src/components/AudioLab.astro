@@ -446,6 +446,17 @@ const WINDOWS = [
         </div>
         <p class="faint">{t(locale, "audio.segment.scope")}</p>
 
+        <div class="cluster audiolab__example">
+          <span class="field__label">{t(locale, "audio.example.title")}</span>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-example-practice>
+            {t(locale, "audio.example.practice")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-example-solved>
+            {t(locale, "audio.example.solved")}
+          </button>
+        </div>
+        <p class="faint" data-audio-example-credit hidden>{t(locale, "audio.example.credit")}</p>
+
         <details class="audiolab__more" data-audio-ipa-panel>
           <summary>{t(locale, "audio.ipa.title")}</summary>
           <p class="faint">{t(locale, "audio.ipa.note")}</p>

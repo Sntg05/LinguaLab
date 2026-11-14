@@ -53,6 +53,8 @@ export interface AnnotationCommandsDeps {
   readonly updateCursor: () => void;
   readonly updateHistory: () => void;
   readonly scheduleAutosave: () => void;
+  /** Aviso de cada cambio registrado, con el documento de antes y el de despues. */
+  readonly onChange?: (previous: AnnotationDocument, next: AnnotationDocument) => void;
 }
 
 export const createAnnotationCommands = (
@@ -63,10 +65,12 @@ export const createAnnotationCommands = (
   const current = (): AnnotationDocument => currentDocument(state);
 
   const applyDocument = (next: AnnotationDocument, rebuild = true): void => {
-    if (next === current()) {
+    const previous = current();
+    if (next === previous) {
       return;
     }
     state.history = recordAnnotation(state.history, next);
+    deps.onChange?.(previous, next);
     if (rebuild) {
       deps.renderIntervals();
     }
