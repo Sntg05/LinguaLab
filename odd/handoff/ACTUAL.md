@@ -1,6 +1,6 @@
 ---
 status: current
-updated: 2026-11-12
+updated: 2026-11-13
 ---
 
 # Traspaso vigente: rework v4
@@ -17,7 +17,7 @@ Pega esto como primera instrucción, o síguelo tal cual:
 > Lee `odd/handoff/ACTUAL.md` entero y `odd/tasks/rework-v4.md` hasta `## Log`. No leas más documentos
 > todavía. Trabaja en la rama `feat/rework-v4`. Toma la **primera tarea sin bloquear** de la tabla de §6,
 > sigue sus pasos en orden, corre las puertas de §2 y haz commit y push al terminar cada unidad. No
-> fusiones a `main`. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
+> fusiones a `main` sin que el dueño lo pida. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
 > Háblale en español. Al terminar, reescribe este archivo.
 
 Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
@@ -29,9 +29,11 @@ decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
   Público: estudiantes de lenguas y de lingüística. Publicado desde `main` en
   `https://lingualab-beta.vercel.app`.
 - **Rama de trabajo:** `feat/rework-v4`, publicada en `origin`. Sale de `main` @ `baa8322`.
+- **Primera entrega ya en `main`:** el 2026-11-13 el dueño pidió fusionar lo hecho hasta T5.2 y T9 en
+  parte (PR #20, merge commit `7a7ecf9`; Log L18). La rama quedó igual a `main` y se sigue usando.
 - **Regla del dueño:** commit y push a esta rama después de cada unidad terminada, para que el equipo
   la trabaje desde otros equipos. **No se fusiona a `main` ni se abre PR de merge** hasta que el dueño
-  diga que todo funciona.
+  lo pida otra vez.
 - **Fuente de verdad de la entrega:** [`odd/tasks/rework-v4.md`](../tasks/rework-v4.md): el pedido textual
   del dueño (L1), las especificaciones S1–S11, las decisiones, la tabla de tareas y la bitácora.
   **Toda decisión o avance nuevo se anota ahí, en `## Log`,** y la fila de la tarea se actualiza con su
@@ -53,6 +55,8 @@ npm run dev                      # http://localhost:4321
 Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya está instalado en
 `~/.cargo/bin` (rustc 1.99.1, destino `wasm32-unknown-unknown`), **sin** tocar el `PATH`: se invoca como
 `~/.cargo/bin/cargo`. En otra máquina: `rustup` con `--profile minimal --target wasm32-unknown-unknown`.
+En el segundo equipo del dueño (CachyOS) **no hay Rust**, hay Go en `/usr/bin/go` (no se usa) y Node 26
+fuera de nvm; cumple el `>=22.12` del proyecto, pero `.nvmrc` pide 22: si algo difiere, `nvm use 22`.
 
 ### Las puertas, y cuándo correrlas
 
@@ -115,7 +119,9 @@ Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya es
 | `0b514b7` | **T5, primera parte.** F0, F1 y F2 validados contra Praat 6.4.49 en tres vocales (`scripts/build-acoustic-reference.mjs`, `e2e/fixtures/reference/`, `docs/validation/acoustic.md`). **T9, primera parte:** FonoLab usa el transcriptor del sitio. Ficha de X-barra corregida |
 
 | `c9a8b1a` | **T5, unidad 5.2 en parte:** espectrograma en grises, 5 ms, 0–5000 Hz, 70 dB, lienzos más altos |
-| (commit siguiente) | **Corrige los formantes de la página:** se analizaba con 3 formantes en vez de los 5 de Praat |
+| `d7b96c3` | **Corrige los formantes de la página:** se analizaba con 3 formantes en vez de los 5 de Praat |
+| `bd6a08b`, `2d8b93b` | Alertas de CodeQL del PR #20: limpieza de bordes lineal en los transcriptores (`packages/core/src/g2p/trim-edges.ts`), descarga de CMUdict verificada antes de escribir |
+| `7a7ecf9` | Fusión de la primera entrega a `main` (PR #20) |
 
 Puerta completa y e2e en verde en el último commit de código.
 
@@ -145,6 +151,16 @@ Puerta completa y e2e en verde en el último commit de código.
 | T7 cualitativo | TypeScript + IndexedDB (el patrón de `annotation-storage.ts`) | Son datos del usuario: no salen del navegador | — |
 | T4 árboles | TypeScript; un analizador y un validador **por formalismo** | Cada teoría tiene su notación; un analizador de corchetes no sirve para todas | — |
 | Go / servidor | **No** | Decisión D1 del dueño y ADR 0002: nada de servidor propio | — |
+
+**Dónde ya hay Rust:** praatfan, el motor de todo el análisis acústico (F0, formantes, intensidad), es
+Rust compilado a WebAssembly (`public/praatfan/0.1.13/PROVENANCE.txt`). Lo que queda en TypeScript es el
+espectrograma de pantalla.
+
+**Medición del espectrograma (2026-11-13, Node 26, 60 s de audio a 44,1 kHz, ventana de 5 ms, paso de
+2 ms, mediana de 15 corridas):** con el tope actual de 512 columnas, 2,3 ms; con 2720 columnas (una
+pantalla de 1360 px a doble densidad), 11,9 ms; sin tope (unas 30 000 columnas), 134 ms. Todo queda bajo
+el umbral de ~300 ms, así que pasarlo a Rust no se nota todavía. Se vuelve a medir en 5.2, al rellenar la
+FFT con ceros hasta 512 o 1024 puntos, que multiplica el costo.
 
 **Regla para añadir una dependencia:** versión fijada exacta; licencia compatible con GPL-3.0 leída del
 propio paquete; publicada hace al menos catorce días; anotada en `THIRD_PARTY_NOTICES.md`; si se sirve

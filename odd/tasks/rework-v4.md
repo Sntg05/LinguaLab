@@ -204,3 +204,9 @@ Se preguntan de a una, al empezar la fase que las necesita.
   caché sin preguntar antes si existe. `scripts/eval-g2p.mts` se corre ahora con `node scripts/run-ts.mjs`,
   porque Node no resuelve las importaciones sin extensión del núcleo. Se fusiona con merge commit para que
   `feat/rework-v4` siga en uso.
+- **L19 (2026-11-13).** El dueño, textual: «actualiza el traspaso y empieza con la T5, vamos a trabajar
+  hasta terminar el rework, recuerdas el cambio de motores y el traspaso a rust o go para que sea más
+  optimizado? hazlo efectivo». Lo que consta: D1 dice navegador y Rust a WebAssembly solo donde se mida;
+  Go se descartó con el servidor. praatfan, el motor acústico, ya es Rust en WebAssembly. Medido el
+  espectrograma de TypeScript sobre 60 s a 44,1 kHz: 2,3 ms con 512 columnas, 11,9 ms con 2720, 134 ms
+  sin tope; bajo el umbral de ~300 ms. Traspaso actualizado con la fusión del PR #20 y esta medición.
