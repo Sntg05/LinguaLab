@@ -85,7 +85,10 @@ test("lo que se validó contra Praat y lo que no se ve antes de analizar nada", 
 
   const panel = page.locator("[data-acoustic]");
   await expect(panel).toContainText(/contrastados con Praat/i);
-  await expect(panel).toContainText(/la intensidad todavía no/i);
+  // Desde la unidad 5.6 la intensidad tambien esta validada (Praat 7.0.03); lo
+  // que sigue sin contrastar se dice igual de visible.
+  await expect(panel).toContainText(/e intensidad \(Praat 7\.0\.03\)/i);
+  await expect(panel).toContainText(/Todavía sin contrastar/i);
 });
 
 const SPEC = "[data-audio-spec]";

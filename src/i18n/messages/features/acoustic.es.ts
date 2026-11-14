@@ -35,23 +35,17 @@ export const acousticEs = {
   "acoustic.pitch.title": "Contorno de F0 (tono)",
   "acoustic.pitch.floor": "Piso (Hz)",
   "acoustic.pitch.ceiling": "Techo (Hz)",
-  "acoustic.pitch.run": "Calcular F0",
   "acoustic.pitch.note":
     "El piso y el techo acotan la búsqueda. Con un techo demasiado bajo, el análisis toma la mitad de la frecuencia real; con un piso demasiado alto, pierde las voces graves.",
-  "acoustic.canvas.f0": "Contorno de la frecuencia fundamental, en hercios",
 
   "acoustic.formant.title": "Formantes F1 a F3",
   "acoustic.formant.max": "Frecuencia máxima (Hz)",
-  "acoustic.formant.run": "Calcular formantes",
-  "acoustic.formant.overlay": "Superponer sobre el espectrograma",
   "acoustic.formant.note":
     "La frecuencia máxima tiene que superar el formante más alto que esperas encontrar: en voces infantiles suele hacer falta más de 5500 Hz.",
 
   "acoustic.intensity.title": "Intensidad",
-  "acoustic.intensity.run": "Calcular intensidad",
   "acoustic.intensity.note":
     "Decibelios de la señal, medidos con el mismo método que Praat y referidos al mismo umbral.",
-  "acoustic.canvas.intensity": "Curva de intensidad, en decibelios",
 
   "acoustic.measure.title": "Medición de la selección",
   "acoustic.measure.run": "Medir la selección",
@@ -85,9 +79,6 @@ export const acousticEs = {
   "acoustic.status.idle":
     "El análisis se ejecuta en un worker: el primer cálculo carga el motor y puede tardar unos segundos.",
   "acoustic.status.analysing": "Analizando… el cálculo corre en un worker y la página sigue respondiendo.",
-  "acoustic.status.f0": "Contorno de F0 listo: {count} marcos con voz.",
-  "acoustic.status.formants": "Formantes calculados.",
-  "acoustic.status.intensity": "Intensidad calculada.",
   "acoustic.status.measured": "Medición lista: {count} intervalo(s).",
   "acoustic.status.exported": "Mediciones descargadas: {name}",
   "acoustic.status.cleared": "Mediciones borradas.",

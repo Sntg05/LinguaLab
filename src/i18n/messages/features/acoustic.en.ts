@@ -35,23 +35,17 @@ export const acousticEn = {
   "acoustic.pitch.title": "F0 contour (pitch)",
   "acoustic.pitch.floor": "Floor (Hz)",
   "acoustic.pitch.ceiling": "Ceiling (Hz)",
-  "acoustic.pitch.run": "Compute F0",
   "acoustic.pitch.note":
     "The floor and ceiling bound the search. With a ceiling that is too low the analysis reports half the real frequency; with a floor that is too high it loses low voices.",
-  "acoustic.canvas.f0": "Fundamental frequency contour, in hertz",
 
   "acoustic.formant.title": "Formants F1 to F3",
   "acoustic.formant.max": "Maximum frequency (Hz)",
-  "acoustic.formant.run": "Compute formants",
-  "acoustic.formant.overlay": "Overlay on the spectrogram",
   "acoustic.formant.note":
     "The maximum frequency must exceed the highest formant you expect: child voices usually need more than 5500 Hz.",
 
   "acoustic.intensity.title": "Intensity",
-  "acoustic.intensity.run": "Compute intensity",
   "acoustic.intensity.note":
     "Signal level in decibels, measured with the same method and the same threshold as Praat.",
-  "acoustic.canvas.intensity": "Intensity curve, in decibels",
 
   "acoustic.measure.title": "Measurement of the selection",
   "acoustic.measure.run": "Measure the selection",
@@ -84,9 +78,6 @@ export const acousticEn = {
   "acoustic.status.idle":
     "The analysis runs in a worker: the first calculation loads the engine and may take a few seconds.",
   "acoustic.status.analysing": "Analysing… the calculation runs in a worker and the page keeps responding.",
-  "acoustic.status.f0": "F0 contour ready: {count} voiced frames.",
-  "acoustic.status.formants": "Formants computed.",
-  "acoustic.status.intensity": "Intensity computed.",
   "acoustic.status.measured": "Measurement ready: {count} interval(s).",
   "acoustic.status.exported": "Measurements downloaded: {name}",
   "acoustic.status.cleared": "Measurements cleared.",
