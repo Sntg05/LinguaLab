@@ -462,7 +462,7 @@ Se le pregunta **una** cuando se llega a la tarea que la necesita, con la recome
 - **Límite de uso del dueño:** trabaja con un plan con tope de cinco horas y otro semanal. Conviene
   commitear seguido, no releer archivos ya leídos, limitar la salida de los comandos (`| tail`, `| grep`)
   y dejar este traspaso al día antes de agotar la sesión.
-- **Pendientes anteriores** que siguen en `docs/HUMAN-EVIDENCE.md`: descartar en GitHub cinco alertas de
+- **Pendientes anteriores** que siguen en `docs/HUMAN-EVIDENCE.md`: descartar en GitHub siete alertas de
   CodeQL justificadas, proteger `main` también para administradores, subir el piso de Node para Astro
   7.4.2 (P23), etiquetas `v3.0.0` y `v3.1.0`.
 

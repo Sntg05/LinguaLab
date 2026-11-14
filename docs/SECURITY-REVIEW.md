@@ -173,6 +173,15 @@ propósito mismo de un script de desarrollo y se descartan con su motivo.
 | 5, 6, 12, 13 | `http-to-file-access` | `fetch-ipa-audio.mjs`, `build-language-data.mjs`, `vendor-pyodide.mjs` | **Se descartan: es el propósito del script.** Los tres descargan a propósito lo que se va a servir, los corre una persona y no el sitio, y cada uno deja constancia: el audio, la licencia de cada archivo; Glottolog, el `sha256` del dataset; Pyodide, el `sha256` esperado de cada archivo, que hace fallar el script si no coincide |
 | 11 | `file-access-to-http` | `scripts/vendor-pyodide.mjs` | **Se descarta por lo mismo.** La URL sale del `pyodide-lock.json` de la versión fijada en `package.json` |
 
+**Alertas del PR 20 (rework v4, 2026-11-13).**
+
+| # | Regla | Dónde | Destino |
+|---|---|---|---|
+| 19, 20 | `polynomial-redos` | `packages/core/src/g2p/english.ts`, `spanish.ts` | **Corregidas, y eran un defecto real:** una palabra de 50 000 signos tardaba 4,2 s en el navegador. Los bordes se recorren en tiempo lineal (`trim-edges.ts`), con prueba |
+| 21 | `file-system-race` | `scripts/build-cmudict.mts` | **Corregida.** Se lee la caché sin comprobar antes si existe |
+| 22 | `http-to-file-access` | `scripts/build-cmudict.mts` | **Corregida.** El hash se comprueba antes de escribir la descarga |
+| 23, 24 | `http-to-file-access` | `scripts/build-cmudict.mts` | **Se descartan: es el propósito del script.** Escribe en disco el diccionario que se sirve, solo después de comprobar el `sha256` fijado de la descarga; lo corre una persona y no el sitio |
+
 El análisis del PR #13 encontró dos alertas más en el propio arreglo: **#16** (`incomplete-multi-character-sanitization`, la expresión regular de `strip` seguía siendo la que CodeQL rechaza) y **#17** (`file-system-race`, `verify-build` medía un archivo y lo leía después). Las dos se corrigieron en la misma rama: `strip` recorre el texto contando la profundidad de las etiquetas, sin expresiones regulares, y `verify-build` lee una sola vez y mide lo leído.
 
 Descartar una alerta en GitHub es un cambio en la configuración del repositorio, y lo hace su dueño. Los

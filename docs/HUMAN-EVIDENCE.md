@@ -36,7 +36,7 @@ la evidencia queda en el documento que la pedía (P17, `docs/validation/`, el AD
 | Qué | Por qué espera | Se anota en |
 |---|---|---|
 | Fusionar `fix/auditoria-v3-1` a `main` y publicarlo | Una verificación en verde no autoriza a fusionar | `odd/tasks/audit-v3.1-closure.md` |
-| Descartar en GitHub las cinco alertas de CodeQL propias de un script (#5, #6, #11, #12, #13) | Cambia la configuración del repositorio | `SECURITY-REVIEW.md` §6 trae el motivo de cada una |
+| Descartar en GitHub las siete alertas de CodeQL propias de un script (#5, #6, #11, #12, #13, #23, #24) | Cambia la configuración del repositorio | `SECURITY-REVIEW.md` §6 trae el motivo de cada una |
 | Protección de `main`: aplicarla también a administradores e historia lineal | Hoy un administrador puede empujar a `main` sin PR, y así entró la entrega v3 | `CONTRIBUTING.md`, «Configuración recomendada de `main`» |
 | Subir el piso de Node a 22.23.4 para poder usar Astro 7.4.2 | Cambia el entorno de quien contribuye | P23 |
 | Etiquetar `v3.0.0` y `v3.1.0` y borrar las ramas ya fusionadas | Publica y borra en el remoto | ADR 0003 |
