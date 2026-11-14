@@ -88,3 +88,36 @@ describe("resolveShortcut con el foco en el editor (atajos de Praat)", () => {
     expect(resolveShortcut(press("z", { ctrlKey: true }), editor)?.command).toBe("undo");
   });
 });
+
+describe("atajos de zoom y de seleccion con el foco en el editor (5.4)", () => {
+  const editor = { inEditor: true } as const;
+
+  it("Ctrl o Cmd con A, I, O y N hacen zoom como en Praat («Keyboard shortcuts»)", () => {
+    expect(resolveShortcut(press("a", { ctrlKey: true }), editor)).toEqual({
+      command: "zoom-all",
+      preventDefault: true,
+    });
+    expect(resolveShortcut(press("i", { metaKey: true }), editor)?.command).toBe("zoom-in");
+    expect(resolveShortcut(press("o", { ctrlKey: true }), editor)?.command).toBe("zoom-out");
+    expect(resolveShortcut(press("N", { ctrlKey: true }), editor)?.command).toBe(
+      "zoom-selection",
+    );
+  });
+
+  it("fuera del editor, Ctrl+A, Ctrl+I, Ctrl+O y Ctrl+N siguen siendo del navegador", () => {
+    for (const key of ["a", "i", "o", "n"]) {
+      expect(resolveShortcut(press(key, { ctrlKey: true }))).toBeNull();
+    }
+  });
+
+  it("Mayus+flechas mueven el extremo de la seleccion; sin el editor, no", () => {
+    expect(resolveShortcut(press("ArrowRight", { shiftKey: true }), editor)).toEqual({
+      command: "extend-selection-right",
+      preventDefault: true,
+    });
+    expect(resolveShortcut(press("ArrowLeft", { shiftKey: true }), editor)?.command).toBe(
+      "extend-selection-left",
+    );
+    expect(resolveShortcut(press("ArrowRight", { shiftKey: true }))).toBeNull();
+  });
+});

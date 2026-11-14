@@ -76,3 +76,37 @@ export const ratioAtTime = (view: ViewWindow, time: number): number => {
   const span = view.end - view.start;
   return span <= 0 ? 0 : (time - view.start) / span;
 };
+
+/* ---------------- zoom a la seleccion y «Atras» (unidad 5.4) ---------------- */
+
+/** La ventana justo sobre la seleccion; sin seleccion, la misma ventana. */
+export const zoomToRegion = (
+  view: ViewWindow,
+  duration: number,
+  region: { readonly start: number; readonly end: number } | null,
+): ViewWindow => {
+  if (region === null) {
+    return view;
+  }
+  const span = Math.max(region.end - region.start, MIN_SPAN);
+  return clampWindow({ start: region.start, end: region.start + span }, duration);
+};
+
+/** Cuantas ventanas recuerda «Atras». Suficiente para deshacer una exploracion. */
+export const VIEW_HISTORY_LIMIT = 50;
+
+/** Guarda la ventana antes de un zoom, para que «Atras» la recupere. */
+export const pushView = (
+  history: readonly ViewWindow[],
+  view: ViewWindow,
+): readonly ViewWindow[] => [...history, view].slice(-VIEW_HISTORY_LIMIT);
+
+/** La ultima ventana guardada y la historia sin ella; sin historia, `null`. */
+export const popView = (
+  history: readonly ViewWindow[],
+): { readonly view: ViewWindow | null; readonly history: readonly ViewWindow[] } => {
+  const view = history.at(-1);
+  return view === undefined
+    ? { view: null, history }
+    : { view, history: history.slice(0, -1) };
+};

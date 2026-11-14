@@ -91,7 +91,11 @@ test("el aviso de que el audio no sale del equipo se ve antes de cargar nada", a
   await page.goto("/visualizador");
 
   await expect(page.locator("[data-audiolab]")).toContainText(/no sale de tu equipo/i);
-  await expect(page.locator("[data-audiolab]")).toContainText(/Experimental/i);
+  // El aviso de que el TextGrid era experimental se quito con la unidad 5.7: la
+  // ida y vuelta por Praat 7.0.03 ya se prueba (`npm run validate:textgrid-praat`).
+  await expect(page.locator("[data-audiolab]")).not.toContainText(
+    /no se puede comprobar desde una prueba/i,
+  );
 });
 
 test("carga un wav corto y deja el visor listo para anotar", async ({ page }) => {
@@ -706,4 +710,123 @@ test.describe("en una pantalla de doble densidad (Retina)", () => {
       });
     expect(darkestRow).toBeGreaterThan(0.8);
   });
+});
+
+/* ---------------- 5.4: seleccion por arrastre, lecturas, barras y zoom ---------------- */
+
+const SELECTION_READOUT = "[data-audio-selection-readout]";
+const POINTER_READOUT = "[data-audio-pointer-readout]";
+
+/** Los numeros de una lectura, en orden: «Selección: 0.200 s – 0.600 s (0.400 s)». */
+const readoutNumbers = async (page: Page, selector: string): Promise<number[]> => {
+  const text = (await page.locator(selector).textContent()) ?? "";
+  return [...text.matchAll(/\d+(?:\.\d+)?/g)].map((match) => Number(match[0]));
+};
+
+/** Pasa el raton por un punto del lienzo y devuelve lo que lee el puntero. */
+const pointerAt = async (page: Page, selector: string, xRatio: number, yRatio = 0.5) => {
+  const at = await pointOn(page, selector, xRatio, yRatio);
+  await page.mouse.move(at.x, at.y);
+  return readoutNumbers(page, POINTER_READOUT);
+};
+
+test("arrastrar sobre la onda selecciona un tramo, lo lee arriba y se puede hacer zoom a el y volver", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1360, height: 900 });
+  await loadAudio(page);
+  // Sin limites, la seleccion es el unico intervalo: todo el audio.
+  await expect(page.locator(SELECTION_READOUT)).toContainText("0.000 s – 1.000 s (1.000 s)");
+
+  const from = await pointOn(page, "[data-audio-wave]", 0.2);
+  const to = await pointOn(page, "[data-audio-wave]", 0.6);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(to.x, to.y, { steps: 8 });
+  await page.mouse.up();
+
+  const [start, end, duration] = await readoutNumbers(page, SELECTION_READOUT);
+  expect(start).toBeCloseTo(0.2, 2);
+  expect(end).toBeCloseTo(0.6, 2);
+  expect(duration).toBeCloseTo(0.4, 2);
+  // El cursor queda en el inicio del tramo, como en Praat.
+  expect(Number(await page.locator(CURSOR).inputValue())).toBeCloseTo(0.2, 2);
+
+  // Zoom a la seleccion: el borde izquierdo de la onda es su inicio y el derecho, su fin.
+  await page.locator("[data-audio-zoom-selection]").click();
+  expect((await pointerAt(page, "[data-audio-wave]", 0))[0]).toBeCloseTo(0.2, 2);
+  expect((await pointerAt(page, "[data-audio-wave]", 0.999))[0]).toBeCloseTo(0.6, 2);
+
+  // «Atras» vuelve a la ventana de antes del zoom: todo el audio.
+  await page.locator("[data-audio-zoom-back]").click();
+  expect((await pointerAt(page, "[data-audio-wave]", 0.999))[0]).toBeCloseTo(1, 2);
+
+  // Un clic suelta la seleccion: vuelve a ser el intervalo bajo el cursor.
+  const click = await pointOn(page, "[data-audio-wave]", 0.8);
+  await page.mouse.click(click.x, click.y);
+  await expect(page.locator(SELECTION_READOUT)).toContainText("0.000 s – 1.000 s (1.000 s)");
+});
+
+test("sobre el espectrograma el puntero lee el tiempo y la frecuencia a su altura", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1360, height: 900 });
+  await loadAudio(page);
+
+  const [timeTop, hzTop] = await pointerAt(page, "[data-audio-spec]", 0.5, 0.25);
+  const [, hzBottom] = await pointerAt(page, "[data-audio-spec]", 0.5, 0.75);
+  expect(timeTop).toBeCloseTo(0.5, 2);
+  // Escala lineal desde 0 Hz: a tres cuartos de altura, el triple que a un cuarto.
+  expect(hzTop).toBeGreaterThan(hzBottom ?? 0);
+  expect((hzTop ?? 0) / (hzBottom ?? 1)).toBeCloseTo(3, 1);
+});
+
+test("sin raton: Mayus+flechas seleccionan, Ctrl+N hace zoom a la seleccion y Ctrl+A muestra todo", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1360, height: 900 });
+  await loadAudio(page);
+  await moveCursor(page, 0.5);
+  await page.locator(EDITOR).focus();
+  for (let step = 0; step < 10; step += 1) {
+    await page.keyboard.press("Shift+ArrowRight");
+  }
+  // Cada paso es una centesima de la ventana visible (1 s): 10 pasos, 0,1 s.
+  const [start, end, duration] = await readoutNumbers(page, SELECTION_READOUT);
+  expect(start).toBeCloseTo(0.5, 3);
+  expect(end).toBeCloseTo(0.6, 3);
+  expect(duration).toBeCloseTo(0.1, 3);
+
+  await page.keyboard.press("ControlOrMeta+n");
+  expect((await pointerAt(page, "[data-audio-wave]", 0))[0]).toBeCloseTo(0.5, 2);
+  await page.locator(EDITOR).focus();
+  await page.keyboard.press("ControlOrMeta+a");
+  expect((await pointerAt(page, "[data-audio-wave]", 0.999))[0]).toBeCloseTo(1, 2);
+  // Ctrl+A en el editor no selecciona el texto de la pagina.
+  expect(await page.evaluate(() => window.getSelection()?.toString() ?? "")).toBe("");
+});
+
+test("la barra «Selección» suena solo el tramo y al terminar la seleccion sigue ahi", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1360, height: 900 });
+  await loadAudio(page);
+  const from = await pointOn(page, "[data-audio-wave]", 0.2);
+  const to = await pointOn(page, "[data-audio-wave]", 0.4);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(to.x, to.y, { steps: 8 });
+  await page.mouse.up();
+  const before = await page.locator(SELECTION_READOUT).textContent();
+
+  await page.locator("[data-audio-play-selection]").click();
+  await expect(page.locator("[data-audio-play]")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("[data-audio-play]")).toHaveAttribute("aria-pressed", "false", {
+    timeout: 5_000,
+  });
+  await expect(page.locator(SELECTION_READOUT)).toHaveText(before ?? "");
+  // Las tres barras y los cinco zooms tienen nombre propio para el lector de pantalla.
+  for (const name of ["Reproducir Visible", "Reproducir Selección", "Reproducir Todo"]) {
+    await expect(page.getByRole("button", { name, exact: true })).toHaveCount(1);
+  }
 });

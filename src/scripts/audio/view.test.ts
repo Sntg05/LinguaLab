@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   clampWindow,
+  MIN_SPAN,
   panWindow,
+  popView,
+  pushView,
+  VIEW_HISTORY_LIMIT,
+  zoomToRegion,
   ratioAtTime,
   timeAtRatio,
   zoomWindow,
@@ -95,5 +100,51 @@ describe("timeAtRatio / ratioAtTime", () => {
 
     expect(ratioAtTime(view, 1)).toBeLessThan(0);
     expect(ratioAtTime(view, 9)).toBeGreaterThan(1);
+  });
+});
+
+/* ---------------- 5.4: zoom a la seleccion, todo y atras, como en Praat ---------------- */
+
+describe("zoomToRegion", () => {
+  it("la ventana pasa a ser exactamente la seleccion", () => {
+    expect(zoomToRegion({ start: 0, end: 4 }, 4, { start: 1.25, end: 2 })).toEqual({
+      start: 1.25,
+      end: 2,
+    });
+  });
+
+  it("sin seleccion, la ventana no cambia", () => {
+    const view: ViewWindow = { start: 0.5, end: 3 };
+    expect(zoomToRegion(view, 4, null)).toBe(view);
+  });
+
+  it("una seleccion mas corta que el zoom minimo se abre hasta el minimo", () => {
+    const zoomed = zoomToRegion({ start: 0, end: 4 }, 4, { start: 2, end: 2.0001 });
+    expect(zoomed.end - zoomed.start).toBeCloseTo(MIN_SPAN, 9);
+  });
+});
+
+describe("pushView / popView (boton «Atras»)", () => {
+  it("atras vuelve a la ventana anterior, en orden inverso", () => {
+    let history = pushView([], { start: 0, end: 4 });
+    history = pushView(history, { start: 1, end: 2 });
+    const first = popView(history);
+    expect(first.view).toEqual({ start: 1, end: 2 });
+    const second = popView(first.history);
+    expect(second.view).toEqual({ start: 0, end: 4 });
+    expect(second.history).toEqual([]);
+  });
+
+  it("sin historia, atras no devuelve ventana", () => {
+    expect(popView([]).view).toBeNull();
+  });
+
+  it("la historia no crece sin limite: se olvidan las ventanas mas viejas", () => {
+    let history: readonly ViewWindow[] = [];
+    for (let index = 0; index < VIEW_HISTORY_LIMIT + 5; index += 1) {
+      history = pushView(history, { start: index, end: index + 1 });
+    }
+    expect(history).toHaveLength(VIEW_HISTORY_LIMIT);
+    expect(history[0]).toEqual({ start: 5, end: 6 });
   });
 });

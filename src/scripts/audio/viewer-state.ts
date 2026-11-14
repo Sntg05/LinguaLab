@@ -23,10 +23,13 @@ import type { RequiredAudioLabElements } from "./elements";
 import type { Palette } from "./render";
 import {
   activeSheet,
+  effectiveSelection,
   intervalIndexAt,
   loopRegionAt,
   type Region,
   type Sheet,
+  selectionRegion,
+  type TimeSelection,
 } from "./selection";
 import type { Spectrogram } from "./spectrogram";
 import type { AudioStrings } from "./strings";
@@ -48,7 +51,14 @@ export interface ViewerState {
   audio: LoadedAudio | null;
   spectrogram: Spectrogram | null;
   view: ViewWindow;
+  /** Ventanas anteriores a cada zoom: las recupera «Atras». */
+  viewHistory: readonly ViewWindow[];
   cursor: number;
+  /**
+   * Tramo arrastrado sobre la onda o el espectrograma, o con Mayus+flechas. Vale
+   * mientras el cursor siga en su inicio (ver `effectiveSelection`).
+   */
+  selection: TimeSelection | null;
   activeTier: number;
   /**
    * Frontera seleccionada en la capa activa, nombrada por el intervalo de su
@@ -77,7 +87,9 @@ export const createViewerState = (palette: Palette): ViewerState => ({
   audio: null,
   spectrogram: null,
   view: { start: 0, end: 1 },
+  viewHistory: [],
   cursor: 0,
+  selection: null,
   activeTier: 0,
   selectedBoundary: null,
   dragPreview: null,
@@ -98,9 +110,25 @@ export const activeSheetOf = (state: ViewerState): Sheet | null =>
 export const activeIntervalIndexOf = (state: ViewerState): number =>
   intervalIndexAt(activeSheetOf(state), state.cursor);
 
-/** El intervalo seleccionado como tramo: lo que se resalta y lo que suena en bucle. */
+/** El intervalo bajo el cursor como tramo, sin contar lo arrastrado. */
 export const loopRegionOf = (state: ViewerState): Region | null =>
   loopRegionAt(activeSheetOf(state), activeIntervalIndexOf(state));
+
+/**
+ * La seleccion del visor: lo que se resalta, lo que suena con Tab y en bucle, lo
+ * que se mide y a lo que se hace zoom. Es el tramo arrastrado si sigue vigente;
+ * si no, el intervalo bajo el cursor.
+ */
+export const selectionOf = (state: ViewerState): Region | null =>
+  effectiveSelection(state.selection, state.cursor, loopRegionOf(state));
+
+/** El arrastre guardado, solo si sigue vigente; si no, `null`. */
+export const draggedSelectionOf = (state: ViewerState): TimeSelection | null => {
+  const dragged = selectionRegion(state.selection);
+  return dragged !== null && Math.abs(state.cursor - dragged.start) <= 1e-9
+    ? state.selection
+    : null;
+};
 
 export type StatusState = "idle" | "busy" | "ok" | "error";
 

@@ -63,9 +63,10 @@ import {
   activeIntervalIndexOf,
   activeSheetOf,
   createViewerContext,
+  draggedSelectionOf,
   createViewerState,
   currentDocument,
-  loopRegionOf,
+  selectionOf,
   type ViewerContext,
 } from "./viewer-state";
 
@@ -95,10 +96,15 @@ const mountAcoustic = (
     strings: createAcousticStrings(parseAcousticStrings(acousticRoot.dataset.acousticStrings)),
     es: ctx.es,
     getAudio: () => acousticAudioOf(ctx),
-    // La seleccion es el intervalo donde esta el cursor: es el que el
-    // visor ya resalta en la onda y en las capas, asi que medir «la
-    // seleccion» no puede significar otra cosa.
+    // La seleccion es la del visor: el tramo arrastrado, si lo hay (sin
+    // etiqueta: la fila se nombra por su rango), o el intervalo donde esta el
+    // cursor. Es lo que se resalta en la onda, asi que medir «la seleccion» no
+    // puede significar otra cosa.
     getSelection: () => {
+      const region = selectionOf(state);
+      if (region !== null && draggedSelectionOf(state) !== null) {
+        return { start: region.start, end: region.end, label: "" };
+      }
       const active = activeSheetOf(state);
       const interval = active?.tier.items[activeIntervalIndexOf(state)];
       if (active === null || interval === undefined) {
@@ -228,6 +234,9 @@ export const initAudioLab = (): void => {
     setBuffer: transport.setBuffer,
     acoustic: {
       reset: () => {
+        // Un audio nuevo no hereda la seleccion ni los zooms del anterior.
+        state.selection = null;
+        state.viewHistory = [];
         tracks.reset();
         overlay.reset();
         acoustic?.reset();
@@ -248,7 +257,7 @@ export const initAudioLab = (): void => {
 
   /* ---------------------------- entradas ------------------------------ */
 
-  listenToViewerControls(ctx, {
+  const view = listenToViewerControls(ctx, {
     transport,
     loadAudioFile: loading.loadAudioFile,
     importTextGrid: textGrid.importTextGrid,
@@ -270,7 +279,13 @@ export const initAudioLab = (): void => {
     redo: commands.redo,
     "add-boundary": commands.splitAtCursor,
     "remove-boundary": commands.removeSelectedBoundary,
-    "play-interval": () => transport.toggleRegion(loopRegionOf(state)),
+    "play-interval": () => transport.toggleRegion(selectionOf(state)),
+    "zoom-all": view.zoomAll,
+    "zoom-in": view.zoomIn,
+    "zoom-out": view.zoomOut,
+    "zoom-selection": view.zoomSelection,
+    "extend-selection-left": () => view.extendSelection(-1),
+    "extend-selection-right": () => view.extendSelection(1),
   };
   listenForShortcuts((command) => shortcuts[command](), el.canvasFrame);
 

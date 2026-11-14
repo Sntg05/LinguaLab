@@ -10,13 +10,13 @@
 import { canRedoAnnotation, canUndoAnnotation } from "@lingualab/core";
 import type { AcousticOverlay } from "./acoustic-overlay";
 import { drawSpectrogram, drawTierStrips, drawWaveform } from "./render";
-import { formatSeconds } from "./strings";
+import { format, formatSeconds } from "./strings";
 import { playLabel } from "./viewer-rules";
 import {
   activeIntervalIndexOf,
   activeSheetOf,
   currentDocument,
-  loopRegionOf,
+  selectionOf,
   type ViewerContext,
 } from "./viewer-state";
 
@@ -51,7 +51,7 @@ export const createCanvasView = (ctx: ViewerContext, deps: CanvasViewDeps): Canv
         duration: audio.duration,
         palette: state.palette,
         cursor: state.cursor,
-        selection: loopRegionOf(state),
+        selection: selectionOf(state),
       });
     }
     if (el.specCanvas !== null) {
@@ -75,6 +75,31 @@ export const createCanvasView = (ctx: ViewerContext, deps: CanvasViewDeps): Canv
       }
     }
     renderTiers();
+    updateSelection();
+  };
+
+  /**
+   * Lectura de la seleccion arriba, como en Praat: inicio, fin y duracion. Solo
+   * se escribe si cambio: es una region viva y repetir el mismo texto en cada
+   * cuadro de la reproduccion lo volveria a anunciar.
+   */
+  const updateSelection = (): void => {
+    const readout = el.selectionReadout;
+    if (readout === null) {
+      return;
+    }
+    const region = selectionOf(state);
+    const text =
+      region === null
+        ? ctx.strings.text("audio.readout.noSelection")
+        : format(ctx.strings.text("audio.readout.selection"), {
+            start: formatSeconds(region.start),
+            end: formatSeconds(region.end),
+            duration: formatSeconds(region.end - region.start),
+          });
+    if (readout.textContent !== text) {
+      readout.textContent = text;
+    }
   };
 
   /**

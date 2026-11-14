@@ -315,3 +315,20 @@ Se preguntan de a una, al empezar la fase que las necesita.
   PATH. P17 cerrada en lo del TextGrid. La interfaz ya dice que la intensidad está validada y la ficha
   `textgrid-viewer` pasa a `stable` (su nota decía que no había análisis acústico y que Praat no se podía
   medir). Queda el aviso `audio.experimental` del visor, que se quita junto con 5.4 (mismo archivo).
+- **L31 (2026-11-14). T5, unidad 5.4: selección, lecturas, barras y zoom.** Arrastrar sobre la onda o el
+  espectrograma selecciona un tramo (desde 4 px; menos es un clic y pone el cursor). El cursor va al
+  inicio del tramo, como en Praat, y la selección vale mientras siga ahí; sin arrastre, la selección es el
+  intervalo bajo el cursor. Lecturas en la fila del cursor: selección (inicio, fin, duración;
+  `aria-live`) y puntero (tiempo y, sobre el espectrograma, Hz). Bajo las capas, «Reproducir» Visible,
+  Selección, Todo (las barras de Praat como botones: tres barras apiladas no cabían en una pantalla) y
+  «Ver» Todo, Acercar, Alejar, Selección, Atrás. Atajos con el foco en el editor, verificados en el
+  manual de Praat («Keyboard shortcuts»): Ctrl+A, I, O, N; «Atrás» no tiene atajo porque el manual no lo
+  lista; Chrome se queda Ctrl+N y la ayuda lo dice. Mayús+←/→ extienden la selección (propio de
+  LinguaLab: en Praat Mayús+Tab reproduce la ventana, y aquí Mayús+Tab sale del editor). Cambio de
+  comportamiento: al terminar o interrumpir un tramo, el cursor vuelve a donde estaba; antes quedaba al
+  final y la selección saltaba al intervalo siguiente. Rojo: 23 pruebas unitarias; cuatro e2e por
+  mutación. Verificación independiente sin bloqueos (arrastre, clic de 2 px, Tab y barras, zoom e
+  historia, Hz en el puntero, Ctrl+A fuera del editor sin interceptar, guía de «pato»); solo hay Chromium
+  en esta máquina, Firefox y Safari sin probar. En el mismo commit: se quita el aviso «experimental» del
+  visor (la ida y vuelta por Praat pasa, L30) y se corrige `audio.status.mismatch`, que imprimía «s s»
+  (rojo: `src/scripts/audio/strings.test.ts`).

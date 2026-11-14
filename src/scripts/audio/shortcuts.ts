@@ -20,7 +20,13 @@ export type ShortcutCommand =
   | "redo"
   | "add-boundary"
   | "remove-boundary"
-  | "play-interval";
+  | "play-interval"
+  | "zoom-all"
+  | "zoom-in"
+  | "zoom-out"
+  | "zoom-selection"
+  | "extend-selection-left"
+  | "extend-selection-right";
 
 /** Lo que importa de una pulsacion para decidir el atajo. */
 export interface KeyPress {
@@ -61,6 +67,31 @@ const EDITOR_KEYS: Readonly<Record<string, Shortcut>> = {
   Tab: { command: "play-interval", preventDefault: true },
 };
 
+/**
+ * Zoom con Ctrl o Cmd, como en Praat (manual, «Keyboard shortcuts»: Command-A
+ * «Zoom all», Command-I «Zoom in», Command-O «Zoom out», Command-N «Zoom to
+ * selection»). Solo con el foco en el editor: fuera de el, Ctrl+A selecciona el
+ * texto de la pagina y Ctrl+O abre un archivo, y eso no se le quita a nadie.
+ * Algunos navegadores se reservan Ctrl+N (ventana nueva) y no lo entregan a la
+ * pagina: por eso cada uno tiene su boton.
+ */
+const EDITOR_CTRL_KEYS: Readonly<Record<string, Shortcut>> = {
+  a: { command: "zoom-all", preventDefault: true },
+  i: { command: "zoom-in", preventDefault: true },
+  o: { command: "zoom-out", preventDefault: true },
+  n: { command: "zoom-selection", preventDefault: true },
+};
+
+/**
+ * Mayus+flechas: la via de teclado para seleccionar un tramo, como al
+ * seleccionar texto. Praat lo hace con Mayus y Command mas flecha arriba y abajo;
+ * aqui se usan las horizontales porque Ctrl+flecha arriba es del sistema en macOS.
+ */
+const EDITOR_SHIFT_KEYS: Readonly<Record<string, Shortcut>> = {
+  ArrowLeft: { command: "extend-selection-left", preventDefault: true },
+  ArrowRight: { command: "extend-selection-right", preventDefault: true },
+};
+
 /** Donde esta el foco al pulsar. */
 export interface ShortcutScope {
   /** El foco esta en el editor (el marco de los lienzos). */
@@ -70,24 +101,32 @@ export interface ShortcutScope {
 /**
  * La orden que corresponde a una pulsacion fuera de un campo, o `null`.
  *
- * Con Ctrl o Cmd solo cuenta la Z (deshacer; con Mayusculas, rehacer): el resto
- * de combinaciones son del navegador y no se tocan.
+ * Con Ctrl o Cmd cuenta la Z (deshacer; con Mayusculas, rehacer) y, dentro del
+ * editor, el zoom de Praat: el resto de combinaciones son del navegador.
  */
 export const resolveShortcut = (
   press: KeyPress,
   scope: ShortcutScope = { inEditor: false },
 ): Shortcut | null => {
   if (press.ctrlKey || press.metaKey) {
-    if (press.key.toLowerCase() === "z") {
+    const key = press.key.toLowerCase();
+    if (key === "z") {
       return { command: press.shiftKey ? "redo" : "undo", preventDefault: true };
     }
-    return null;
+    return scope.inEditor && !press.shiftKey ? lookup(EDITOR_CTRL_KEYS, key) : null;
   }
-  if (scope.inEditor && !press.shiftKey && Object.hasOwn(EDITOR_KEYS, press.key)) {
-    return EDITOR_KEYS[press.key] ?? null;
+  if (scope.inEditor) {
+    const editorShortcut = lookup(press.shiftKey ? EDITOR_SHIFT_KEYS : EDITOR_KEYS, press.key);
+    if (editorShortcut !== null) {
+      return editorShortcut;
+    }
   }
-  return Object.hasOwn(PLAIN_KEYS, press.key) ? (PLAIN_KEYS[press.key] ?? null) : null;
+  return lookup(PLAIN_KEYS, press.key);
 };
+
+/** Busca la tecla en una tabla sin caer en propiedades heredadas («toString»). */
+const lookup = (table: Readonly<Record<string, Shortcut>>, key: string): Shortcut | null =>
+  Object.hasOwn(table, key) ? (table[key] ?? null) : null;
 
 /** Si el foco esta en algo donde se escribe. */
 const isTypingTarget = (target: EventTarget | null): boolean =>

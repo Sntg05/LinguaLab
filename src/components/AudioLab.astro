@@ -76,7 +76,6 @@ const WINDOWS = [
       <!-- El aviso de privacidad va visible: quien abre una herramienta tiene que
            poder saber, sin buscarlo, que su grabacion no sale del equipo. -->
       <p class="callout">{t(locale, "audio.privacy")}</p>
-      <p class="callout callout--warn">{t(locale, "audio.experimental")}</p>
     </div>
 
     <div class="audiolab">
@@ -128,12 +127,6 @@ const WINDOWS = [
             <input type="checkbox" data-audio-loop />
             <span class="field__label">{t(locale, "audio.loop")}</span>
           </label>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-in>
-            {t(locale, "audio.zoomIn")}
-          </button>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-out>
-            {t(locale, "audio.zoomOut")}
-          </button>
           <button class="btn btn--quiet btn--sm" type="button" data-audio-pan-left>
             {t(locale, "audio.panLeft")}
           </button>
@@ -155,6 +148,13 @@ const WINDOWS = [
             disabled
           />
           <output class="audiolab__readout" data-audio-cursor-readout>0.000 s</output>
+          {/* Lecturas de Praat (unidad 5.4): la seleccion, region viva porque cambia
+              con cada gesto; el puntero, no, porque cambia con cada movimiento
+              del raton y su anuncio taparia lo demas. */}
+          <span class="audiolab__readout" data-audio-selection-readout aria-live="polite"
+            >{t(locale, "audio.readout.noSelection")}</span
+          >
+          <span class="audiolab__readout audiolab__readout--pointer" data-audio-pointer-readout></span>
         </div>
         <p class="audiolab__status" data-audio-status role="status" aria-live="polite" data-state="idle">
           {t(locale, "audio.status.idle")}
@@ -198,6 +198,37 @@ const WINDOWS = [
           data-audio-tiers
           role="img"
           aria-label={t(locale, "audio.canvas.tiers")}></canvas>
+        {/* Bajo las capas, como en Praat: las barras de reproduccion (visible,
+            seleccion, total) y los botones de zoom. Las barras son botones en una
+            fila: tres barras apiladas empujaban el editor fuera de la pantalla. */}
+        <div class="audiolab__bottombar" role="group" aria-label={t(locale, "audio.bottombar.title")}>
+          <span class="field__label" aria-hidden="true">{t(locale, "audio.playbar.label")}</span>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-play-visible>
+            <span class="u-visually-hidden">{t(locale, "audio.playbar.label")} </span>{t(locale, "audio.playbar.visible")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-play-selection>
+            <span class="u-visually-hidden">{t(locale, "audio.playbar.label")} </span>{t(locale, "audio.playbar.selection")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-play-all>
+            <span class="u-visually-hidden">{t(locale, "audio.playbar.label")} </span>{t(locale, "audio.playbar.all")}
+          </button>
+          <span class="field__label audiolab__bottombar-gap" aria-hidden="true">{t(locale, "audio.zoombar.label")}</span>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-all>
+            <span class="u-visually-hidden">{t(locale, "audio.zoombar.label")} </span>{t(locale, "audio.zoomAll")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-in>
+            {t(locale, "audio.zoomIn")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-out>
+            {t(locale, "audio.zoomOut")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-selection>
+            <span class="u-visually-hidden">{t(locale, "audio.zoombar.label")} </span>{t(locale, "audio.zoomSelection")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-back>
+            {t(locale, "audio.zoomBack")}
+          </button>
+        </div>
         <p class="faint" id="audio-editor-hint">{t(locale, "audio.canvas.note")}</p>
       </div>
       </div>
@@ -603,6 +634,13 @@ const WINDOWS = [
           <dd>{t(locale, "audio.keys.remove")}</dd>
           <dt><kbd>Tab</kbd></dt>
           <dd>{t(locale, "audio.keys.interval")}</dd>
+          <dt>
+            <kbd>Ctrl</kbd>+<kbd>A</kbd> <kbd>Ctrl</kbd>+<kbd>I</kbd> <kbd>Ctrl</kbd>+<kbd>O</kbd>
+            <kbd>Ctrl</kbd>+<kbd>N</kbd>
+          </dt>
+          <dd>{t(locale, "audio.keys.zoom")}</dd>
+          <dt><kbd>{es ? "Mayús" : "Shift"}</kbd>+<kbd>←</kbd> <kbd>→</kbd></dt>
+          <dd>{t(locale, "audio.keys.extend")}</dd>
           <dt><kbd>Ctrl</kbd>+<kbd>Z</kbd></dt>
           <dd>{t(locale, "audio.keys.undo")}</dd>
         </dl>
@@ -709,6 +747,18 @@ const WINDOWS = [
   .audiolab__cursor input {
     flex: 1 1 10rem;
     min-width: 0;
+  }
+
+  /* Fila de reproducir y ver bajo las capas, compacta como la de Praat. */
+  .audiolab__bottombar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs) var(--space-xs);
+  }
+
+  .audiolab__bottombar-gap {
+    margin-left: var(--space-s);
   }
 
   .audiolab__readout {

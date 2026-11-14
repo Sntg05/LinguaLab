@@ -9,7 +9,7 @@
 
 import { createPlayback, type Playback } from "./playback";
 import { clamp } from "./selection";
-import { loopRegionOf, type ViewerContext } from "./viewer-state";
+import { selectionOf, type ViewerContext } from "./viewer-state";
 import { createWebAudioDecoder, type WebAudioDecoder } from "./web-audio-decoder";
 
 export interface Transport {
@@ -23,6 +23,11 @@ export interface Transport {
   togglePlay(): void;
   /** Como Tab en Praat: si suena, para; si no, suena solo el tramo dado. */
   toggleRegion(region: { readonly start: number; readonly end: number } | null): void;
+  /**
+   * Como las barras de Praat: suena el tramo dado, cortando lo que sonara. Al
+   * terminar, el cursor vuelve a donde estaba.
+   */
+  playRegion(region: { readonly start: number; readonly end: number } | null): void;
   /** Detiene la reproduccion y el cursor en marcha. */
   stop(): void;
 }
@@ -38,6 +43,12 @@ export const createTransport = (ctx: ViewerContext, deps: TransportDeps): Transp
   let audioContext: AudioContext | null = null;
   let playback: Playback | null = null;
   let animation = 0;
+  /**
+   * Donde estaba el cursor antes de sonar un tramo. En Praat, oir un tramo no
+   * mueve la seleccion; aqui el cursor marca la seleccion arrastrada (ver
+   * `effectiveSelection`), asi que al terminar de sonar vuelve a su sitio.
+   */
+  let resumeCursor: number | null = null;
 
   const stopAnimation = (): void => {
     if (animation !== 0) {
@@ -55,6 +66,12 @@ export const createTransport = (ctx: ViewerContext, deps: TransportDeps): Transp
       playback = createPlayback(audioContext);
       playback.onEnded(() => {
         stopAnimation();
+        if (resumeCursor !== null) {
+          state.cursor = resumeCursor;
+          resumeCursor = null;
+          deps.updateCursor();
+          deps.renderCanvas();
+        }
         deps.updateTransport();
       });
     }
@@ -85,10 +102,11 @@ export const createTransport = (ctx: ViewerContext, deps: TransportDeps): Transp
     if (playback === null || state.audio === null) {
       return;
     }
+    resumeCursor = null;
     playback.setBuffer(state.audio.buffer);
     playback.play(from, {
       rate: Number(el.rateInput?.value ?? "1"),
-      loop: el.loopInput?.checked === true ? loopRegionOf(state) : null,
+      loop: el.loopInput?.checked === true ? selectionOf(state) : null,
     });
     deps.updateTransport();
     stopAnimation();
@@ -103,9 +121,16 @@ export const createTransport = (ctx: ViewerContext, deps: TransportDeps): Transp
       togglePlay();
       return;
     }
-    if (region === null) {
+    playRegion(region);
+  };
+
+  const playRegion = (region: { readonly start: number; readonly end: number } | null): void => {
+    if (playback === null || state.audio === null || region === null) {
       return;
     }
+    // Si ya sonaba un tramo, se conserva el cursor de antes de el: `setBuffer`
+    // corta la fuente sin avisar a `onEnded`, asi que no se restaura en medio.
+    resumeCursor ??= state.cursor;
     playback.setBuffer(state.audio.buffer);
     playback.play(region.start, {
       rate: Number(el.rateInput?.value ?? "1"),
@@ -148,6 +173,7 @@ export const createTransport = (ctx: ViewerContext, deps: TransportDeps): Transp
     play,
     togglePlay,
     toggleRegion,
+    playRegion,
     stop,
   };
 };
