@@ -200,6 +200,19 @@ export interface SpectrogramOptions {
 }
 
 /** Espectrograma por pixel, leyendo la columna que corresponde a cada instante. */
+/**
+ * Ultima imagen pintada de cada lienzo de espectrograma. Durante la
+ * reproduccion el visor se redibuja en cada cuadro para mover el cursor, pero
+ * el espectrograma no cambia: repintar pixel a pixel costaba unos 15 ms por
+ * cuadro en una pantalla de doble densidad (medido el 2026-11-13), casi todo el
+ * presupuesto de 16,7 ms. Con la imagen guardada se copia de una vez. Se rehace
+ * si cambia el analisis, la ventana visible, el tamano o la paleta.
+ */
+const spectrogramImages = new WeakMap<
+  HTMLCanvasElement,
+  { readonly spectrogram: Spectrogram; readonly key: string; readonly image: ImageData }
+>();
+
 export const drawSpectrogram = (canvas: HTMLCanvasElement, options: SpectrogramOptions): void => {
   const surface = fitCanvas(canvas);
   if (surface === null) {
@@ -218,24 +231,56 @@ export const drawSpectrogram = (canvas: HTMLCanvasElement, options: SpectrogramO
     return;
   }
 
-  const image = ctx.createImageData(width, height);
+  const key = `${options.view.start}|${options.view.end}|${canvas.width}x${canvas.height}|${scale}`;
+  const cached = spectrogramImages.get(canvas);
+  if (cached !== undefined && cached.spectrogram === spectrogram && cached.key === key) {
+    ctx.putImageData(cached.image, 0, 0);
+    drawFrequencyAxis(ctx, width, height, spectrogram.minHz, spectrogram.maxHz, options.palette);
+    return;
+  }
+
+  // La imagen se arma en pixeles del DISPOSITIVO: `putImageData` no aplica la
+  // escala que `fitCanvas` pone para la densidad de la pantalla, y una imagen
+  // del tamano en pixeles CSS ocupaba solo el cuarto de arriba a la izquierda en
+  // una pantalla de doble densidad.
+  const deviceWidth = canvas.width;
+  const deviceHeight = canvas.height;
+  const image = ctx.createImageData(deviceWidth, deviceHeight);
   const data = image.data;
   const step = spectrogram.columnSeconds;
+  const lastBand = spectrogram.columnLength - 1;
+  const span = spectrogram.maxHz - spectrogram.minHz;
 
-  for (let x = 0; x < width; x += 1) {
-    const time = options.view.start + (x / width) * (options.view.end - options.view.start);
+  // Para cada fila, la banda (con decimales) que le toca: se interpola entre las
+  // dos vecinas para que el dibujo no salga en escalones.
+  const rowBand = new Float64Array(deviceHeight);
+  for (let y = 0; y < deviceHeight; y += 1) {
+    const hz = spectrogram.minHz + (1 - (y + 0.5) / deviceHeight) * span;
+    const band =
+      spectrogram.bandHz > 0
+        ? (hz - spectrogram.firstBandHz) / spectrogram.bandHz
+        : (1 - (y + 0.5) / deviceHeight) * spectrogram.columnLength;
+    rowBand[y] = Math.min(Math.max(band, 0), lastBand);
+  }
+
+  for (let x = 0; x < deviceWidth; x += 1) {
+    const time =
+      options.view.start + (x / deviceWidth) * (options.view.end - options.view.start);
     const column = Math.min(
       spectrogram.columns - 1,
       Math.max(0, Math.floor(time / Math.max(step, 1e-9))),
     );
-    for (let y = 0; y < height; y += 1) {
-      const band = Math.min(
-        spectrogram.columnLength - 1,
-        Math.max(0, Math.floor((1 - (y + 0.5) / height) * spectrogram.columnLength)),
-      );
-      const value = spectrogram.values[column * spectrogram.columnLength + band] ?? 0;
+    const base = column * spectrogram.columnLength;
+    for (let y = 0; y < deviceHeight; y += 1) {
+      const band = rowBand[y] ?? 0;
+      const low = Math.floor(band);
+      const high = Math.min(low + 1, lastBand);
+      const weight = band - low;
+      const value =
+        (spectrogram.values[base + low] ?? 0) * (1 - weight) +
+        (spectrogram.values[base + high] ?? 0) * weight;
       const [red, green, blue] = spectrogramColor(value, scale);
-      const offset = (y * width + x) * 4;
+      const offset = (y * deviceWidth + x) * 4;
       data[offset] = red;
       data[offset + 1] = green;
       data[offset + 2] = blue;
@@ -243,7 +288,47 @@ export const drawSpectrogram = (canvas: HTMLCanvasElement, options: SpectrogramO
     }
   }
 
+  spectrogramImages.set(canvas, { spectrogram, key, image });
   ctx.putImageData(image, 0, 0);
+  drawFrequencyAxis(ctx, width, height, spectrogram.minHz, spectrogram.maxHz, options.palette);
+};
+
+/**
+ * Eje de frecuencia rotulado en Hz, a la izquierda, cada 1000 Hz como en Praat
+ * (o cada 500 si el rango es corto). Va encima de la imagen, sobre un fondo, para
+ * que se lea en gris y en color.
+ */
+const drawFrequencyAxis = (
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  minHz: number,
+  maxHz: number,
+  palette: Palette,
+): void => {
+  const span = maxHz - minHz;
+  if (span <= 0 || width < 80) {
+    return;
+  }
+  const stepHz = span <= 2500 ? 500 : 1000;
+  ctx.save();
+  ctx.font = "10px system-ui, sans-serif";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  for (let hz = Math.ceil(minHz / stepHz) * stepHz; hz <= maxHz; hz += stepHz) {
+    const y = height - ((hz - minHz) / span) * height;
+    const label = `${hz} Hz`;
+    const labelY = Math.min(Math.max(y, 7), height - 7);
+    const labelWidth = ctx.measureText(label).width + 6;
+    ctx.fillStyle = palette.surface;
+    ctx.globalAlpha = 0.8;
+    ctx.fillRect(0, labelY - 6, labelWidth + 6, 12);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = palette.ink;
+    ctx.fillRect(0, Math.round(y), 5, 1);
+    ctx.fillText(label, 7, labelY);
+  }
+  ctx.restore();
 };
 
 

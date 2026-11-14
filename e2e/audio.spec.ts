@@ -664,3 +664,46 @@ test("«Practicar con pato» guia tres pasos en la linea de estado y avanza con 
   await page.locator(LABEL).fill("p");
   await expect(page.locator(STATUS)).toContainText("Listo");
 });
+
+/* ---------------- 5.2: el espectrograma en pantallas de alta densidad ---------------- */
+
+test.describe("en una pantalla de doble densidad (Retina)", () => {
+  test.use({ deviceScaleFactor: 2 });
+
+  test("el espectrograma llena el lienzo: el tono de 440 Hz queda abajo, no en el cuarto de arriba", async ({
+    page,
+  }) => {
+    await loadAudio(page);
+    // La fila mas oscura (la de mas energia) de la mitad izquierda del lienzo,
+    // medida en pixeles del dispositivo. 440 Hz en una escala de 0 a 5000 Hz cae
+    // cerca del borde de abajo. Si la imagen se pintara en pixeles CSS sin
+    // escalar, ocuparia el cuarto de arriba a la izquierda y esa fila quedaria
+    // cerca de la mitad.
+    const darkestRow = await page
+      .locator("[data-audio-spec]")
+      .evaluate((canvas: HTMLCanvasElement) => {
+        const ctx = canvas.getContext("2d");
+        if (ctx === null) return -1;
+        const { width, height } = canvas;
+        const pixels = ctx.getImageData(0, 0, Math.floor(width / 2), height).data;
+        let best = -1;
+        let bestLuma = Number.POSITIVE_INFINITY;
+        for (let y = 0; y < height; y += 1) {
+          let sum = 0;
+          let opaque = 0;
+          for (let x = 0; x < Math.floor(width / 2); x += 1) {
+            const offset = (y * Math.floor(width / 2) + x) * 4;
+            if ((pixels[offset + 3] ?? 0) === 0) continue;
+            sum += (pixels[offset] ?? 0) + (pixels[offset + 1] ?? 0) + (pixels[offset + 2] ?? 0);
+            opaque += 1;
+          }
+          if (opaque > 0 && sum / opaque < bestLuma) {
+            bestLuma = sum / opaque;
+            best = y / height;
+          }
+        }
+        return best;
+      });
+    expect(darkestRow).toBeGreaterThan(0.8);
+  });
+});

@@ -68,7 +68,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | hecha | `03ec0d8`: motores con rojo y verde. Commit siguiente: CMUdict empaquetado (`scripts/build-cmudict.mts`), adaptador `createNativePhonemizer` (rojo: suite sin módulo; verde: 9 pruebas), página conectada con variedad, nivel, palabras sin transcribir y variantes, y eSpeak retirado. `verify:all` y e2e completa en verde. Español: 96,6 % propio frente a 76,9 % de eSpeak |
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
-| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline, TypeScript; Rust solo si se mide | en curso | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana). Falta el resto de 5.8, 5.2 (resto) y 5.3 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
+| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline, TypeScript; Rust solo si se mide | en curso | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26). Falta 5.3 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
@@ -257,3 +257,16 @@ Se preguntan de a una, al empezar la fase que las necesita.
   mutación (la guía que no avanza y el ejemplo sin TextGrid fallan). Queda como evidencia humana, en
   `docs/HUMAN-EVIDENCE.md`, que alguien que no conoce el visor lo consiga sin leer la ayuda.
   Con esto 5.8 queda hecha en código. Siguen 5.2 (resto), 5.3–5.7.
+- **L26 (2026-11-13). T5, unidad 5.2, resto.** (a) La FFT se rellena con ceros hasta 1024 puntos
+  (`MIN_FFT_SIZE`): con la ventana de 5 ms las bandas pasan de 172 Hz a 43 Hz, y al pintar se interpola
+  entre bandas vecinas. (b) Eje de frecuencia rotulado en Hz cada 1000 (o 500) Hz. Defecto encontrado y
+  corregido: el espectrograma se pintaba con `putImageData` en píxeles CSS y en pantallas de doble
+  densidad ocupaba solo el cuarto de arriba a la izquierda; ahora se arma en píxeles del dispositivo.
+  Rojo: dos pruebas de resolución (banda < 50 Hz; tono de 1000 Hz con error < 50 Hz) y una e2e a DPR 2
+  (la fila del tono de 440 Hz caía en 0,44 de la altura). Medido según L20, Node 26, 60 s a 44,1 kHz,
+  FFT de 1024: análisis 9,7 ms con 512 columnas y 48 ms con 2720; bajo ~300 ms, se queda en TypeScript.
+  Medido en Chromium a 1360×900: el redibujo completo costaba 15 ms por cuadro a DPR 2 (casi todo el
+  cuadro de 16,7 ms, y durante la reproducción se redibuja en cada cuadro); con la imagen del
+  espectrograma guardada por lienzo baja a 0,4 ms. Pendiente: (c) ventana gaussiana como la de Praat,
+  opcional, y la captura junto a la de Praat en `docs/validation/acoustic.md` (en este equipo no hay
+  Praat).
