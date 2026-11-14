@@ -121,3 +121,31 @@ describe("atajos de zoom y de seleccion con el foco en el editor (5.4)", () => {
     expect(resolveShortcut(press("ArrowRight", { shiftKey: true }))).toBeNull();
   });
 });
+
+describe("consultas de Praat con el foco en el editor (5.5)", () => {
+  // Manual de Praat, «Keyboard shortcuts»: F1 «Get first formant», F2 «Get
+  // second formant», F5 (Windows y Linux) o F10 (Mac) «Get pitch», F8 «Get intensity».
+  it.each([
+    ["F1", "query-f1"],
+    ["F2", "query-f2"],
+    ["F5", "query-pitch"],
+    ["F10", "query-pitch"],
+    ["F8", "query-intensity"],
+  ] as const)("%s pide %s e impide lo que el navegador haria con la tecla", (key, command) => {
+    expect(resolveShortcut(press(key), { inEditor: true })).toEqual({
+      command,
+      preventDefault: true,
+    });
+  });
+
+  it("fuera del editor F1, F5 y F10 siguen siendo del navegador (ayuda, recargar, menu)", () => {
+    for (const key of ["F1", "F2", "F5", "F8", "F10"]) {
+      expect(resolveShortcut(press(key))).toBeNull();
+    }
+  });
+
+  it("con Mayus o Ctrl no es la consulta simple (en Praat son el maximo y el listado)", () => {
+    expect(resolveShortcut(press("F5", { shiftKey: true }), { inEditor: true })).toBeNull();
+    expect(resolveShortcut(press("F5", { ctrlKey: true }), { inEditor: true })).toBeNull();
+  });
+});

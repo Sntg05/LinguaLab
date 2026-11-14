@@ -58,6 +58,18 @@ const acousticStrings = Object.fromEntries(
   ACOUSTIC_STRING_KEYS.map((key) => [key, t(locale, key)]),
 );
 
+/**
+ * Consultas de Praat con sus teclas (manual, «Keyboard shortcuts»): F5 «Get
+ * pitch» en Windows y Linux, F10 en Mac; F1 y F2 los formantes; F8 la
+ * intensidad. `aria-keyshortcuts` se lo dice a un lector de pantalla.
+ */
+const queryButtons = [
+  { magnitude: "pitch", label: "audio.query.pitch", keys: "F5 F10" },
+  { magnitude: "f1", label: "audio.query.f1", keys: "F1" },
+  { magnitude: "f2", label: "audio.query.f2", keys: "F2" },
+  { magnitude: "intensity", label: "audio.query.intensity", keys: "F8" },
+] as const;
+
 const WINDOWS = [
   { value: "0.005", label: "5 ms" },
   { value: "0.01", label: "10 ms" },
@@ -228,6 +240,20 @@ const WINDOWS = [
           <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-back>
             {t(locale, "audio.zoomBack")}
           </button>
+          {/* Consultas de Praat (unidad 5.5) en la misma fila: debajo de las capas,
+              para que el editor siga cabiendo en una pantalla. La respuesta es
+              region viva porque solo cambia cuando se pide. */}
+          <span class="field__label audiolab__bottombar-gap" aria-hidden="true">{t(locale, "audio.querybar.label")}</span>
+          {queryButtons.map((query) => (
+            <button
+              class="btn btn--quiet btn--sm"
+              type="button"
+              data-audio-query={query.magnitude}
+              aria-keyshortcuts={query.keys}>
+              <span class="u-visually-hidden">{t(locale, "audio.querybar.get")} </span>{t(locale, query.label)}
+            </button>
+          ))}
+          <output class="audiolab__readout audiolab__query" data-audio-query-result aria-live="polite" data-state="empty"></output>
         </div>
         <p class="faint" id="audio-editor-hint">{t(locale, "audio.canvas.note")}</p>
       </div>
@@ -641,6 +667,8 @@ const WINDOWS = [
           <dd>{t(locale, "audio.keys.zoom")}</dd>
           <dt><kbd>{es ? "Mayús" : "Shift"}</kbd>+<kbd>←</kbd> <kbd>→</kbd></dt>
           <dd>{t(locale, "audio.keys.extend")}</dd>
+          <dt><kbd>F1</kbd> <kbd>F2</kbd> <kbd>F5</kbd> <kbd>F8</kbd></dt>
+          <dd>{t(locale, "audio.keys.query")}</dd>
           <dt><kbd>Ctrl</kbd>+<kbd>Z</kbd></dt>
           <dd>{t(locale, "audio.keys.undo")}</dd>
         </dl>
@@ -759,6 +787,16 @@ const WINDOWS = [
 
   .audiolab__bottombar-gap {
     margin-left: var(--space-s);
+  }
+
+  /* La respuesta de la consulta ocupa lo que queda de la fila y, si no cabe,
+     baja a la suya: debajo de las capas no empuja el editor. */
+  .audiolab__query {
+    flex: 1 1 14rem;
+  }
+
+  .audiolab__query[data-state="error"] {
+    color: var(--warn);
   }
 
   .audiolab__readout {

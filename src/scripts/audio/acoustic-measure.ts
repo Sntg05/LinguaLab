@@ -324,3 +324,120 @@ export const measurementsToCsv = (
 
   return `${CSV_HEADER.join(",")}\n${rows.map((row) => `${row}\n`).join("")}`;
 };
+
+/* ----------------------------- consultas ----------------------------- */
+
+/**
+ * Donde se consulta: el cursor o un tramo seleccionado.
+ *
+ * Es la distincion del manual de Praat («Intro 4.3», «Intro 5.3»): con un
+ * cursor, «Get pitch» da el valor en ese instante; con una seleccion, la media
+ * en ella.
+ */
+export type QueryTarget =
+  | { readonly kind: "cursor"; readonly time: number }
+  | { readonly kind: "selection"; readonly start: number; readonly end: number };
+
+/** Respuesta de una consulta: un valor de un marco, una media o nada medido. */
+export type QueryAnswer =
+  | { readonly kind: "value"; readonly time: number; readonly value: number }
+  | {
+      readonly kind: "mean";
+      readonly start: number;
+      readonly end: number;
+      readonly value: number;
+      readonly count: number;
+    }
+  | { readonly kind: "undefined" };
+
+/**
+ * Como se trata la pista: una frecuencia (tono, formantes), donde 0 o NaN es
+ * «sin valor», o una intensidad en dB, donde 0 dB es un valor.
+ */
+export type QueryScale = "frequency" | "intensity";
+
+const NOTHING: QueryAnswer = { kind: "undefined" };
+
+const isQueryValue = (value: number, scale: QueryScale): boolean =>
+  scale === "intensity" ? Number.isFinite(value) : isMeasured(value);
+
+/**
+ * Media de energia: 10·log10 de la media de 10^(dB/10).
+ *
+ * Es el metodo «energy» de «Intensity: Get mean…» de Praat, el que su manual
+ * dice que se acerca al nivel de presion sonora del tramo. La media aritmetica
+ * de los dB (la de la tabla de mediciones) pesa igual un marco casi en silencio
+ * que uno fuerte, y por eso da menos.
+ */
+const energyMean = (values: readonly number[]): number =>
+  10 * Math.log10(values.reduce((total, db) => total + 10 ** (db / 10), 0) / values.length);
+
+/**
+ * Consulta una pista en el cursor o en una seleccion.
+ *
+ * En el cursor se da el valor del marco mas cercano y se informa el instante de
+ * ese marco, no el del cursor: asi se ve de donde sale el numero. Praat
+ * interpola entre los dos marcos vecinos; aqui no se interpola, por la misma
+ * razon que en `valueAt`: un valor entre marcos es un numero que nadie midio, y
+ * los marcos estan a pocos milisegundos. Si el marco mas cercano esta a mas de
+ * un paso del cursor, el cursor cae fuera de lo analizado y no hay valor.
+ *
+ * Con una seleccion se da la media de los marcos medidos dentro de ella: para
+ * tono y formantes, la media aritmetica en Hz sin los marcos sordos (como
+ * «Get mean» de Praat, que ignora los indefinidos); para la intensidad, la media
+ * de energia.
+ */
+export const queryTrack = (
+  track: AcousticTrack | undefined,
+  target: QueryTarget,
+  scale: QueryScale,
+): QueryAnswer => {
+  if (track === undefined || track.times.length === 0) {
+    return NOTHING;
+  }
+
+  if (target.kind === "selection") {
+    const values: number[] = [];
+    track.times.forEach((time, index) => {
+      const value = track.values[index];
+      if (
+        value !== undefined &&
+        time >= target.start - 1e-9 &&
+        time <= target.end + 1e-9 &&
+        isQueryValue(value, scale)
+      ) {
+        values.push(value);
+      }
+    });
+    if (values.length === 0) {
+      return NOTHING;
+    }
+    return {
+      kind: "mean",
+      start: target.start,
+      end: target.end,
+      value: scale === "intensity" ? energyMean(values) : mean(values),
+      count: values.length,
+    };
+  }
+
+  let nearest = -1;
+  let distance = Number.POSITIVE_INFINITY;
+  track.times.forEach((time, index) => {
+    const gap = Math.abs(time - target.time);
+    if (gap < distance) {
+      distance = gap;
+      nearest = index;
+    }
+  });
+
+  const first = track.times[0] ?? 0;
+  const second = track.times[1];
+  const step = second === undefined ? Number.POSITIVE_INFINITY : second - first;
+  const time = track.times[nearest];
+  const value = track.values[nearest];
+  if (time === undefined || value === undefined || distance > step + 1e-9) {
+    return NOTHING;
+  }
+  return isQueryValue(value, scale) ? { kind: "value", time, value } : NOTHING;
+};

@@ -61,6 +61,17 @@ const KEYS = [
   "audio.overlay.failed",
   "audio.overlay.tooShort",
   "audio.overlay.unavailable",
+  "audio.query.pitch",
+  "audio.query.f1",
+  "audio.query.f2",
+  "audio.query.intensity",
+  "audio.query.busy",
+  "audio.query.atCursor",
+  "audio.query.mean",
+  "audio.query.meanEnergy",
+  "audio.query.unvoiced",
+  "audio.query.none",
+  "audio.query.failed",
 ] as const satisfies readonly MessageKey[];
 
 export const AUDIO_STRING_KEYS: readonly MessageKey[] = KEYS;

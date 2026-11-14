@@ -20,8 +20,7 @@ Pega esto como primera instrucción, o síguelo tal cual:
 > fusiones a `main` sin que el dueño lo pida. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
 > Háblale en español. Al terminar, reescribe este archivo.
 
-Estado al 2026-11-14: en T5 falta solo **5.5** (consultas «Obtener tono / F1 / F2 / intensidad»); después
-sigue **T9** (contrato único de herramienta). Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
+Estado al 2026-11-14: T5 hecha en código (5.1–5.8); la siguiente es **T9** (contrato único de herramienta). Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
 decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
 
 ## 1. Qué se está haciendo y dónde
@@ -129,7 +128,8 @@ fuera de nvm; cumple el `>=22.12` del proyecto, pero `.nvmrc` pide 22: si algo d
 | `ee27ef5`, `27c120b`, `c6877fa` | **T5, 5.8:** gestos de Praat (Intro, arrastre, Supr, Tab, ventana de texto), panel «Segmentar» con lo demás plegado, barra compacta, ejemplo «pato» con licencia y modo guiado |
 | `a6ba11b` | **T5, 5.3:** tono, formantes e intensidad sobre el espectrograma, análisis automático del tramo visible (verificado aparte: L28) |
 | `c9bf799`, `f19f6b6` | **T5, 5.6 y 5.7:** intensidad y TextGrid contrastados con Praat 7.0.03 (`npm run validate:textgrid-praat`) |
-| (commit de 5.4) | **T5, 5.4:** selección por arrastre, lecturas, barras de reproducción y zoom; aviso «experimental» quitado |
+| `9316dce` | **T5, 5.4:** selección por arrastre, lecturas, barras de reproducción y zoom; aviso «experimental» quitado |
+| (commit de 5.5) | **T5, 5.5:** consultas «Obtener tono / F1 / F2 / intensidad» con las teclas de Praat; e2e de la tabla y del teclado contra las referencias |
 | `4d8d32b` | **T5, 5.2:** FFT rellenada a 1024, eje en Hz, espectrograma nítido en pantallas de doble densidad y guardado entre cuadros |
 
 Puerta completa y e2e en verde en el último commit de código.
@@ -179,7 +179,7 @@ desde `public/`, regla 9 de §3. Si se puede escribir en menos de ~200 líneas p
 
 | Tarea | Estado | Bloqueada por | Tamaño |
 |---|---|---|---|
-| T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | **casi hecha**: 5.1–5.4 y 5.6–5.8 hechas (ver §4 y el Log L21–L31); **falta 5.5** (consultas y atajos). Pendiente humano: la persona que no conoce el visor, y la captura del espectrograma junto a Praat | nada | — |
+| T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | **hecha en código**: 5.1–5.8 (ver §4 y el Log L21–L32). Pendiente humano: la persona que no conoce el visor, y la captura del espectrograma junto a Praat | nada | — |
 | T9 Contrato único de herramienta | empezada | nada | mediana |
 | T7 Análisis cualitativo | sin empezar | nada | grande |
 | T4 Árboles | ficha corregida; falta lo demás | D3 | grande |

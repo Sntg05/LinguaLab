@@ -26,7 +26,11 @@ export type ShortcutCommand =
   | "zoom-out"
   | "zoom-selection"
   | "extend-selection-left"
-  | "extend-selection-right";
+  | "extend-selection-right"
+  | "query-pitch"
+  | "query-f1"
+  | "query-f2"
+  | "query-intensity";
 
 /** Lo que importa de una pulsacion para decidir el atajo. */
 export interface KeyPress {
@@ -65,6 +69,15 @@ const EDITOR_KEYS: Readonly<Record<string, Shortcut>> = {
   Delete: { command: "remove-boundary", preventDefault: true },
   Backspace: { command: "remove-boundary", preventDefault: true },
   Tab: { command: "play-interval", preventDefault: true },
+  // Consultas de Praat (manual, «Keyboard shortcuts»): F1 «Get first formant»,
+  // F2 «Get second formant», F5 «Get pitch» en Windows y Linux (F10 en Mac) y
+  // F8 «Get intensity». Fuera del editor el navegador usa F1 (ayuda), F5
+  // (recargar) y F10 (menu): por eso solo aqui, y con `preventDefault`.
+  F1: { command: "query-f1", preventDefault: true },
+  F2: { command: "query-f2", preventDefault: true },
+  F5: { command: "query-pitch", preventDefault: true },
+  F10: { command: "query-pitch", preventDefault: true },
+  F8: { command: "query-intensity", preventDefault: true },
 };
 
 /**

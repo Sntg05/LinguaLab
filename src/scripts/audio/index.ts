@@ -42,6 +42,7 @@ import { createEmptyDocument, intervalTiers, startAnnotationHistory } from "@lin
 import { lingualab } from "../../composition-root";
 import { type AcousticPanels, initAcousticPanels } from "./acoustic-analysis";
 import { type AcousticOverlay, createAcousticOverlay } from "./acoustic-overlay";
+import { createAcousticQuery } from "./acoustic-query";
 import { type AcousticTracks, createAcousticTracks } from "./acoustic-tracks";
 import { createAcousticStrings, parseAcousticStrings } from "./acoustic-strings";
 import { createAnnotationCommands } from "./annotation-commands";
@@ -125,6 +126,10 @@ const acousticAudioOf = (ctx: ViewerContext) => {
     : { samples: audio.samples, sampleRate: audio.sampleRate, duration: audio.duration };
 };
 
+/** Los parametros de los campos del panel acustico; sin panel, los de Praat. */
+const paramsOf = (panels: AcousticPanels | null) =>
+  panels?.params() ?? { floor: 75, ceiling: 600, maxFormantHz: 5500 };
+
 /**
  * Curvas sobre el espectrograma (unidad 5.3). Comparten los analisis con el
  * panel acustico y toman de el los parametros; sin panel, los de Praat.
@@ -140,7 +145,7 @@ const mountOverlay = (
     tracks,
     strings: ctx.strings,
     getAudio: () => acousticAudioOf(ctx),
-    params: () => panels?.params() ?? { floor: 75, ceiling: 600, maxFormantHz: 5500 },
+    params: () => paramsOf(panels),
     palette: () => ctx.state.palette,
     toggles: {
       pitch: el.overlayPitchToggle,
@@ -181,6 +186,8 @@ export const initAudioLab = (): void => {
   const tracks = createAcousticTracks(lingualab.acoustic);
   const acoustic = mountAcoustic(ctx, tracks, canvas.renderCanvas);
   const overlay = mountOverlay(ctx, tracks, acoustic, canvas.renderCanvas);
+  // Consultas (unidad 5.5): mismos analisis y parametros que la tabla de medidas.
+  const query = createAcousticQuery(ctx, { tracks, params: () => paramsOf(acoustic) });
   const transport = createTransport(ctx, {
     ...canvas,
     updateTransport: () => {
@@ -240,6 +247,7 @@ export const initAudioLab = (): void => {
         tracks.reset();
         overlay.reset();
         acoustic?.reset();
+        query.reset();
       },
     },
     renderCanvas: canvas.renderCanvas,
@@ -286,6 +294,10 @@ export const initAudioLab = (): void => {
     "zoom-selection": view.zoomSelection,
     "extend-selection-left": () => view.extendSelection(-1),
     "extend-selection-right": () => view.extendSelection(1),
+    "query-pitch": () => query.run("pitch"),
+    "query-f1": () => query.run("f1"),
+    "query-f2": () => query.run("f2"),
+    "query-intensity": () => query.run("intensity"),
   };
   listenForShortcuts((command) => shortcuts[command](), el.canvasFrame);
 
