@@ -50,6 +50,7 @@ import { readPalette } from "./render";
 import { listenForShortcuts, type ShortcutCommand } from "./shortcuts";
 import { createAudioStrings, parseAudioStrings } from "./strings";
 import { createTextGridIo } from "./textgrid-io";
+import { listenToTierPointer } from "./tier-pointer";
 import { createTransport } from "./transport";
 import { listenToViewerControls } from "./viewer-controls";
 import {
@@ -58,6 +59,7 @@ import {
   createViewerContext,
   createViewerState,
   currentDocument,
+  loopRegionOf,
   type ViewerContext,
 } from "./viewer-state";
 
@@ -202,8 +204,25 @@ export const initAudioLab = (): void => {
     next: () => commands.moveCursorToInterval(1),
     undo: commands.undo,
     redo: commands.redo,
+    "add-boundary": commands.splitAtCursor,
+    "remove-boundary": commands.removeSelectedBoundary,
+    "play-interval": () => transport.toggleRegion(loopRegionOf(state)),
   };
-  listenForShortcuts((command) => shortcuts[command]());
+  listenForShortcuts((command) => shortcuts[command](), el.canvasFrame);
+
+  listenToTierPointer(ctx, {
+    applyDocument: commands.applyDocument,
+    renderCanvas: canvas.renderCanvas,
+    renderTierSelect: () => table.renderTierSelect(),
+  });
+
+  el.labelInput?.addEventListener("input", () => {
+    commands.setActiveText(el.labelInput?.value ?? "");
+  });
+  el.labelInput?.addEventListener("focus", () => {
+    // El teclado AFI escribe en el ultimo campo de texto enfocado.
+    state.lastTextInput = el.labelInput;
+  });
 
   /* ------------------------------ arranque ---------------------------- */
 

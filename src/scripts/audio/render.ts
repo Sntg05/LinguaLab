@@ -16,6 +16,7 @@ import type { AnnotationDocument, Tier } from "@lingualab/core";
 import { isIntervalTier } from "@lingualab/core";
 import type { Spectrogram } from "./spectrogram";
 import type { ViewWindow } from "./view";
+import { tierStripLayout } from "./tier-geometry";
 import { ratioAtTime } from "./view";
 import type { Peak } from "./waveform";
 
@@ -256,18 +257,31 @@ interface Strip {
   readonly palette: Palette;
 }
 
-const drawBoundary = (strip: Strip, x: number): void => {
-  strip.ctx.strokeStyle = strip.palette.ink;
-  strip.ctx.globalAlpha = 0.5;
-  strip.ctx.beginPath();
-  strip.ctx.moveTo(x + 0.5, strip.top);
-  strip.ctx.lineTo(x + 0.5, strip.top + strip.rowHeight - 2);
-  strip.ctx.stroke();
-  strip.ctx.globalAlpha = 1;
+/** Lo que esta seleccionado en la capa activa, para resaltarlo como Praat. */
+interface RowSelection {
+  readonly interval: number;
+  readonly boundary: number | null;
+}
+
+const drawBoundary = (strip: Strip, x: number, selected: boolean): void => {
+  const { ctx } = strip;
+  ctx.strokeStyle = selected ? strip.palette.accent : strip.palette.ink;
+  ctx.globalAlpha = selected ? 1 : 0.5;
+  ctx.lineWidth = selected ? 3 : 1;
+  ctx.beginPath();
+  ctx.moveTo(x + 0.5, strip.top);
+  ctx.lineTo(x + 0.5, strip.top + strip.rowHeight - 2);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  ctx.lineWidth = 1;
 };
 
+/** Cuerpo de letra de las etiquetas: crece con la fila para que se lea en clase. */
+const labelFont = (rowHeight: number): string =>
+  `${rowHeight >= 40 ? 16 : 11}px system-ui, sans-serif`;
+
 /**
- * Etiqueta recortada al hueco del intervalo.
+ * Etiqueta recortada al hueco del intervalo y centrada en la fila.
  *
  * Se recorta en vez de escribir encima del vecino porque un texto que invade el
  * intervalo de al lado se lee como si perteneciera a ese intervalo.
@@ -282,37 +296,69 @@ const drawLabel = (strip: Strip, from: number, to: number, text: string): void =
   ctx.rect(from + 2, strip.top, Math.max(to - from - 4, 0), strip.rowHeight - 2);
   ctx.clip();
   ctx.fillStyle = strip.palette.ink;
-  ctx.fillText(text, from + 3, strip.top + strip.rowHeight - 7);
+  ctx.font = labelFont(strip.rowHeight);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const centre = Math.max(from, 0) + (Math.min(to, strip.width) - Math.max(from, 0)) / 2;
+  ctx.fillText(text, centre, strip.top + (strip.rowHeight - 2) / 2);
   ctx.restore();
 };
 
-/** Una banda completa de una capa: fondo, nombre y su contenido. */
-const drawTierRow = (strip: Strip, tier: Tier, active: boolean): void => {
+/** Una banda completa de una capa: fondo, seleccion, nombre y su contenido. */
+const drawTierRow = (strip: Strip, tier: Tier, selection: RowSelection | null): void => {
   const { ctx } = strip;
+  const active = selection !== null;
 
   ctx.fillStyle = active ? strip.palette.accent : strip.palette.line;
-  ctx.globalAlpha = active ? 0.14 : 0.35;
+  ctx.globalAlpha = active ? 0.1 : 0.35;
   ctx.fillRect(0, strip.top, strip.width, strip.rowHeight - 2);
   ctx.globalAlpha = 1;
 
-  ctx.fillStyle = active ? strip.palette.ink : strip.palette.muted;
-  ctx.font = active ? "600 11px system-ui, sans-serif" : "11px system-ui, sans-serif";
-  ctx.fillText(tier.name, 4, strip.top + strip.rowHeight - 7);
-
   if (!isIntervalTier(tier)) {
     drawPointStrip(strip, tier.points);
+    drawTierName(strip, tier.name, active);
     return;
   }
 
-  for (const interval of tier.items) {
+  // El intervalo seleccionado se pinta entero, como el amarillo de Praat: es el
+  // que suena con Tab y el que se escribe en la ventana de texto.
+  const chosen = selection === null ? undefined : tier.items[selection.interval];
+  if (chosen !== undefined) {
+    const from = timeToX(strip.view, strip.width, chosen.start);
+    const to = timeToX(strip.view, strip.width, chosen.end);
+    ctx.fillStyle = strip.palette.accent;
+    ctx.globalAlpha = 0.22;
+    ctx.fillRect(from, strip.top, to - from, strip.rowHeight - 2);
+    ctx.globalAlpha = 1;
+  }
+
+  tier.items.forEach((interval, index) => {
     const from = timeToX(strip.view, strip.width, interval.start);
     const to = timeToX(strip.view, strip.width, interval.end);
     if (to < 0 || from > strip.width) {
-      continue;
+      return;
     }
-    drawBoundary(strip, from);
+    // La frontera de la izquierda del intervalo `index` es la `index - 1`.
+    drawBoundary(strip, from, selection !== null && selection.boundary === index - 1);
     drawLabel(strip, from, to, interval.text);
-  }
+  });
+  drawTierName(strip, tier.name, active);
+};
+
+/** Nombre de la capa en la esquina, sobre un fondo para que no lo tape una etiqueta. */
+const drawTierName = (strip: Strip, name: string, active: boolean): void => {
+  const { ctx } = strip;
+  ctx.font = active ? "600 11px system-ui, sans-serif" : "11px system-ui, sans-serif";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  const label = active ? `☞ ${name}` : name;
+  const width = ctx.measureText(label).width + 6;
+  ctx.fillStyle = strip.palette.surface;
+  ctx.globalAlpha = 0.85;
+  ctx.fillRect(1, strip.top + 1, width, 14);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = active ? strip.palette.ink : strip.palette.muted;
+  ctx.fillText(label, 4, strip.top + 2);
 };
 
 /** Capa de puntos: cada marca es un triangulo en su instante. */
@@ -338,6 +384,12 @@ export interface TierStripOptions {
   readonly view: ViewWindow;
   readonly activeTier: number;
   readonly palette: Palette;
+  /** Intervalo seleccionado en la capa activa (el que esta bajo el cursor). */
+  readonly selectedInterval?: number;
+  /** Frontera seleccionada en la capa activa. */
+  readonly selectedBoundary?: number | null;
+  /** Cursor, que cruza todas las capas como en Praat. */
+  readonly cursor?: number;
 }
 
 /**
@@ -345,7 +397,8 @@ export interface TierStripOptions {
  *
  * El texto de las etiquetas se dibuja solo si cabe: un texto recortado a la mitad
  * se lee como una etiqueta distinta, y la tabla del DOM ya tiene el texto
- * completo y accesible.
+ * completo y accesible. La geometria es la de `tier-geometry.ts`, la misma que
+ * usa el puntero para saber que capa y que frontera hay bajo un clic.
  */
 export const drawTierStrips = (canvas: HTMLCanvasElement, options: TierStripOptions): void => {
   const surface = fitCanvas(canvas);
@@ -354,17 +407,18 @@ export const drawTierStrips = (canvas: HTMLCanvasElement, options: TierStripOpti
   }
   const { ctx, width, height } = surface;
   const tiers = options.document.tiers;
-  const rowHeight = Math.max(18, Math.min(28, height / Math.max(tiers.length + 1, 1)));
+  const { rulerHeight, rowHeight } = tierStripLayout(height, tiers.length);
 
   ctx.fillStyle = options.palette.surface;
   ctx.fillRect(0, 0, width, height);
 
   ctx.fillStyle = options.palette.muted;
   ctx.font = "11px system-ui, sans-serif";
+  ctx.textBaseline = "alphabetic";
   ctx.strokeStyle = options.palette.line;
   ctx.lineWidth = 1;
 
-  const rulerY = rowHeight;
+  const rulerY = rulerHeight;
   ctx.beginPath();
   ctx.moveTo(0, rulerY + 0.5);
   ctx.lineTo(width, rulerY + 0.5);
@@ -384,10 +438,25 @@ export const drawTierStrips = (canvas: HTMLCanvasElement, options: TierStripOpti
   }
 
   tiers.forEach((tier, index) => {
+    const selection: RowSelection | null =
+      index === options.activeTier
+        ? { interval: options.selectedInterval ?? -1, boundary: options.selectedBoundary ?? null }
+        : null;
     drawTierRow(
       { ctx, top: rulerY + index * rowHeight, rowHeight, width, view: options.view, palette: options.palette },
       tier,
-      index === options.activeTier,
+      selection,
     );
   });
+
+  if (options.cursor !== undefined) {
+    const x = timeToX(options.view, width, options.cursor);
+    if (x >= 0 && x <= width) {
+      ctx.strokeStyle = options.palette.warn;
+      ctx.beginPath();
+      ctx.moveTo(x + 0.5, rulerY);
+      ctx.lineTo(x + 0.5, rulerY + tiers.length * rowHeight);
+      ctx.stroke();
+    }
+  }
 };

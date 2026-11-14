@@ -29,6 +29,8 @@ export interface AudioLabElements {
   readonly specCanvas: HTMLCanvasElement | null;
   readonly tiersCanvas: HTMLCanvasElement | null;
   readonly canvasFrame: HTMLElement | null;
+  /** Ventana de texto del intervalo seleccionado, como la de Praat. */
+  readonly labelInput: HTMLInputElement | null;
   readonly tierSelect: HTMLSelectElement | null;
   readonly tierNameInput: HTMLInputElement | null;
   readonly tierAddButton: HTMLButtonElement | null;
@@ -96,6 +98,7 @@ export const queryAudioLabElements = (root: HTMLElement): AudioLabElements => {
     specCanvas: $<HTMLCanvasElement>("[data-audio-spec]"),
     tiersCanvas: $<HTMLCanvasElement>("[data-audio-tiers]"),
     canvasFrame: $<HTMLElement>("[data-audio-canvas]"),
+    labelInput: $<HTMLInputElement>("[data-audio-label]"),
     tierSelect: $<HTMLSelectElement>("[data-audio-tier]"),
     tierNameInput: $<HTMLInputElement>("[data-audio-tier-name]"),
     tierAddButton: $<HTMLButtonElement>("[data-audio-tier-add]"),

@@ -174,7 +174,27 @@ const WINDOWS = [
       </div>
 
       <!-- --------------------------- Canvas ---------------------------- -->
-      <div class="audiolab__canvas" data-audio-canvas>
+      {/* El marco es el editor: recibe el foco (un clic en un lienzo lo enfoca) y
+          con el foco dentro valen los atajos de Praat: Intro, Supr y Tab. */}
+      <div
+        class="audiolab__canvas"
+        data-audio-canvas
+        tabindex="0"
+        role="group"
+        aria-label={t(locale, "audio.editor.label")}
+        aria-describedby="audio-editor-hint">
+        <div class="audiolab__label">
+          <label class="field__label" for="audio-label">{t(locale, "audio.label.title")}</label>
+          <input
+            id="audio-label"
+            class="audiolab__label-input"
+            type="text"
+            data-audio-label
+            autocomplete="off"
+            spellcheck="false"
+            disabled
+          />
+        </div>
         <canvas
           class="audiolab__wave"
           data-audio-wave
@@ -190,7 +210,7 @@ const WINDOWS = [
           data-audio-tiers
           role="img"
           aria-label={t(locale, "audio.canvas.tiers")}></canvas>
-        <p class="faint">{t(locale, "audio.canvas.note")}</p>
+        <p class="faint" id="audio-editor-hint">{t(locale, "audio.canvas.note")}</p>
       </div>
 
       <!-- ------------------------ Espectrograma ------------------------ -->
@@ -578,6 +598,12 @@ const WINDOWS = [
           <dd>{t(locale, "audio.keys.split")}</dd>
           <dt><kbd>,</kbd> <kbd>.</kbd></dt>
           <dd>{t(locale, "audio.keys.move")}</dd>
+          <dt><kbd>{es ? "Intro" : "Enter"}</kbd></dt>
+          <dd>{t(locale, "audio.keys.boundary")}</dd>
+          <dt><kbd>{es ? "Supr" : "Delete"}</kbd></dt>
+          <dd>{t(locale, "audio.keys.remove")}</dd>
+          <dt><kbd>Tab</kbd></dt>
+          <dd>{t(locale, "audio.keys.interval")}</dd>
           <dt><kbd>Ctrl</kbd>+<kbd>Z</kbd></dt>
           <dd>{t(locale, "audio.keys.undo")}</dd>
         </dl>
@@ -726,17 +752,37 @@ const WINDOWS = [
 
   /* La onda y el espectrograma son lo que se viene a mirar: ocupan la altura
      que ocupan en Praat frente a los controles, no una franja. */
+  .audiolab__canvas:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Ventana de texto del intervalo seleccionado, arriba como en Praat. */
+  .audiolab__label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+  }
+
+  .audiolab__label-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--step-0);
+  }
+
+  /* Las tres piezas suman el 92 % de la altura del editor: el resto es para la
+     ventana de texto, y asi todo sigue cabiendo en una pantalla. */
   .audiolab__wave {
-    height: max(120px, calc(var(--editor-h) * 0.25));
+    height: max(120px, calc(var(--editor-h) * 0.22));
     cursor: crosshair;
   }
 
   .audiolab__spec {
-    height: max(180px, calc(var(--editor-h) * 0.45));
+    height: max(180px, calc(var(--editor-h) * 0.42));
   }
 
   .audiolab__tiers {
-    height: max(120px, calc(var(--editor-h) * 0.3));
+    height: max(120px, calc(var(--editor-h) * 0.28));
   }
 
   .audiolab__table-wrap {

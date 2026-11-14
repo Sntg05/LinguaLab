@@ -20,6 +20,8 @@ export interface LoopRegion {
 export interface PlayOptions {
   readonly rate: number;
   readonly loop: LoopRegion | null;
+  /** Si se da y no hay bucle, deja de sonar en este instante (un intervalo, con Tab). */
+  readonly until?: number;
 }
 
 export interface Playback {
@@ -121,7 +123,15 @@ export const createPlayback = (context: AudioContext): Playback => {
       };
       source = node;
       startedAt = context.currentTime;
-      node.start(0, offset);
+      // Sin bucle y con fin pedido, la fuente suena solo ese tramo; la duracion
+      // de `start` se mide en segundos del buffer, no del reloj, asi que la
+      // velocidad no la altera.
+      const until = options.until;
+      if (!node.loop && until !== undefined && until > offset) {
+        node.start(0, offset, Math.min(until, buffer.duration) - offset);
+      } else {
+        node.start(0, offset);
+      }
     },
 
     stop: () => {

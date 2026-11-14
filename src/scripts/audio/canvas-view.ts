@@ -12,7 +12,13 @@ import type { AcousticPanels } from "./acoustic-analysis";
 import { drawSpectrogram, drawTierStrips, drawWaveform } from "./render";
 import { formatSeconds } from "./strings";
 import { playLabel } from "./viewer-rules";
-import { currentDocument, loopRegionOf, type ViewerContext } from "./viewer-state";
+import {
+  activeIntervalIndexOf,
+  activeSheetOf,
+  currentDocument,
+  loopRegionOf,
+  type ViewerContext,
+} from "./viewer-state";
 
 export interface CanvasView {
   /** Onda, espectrograma (con formantes) y capas. No hace nada sin audio. */
@@ -70,13 +76,36 @@ export const createCanvasView = (ctx: ViewerContext, deps: CanvasViewDeps): Canv
     renderTiers();
   };
 
+  /**
+   * La ventana de texto muestra la etiqueta del intervalo seleccionado, como la
+   * de Praat. Mientras alguien escribe en ella no se le pisa el valor: ya es el
+   * mismo, y reescribirlo moveria el cursor de texto al final.
+   */
+  const syncLabel = (): void => {
+    const input = el.labelInput;
+    if (input === null) {
+      return;
+    }
+    const sheet = activeSheetOf(state);
+    const index = activeIntervalIndexOf(state);
+    const interval = sheet === null || state.audio === null ? undefined : sheet.tier.items[index];
+    input.disabled = interval === undefined;
+    if (document.activeElement !== input) {
+      input.value = interval?.text ?? "";
+    }
+  };
+
   const renderTiers = (): void => {
+    syncLabel();
     if (el.tiersCanvas !== null) {
       drawTierStrips(el.tiersCanvas, {
-        document: currentDocument(state),
+        document: state.dragPreview ?? currentDocument(state),
         view: state.view,
         activeTier: state.activeTier,
         palette: state.palette,
+        selectedInterval: activeIntervalIndexOf(state),
+        selectedBoundary: state.selectedBoundary,
+        cursor: state.audio === null ? undefined : state.cursor,
       });
     }
   };

@@ -50,6 +50,13 @@ export interface ViewerState {
   view: ViewWindow;
   cursor: number;
   activeTier: number;
+  /**
+   * Frontera seleccionada en la capa activa, nombrada por el intervalo de su
+   * izquierda, o `null`. Es la que quita Supr y la que se arrastra.
+   */
+  selectedBoundary: number | null;
+  /** Documento con la frontera arrastrada, mientras dura el arrastre; si no, `null`. */
+  dragPreview: AnnotationDocument | null;
   history: AnnotationHistoryState;
   palette: Palette;
   /** El ultimo campo de texto de intervalo con foco: ahi escribe el teclado IPA. */
@@ -72,6 +79,8 @@ export const createViewerState = (palette: Palette): ViewerState => ({
   view: { start: 0, end: 1 },
   cursor: 0,
   activeTier: 0,
+  selectedBoundary: null,
+  dragPreview: null,
   history: startAnnotationHistory(createEmptyDocument(0)),
   palette,
   lastTextInput: null,

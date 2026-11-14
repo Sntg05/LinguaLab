@@ -475,3 +475,121 @@ test("con audio cargado, transporte, onda, espectrograma y capas caben en una pa
   expect(wave.height).toBeGreaterThanOrEqual(120);
   expect(tiers.height).toBeGreaterThanOrEqual(120);
 });
+
+/* ---------------- 5.8: segmentar como en Praat, con raton o con teclado ---------------- */
+
+const LABEL = "[data-audio-label]";
+const EDITOR = "[data-audio-canvas]";
+
+/** Un punto de un lienzo, en fraccion de su ancho y de su alto. */
+const pointOn = async (page: Page, selector: string, xRatio: number, yRatio = 0.5) => {
+  // La cabecera de la pagina deja el editor debajo del primer pliegue: se lleva
+  // a la vista, como haria quien lo usa, antes de medir donde hacer clic.
+  await page.locator(EDITOR).scrollIntoViewIfNeeded();
+  const box = await page.locator(selector).boundingBox();
+  if (!box) throw new Error(`sin caja: ${selector}`);
+  return { x: box.x + box.width * xRatio, y: box.y + box.height * yRatio };
+};
+
+/** Fila de la primera capa en la franja: la regla ocupa los primeros 20 px. */
+const firstTierY = async (page: Page): Promise<number> => {
+  const box = await page.locator("[data-audio-tiers]").boundingBox();
+  if (!box) throw new Error("sin franja de capas");
+  return (20 + 20 + 64) / 2 / box.height;
+};
+
+const exportTextGrid = async (page: Page): Promise<string> => {
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    page.locator(EXPORT_TEXTGRID).click(),
+  ]);
+  return readFileSync((await download.path()) as string, "utf8");
+};
+
+const intervalTexts = (textGrid: string): string[] =>
+  [...textGrid.matchAll(/text = "([^"]*)"/g)].map((match) => match[1] ?? "");
+
+test("segmenta solo con el raton: clic e Intro ponen limites, se escribe arriba, se arrastra y se quita", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1360, height: 900 });
+  await loadAudio(page);
+
+  // Tres limites con clic en la onda e Intro: cuatro intervalos.
+  for (const ratio of [0.2, 0.4, 0.6]) {
+    const at = await pointOn(page, "[data-audio-wave]", ratio);
+    await page.mouse.click(at.x, at.y);
+    await page.keyboard.press("Enter");
+  }
+  await expect(page.locator(ROWS)).toHaveCount(4);
+
+  // Clic dentro de cada intervalo de la capa y escribir su etiqueta arriba.
+  const tierY = await firstTierY(page);
+  for (const [ratio, text] of [
+    [0.1, "p"],
+    [0.3, "a"],
+    [0.5, "t"],
+  ] as const) {
+    const at = await pointOn(page, "[data-audio-tiers]", ratio, tierY);
+    await page.mouse.click(at.x, at.y);
+    await page.locator(LABEL).fill(text);
+  }
+  await expect(page.locator(ROWS).nth(1).locator("input[type=text]")).toHaveValue("a");
+
+  // Arrastrar el ultimo limite de 0,6 s a 0,7 s, y despues quitarlo con Supr.
+  const from = await pointOn(page, "[data-audio-tiers]", 0.6, tierY);
+  const to = await pointOn(page, "[data-audio-tiers]", 0.7, tierY);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(to.x, to.y, { steps: 5 });
+  await page.mouse.up();
+  await expect(page.locator(ROWS).nth(2).locator("input[type=number]")).toHaveValue(/^0\.7/);
+
+  await page.mouse.click(to.x, to.y);
+  await page.keyboard.press("Delete");
+  await expect(page.locator(ROWS)).toHaveCount(3);
+
+  // Tab reproduce el intervalo y no saca el foco del editor.
+  await page.keyboard.press("Tab");
+  await expect(page.locator(EDITOR)).toBeFocused();
+
+  const textGrid = await exportTextGrid(page);
+  expect(intervalTexts(textGrid)).toEqual(["p", "a", "t"]);
+});
+
+test("segmenta solo con el teclado: cursor, Intro, etiqueta arriba, coma y Supr", async ({
+  page,
+}) => {
+  await loadAudio(page);
+
+  for (const seconds of [0.25, 0.5, 0.75]) {
+    await moveCursor(page, seconds);
+    await page.locator(EDITOR).focus();
+    await page.keyboard.press("Enter");
+  }
+  await expect(page.locator(ROWS)).toHaveCount(4);
+
+  // El limite recien puesto queda seleccionado: Supr lo quita.
+  await page.keyboard.press("Delete");
+  await expect(page.locator(ROWS)).toHaveCount(3);
+
+  // El cursor sigue en el ultimo intervalo; con coma se va al anterior. Cada
+  // etiqueta se escribe arriba, en la ventana de texto.
+  for (const [index, text] of ["t", "a", "p"].entries()) {
+    if (index > 0) {
+      await page.locator(EDITOR).focus();
+      await page.keyboard.press(",");
+    }
+    await page.locator(LABEL).focus();
+    await page.keyboard.press("ControlOrMeta+a");
+    await page.keyboard.type(text);
+  }
+
+  // Mayus+Tab sale del editor como en cualquier pagina.
+  await page.locator(EDITOR).focus();
+  await page.keyboard.press("Shift+Tab");
+  await expect(page.locator(EDITOR)).not.toBeFocused();
+
+  const textGrid = await exportTextGrid(page);
+  expect(intervalTexts(textGrid)).toEqual(["p", "a", "t"]);
+});

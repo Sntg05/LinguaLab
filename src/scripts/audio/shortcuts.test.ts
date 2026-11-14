@@ -50,3 +50,41 @@ describe("resolveShortcut", () => {
     expect(resolveShortcut(press("toString"))).toBeNull();
   });
 });
+
+describe("resolveShortcut con el foco en el editor (atajos de Praat)", () => {
+  const editor = { inEditor: true } as const;
+
+  it("Intro pone un limite en la capa seleccionada, como en el TextGridEditor", () => {
+    expect(resolveShortcut(press("Enter"), editor)).toEqual({
+      command: "add-boundary",
+      preventDefault: true,
+    });
+  });
+
+  it("Supr y Retroceso quitan el limite seleccionado", () => {
+    expect(resolveShortcut(press("Delete"), editor)?.command).toBe("remove-boundary");
+    expect(resolveShortcut(press("Backspace"), editor)?.command).toBe("remove-boundary");
+  });
+
+  it("Tab reproduce el intervalo seleccionado y no mueve el foco", () => {
+    expect(resolveShortcut(press("Tab"), editor)).toEqual({
+      command: "play-interval",
+      preventDefault: true,
+    });
+  });
+
+  it("Mayus+Tab no se intercepta: es la salida del editor con el teclado", () => {
+    expect(resolveShortcut(press("Tab", { shiftKey: true }), editor)).toBeNull();
+  });
+
+  it("fuera del editor, Intro, Supr y Tab siguen siendo del navegador", () => {
+    expect(resolveShortcut(press("Enter"))).toBeNull();
+    expect(resolveShortcut(press("Delete"))).toBeNull();
+    expect(resolveShortcut(press("Tab"))).toBeNull();
+  });
+
+  it("los atajos de siempre siguen valiendo dentro del editor", () => {
+    expect(resolveShortcut(press(" "), editor)?.command).toBe("toggle-play");
+    expect(resolveShortcut(press("z", { ctrlKey: true }), editor)?.command).toBe("undo");
+  });
+});

@@ -11,11 +11,13 @@
 import {
   type AnnotationDocument,
   addTier,
+  mergeIntervalWithNext,
   moveTier,
   recordAnnotation,
   redoAnnotation,
   removeTier,
   renameTier,
+  setIntervalText,
   splitIntervalAt,
   undoAnnotation,
 } from "@lingualab/core";
@@ -32,6 +34,10 @@ export interface AnnotationCommands {
   applyDocument(next: AnnotationDocument, rebuild?: boolean): void;
   /** Divide el intervalo activo en el cursor. */
   splitAtCursor(): void;
+  /** Quita la frontera seleccionada y une sus dos intervalos. */
+  removeSelectedBoundary(): void;
+  /** Pone el texto del intervalo bajo el cursor en la capa activa. */
+  setActiveText(text: string): void;
   /** Lleva el cursor al inicio del intervalo anterior o siguiente. */
   moveCursorToInterval(direction: -1 | 1): void;
   undo(): void;
@@ -69,9 +75,43 @@ export const createAnnotationCommands = (
     deps.scheduleAutosave();
   };
 
+  /**
+   * La frontera que empieza en el cursor queda seleccionada, si la hay: asi Supr
+   * funciona tambien sin raton, despues de Intro o de ir con coma y punto.
+   */
+  const selectBoundaryAtCursor = (): void => {
+    const index = activeIntervalIndexOf(state);
+    const interval = activeSheetOf(state)?.tier.items[index];
+    state.selectedBoundary =
+      interval !== undefined && index > 0 && Math.abs(interval.start - state.cursor) < 1e-6
+        ? index - 1
+        : null;
+  };
+
   const splitAtCursor = (): void => {
     applyDocument(splitIntervalAt(current(), state.activeTier, state.cursor));
+    selectBoundaryAtCursor();
     deps.renderCanvas();
+  };
+
+  const removeSelectedBoundary = (): void => {
+    if (state.selectedBoundary === null) {
+      return;
+    }
+    const next = mergeIntervalWithNext(current(), state.activeTier, state.selectedBoundary);
+    state.selectedBoundary = null;
+    applyDocument(next);
+    deps.renderCanvas();
+  };
+
+  const setActiveText = (text: string): void => {
+    const index = activeIntervalIndexOf(state);
+    if (index < 0) {
+      return;
+    }
+    // Se rehace la tabla: es la vista accesible del mismo texto y tiene que
+    // decir lo mismo que la capa. El foco esta en la ventana de texto, no en ella.
+    applyDocument(setIntervalText(current(), state.activeTier, index, text));
   };
 
   const moveCursorToInterval = (direction: -1 | 1): void => {
@@ -84,18 +124,21 @@ export const createAnnotationCommands = (
       return;
     }
     state.cursor = next.start;
+    selectBoundaryAtCursor();
     deps.updateCursor();
     deps.renderCanvas();
     deps.renderIntervals();
   };
 
   const undo = (): void => {
+    state.selectedBoundary = null;
     state.history = undoAnnotation(state.history);
     deps.renderAll();
     deps.scheduleAutosave();
   };
 
   const redo = (): void => {
+    state.selectedBoundary = null;
     state.history = redoAnnotation(state.history);
     deps.renderAll();
     deps.scheduleAutosave();
@@ -183,5 +226,13 @@ export const createAnnotationCommands = (
     redo();
   });
 
-  return { applyDocument, splitAtCursor, moveCursorToInterval, undo, redo };
+  return {
+    applyDocument,
+    splitAtCursor,
+    removeSelectedBoundary,
+    setActiveText,
+    moveCursorToInterval,
+    undo,
+    redo,
+  };
 };

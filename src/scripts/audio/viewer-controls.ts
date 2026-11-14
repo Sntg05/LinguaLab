@@ -69,10 +69,31 @@ export const listenToViewerControls = (ctx: ViewerContext, deps: ViewerControlsD
     if (state.audio === null) {
       return;
     }
-    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    // La posicion se mide sobre el lienzo que recibio el clic, no sobre el marco:
+    // el marco tiene relleno, y medir sobre el daba un cursor corrido unos pixeles.
+    const target = event.target instanceof HTMLCanvasElement ? event.target : null;
+    if (target === null) {
+      // La ventana de texto y la nota tambien estan en el marco: no mueven el cursor.
+      return;
+    }
+    if (target !== el.tiersCanvas) {
+      // Un clic en la onda o el espectrograma suelta la frontera seleccionada.
+      state.selectedBoundary = null;
+    }
+    const rect = target.getBoundingClientRect();
     const ratio = clamp((event.clientX - rect.left) / Math.max(rect.width, 1), 0, 1);
     state.cursor = timeAtRatio(state.view, ratio);
     cursorMoved();
+  });
+
+  // Un lienzo no recibe el foco con un clic, y sin foco en el editor Intro, Supr
+  // y Tab no llegan a los atajos de Praat: se le da al marco a mano. Va en
+  // `click`, que llega despues de que el navegador resuelva el foco del
+  // `mousedown`; en `pointerdown` el navegador lo volvia a quitar.
+  el.canvasFrame?.addEventListener("click", (event) => {
+    if (event.target instanceof HTMLCanvasElement) {
+      el.canvasFrame?.focus({ preventScroll: true });
+    }
   });
 
   el.playButton?.addEventListener("click", () => {

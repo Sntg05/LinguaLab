@@ -21,6 +21,8 @@ export interface Transport {
   play(from: number): void;
   /** Pausa si suena (dejando el cursor donde iba); si no, suena desde el cursor. */
   togglePlay(): void;
+  /** Como Tab en Praat: si suena, para; si no, suena solo el tramo dado. */
+  toggleRegion(region: { readonly start: number; readonly end: number } | null): void;
   /** Detiene la reproduccion y el cursor en marcha. */
   stop(): void;
 }
@@ -93,6 +95,28 @@ export const createTransport = (ctx: ViewerContext, deps: TransportDeps): Transp
     animation = requestAnimationFrame(tick);
   };
 
+  const toggleRegion = (region: { readonly start: number; readonly end: number } | null): void => {
+    if (playback === null || state.audio === null) {
+      return;
+    }
+    if (playback.isPlaying()) {
+      togglePlay();
+      return;
+    }
+    if (region === null) {
+      return;
+    }
+    playback.setBuffer(state.audio.buffer);
+    playback.play(region.start, {
+      rate: Number(el.rateInput?.value ?? "1"),
+      loop: null,
+      until: region.end,
+    });
+    deps.updateTransport();
+    stopAnimation();
+    animation = requestAnimationFrame(tick);
+  };
+
   const togglePlay = (): void => {
     if (playback === null) {
       return;
@@ -123,6 +147,7 @@ export const createTransport = (ctx: ViewerContext, deps: TransportDeps): Transp
     },
     play,
     togglePlay,
+    toggleRegion,
     stop,
   };
 };
