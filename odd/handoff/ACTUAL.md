@@ -20,7 +20,8 @@ Pega esto como primera instrucción, o síguelo tal cual:
 > fusiones a `main` sin que el dueño lo pida. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
 > Háblale en español. Al terminar, reescribe este archivo.
 
-Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
+Estado al 2026-11-13: en T5 están hechas 5.1, 5.2 y 5.8; la siguiente es **5.3** (curvas sobre el
+espectrograma). Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
 decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
 
 ## 1. Qué se está haciendo y dónde
@@ -122,6 +123,11 @@ fuera de nvm; cumple el `>=22.12` del proyecto, pero `.nvmrc` pide 22: si algo d
 | `d7b96c3` | **Corrige los formantes de la página:** se analizaba con 3 formantes en vez de los 5 de Praat |
 | `bd6a08b`, `2d8b93b` | Alertas de CodeQL del PR #20: limpieza de bordes lineal en los transcriptores (`packages/core/src/g2p/trim-edges.ts`), descarga de CMUdict verificada antes de escribir |
 | `7a7ecf9` | Fusión de la primera entrega a `main` (PR #20) |
+| `a5bd0f1` | Traspaso al día y medición del espectrograma frente a Rust (decisión L20: medir y decidir) |
+| `b0bdb2c` | **T5, 5.1:** editor de una pantalla |
+| `d5df5a6` | Terminología: «fonológico» en vez de «fonémico» en la interfaz en español (L22) |
+| `ee27ef5`, `27c120b`, `c6877fa` | **T5, 5.8:** gestos de Praat (Intro, arrastre, Supr, Tab, ventana de texto), panel «Segmentar» con lo demás plegado, barra compacta, ejemplo «pato» con licencia y modo guiado |
+| `4d8d32b` | **T5, 5.2:** FFT rellenada a 1024, eje en Hz, espectrograma nítido en pantallas de doble densidad y guardado entre cuadros |
 
 Puerta completa y e2e en verde en el último commit de código.
 
@@ -170,7 +176,7 @@ desde `public/`, regla 9 de §3. Si se puede escribir en menos de ~200 líneas p
 
 | Tarea | Estado | Bloqueada por | Tamaño |
 |---|---|---|---|
-| T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | validación hecha; falta la interfaz | nada | grande |
+| T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | 5.1, 5.2 y 5.8 hechas (ver §4); faltan 5.3, 5.4, 5.5, y 5.6–5.7 necesitan Praat instalado | nada (5.6–5.7: Praat en la máquina) | grande |
 | T9 Contrato único de herramienta | empezada | nada | mediana |
 | T7 Análisis cualitativo | sin empezar | nada | grande |
 | T4 Árboles | ficha corregida; falta lo demás | D3 | grande |
@@ -220,8 +226,8 @@ manual, ver búsquedas):
 
 | # | Unidad | Archivos principales | Hecho cuando |
 |---|---|---|---|
-| 5.1 | **Editor de una pantalla.** Rehacer el marcado: zona de lienzos alta (onda ~25 %, espectrograma ~45 %, capas el resto de `min(70vh, 640px)`), barra de herramientas arriba, y todo lo demás (proyecto, exportar, tabla de medidas, gráfico vocálico) en pestañas o paneles plegables debajo | `src/components/AudioLab.astro`, `src/scripts/audio/elements.ts`, `canvas-view.ts`, `render.ts` | Con audio cargado, onda + espectrograma + capas + transporte caben en 900 px de alto; e2e nueva que lo mide con `boundingBox()`; reflujo a 320 px sigue en verde |
-| 5.2 | **Espectrograma como el de Praat.** *Hecho en parte:* grises por defecto con selector de paleta, ventana de 5 ms, 0–5000 Hz, 70 dB, lienzos más altos. **Falta:** (a) el dibujo queda en bloques: 5 ms a 22 kHz son 110 muestras y la FFT de 128 da bandas de ~172 Hz; rellenar con ceros hasta 512 o 1024 puntos e interpolar entre bandas al pintar; (b) eje de frecuencia rotulado en Hz; (c) ventana gaussiana como la de Praat, si se quiere el mismo dibujo | `src/scripts/audio/spectrogram.ts` (`spectrogramColumns`: `fftSize`), `render.ts` (`drawSpectrogram`) | Prueba: un tono de 1000 Hz cae en la fila correcta con error menor de 50 Hz; captura junto a la de Praat en `docs/validation/acoustic.md` |
+| 5.1 | **Hecha** (`b0bdb2c`, ajustada en `27c120b`): editor `min(68vh, 620px)`, barra compacta; la cabecera fija del sitio reserva 88 px, medido.  **Editor de una pantalla.** Rehacer el marcado: zona de lienzos alta (onda ~25 %, espectrograma ~45 %, capas el resto de `min(70vh, 640px)`), barra de herramientas arriba, y todo lo demás (proyecto, exportar, tabla de medidas, gráfico vocálico) en pestañas o paneles plegables debajo | `src/components/AudioLab.astro`, `src/scripts/audio/elements.ts`, `canvas-view.ts`, `render.ts` | Con audio cargado, onda + espectrograma + capas + transporte caben en 900 px de alto; e2e nueva que lo mide con `boundingBox()`; reflujo a 320 px sigue en verde |
+| 5.2 | **Hecha** (`4d8d32b`) salvo la ventana gaussiana opcional y la captura junto a Praat.  **Espectrograma como el de Praat.** *Hecho en parte:* grises por defecto con selector de paleta, ventana de 5 ms, 0–5000 Hz, 70 dB, lienzos más altos. **Falta:** (a) el dibujo queda en bloques: 5 ms a 22 kHz son 110 muestras y la FFT de 128 da bandas de ~172 Hz; rellenar con ceros hasta 512 o 1024 puntos e interpolar entre bandas al pintar; (b) eje de frecuencia rotulado en Hz; (c) ventana gaussiana como la de Praat, si se quiere el mismo dibujo | `src/scripts/audio/spectrogram.ts` (`spectrogramColumns`: `fftSize`), `render.ts` (`drawSpectrogram`) | Prueba: un tono de 1000 Hz cae en la fila correcta con error menor de 50 Hz; captura junto a la de Praat en `docs/validation/acoustic.md` |
 | 5.3 | **Curvas superpuestas.** Tono, formantes e intensidad sobre el espectrograma, con casillas «mostrar», y análisis automático del tramo visible (con el límite de duración que Praat también aplica: no analizar si se ven más de 10 s) | `acoustic-render.ts`, `acoustic-analysis.ts` (725 líneas: partirlo por magnitud al tocarlo) | e2e: al cargar un audio corto las tres curvas se dibujan sin pulsar nada; se pueden ocultar |
 | 5.4 | **Selección y lecturas.** Arrastre para seleccionar, lectura de inicio/fin/duración, cursor con Hz, barras de reproducción, zoom a la selección | `selection.ts` (existe y tiene pruebas), `transport.ts`, `playback.ts`, `viewer-controls.ts` | Pruebas unitarias de la geometría de la selección; e2e de arrastre con `page.mouse` |
 | 5.5 | **Consultas y atajos.** «Obtener tono / F1 / F2 / intensidad» en el cursor o en la selección; atajos de Praat; ayuda de atajos visible | `acoustic-measure.ts`, `viewer-controls.ts` | Los valores de consulta coinciden con los de `e2e/fixtures/reference/*.json`; e2e de teclado |
@@ -237,6 +243,9 @@ el motor no valida la página. Falta una e2e que lea F1 y F2 de la tabla de medi
 `vocal-a.wav` y los compare con el JSON de referencia (unidad 5.5).
 
 #### 5.8 — Segmentación sencilla, como en Praat y para enseñar
+
+**Estado (2026-11-13): hecha en código** (`ee27ef5`, `27c120b`, `c6877fa`; Log L23–L25). Falta solo la
+evidencia humana anotada en `docs/HUMAN-EVIDENCE.md`. Lo que sigue describe el plan con que se hizo.
 
 **Pedido textual (2026-11-12):** «revisa que también la segmentación sea un poco más sencillan y acorde
 con el programa original, necesitamos que sea sencillo e intuitivo de usar así no tenga todas las
