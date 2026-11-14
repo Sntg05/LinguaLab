@@ -150,11 +150,11 @@
       },
       "area": "documentacion",
       "integration": "embedded",
-      "status": "experimental",
+      "status": "stable",
       "languages": [],
       "notes": {
-        "es": "Experimental: visor de audio con forma de onda, espectrograma (ventana y rango de frecuencia ajustables) y capas de intervalos que importan y exportan TextGrid de Praat, además de exportar CSV. El audio no se sube a ningún servidor. El código de TextGrid está probado con archivos de referencia y de ida y vuelta; que Praat abra el archivo exportado no se puede medir desde una prueba automática, así que ábrelo una vez antes de confiarle una sesión larga. No incluye análisis acústico, ELAN ni alineación automática.",
-        "en": "Experimental: audio viewer with a waveform, a spectrogram (adjustable window and frequency range) and annotation tiers that import and export Praat TextGrid, plus CSV export. The audio is never uploaded to a server. The TextGrid code is tested against reference files and round trips; whether Praat opens the exported file cannot be measured from an automated test, so open it once before trusting it with a long session. No acoustic analysis, ELAN or automatic alignment."
+        "es": "Visor de audio al estilo de Praat: forma de onda, espectrograma, tono, formantes e intensidad sobre el espectrograma, y capas de intervalos para segmentar que importan y exportan TextGrid, además de CSV. El audio no se sube a ningún servidor. El TextGrid exportado se abre en Praat 7.0.03 con las mismas capas, intervalos y etiquetas (prueba automática de ida y vuelta), y F0, formantes e intensidad coinciden con Praat en vocales sostenidas. El espectrograma todavía no se comparó con el de Praat. No incluye ELAN ni alineación automática.",
+        "en": "Praat-style audio viewer: waveform, spectrogram, pitch, formants and intensity drawn on the spectrogram, and interval tiers for segmenting that import and export TextGrid, plus CSV. The audio is never uploaded to a server. The exported TextGrid opens in Praat 7.0.03 with the same tiers, intervals and labels (automated round-trip test), and F0, formants and intensity match Praat on sustained vowels. The spectrogram has not yet been compared with Praat's. No ELAN or automatic alignment."
       },
       "citation": "Boersma, P., & Weenink, D. Praat: doing phonetics by computer [Computer software].",
       "theory": {

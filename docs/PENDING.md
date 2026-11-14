@@ -51,7 +51,7 @@ Lo que solo puede cerrar una persona con un programa, una comunidad o una decisi
 | P14 | eSpeak trae 49 voces que no se ofrecen | resuelta | eSpeak se retiró en el rework v4 |
 | P15 | Aviso de `node:fs/promises` en el build | resuelta | Venía de eSpeak, retirado en el rework v4 |
 | P16 | La puerta e2e y los agentes de IA | cerrada | — |
-| P17 | TextGrid y espectrograma contra Praat | abierta | Praat y una persona |
+| P17 | TextGrid y espectrograma contra Praat | cerrada | — |
 | P18 | Puntos fuera de su capa | cerrada | — |
 | P19 | El tope de audio sin prueba propia | cerrada | — |
 | P20 | Borrar un proyecto y no todo el almacén | abierta | Decisión de producto |
@@ -705,7 +705,15 @@ puerto está ocupado, la corrida es roja.
 
 ## P17 — El visor de audio declara experimental el TextGrid y el espectrograma, y no puede probar Praat
 
-**Estado: abierta.**
+**Estado: cerrada el 2026-11-14 (Praat 7.0.03).** El TextGrid que exporta el visor se abre en Praat con
+las mismas capas, intervalos, puntos y etiquetas, y lo que Praat vuelve a guardar en formato largo y
+corto lo lee el visor igual: `npm run validate:textgrid-praat`, con el resultado por caso en
+[`docs/validation/textgrid-praat.md`](validation/textgrid-praat.md). Lo que decía abajo que «no se puede
+comprobar desde una prueba automática» dejó de ser cierto: la prueba
+`packages/adapters/src/acoustic/validation/textgrid-praat.test.ts` lo comprueba donde hay Praat y se salta,
+diciéndolo, donde no. El espectrograma junto al de Praat no se cierra aquí: es la captura que falta de la
+unidad 5.2 de T5 (`odd/handoff/ACTUAL.md`, §6), con los ajustes que el visor usa hoy (ventana de 5 ms,
+0–5000 Hz, 70 dB), no los de 25 ms y 5500 Hz que proponía esta entrada. Lo que sigue es la historia.
 
 **Severidad:** media, y es una promesa de interoperabilidad, no un fallo visible. La herramienta
 funciona; lo que no está medido es que el archivo exportado abra en el programa de otra persona.

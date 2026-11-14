@@ -13,9 +13,11 @@
  *
  * TOLERANCIAS
  *
- * F0 ±2 %, F1 y F2 ±5 %, relativas al valor de referencia. El borde cuenta como
- * dentro (`<=`): una diferencia exactamente igual a la tolerancia esta dentro de
- * la tolerancia.
+ * F0 ±2 %, F1 y F2 ±5 %, relativas al valor de referencia. La intensidad,
+ * ±0,5 dB absolutos: un porcentaje sobre una escala que ya es logaritmica no
+ * tiene sentido fisico (el 5 % de 75 dB serian casi 4 dB).
+ * El borde cuenta como dentro (`<=`): una diferencia exactamente igual a la
+ * tolerancia esta dentro de la tolerancia.
  *
  * Las tolerancias se aplican a puntos concretos en el tiempo, no a la media del
  * contorno. Comparar medias escondedria un contorno desplazado, que es
@@ -37,6 +39,28 @@ export interface ReferencePoint {
   readonly f2: number;
 }
 
+/** Un marco del analisis de intensidad de Praat y su valor en dB. */
+export interface IntensityPoint {
+  readonly time: number;
+  readonly db: number;
+}
+
+/**
+ * Intensidad medida con Praat, en un bloque aparte y opcional.
+ *
+ * Aparte porque se midio despues y con otra version de Praat que F0 y
+ * formantes (la version va dentro del bloque), y en sus propios marcos: los de
+ * intensidad no coinciden con los de formantes, y medir en un marco evita
+ * comparar dos interpolaciones. Opcional porque una referencia sin intensidad
+ * sigue validando F0, F1 y F2.
+ */
+export interface IntensityReference {
+  readonly praatVersion?: string;
+  readonly minimumPitchHz: number;
+  readonly subtractMean: boolean;
+  readonly points: readonly IntensityPoint[];
+}
+
 /** Forma del JSON de referencia que se documenta en `docs/validation/acoustic.md`. */
 export interface ReferenceFixture {
   readonly praatVersion?: string;
@@ -44,6 +68,7 @@ export interface ReferenceFixture {
   readonly pitch: { readonly floorHz: number; readonly ceilingHz: number };
   readonly formant: { readonly maxFormantHz: number; readonly count: number };
   readonly points: readonly ReferencePoint[];
+  readonly intensity?: IntensityReference;
 }
 
 export interface LoadedFixture {
@@ -60,21 +85,30 @@ export type FixtureError =
 export interface Tolerances {
   readonly f0Percent: number;
   readonly formantPercent: number;
+  readonly intensityDb: number;
 }
 
-export const DEFAULT_TOLERANCES: Tolerances = { f0Percent: 2, formantPercent: 5 };
+export const DEFAULT_TOLERANCES: Tolerances = {
+  f0Percent: 2,
+  formantPercent: 5,
+  intensityDb: 0.5,
+};
 
-export type ComparisonKind = "f0" | "f1" | "f2";
+export type FrequencyKind = "f0" | "f1" | "f2";
+export type ComparisonKind = FrequencyKind | "intensity";
 
-export interface ComparisonRow {
+interface RowBase {
   readonly file: string;
   readonly time: number;
-  readonly kind: ComparisonKind;
   readonly reference: number;
   readonly measured: number;
-  readonly tolerancePercent: number;
   readonly passed: boolean;
 }
+
+/** Las frecuencias se comparan en porcentaje; la intensidad, en dB absolutos. */
+export type ComparisonRow =
+  | (RowBase & { readonly kind: FrequencyKind; readonly tolerancePercent: number })
+  | (RowBase & { readonly kind: "intensity"; readonly toleranceDb: number });
 
 export type ValidationReport =
   | { readonly status: "missing-fixtures"; readonly message: string }
@@ -101,6 +135,28 @@ const isPoint = (value: unknown): value is ReferencePoint => {
   );
 };
 
+const isIntensityPoint = (value: unknown): value is IntensityPoint => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const candidate = value as Record<string, unknown>;
+  return isNumber(candidate.time) && isNumber(candidate.db);
+};
+
+const isIntensityReference = (value: unknown): value is IntensityReference => {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const candidate = value as Record<string, unknown>;
+  return (
+    isNumber(candidate.minimumPitchHz) &&
+    typeof candidate.subtractMean === "boolean" &&
+    Array.isArray(candidate.points) &&
+    candidate.points.length > 0 &&
+    candidate.points.every(isIntensityPoint)
+  );
+};
+
 /** Valida el JSON antes de usarlo: una referencia mal escrita no es una referencia. */
 const isFixture = (value: unknown): value is ReferenceFixture => {
   if (typeof value !== "object" || value === null) {
@@ -120,7 +176,10 @@ const isFixture = (value: unknown): value is ReferenceFixture => {
     isNumber(formant.count) &&
     Array.isArray(candidate.points) &&
     candidate.points.length > 0 &&
-    candidate.points.every(isPoint)
+    candidate.points.every(isPoint) &&
+    // Un bloque de intensidad presente y mal escrito no se ignora: ignorarlo
+    // dejaria la intensidad sin validar en silencio.
+    (!("intensity" in candidate) || isIntensityReference(candidate.intensity))
   );
 };
 
@@ -161,7 +220,7 @@ export const loadReferenceFixtures = async (
     if (!isFixture(parsed)) {
       return err({
         code: "invalid-fixture",
-        detail: `${reference} no tiene la forma documentada (audio, pitch, formant y points)`,
+        detail: `${reference} no tiene la forma documentada (audio, pitch, formant, points y, si esta, intensity)`,
       });
     }
 
@@ -233,7 +292,7 @@ const compare = (
   measured: { f0: number; f1: number; f2: number },
   tolerances: Tolerances,
 ): ComparisonRow[] => {
-  const kinds: readonly { kind: ComparisonKind; reference: number; percent: number }[] = [
+  const kinds: readonly { kind: FrequencyKind; reference: number; percent: number }[] = [
     { kind: "f0", reference: point.f0, percent: tolerances.f0Percent },
     { kind: "f1", reference: point.f1, percent: tolerances.formantPercent },
     { kind: "f2", reference: point.f2, percent: tolerances.formantPercent },
@@ -258,6 +317,10 @@ export interface ValidateOptions {
   readonly engine: PraatfanEngine;
   readonly tolerances?: Tolerances;
 }
+
+/** Diferencia absoluta en dB, con el borde incluido como en `withinTolerance`. */
+const withinDb = (reference: number, measured: number, toleranceDb: number): boolean =>
+  Math.abs(measured - reference) <= toleranceDb + 1e-9;
 
 /** Filas comparadas de un fixture, o el motivo por el que no se pudo comparar. */
 type FixtureComparison =
@@ -296,7 +359,7 @@ const compareFixture = async (
     return { ok: false, message: `${file}: el analisis devolvio menos de dos formantes` };
   }
 
-  const rows = fixture.points.flatMap((point) =>
+  const rows: ComparisonRow[] = fixture.points.flatMap((point) =>
     compare(
       file,
       point,
@@ -308,6 +371,30 @@ const compareFixture = async (
       tolerances,
     ),
   );
+
+  if (fixture.intensity !== undefined) {
+    const intensity = await engine.intensity(samples, sampleRate, {
+      minimumPitchHz: fixture.intensity.minimumPitchHz,
+    });
+    if (!intensity.ok) {
+      return {
+        ok: false,
+        message: `${file}: el analisis de intensidad fallo (${intensity.error.code})`,
+      };
+    }
+    for (const point of fixture.intensity.points) {
+      const measured = valueAtTime(intensity.value, point.time);
+      rows.push({
+        file,
+        time: point.time,
+        kind: "intensity",
+        reference: point.db,
+        measured,
+        toleranceDb: tolerances.intensityDb,
+        passed: withinDb(point.db, measured, tolerances.intensityDb),
+      });
+    }
+  }
 
   return { ok: true, rows };
 };

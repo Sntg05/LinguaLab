@@ -1,6 +1,6 @@
 # Validación del análisis acústico contra Praat
 
-- **Estado:** validado en parte (2026-11-12, Praat 6.4.49). F0, F1 y F2 coinciden con Praat en tres vocales de una voz; lo demás sigue sin contrastar (ver «Resultados»).
+- **Estado:** validado en parte. F0, F1 y F2 coinciden con Praat 6.4.49 (2026-11-12) y la intensidad con Praat 7.0.03 (2026-11-14), en tres vocales de una voz; lo demás sigue sin contrastar (ver «Resultados»).
 - **Código:** `packages/adapters/src/acoustic/validation/`
 - **Adaptador:** `packages/adapters/src/acoustic/praatfan-acoustic-analysis.ts`
 - **Motor:** `public/praatfan/0.1.13/` (praatfan 0.1.13, GPL-3.0, fijado por hash; la versión sale de `src/config/engines.json`)
@@ -12,24 +12,44 @@
 [e] e [i] de las grabaciones del AFI que el sitio ya publica (Wikimedia Commons, CC BY-SA 3.0)— y deja el
 WAV y sus mediciones en `e2e/fixtures/reference/`. El arnés compara esas mediciones con las de praatfan.
 
-| Magnitud | Comparaciones | Diferencia máxima frente a Praat |
-|---|---|---|
-| F0 (`To Pitch: 0, 75, 600`) | 9 | 0,000 % |
-| F1 (`To Formant (burg): 0, 5, 5000, 0.025, 50`) | 9 | 0,000 % |
-| F2 (mismo análisis) | 9 | 0,000 % |
+| Magnitud | Praat | Comparaciones | Diferencia máxima frente a Praat |
+|---|---|---|---|
+| F0 (`To Pitch: 0, 75, 600`) | 6.4.49 | 9 | 0,000 % |
+| F1 (`To Formant (burg): 0, 5, 5000, 0.025, 50`) | 6.4.49 | 9 | 0,000 % |
+| F2 (mismo análisis) | 6.4.49 | 9 | 0,000 % |
+| Intensidad (`To Intensity: 100, 0, "yes"`) | 7.0.03 | 9 | 0,0000 dB |
 
-Las 27 pasan, y con cuatro decimales el valor es el mismo. La prueba
+Las 36 pasan, y con cuatro decimales el valor es el mismo. La prueba
 `acoustic-fixtures.test.ts` ya no acepta que falten las referencias.
+
+**Intensidad, medida el 2026-11-14 con Praat 7.0.03.** Piso de 100 Hz (el del visor,
+`INTENSITY_MIN_PITCH_HZ`), paso automático y resta de la media, como trae Praat por defecto. Se mide
+con `Get value at time` y "nearest" en el marco de intensidad más cercano a cada instante de formantes,
+así que el arnés compara el valor de un marco con el de otro marco. Valores en dB (Praat = praatfan):
+
+| Audio | Marco 1 | Marco 2 | Marco 3 |
+|---|---|---|---|
+| `vocal-a.wav` | 0,154077 s: 76,5418 | 0,218077 s: 77,5618 | 0,274077 s: 75,6760 |
+| `vocal-e.wav` | 0,168676 s: 78,0846 | 0,264676 s: 78,6968 | 0,368676 s: 74,4430 |
+| `vocal-i.wav` | 0,178567 s: 76,2683 | 0,290567 s: 81,1313 | 0,402567 s: 77,1223 |
+
+La resta de la media importa poco aquí, pero se nota: sin ella, Praat da en el tercer marco de [a]
+75,7007 dB, y praatfan coincide con la versión que la resta.
+
+**Dos versiones de Praat, a propósito.** F0, F1 y F2 se quedan con sus valores de 6.4.49: Praat 7.0.03
+mide igual F0 en los nueve instantes y F1 y F2 en ocho de nueve, pero en el primer instante de [e]
+(0,171426 s) da F1 = 358,0499 Hz y F2 = 2520,1660 Hz, donde 6.4.49 daba 357,6936 y 2520,2907
+(diferencias de 0,10 % y 0,005 %, dentro de la tolerancia). praatfan coincide con 6.4.49. Regenerar
+todo con 7.0.03 cambiaría la referencia sin que haya cambiado el motor, así que el script añade la
+intensidad aparte (`--intensity`) y cada bloque del JSON dice con qué versión se midió.
 
 **Lo que esto NO valida**, y la interfaz lo dice:
 
-- la **intensidad** (el arnés solo compara F0, F1 y F2);
 - voces agudas o infantiles, y otros techos de formantes (solo se midió una voz masculina a 5000 Hz);
 - habla continua, consonantes y transiciones: son vocales sostenidas;
 - grabaciones con ruido o comprimidas con pérdida antes de llegar al visor.
 
-Ampliar la validación es añadir audios a `VOWELS` en el script (o un caso nuevo) y, para la intensidad,
-enseñarle esa magnitud al arnés.
+Ampliar la validación es añadir audios a `VOWELS` en el script (o un caso nuevo).
 
 ## Qué se midió y qué no
 
@@ -51,8 +71,7 @@ No medido, y es lo que importa para quitar la etiqueta «Experimental»:
 - **Formantes.** Un tono puro no tiene formantes vocales: solo se comprueba que la
   forma de la salida es la esperada (una pista por formante, tiempos paralelos a
   valores), no sus valores.
-- **Intensidad frente a Praat.** Se comprueba que está en decibelios y en un rango
-  audible; no que coincida con lo que Praat informa para el mismo archivo.
+- **Intensidad frente a Praat.** Resuelto el 2026-11-14: ver «Resultados».
 - **Techo y piso de F0 en voces agudas o infantiles.** Los presets son rangos de
   trabajo, no valores validados.
 - **Comparación con el Praat oficial.** Nadie ha corrido el mismo audio por Praat y
@@ -91,7 +110,13 @@ comunidad sin autorización explícita (ADR 0002).
   "points": [
     { "time": 0.25, "f0": 118.4, "f1": 512.0, "f2": 1487.0 },
     { "time": 0.5, "f0": 121.2, "f1": 498.0, "f2": 1502.0 }
-  ]
+  ],
+  "intensity": {
+    "praatVersion": "7.0.03",
+    "minimumPitchHz": 100,
+    "subtractMean": true,
+    "points": [{ "time": 0.254, "db": 76.5 }]
+  }
 }
 ```
 
@@ -102,6 +127,7 @@ comunidad sin autorización explícita (ADR 0002).
 | `pitch` | sí | Piso y techo usados en Praat para ese audio; el arnés los pasa al adaptador. |
 | `formant` | sí | Frecuencia máxima y número de formantes usados en Praat. |
 | `points` | sí | Al menos un instante con F0, F1 y F2 medidos con Praat en ese instante. |
+| `intensity` | no | Intensidad medida con Praat: su versión, el piso de tono, si se restó la media y al menos un marco con `time` y `db`. Si está y está mal escrito, la referencia entera es inválida. |
 
 ### Cómo obtener los valores con Praat
 
@@ -112,11 +138,17 @@ comunidad sin autorización explícita (ADR 0002).
 3. `To Formant (burg)…` con la frecuencia máxima y el número de formantes anotados.
 4. Para cada instante del JSON: `Get value at time…` en el Pitch y en el Formant 1 y
    2, y anotar los tres números con la misma marca de tiempo.
-5. Escribir el JSON y ejecutar `npx vitest run packages/adapters/src/acoustic/validation/`.
+5. Para la intensidad: `To Intensity…` con el piso anotado (100 Hz) y «Subtract mean» marcado;
+   en el marco más cercano a cada instante, `Get value at time…` con "nearest", y anotar el tiempo
+   del marco y el valor en el bloque `intensity`.
+6. Escribir el JSON y ejecutar `npx vitest run packages/adapters/src/acoustic/validation/`.
 
 ### Tolerancias
 
-F0 ±2 %, F1 y F2 ±5 %, **relativas al valor de referencia**, con el borde incluido
+F0 ±2 %, F1 y F2 ±5 %, **relativas al valor de referencia**; intensidad ±0,5 dB
+**absolutos**, porque un porcentaje sobre una escala que ya es logarítmica no tiene sentido físico (un
+5 % de 75 dB serían casi 4 dB). Se fijó antes de medir; la diferencia observada es 0,0000 dB. El borde
+se incluye
 (`<=`). Las constantes viven en `DEFAULT_TOLERANCES`
 (`packages/adapters/src/acoustic/validation/acoustic-validation.ts`); cambiarlas
 exige cambiar este documento en el mismo commit.

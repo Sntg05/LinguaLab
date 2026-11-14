@@ -24,7 +24,7 @@ export const acousticEs = {
   "acoustic.title": "Análisis acústico",
   "acoustic.lead":
     "Tono, formantes e intensidad de la grabación cargada. Los números salen de praatfan, una reimplementación de los algoritmos de Praat que corre en tu navegador y en un worker aparte: la página sigue respondiendo mientras analiza.",
-  "acoustic.experimental": "Tono y formantes contrastados con Praat; la intensidad todavía no. Mira abajo qué se validó y qué no antes de publicar una medición.",
+  "acoustic.experimental": "Tono, formantes e intensidad contrastados con Praat en vocales sostenidas. Mira abajo qué se validó y qué no antes de publicar una medición.",
 
   "acoustic.preset.label": "Preset de voz",
   "acoustic.preset.custom": "Personalizado",
@@ -100,5 +100,5 @@ export const acousticEs = {
   "acoustic.error.failed": "El análisis falló: {detail}",
 
   "acoustic.limits":
-    "Validado contra Praat 6.4.49: F0, F1 y F2 de tres vocales sostenidas ([a], [e], [i]) de una voz masculina dan el mismo valor que Praat con los mismos ajustes. Todavía sin contrastar: la intensidad, las voces agudas o infantiles, el habla continua y las grabaciones con ruido. En esos casos, comprueba tus resultados con Praat.",
+    "Validado contra Praat: F0, F1 y F2 (Praat 6.4.49) e intensidad (Praat 7.0.03) de tres vocales sostenidas ([a], [e], [i]) de una voz masculina dan el mismo valor que Praat con los mismos ajustes. Todavía sin contrastar: las voces agudas o infantiles, el habla continua y las grabaciones con ruido. En esos casos, comprueba tus resultados con Praat.",
 } as const;

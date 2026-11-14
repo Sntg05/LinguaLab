@@ -32,7 +32,7 @@ const PRAATFAN_VERSION = (
 const VENDOR = new URL(`../../../../../public/praatfan/${PRAATFAN_VERSION}/`, import.meta.url);
 
 describe("las referencias de Praat del repositorio", () => {
-  it("F0, F1 y F2 de las tres vocales coinciden con Praat dentro de la tolerancia", async () => {
+  it("F0, F1, F2 e intensidad de las tres vocales coinciden con Praat dentro de la tolerancia", async () => {
     const engine = createPraatfanEngine({
       moduleUrl: new URL("praatfan_gpl.js", VENDOR).href,
       wasmBytes: new Uint8Array(await readFile(new URL("praatfan_gpl_bg.wasm", VENDOR))),
@@ -52,13 +52,19 @@ describe("las referencias de Praat del repositorio", () => {
       const failed = "rows" in report ? report.rows.filter((row) => !row.passed) : [];
       throw new Error(`${report.message}\n${JSON.stringify(failed, null, 2)}`);
     }
-    // Tres audios, tres instantes y tres magnitudes (F0, F1, F2) cada uno.
-    expect(report.rows).toHaveLength(27);
+    // Tres audios, tres instantes y cuatro magnitudes (F0, F1, F2 e
+    // intensidad) cada uno. La intensidad se midio aparte, en sus propios
+    // marcos (ver `scripts/build-acoustic-reference.mjs`).
+    expect(report.rows).toHaveLength(36);
+    expect(report.rows.filter((row) => row.kind === "intensity")).toHaveLength(9);
     console.info(
       report.rows
         .map((row) => {
-          const diff = ((row.measured - row.reference) / row.reference) * 100;
-          return `${row.file} ${row.time.toFixed(3)} ${row.kind} praat=${row.reference} medido=${row.measured.toFixed(4)} (${diff.toFixed(3)} %)`;
+          const diff =
+            row.kind === "intensity"
+              ? `${(row.measured - row.reference).toFixed(4)} dB`
+              : `${(((row.measured - row.reference) / row.reference) * 100).toFixed(3)} %`;
+          return `${row.file} ${row.time.toFixed(3)} ${row.kind} praat=${row.reference} medido=${row.measured.toFixed(4)} (${diff})`;
         })
         .join("\n"),
     );

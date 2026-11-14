@@ -297,3 +297,21 @@ Se preguntan de a una, al empezar la fase que las necesita.
   cancelan (cuestan, no se traban); una curva que falla marca todo el overlay `failed`; el mensaje
   `audio.status.mismatch` imprime «s s» (defecto previo, no de este cambio). Sobre lo quitado: los botones
   y lienzos aparte de F0 e intensidad no exportaban valores; la tabla de medidas con CSV sigue igual.
+- **L29 (2026-11-14).** El dueño, textual: «desactiva el RDD review de gentle ai». Hecho con
+  `gentle-ai review mode disable`: queda apagado en el ámbito global. Las pruebas, la verificación
+  independiente de lo de alto riesgo y la revisión del diff antes de cada commit siguen igual.
+- **L30 (2026-11-14). T5, unidades 5.6 y 5.7: intensidad y TextGrid contra Praat.** En esta máquina hay
+  Praat **7.0.03**. (a) Intensidad: `To Intensity: 100, 0, "yes"` (el piso del visor) y `Get value at
+  time` con "nearest"; bloque `intensity` aparte en cada JSON de referencia, con su versión
+  (`build-acoustic-reference.mjs --intensity`), sin tocar F0, F1 ni F2. Tolerancia de ±0,5 dB absolutos,
+  fijada antes de medir; las nueve comparaciones dan 0,0000 dB. Praat 7.0.03 no reproduce exactamente
+  6.4.49 (en [e], F1 358,0499 Hz frente a 357,6936: 0,10 %) y praatfan coincide con 6.4.49, así que esas
+  referencias no se regeneraron. Rojo: tres pruebas del arnés y la de fixtures; mutación: +0,6 dB en una
+  referencia la hace fallar. (b) TextGrid: `scripts/textgrid-praat-roundtrip.mts`
+  (`npm run validate:textgrid-praat`) exporta con `serializeTextGrid`, lo abre con `praat --run`, compara
+  capas, intervalos, puntos y etiquetas y relee lo que Praat guarda: 5 de 5 casos iguales (varias capas,
+  etiquetas vacías, AFI, comillas, tiempos sin decimal exacto y `pato.TextGrid`). Mutación: sin doblar
+  comillas Praat rechaza el archivo; un límite movido se marca. La prueba solo corre con `praat` en el
+  PATH. P17 cerrada en lo del TextGrid. La interfaz ya dice que la intensidad está validada y la ficha
+  `textgrid-viewer` pasa a `stable` (su nota decía que no había análisis acústico y que Praat no se podía
+  medir). Queda el aviso `audio.experimental` del visor, que se quita junto con 5.4 (mismo archivo).

@@ -93,7 +93,11 @@ const FIXTURE = {
  * Motor de mentira para probar el arnes: devuelve los valores que la prueba
  * pida, sin wasm. El motor real ya tiene su propia prueba con el artefacto.
  */
-const engineReturning = (values: { f0: number; f1: number; f2: number }): PraatfanEngine => ({
+const engineReturning = (
+  values: { f0: number; f1: number; f2: number },
+  intensityDb = 70,
+  intensityCalls: number[] = [],
+): PraatfanEngine => ({
   isLoaded: () => true,
   pitch: async () => ({
     ok: true,
@@ -106,11 +110,28 @@ const engineReturning = (values: { f0: number; f1: number; f2: number }): Praatf
       { kind: "formant", times: [0.25, 0.35], values: [values.f2, values.f2] },
     ],
   }),
-  intensity: async () => ({
-    ok: true,
-    value: { kind: "intensity", times: [0.25, 0.35], values: [70, 70] },
-  }),
+  intensity: async (_samples, _rate, params) => {
+    intensityCalls.push(params.minimumPitchHz);
+    return {
+      ok: true,
+      value: { kind: "intensity", times: [0.25, 0.35], values: [intensityDb, intensityDb] },
+    };
+  },
 });
+
+/** La misma referencia con el bloque de intensidad que escribe el script de Praat. */
+const WITH_INTENSITY = {
+  ...FIXTURE,
+  intensity: {
+    praatVersion: "7.0.03",
+    minimumPitchHz: 100,
+    subtractMean: true,
+    points: [
+      { time: 0.25, db: 70 },
+      { time: 0.35, db: 70 },
+    ],
+  },
+};
 
 describe("decodeWavPcm16", () => {
   it("lee un wav PCM de 16 bits y devuelve sus muestras", () => {
@@ -223,8 +244,73 @@ describe("validateAgainstReference", () => {
     }
     const failed = report.rows.filter((row) => !row.passed);
     expect(failed.length).toBe(2);
-    expect(failed[0]?.kind).toBe("f0");
+    expect(failed[0]).toMatchObject({
+      kind: "f0",
+      tolerancePercent: DEFAULT_TOLERANCES.f0Percent,
+    });
     expect(failed[0]?.measured).toBeCloseTo(260, 6);
-    expect(failed[0]?.tolerancePercent).toBe(DEFAULT_TOLERANCES.f0Percent);
+  });
+
+  it("la intensidad se compara en decibelios absolutos, con el piso de tono de la referencia", async () => {
+    const directory = await makeScratch();
+    await writeFile(join(directory, "tono.wav"), wav(200));
+    await writeFile(join(directory, "tono.json"), JSON.stringify(WITH_INTENSITY), "utf8");
+    const calls: number[] = [];
+
+    // Exactamente +0,5 dB: el borde cuenta como dentro, igual que en F0.
+    const report = await validateAgainstReference({
+      directory,
+      engine: engineReturning({ f0: 200, f1: 500, f2: 1500 }, 70.5, calls),
+    });
+
+    if (report.status !== "passed") {
+      throw new Error(`se esperaba un informe aprobado: ${report.message}`);
+    }
+    const intensity = report.rows.filter((row) => row.kind === "intensity");
+    expect(report.rows.length).toBe(8);
+    expect(intensity.length).toBe(2);
+    expect(intensity[0]).toMatchObject({
+      reference: 70,
+      measured: 70.5,
+      toleranceDb: DEFAULT_TOLERANCES.intensityDb,
+      passed: true,
+    });
+    expect(calls).toEqual([100]);
+  });
+
+  it("una intensidad fuera de tolerancia falla aunque F0 y formantes pasen", async () => {
+    const directory = await makeScratch();
+    await writeFile(join(directory, "tono.wav"), wav(200));
+    await writeFile(join(directory, "tono.json"), JSON.stringify(WITH_INTENSITY), "utf8");
+
+    const report = await validateAgainstReference({
+      directory,
+      engine: engineReturning({ f0: 200, f1: 500, f2: 1500 }, 70.6),
+    });
+
+    if (report.status !== "failed") {
+      throw new Error(`se esperaba un informe fallido: ${report.message}`);
+    }
+    const failed = report.rows.filter((row) => !row.passed);
+    expect(failed.map((row) => row.kind)).toEqual(["intensity", "intensity"]);
+    expect(failed[0]?.measured).toBeCloseTo(70.6, 6);
+  });
+
+  it("un bloque de intensidad mal escrito invalida la referencia en vez de ignorarse", async () => {
+    const directory = await makeScratch();
+    await writeFile(join(directory, "tono.wav"), wav(200));
+    const broken = {
+      ...WITH_INTENSITY,
+      intensity: { ...WITH_INTENSITY.intensity, points: [{ time: 0.25 }] },
+    };
+    await writeFile(join(directory, "tono.json"), JSON.stringify(broken), "utf8");
+
+    const report = await validateAgainstReference({
+      directory,
+      engine: engineReturning({ f0: 200, f1: 500, f2: 1500 }),
+    });
+
+    expect(report.status).toBe("invalid-fixture");
+    expect(report.message).toContain("intensity");
   });
 });

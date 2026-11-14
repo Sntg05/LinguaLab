@@ -24,7 +24,7 @@ export const acousticEn = {
   "acoustic.title": "Acoustic analysis",
   "acoustic.lead":
     "Pitch, formants and intensity of the loaded recording. The numbers come from praatfan, a reimplementation of Praat's algorithms that runs in your browser and in a separate worker, so the page stays responsive while it measures.",
-  "acoustic.experimental": "Pitch and formants checked against Praat; intensity not yet. See below what was validated and what was not before publishing a measurement.",
+  "acoustic.experimental": "Pitch, formants and intensity checked against Praat on sustained vowels. See below what was validated and what was not before publishing a measurement.",
 
   "acoustic.preset.label": "Voice preset",
   "acoustic.preset.custom": "Custom",
@@ -99,5 +99,5 @@ export const acousticEn = {
   "acoustic.error.failed": "The analysis failed: {detail}",
 
   "acoustic.limits":
-    "Validated against Praat 6.4.49: F0, F1 and F2 of three sustained vowels ([a], [e], [i]) from a male voice give the same value as Praat with the same settings. Not yet checked: intensity, high-pitched or children's voices, running speech and noisy recordings. In those cases, check your results with Praat.",
+    "Validated against Praat: F0, F1 and F2 (Praat 6.4.49) and intensity (Praat 7.0.03) of three sustained vowels ([a], [e], [i]) from a male voice give the same value as Praat with the same settings. Not yet checked: high-pitched or children's voices, running speech and noisy recordings. In those cases, check your results with Praat.",
 } as const;
