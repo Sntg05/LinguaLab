@@ -447,3 +447,31 @@ test("cada boton de reproducir nombra su propio intervalo", async ({ page }) => 
     ).toHaveCount(1);
   }
 });
+
+test("con audio cargado, transporte, onda, espectrograma y capas caben en una pantalla", async ({
+  page,
+}) => {
+  // Unidad 5.1 del rework v4: en Praat todo cabe en una ventana. Antes la pagina
+  // medía unos 8000 px y la onda y el espectrograma eran franjas de 80 px.
+  await page.setViewportSize({ width: 1360, height: 900 });
+  await loadAudio(page);
+
+  const box = async (selector: string) => {
+    const found = await page.locator(selector).boundingBox();
+    if (!found) throw new Error(`sin caja: ${selector}`);
+    return found;
+  };
+  const play = await box("[data-audio-play]");
+  const wave = await box("[data-audio-wave]");
+  const spec = await box("[data-audio-spec]");
+  const tiers = await box("[data-audio-tiers]");
+
+  // El transporte va arriba de los lienzos, y del boton de reproducir al pie de
+  // las capas no hay mas de una pantalla.
+  expect(play.y).toBeLessThan(wave.y);
+  expect(tiers.y + tiers.height - play.y).toBeLessThanOrEqual(900);
+  // El espectrograma es la pieza mas alta, y ninguna es una franja.
+  expect(spec.height).toBeGreaterThan(wave.height);
+  expect(wave.height).toBeGreaterThanOrEqual(120);
+  expect(tiers.height).toBeGreaterThanOrEqual(120);
+});

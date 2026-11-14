@@ -80,6 +80,10 @@ const WINDOWS = [
     </div>
 
     <div class="audiolab">
+      <!-- Barra del editor: cargar y reproducir van juntos encima de los lienzos,
+           como la barra de una ventana de Praat, para que el transporte y la onda
+           quepan en la misma pantalla (unidad 5.1 del rework v4). -->
+      <div class="audiolab__bar">
       <!-- ---------------------------- Carga ---------------------------- -->
       <div class="panel">
         <h2 class="panel__title">{t(locale, "audio.load.title")}</h2>
@@ -136,6 +140,18 @@ const WINDOWS = [
             <input type="checkbox" data-audio-loop />
             <span class="field__label">{t(locale, "audio.loop")}</span>
           </label>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-in>
+            {t(locale, "audio.zoomIn")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-out>
+            {t(locale, "audio.zoomOut")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-pan-left>
+            {t(locale, "audio.panLeft")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-pan-right>
+            {t(locale, "audio.panRight")}
+          </button>
         </div>
 
         <div class="field">
@@ -154,21 +170,7 @@ const WINDOWS = [
             <output class="audiolab__readout" data-audio-cursor-readout>0.000 s</output>
           </div>
         </div>
-
-        <div class="cluster">
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-in>
-            {t(locale, "audio.zoomIn")}
-          </button>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-out>
-            {t(locale, "audio.zoomOut")}
-          </button>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-pan-left>
-            {t(locale, "audio.panLeft")}
-          </button>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-pan-right>
-            {t(locale, "audio.panRight")}
-          </button>
-        </div>
+      </div>
       </div>
 
       <!-- --------------------------- Canvas ---------------------------- -->
@@ -689,7 +691,23 @@ const WINDOWS = [
     min-width: 5.5rem;
   }
 
+  /* Cargar a la izquierda, reproducir a la derecha; en pantallas estrechas se
+     apilan. Va dentro de la misma pantalla que los lienzos. */
+  .audiolab__bar {
+    display: grid;
+    gap: var(--space-s);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  }
+
+  .audiolab__bar .panel {
+    gap: var(--space-xs);
+    padding: var(--space-s);
+  }
+
   .audiolab__canvas {
+    /* Altura del editor completo, repartida como en Praat: la onda arriba, el
+       espectrograma, que es lo que mas se mira, en el centro, y las capas debajo. */
+    --editor-h: min(68vh, 620px);
     display: grid;
     gap: 0.35rem;
     padding: var(--space-s);
@@ -709,16 +727,16 @@ const WINDOWS = [
   /* La onda y el espectrograma son lo que se viene a mirar: ocupan la altura
      que ocupan en Praat frente a los controles, no una franja. */
   .audiolab__wave {
-    height: clamp(120px, 18vh, 180px);
+    height: max(120px, calc(var(--editor-h) * 0.25));
     cursor: crosshair;
   }
 
   .audiolab__spec {
-    height: clamp(180px, 34vh, 340px);
+    height: max(180px, calc(var(--editor-h) * 0.45));
   }
 
   .audiolab__tiers {
-    height: 96px;
+    height: max(120px, calc(var(--editor-h) * 0.3));
   }
 
   .audiolab__table-wrap {

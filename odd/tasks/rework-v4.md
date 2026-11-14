@@ -68,7 +68,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | hecha | `03ec0d8`: motores con rojo y verde. Commit siguiente: CMUdict empaquetado (`scripts/build-cmudict.mts`), adaptador `createNativePhonemizer` (rojo: suite sin módulo; verde: 9 pruebas), página conectada con variedad, nivel, palabras sin transcribir y variantes, y eSpeak retirado. `verify:all` y e2e completa en verde. Español: 96,6 % propio frente a 76,9 % de eSpeak |
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
-| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline, TypeScript; Rust solo si se mide | en curso | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). Falta la interfaz: unidades 5.1 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
+| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline, TypeScript; Rust solo si se mide | en curso | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21). Falta 5.8, 5.2 (resto) y 5.3 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
@@ -210,3 +210,11 @@ Se preguntan de a una, al empezar la fase que las necesita.
   Go se descartó con el servidor. praatfan, el motor acústico, ya es Rust en WebAssembly. Medido el
   espectrograma de TypeScript sobre 60 s a 44,1 kHz: 2,3 ms con 512 columnas, 11,9 ms con 2720, 134 ms
   sin tope; bajo el umbral de ~300 ms. Traspaso actualizado con la fusión del PR #20 y esta medición.
+- **L20 (2026-11-13).** El dueño elige «Medir y decidir»: el espectrograma sigue en TypeScript y se mide
+  otra vez en 5.2 con la FFT rellenada; pasa a Rust solo si supera ~300 ms. La misma regla vale para T6.
+- **L21 (2026-11-13). T5, unidad 5.1.** Cargar y reproducir pasan a una barra encima de los lienzos
+  (el zoom va en la fila de reproducir) y los tres lienzos se reparten la altura del editor,
+  `min(68vh, 620px)`: onda 25 %, espectrograma 45 %, capas 30 %. Rojo: la e2e nueva «caben en una
+  pantalla» falló con las capas en 96 px; con 70vh/640 px medía 907 px y se bajó a 68vh/620 px. Verde:
+  `verify:all` y la e2e completa. Antes, en este equipo, `npm ci`: `node_modules` era de una versión
+  anterior y faltaban las fuentes nuevas (todas las páginas daban 404 en la prueba de consola).
