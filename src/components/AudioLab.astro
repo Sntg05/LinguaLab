@@ -204,7 +204,7 @@ const WINDOWS = [
             <select data-audio-window>
               {
                 WINDOWS.map((option) => (
-                  <option value={option.value} selected={option.value === "0.025"}>
+                  <option value={option.value} selected={option.value === "0.005"}>
                     {option.label}
                   </option>
                 ))
@@ -213,11 +213,18 @@ const WINDOWS = [
           </label>
           <label class="field field--inline">
             <span class="field__label">{t(locale, "audio.fmax")}</span>
-            <input type="number" data-audio-fmax min="500" max="22050" step="100" value="5500" />
+            <input type="number" data-audio-fmax min="500" max="22050" step="100" value="5000" />
           </label>
           <label class="field field--inline">
             <span class="field__label">{t(locale, "audio.fmin")}</span>
             <input type="number" data-audio-fmin min="0" max="21000" step="100" value="0" />
+          </label>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "audio.scale")}</span>
+            <select data-audio-scale>
+              <option value="gray">{t(locale, "audio.scaleGray")}</option>
+              <option value="color">{t(locale, "audio.scaleColor")}</option>
+            </select>
           </label>
           <span class="badge badge--warn">{t(locale, "audio.experimentalBadge")}</span>
         </div>
@@ -699,13 +706,15 @@ const WINDOWS = [
     touch-action: none;
   }
 
+  /* La onda y el espectrograma son lo que se viene a mirar: ocupan la altura
+     que ocupan en Praat frente a los controles, no una franja. */
   .audiolab__wave {
-    height: 120px;
+    height: clamp(120px, 18vh, 180px);
     cursor: crosshair;
   }
 
   .audiolab__spec {
-    height: 160px;
+    height: clamp(180px, 34vh, 340px);
   }
 
   .audiolab__tiers {

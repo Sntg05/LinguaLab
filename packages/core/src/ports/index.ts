@@ -31,7 +31,12 @@ export type {
   OrthographyRepositoryPort,
   OrthographyTableSummary,
 } from "./orthography-repository";
-export type { PhonemizerError, PhonemizerPort } from "./phonemizer";
+export type {
+  PhonemizedText,
+  PhonemizeOptions,
+  PhonemizerError,
+  PhonemizerPort,
+} from "./phonemizer";
 export type {
   PhoneRecognitionError,
   PhoneRecognitionParams,

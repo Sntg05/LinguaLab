@@ -1,15 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 
 /**
- * El fonemizador, en un navegador de verdad.
+ * El transcriptor, en un navegador de verdad.
  *
  * POR QUE ESTA PRUEBA NO PUEDE FALTAR
  *
- * El adaptador tiene su suite de contrato, pero corre en Node, donde no hay
- * `Worker`: lo único que puede probar ahí es el camino de motor no disponible.
- * Que eSpeak NG arranque, compile su WebAssembly, monte los datos y devuelva AFI
- * solo se puede demostrar aquí. Sin esta prueba, «fonemizador estable» sería una
- * afirmación sin medición.
+ * El adaptador tiene su suite de contrato en Node, con un `fetch` de mentira.
+ * Que la pagina lo conecte bien, que el diccionario del ingles se sirva desde
+ * el propio sitio bajo la CSP y que los selectores lleguen hasta el motor solo
+ * se puede demostrar aqui.
  *
  * POR QUE SE ESPERA AL ESTADO Y NO A QUE LA SALIDA NO ESTE VACIA
  *
@@ -17,10 +16,6 @@ import { expect, test, type Page } from "@playwright/test";
  * tipo «no está vacío» se satisface al instante y hace leer el marcador como si
  * fuera la transcripción: una prueba verde que no probó nada. Se espera a que el
  * estado diga «Listo» y a que el marcador haya sido reemplazado.
- *
- * La primera fonemización descarga 5,6 MB desde el propio origen y monta un
- * archivo en el sistema de archivos virtual del wasm, así que las esperas son
- * largas a propósito: un tiempo corto mediría la máquina, no el producto.
  */
 
 const TEXT = "[data-phon-text]";
@@ -49,56 +44,59 @@ async function esperarResultado(page: Page): Promise<string> {
   return (await page.locator(IPA).innerText()).trim();
 }
 
-test("fonemiza una palabra en español y muestra su AFI", async ({ page }) => {
-  await fonemizar(page, "casa", "spa");
+test("transcribe español con sílabas y acento, sin pedir el diccionario", async ({ page }) => {
+  const requests: string[] = [];
+  page.on("request", (request) => requests.push(request.url()));
 
-  const ipa = await esperarResultado(page);
+  await fonemizar(page, "casa pingüino", "spa");
 
-  expect(ipa.length).toBeGreaterThan(0);
-  // "casa" empieza con oclusiva velar sorda en las voces españolas
-  expect(ipa).toContain("k");
-  // y la vocal final sigue ahí: una salida sin vocales no es una transcripción
-  expect(ipa).toContain("a");
+  expect(await esperarResultado(page)).toBe("ˈka.sa pin.ˈɡwi.no");
+  expect(requests.filter((url) => url.includes("/cmudict/"))).toEqual([]);
 });
 
-test("fonemiza en inglés y la salida no es la misma que en español", async ({ page }) => {
-  await fonemizar(page, "casa", "spa");
-  const enEspanol = await esperarResultado(page);
-
-  await page.locator(LANG).selectOption("eng");
+test("la variedad y el nivel del español llegan hasta el motor", async ({ page }) => {
+  await page.goto("/fonemizador");
+  await page.locator(TEXT).fill("zapato lobo");
+  await page.locator("[data-phon-variety]").selectOption("castilian");
+  await page.locator("[data-phon-level]").selectOption("phonetic");
   await page.locator(RUN).click();
-  const enIngles = await esperarResultado(page);
 
-  // Dos voces distintas sobre la misma grafía no tienen por qué coincidir; si
-  // coincidieran, el selector de lengua no estaría haciendo nada.
-  expect(enIngles).not.toBe(enEspanol);
+  expect(await esperarResultado(page)).toBe("θa.ˈpa.to ˈlo.βo");
 });
 
-test("sin Web Workers lo dice, y no inventa un resultado", async ({ page }) => {
-  // El motor vive en un worker. Sin él no hay fonemización posible, y la
-  // herramienta tiene que decirlo en vez de mostrar el texto de entrada como si
-  // fuera una transcripción.
-  //
-  // POR QUE SE SIMULA LA AUSENCIA Y NO SE BLOQUEAN LOS DATOS
-  //
-  // Lo natural sería abortar las descargas con `page.route`, y no funciona:
-  // Chromium no pasa por el enrutador de Playwright las peticiones que hace un
-  // Web Worker, así que los datos llegaban igual y el motor fonemizaba. Se
-  // comprobó con `page.route` y con `context.route`, las dos veces en falso. Un
-  // navegador sin `Worker` —restricciones de contexto, versiones viejas— es un
-  // caso real y este sí se puede reproducir de forma determinista.
-  await page.addInitScript(() => {
-    Object.defineProperty(window, "Worker", { value: undefined, configurable: true });
-  });
+test("transcribe inglés con el diccionario y declara lo que no sabe", async ({ page }) => {
+  await fonemizar(page, "the bird read zzyzxq", "eng");
 
-  await fonemizar(page, "casa", "spa");
+  expect(await esperarResultado(page)).toBe("ðə bɝd ɹɛd ⟨zzyzxq⟩");
+  await expect(page.locator("[data-phon-skipped]")).toHaveText("zzyzxq");
+  await expect(page.locator("[data-phon-variants]")).toContainText("read: ɹɛd ~ ɹid");
+  // La variedad y el nivel son del español: en inglés no se ofrecen.
+  await expect(page.locator("[data-phon-variety]")).toBeHidden();
+});
+
+test("si el diccionario no llega lo dice, y no inventa un resultado", async ({ page }) => {
+  await page.route("**/cmudict/**", (route) => route.abort());
+
+  await fonemizar(page, "bird", "eng");
 
   await expect(page.locator(STATUS)).toContainText("no está disponible", ENGINE_START);
   await expect(page.locator(IPA)).toHaveText(EMPTY);
 });
 
-test("el aviso de que el AFI es aproximado se ve antes de fonemizar", async ({ page }) => {
+test("el aviso de que es una transcripción de referencia se ve antes de transcribir", async ({
+  page,
+}) => {
   await page.goto("/fonemizador");
 
-  await expect(page.locator("[data-phonemizer]")).toContainText(/aproximad/i);
+  await expect(page.locator("[data-phonemizer]")).toContainText(/no sustituye/i);
+});
+
+test("FonoLab transcribe con el mismo motor que esta página", async ({ page }) => {
+  // FonoLab tenía reglas propias con distinción: «zapato» daba /θ/ allá y /s/
+  // aquí. Un solo motor significa una sola respuesta.
+  await page.goto("/fono");
+  await page.locator("[data-tx-input]").fill("zapato");
+  await page.locator("[data-tx-run]").click();
+
+  await expect(page.locator("[data-tx-out]")).toHaveText("sa.ˈpa.to");
 });

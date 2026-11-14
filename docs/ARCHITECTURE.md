@@ -89,7 +89,7 @@ no reintentar.
 | Puerto | Qué abstrae | Adaptador previsto |
 |---|---|---|
 | `OrthographyRepositoryPort` | guardar y recuperar tablas | IndexedDB, con memoria como respaldo |
-| `PhonemizerPort` | texto → AFI con un motor entrenado | eSpeak NG en WebAssembly (segmento 5) |
+| `PhonemizerPort` | texto → AFI | Transcriptor propio: reglas para el español y CMUdict para el inglés (rework v4) |
 | `TextGridCodecPort` | leer y escribir Praat | implementación propia en TypeScript |
 | `ElanCodecPort` | leer y escribir ELAN | Pyodide con `pympi-ling` (segmento 9) |
 | `AudioDecoderPort` | archivo de audio → muestras | Web Audio `decodeAudioData` |

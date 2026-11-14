@@ -24,6 +24,7 @@ export interface AudioLabElements {
   readonly minHzInput: HTMLInputElement | null;
   readonly maxHzInput: HTMLInputElement | null;
   readonly spectrogramToggle: HTMLInputElement | null;
+  readonly scaleSelect: HTMLSelectElement | null;
   readonly waveCanvas: HTMLCanvasElement | null;
   readonly specCanvas: HTMLCanvasElement | null;
   readonly tiersCanvas: HTMLCanvasElement | null;
@@ -90,6 +91,7 @@ export const queryAudioLabElements = (root: HTMLElement): AudioLabElements => {
     minHzInput: $<HTMLInputElement>("[data-audio-fmin]"),
     maxHzInput: $<HTMLInputElement>("[data-audio-fmax]"),
     spectrogramToggle: $<HTMLInputElement>("[data-audio-spectrogram]"),
+    scaleSelect: $<HTMLSelectElement>("[data-audio-scale]"),
     waveCanvas: $<HTMLCanvasElement>("[data-audio-wave]"),
     specCanvas: $<HTMLCanvasElement>("[data-audio-spec]"),
     tiersCanvas: $<HTMLCanvasElement>("[data-audio-tiers]"),

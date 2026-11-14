@@ -1,0 +1,33 @@
+{
+  "praatVersion": "6.4.49",
+  "audio": "vocal-e.wav",
+  "source": "public/audio/ipa/65.ogg",
+  "pitch": {
+    "floorHz": 75,
+    "ceilingHz": 600
+  },
+  "formant": {
+    "maxFormantHz": 5000,
+    "count": 5
+  },
+  "points": [
+    {
+      "time": 0.171426,
+      "f0": 137.297,
+      "f1": 357.6936,
+      "f2": 2520.2907
+    },
+    {
+      "time": 0.265176,
+      "f0": 118.3755,
+      "f1": 305.2586,
+      "f2": 2520.9736
+    },
+    {
+      "time": 0.365176,
+      "f0": 105.0587,
+      "f1": 357.3348,
+      "f2": 2467.9517
+    }
+  ]
+}

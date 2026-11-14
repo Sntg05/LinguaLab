@@ -1,4 +1,5 @@
 ---
+import TheoryNote from "../../components/TheoryNote.astro";
 import LanguageMap from "../../components/LanguageMap.astro";
 import Base from "../../layouts/Base.astro";
 ---
@@ -10,4 +11,5 @@ import Base from "../../layouts/Base.astro";
   description="A browsable map of the languages Glottolog records in Colombia: family, Glottocode, ISO 639-3 code and source record, with an accessible table, filters and a map that requests nothing from another server."
 >
   <LanguageMap locale="en" />
+  <TheoryNote locale="en" tools={["mapa-lenguas-colombia"]} />
 </Base>

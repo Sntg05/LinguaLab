@@ -1,10 +1,35 @@
 # Validación del análisis acústico contra Praat
 
-- **Estado:** pendiente. El arnés está escrito y se ejecuta; las referencias no existen.
+- **Estado:** validado en parte (2026-11-12, Praat 6.4.49). F0, F1 y F2 coinciden con Praat en tres vocales de una voz; lo demás sigue sin contrastar (ver «Resultados»).
 - **Código:** `packages/adapters/src/acoustic/validation/`
 - **Adaptador:** `packages/adapters/src/acoustic/praatfan-acoustic-analysis.ts`
 - **Motor:** `public/praatfan/0.1.13/` (praatfan 0.1.13, GPL-3.0, fijado por hash; la versión sale de `src/config/engines.json`)
 - **Decisión de arquitectura:** [`docs/adr/0006-analisis-acustico-praatfan.md`](../adr/0006-analisis-acustico-praatfan.md)
+
+## Resultados
+
+`node scripts/build-acoustic-reference.mjs` corre el Praat oficial sobre tres vocales sostenidas —[a],
+[e] e [i] de las grabaciones del AFI que el sitio ya publica (Wikimedia Commons, CC BY-SA 3.0)— y deja el
+WAV y sus mediciones en `e2e/fixtures/reference/`. El arnés compara esas mediciones con las de praatfan.
+
+| Magnitud | Comparaciones | Diferencia máxima frente a Praat |
+|---|---|---|
+| F0 (`To Pitch: 0, 75, 600`) | 9 | 0,000 % |
+| F1 (`To Formant (burg): 0, 5, 5000, 0.025, 50`) | 9 | 0,000 % |
+| F2 (mismo análisis) | 9 | 0,000 % |
+
+Las 27 pasan, y con cuatro decimales el valor es el mismo. La prueba
+`acoustic-fixtures.test.ts` ya no acepta que falten las referencias.
+
+**Lo que esto NO valida**, y la interfaz lo dice:
+
+- la **intensidad** (el arnés solo compara F0, F1 y F2);
+- voces agudas o infantiles, y otros techos de formantes (solo se midió una voz masculina a 5000 Hz);
+- habla continua, consonantes y transiciones: son vocales sostenidas;
+- grabaciones con ruido o comprimidas con pérdida antes de llegar al visor.
+
+Ampliar la validación es añadir audios a `VOWELS` en el script (o un caso nuevo) y, para la intensidad,
+enseñarle esa magnitud al arnés.
 
 ## Qué se midió y qué no
 

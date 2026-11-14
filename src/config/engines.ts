@@ -3,7 +3,8 @@
  *
  * POR QUE LA VERSION VA EN LA RUTA
  *
- * Pyodide (13,7 MB), eSpeak NG (5,9 MB) y praatfan (0,7 MB) se servian desde
+ * Pyodide (13,7 MB), eSpeak NG (5,9 MB, retirado en el rework v4: hoy ese lugar
+ * lo ocupa el diccionario CMUdict) y praatfan (0,7 MB) se servian desde
  * `/pyodide/`, `/espeak-phonemizer/` y `/praatfan/` con `max-age=0`: cada visita
  * volvia a preguntar por cada archivo. Marcarlos como inmutables en esa ruta
  * habria sido peor, porque al actualizar un motor el navegador seguiria usando
@@ -24,7 +25,7 @@ export type EngineName = keyof typeof ENGINES;
 /** La carpeta publica de cada motor, sin la version. */
 export const ENGINE_DIRS: Readonly<Record<EngineName, string>> = {
   pyodide: "pyodide",
-  espeakPhonemizer: "espeak-phonemizer",
+  cmudict: "cmudict",
   praatfan: "praatfan",
 };
 

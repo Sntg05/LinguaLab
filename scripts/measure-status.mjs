@@ -105,7 +105,7 @@ const metrics = {
     worstPage: build.match(/KB gz — (\S+)/)?.[1] ?? null,
     enginesMb: {
       pyodide: engineMb("pyodide"),
-      espeakPhonemizer: engineMb("espeak-phonemizer"),
+      cmudict: engineMb("cmudict"),
       praatfan: engineMb("praatfan"),
     },
   },

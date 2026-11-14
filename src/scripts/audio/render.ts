@@ -142,8 +142,29 @@ export const drawWaveform = (canvas: HTMLCanvasElement, options: WaveformOptions
   ctx.stroke();
 };
 
+/** Como se pinta la energia: en grises, como Praat, o con la rampa de color. */
+export type SpectrogramScale = "gray" | "color";
+
 /**
- * Rampa de color del espectrograma: azul oscuro (silencio) a ambar (energia).
+ * El color de un punto del espectrograma, con `value` entre 0 (silencio) y 1.
+ *
+ * Por defecto se usa la escala de grises de Praat —blanco el silencio, negro la
+ * energia—, porque es la que traen los manuales de fonetica y la que un
+ * estudiante va a comparar con su propio Praat. Ninguna de las dos escalas
+ * depende del tema: un espectrograma pintado con los colores del tema se
+ * vuelve ilegible en uno de los dos.
+ */
+export const spectrogramColor = (
+  value: number,
+  scale: SpectrogramScale,
+): readonly [number, number, number] => {
+  if (scale === "color") return heatColor(value);
+  const level = Math.round(255 * (1 - Math.min(Math.max(value, 0), 1)));
+  return [level, level, level];
+};
+
+/**
+ * Rampa de color alternativa: azul oscuro (silencio) a ambar (energia).
  *
  * Es fija y no depende del tema a proposito. Un espectrograma pintado con los
  * colores del tema se vuelve ilegible en uno de los dos, y el contraste entre
@@ -171,6 +192,8 @@ const heatColor = (value: number): readonly [number, number, number] => {
 
 export interface SpectrogramOptions {
   readonly spectrogram: Spectrogram;
+  /** Por defecto, grises como Praat. */
+  readonly scale?: SpectrogramScale;
   readonly view: ViewWindow;
   readonly palette: Palette;
 }
@@ -183,6 +206,7 @@ export const drawSpectrogram = (canvas: HTMLCanvasElement, options: SpectrogramO
   }
   const { ctx, width, height } = surface;
   const { spectrogram } = options;
+  const scale = options.scale ?? "gray";
 
   if (spectrogram.columns === 0 || spectrogram.columnLength === 0) {
     ctx.fillStyle = options.palette.surface;
@@ -209,7 +233,7 @@ export const drawSpectrogram = (canvas: HTMLCanvasElement, options: SpectrogramO
         Math.max(0, Math.floor((1 - (y + 0.5) / height) * spectrogram.columnLength)),
       );
       const value = spectrogram.values[column * spectrogram.columnLength + band] ?? 0;
-      const [red, green, blue] = heatColor(value);
+      const [red, green, blue] = spectrogramColor(value, scale);
       const offset = (y * width + x) * 4;
       data[offset] = red;
       data[offset + 1] = green;

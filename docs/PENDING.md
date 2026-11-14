@@ -48,8 +48,8 @@ Lo que solo puede cerrar una persona con un programa, una comunidad o una decisi
 | P11 | Los nodos que axe no mide | abierta | Método de medición por píxeles |
 | P12 | `incomplete` sin motivo textual | cerrada | — |
 | P13 | Cinco inexactitudes documentales | cerrada | — |
-| P14 | eSpeak trae 49 voces que no se ofrecen | abierta | Recompilar el WASM |
-| P15 | Aviso de `node:fs/promises` en el build | abierta | Paquete de terceros |
+| P14 | eSpeak trae 49 voces que no se ofrecen | resuelta | eSpeak se retiró en el rework v4 |
+| P15 | Aviso de `node:fs/promises` en el build | resuelta | Venía de eSpeak, retirado en el rework v4 |
 | P16 | La puerta e2e y los agentes de IA | cerrada | — |
 | P17 | TextGrid y espectrograma contra Praat | abierta | Praat y una persona |
 | P18 | Puntos fuera de su capa | cerrada | — |
@@ -599,7 +599,9 @@ sino verificar la que hay.
 
 ## P14 — El bundle del fonemizador pesa 5,6 MB y trae 49 voces que no se ofrecen
 
-**Estado: abierta.**
+**Estado: resuelta.** El 2026-11-10. eSpeak NG se retiró en el rework v4 y lo reemplaza un transcriptor
+propio: el español no descarga nada y el inglés descarga CMUdict (cerca de 1 MB comprimido). Lo que
+sigue es el registro histórico.
 
 **Severidad:** la primera fonemización tarda lo que tarda una descarga de 5,6 MB, y el 96 % de esos
 bytes son lenguas que la interfaz no muestra.
@@ -631,7 +633,8 @@ baja al menos un 80 %.
 
 ## P15 — El build avisa que `node:fs/promises` se externalizó para el navegador
 
-**Estado: abierta.**
+**Estado: resuelta.** El 2026-11-10. El aviso venía de `espeak-phonemizer`; al retirarlo en el rework v4,
+`npm run build` ya no lo imprime. Lo que sigue es el registro histórico.
 
 **Severidad:** baja. La herramienta funciona —está probada en navegador real— pero el build emite una
 advertencia que alguien va a leer algún día y va a querer entender.

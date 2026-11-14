@@ -169,8 +169,8 @@ const articulatoryRows = (symbol: typeof first) => [
       <p class="muted">
         {
           es
-            ? "Transcripción aproximada, grafema a fonema. No es un transcriptor morfológico: sirve como apoyo didáctico. Usa distinción (/θ/ en «cena» y «zapato»); en Colombia y casi toda América esas letras suenan /s/ (seseo), como en el fonemizador."
-            : "An approximate grapheme-to-phoneme transcription. Not a morphological transcriber: it is a teaching aid. It uses distinción (/θ/ in «cena» and «zapato»); in Colombia and most of the Americas those letters sound /s/ (seseo), as in the phonemizer."
+            ? "El mismo transcriptor de la página Transcriptor AFI: reglas fonológicas para el español latinoamericano, con seseo («zapato» da /s/), sílabas y acento; diccionario CMUdict para el inglés. Es una transcripción de referencia y un apoyo didáctico: no sustituye la de una persona. Allá puedes elegir la variedad peninsular y el nivel fonético."
+            : "The same transcriber as the IPA transcriber page: phonological rules for Latin American Spanish, with seseo («zapato» gives /s/), syllables and stress; the CMUdict dictionary for English. It is a reference transcription and a teaching aid: it does not replace one made by a person. That page lets you choose the Peninsular variety and the phonetic level."
         }
       </p>
     </div>
@@ -204,8 +204,8 @@ const articulatoryRows = (symbol: typeof first) => [
   import type { IpaSymbol } from "../data/ipa-chart";
   import { PLACE_LABELS } from "../data/articulation-labels";
   import { play, sampleCount, stop, warmUpVoices } from "../scripts/fono/audio";
-  import { transcribe, type TranscribeLang } from "../scripts/fono/phonetics";
   import { applyArticulation } from "../scripts/fono/vocal-tract";
+  import { lingualab } from "../composition-root";
   import { safeInitAll } from "../scripts/core/safe";
   import type { Locale } from "../i18n";
 
@@ -455,18 +455,38 @@ const articulatoryRows = (symbol: typeof first) => [
       const langs = [...document.querySelectorAll<HTMLButtonElement>("[data-tx-lang]")];
       if (!input || !output || !run) return;
 
-      let lang: TranscribeLang = locale === "en" ? "en" : "es";
+      let lang: "es" | "en" = locale === "en" ? "en" : "es";
+      // Una respuesta que llega tarde no puede pisar a una más nueva: el inglés
+      // espera la descarga del diccionario la primera vez.
+      let latest = 0;
 
-      const render = (): void => {
-        output.textContent = transcribe(input.value, lang) || "—";
+      const render = async (): Promise<void> => {
+        const text = input.value.trim();
+        if (text === "") {
+          output.textContent = "—";
+          return;
+        }
+        const request = ++latest;
+        output.setAttribute("aria-busy", "true");
+        const result = await lingualab.phonemizeText({
+          text,
+          languageCode: lang === "en" ? "eng" : "spa",
+        });
+        if (request !== latest) return;
+        output.removeAttribute("aria-busy");
+        output.textContent = result.ok
+          ? result.value.ipa || "—"
+          : locale === "en"
+            ? "The English dictionary could not be downloaded. Check the connection and try again."
+            : "No se pudo descargar el diccionario de inglés. Revisa la conexión y vuelve a intentarlo.";
       };
 
-      run.addEventListener("click", render);
+      run.addEventListener("click", () => void render());
 
       input.addEventListener("keydown", (event) => {
         if ((event as KeyboardEvent).key === "Enter" && !(event as KeyboardEvent).shiftKey) {
           event.preventDefault();
-          render();
+          void render();
         }
       });
 
@@ -482,7 +502,7 @@ const articulatoryRows = (symbol: typeof first) => [
           for (const other of langs) {
             other.setAttribute("aria-pressed", other === button ? "true" : "false");
           }
-          render();
+          void render();
         });
       }
 

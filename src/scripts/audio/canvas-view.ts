@@ -52,7 +52,12 @@ export const createCanvasView = (ctx: ViewerContext, deps: CanvasViewDeps): Canv
       const spectrogram = state.spectrogram;
       if (spectrogram !== null && el.spectrogramToggle?.checked !== false) {
         el.specCanvas.hidden = false;
-        drawSpectrogram(el.specCanvas, { spectrogram, view: state.view, palette: state.palette });
+        drawSpectrogram(el.specCanvas, {
+          spectrogram,
+          view: state.view,
+          palette: state.palette,
+          scale: el.scaleSelect?.value === "color" ? "color" : "gray",
+        });
         // Los formantes se dibujan ENCIMA del espectrograma ya pintado: es la
         // unica forma de leer el formante contra su banda oscura.
         deps

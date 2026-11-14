@@ -27,7 +27,6 @@
     "@jspsych/plugin-instructions": "2.1.0",
     "@jspsych/plugin-survey-likert": "2.2.0",
     "@lingualab/core": "0.1.0",
-    "espeak-phonemizer": "0.2.0",
     "jspsych": "8.3.0"
   },
   "devDependencies": {

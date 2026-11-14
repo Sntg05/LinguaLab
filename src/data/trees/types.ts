@@ -58,8 +58,8 @@ export const TREE_TYPES: readonly TreeType[] = [
     "opts": {
       "xbar": true
     },
-    "blurb_es": "Toda proyección tiene núcleo, complemento, adjunto y espéculo; ramificación estrictamente binaria.",
-    "blurb_en": "Every projection has a head, complement, adjunct and specifier; strictly binary branching.",
+    "blurb_es": "Toda proyección tiene un núcleo (X) que proyecta X′ y SX. El complemento es hermano del núcleo, el adjunto se une a X′ y el especificador es hijo de SX; los tres son opcionales. Ramificación binaria.",
+    "blurb_en": "Every projection has a head (X) that projects X′ and XP. The complement is the sister of the head, an adjunct attaches to X′ and the specifier is a daughter of XP; all three are optional. Binary branching.",
     "hint_es": "[NP [Spec [Det the]] [N' [N student] [PP of physics]]]",
     "hint_en": "[NP [Spec [Det the]] [N' [N student] [PP of physics]]]"
   },

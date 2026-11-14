@@ -1,0 +1,194 @@
+{
+  "version": 1,
+  "references": [
+    {
+      "id": "ipa1999",
+      "authors": "International Phonetic Association",
+      "year": 1999,
+      "title": "Handbook of the International Phonetic Association: A guide to the use of the International Phonetic Alphabet",
+      "source": "Cambridge University Press",
+      "doi": "10.1017/9780511807954",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "ipa-chart2020",
+      "authors": "International Phonetic Association",
+      "year": 2020,
+      "title": "Full IPA Chart (revised to 2020)",
+      "source": "International Phonetic Association",
+      "url": "https://www.internationalphoneticassociation.org/content/full-ipa-chart",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "hualde2013",
+      "authors": "Hualde, J. I.",
+      "year": 2013,
+      "title": "Los sonidos del español",
+      "source": "Cambridge University Press",
+      "doi": "10.1017/CBO9780511719943",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "mortensen2018",
+      "authors": "Mortensen, D. R., Dalmia, S., & Littell, P.",
+      "year": 2018,
+      "title": "Epitran: Precision G2P for many languages",
+      "source": "Proceedings of the Eleventh International Conference on Language Resources and Evaluation (LREC 2018)",
+      "url": "https://aclanthology.org/L18-1429/",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "demarneffe2021",
+      "authors": "de Marneffe, M.-C., Manning, C. D., Nivre, J., & Zeman, D.",
+      "year": 2021,
+      "title": "Universal Dependencies",
+      "source": "Computational Linguistics, 47(2), 255–308",
+      "doi": "10.1162/coli_a_00402",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "chomsky1981",
+      "authors": "Chomsky, N.",
+      "year": 1981,
+      "title": "Lectures on Government and Binding: The Pisa lectures",
+      "source": "Foris (reprinted by De Gruyter Mouton, 1993)",
+      "doi": "10.1515/9783110884166",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "chomsky1995",
+      "authors": "Chomsky, N.",
+      "year": 1995,
+      "title": "The Minimalist Program",
+      "source": "The MIT Press (20th anniversary edition, 2014)",
+      "doi": "10.7551/mitpress/9780262527347.001.0001",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "church1990",
+      "authors": "Church, K. W., & Hanks, P.",
+      "year": 1990,
+      "title": "Word association norms, mutual information, and lexicography",
+      "source": "Computational Linguistics, 16(1), 22–29",
+      "url": "https://aclanthology.org/J90-1003/",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "dunning1993",
+      "authors": "Dunning, T.",
+      "year": 1993,
+      "title": "Accurate methods for the statistics of surprise and coincidence",
+      "source": "Computational Linguistics, 19(1), 61–74",
+      "url": "https://aclanthology.org/J93-1003/",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "rychly2008",
+      "authors": "Rychlý, P.",
+      "year": 2008,
+      "title": "A lexicographer-friendly association score",
+      "source": "Proceedings of Recent Advances in Slavonic Natural Language Processing (RASLAN 2008)",
+      "url": "https://nlp.fi.muni.cz/raslan/2008/papers/13.pdf",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "gries2008",
+      "authors": "Gries, S. Th.",
+      "year": 2008,
+      "title": "Dispersions and adjusted frequencies in corpora",
+      "source": "International Journal of Corpus Linguistics, 13(4), 403–437",
+      "doi": "10.1075/ijcl.13.4.02gri",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "flesch1948",
+      "authors": "Flesch, R.",
+      "year": 1948,
+      "title": "A new readability yardstick",
+      "source": "Journal of Applied Psychology, 32(3), 221–233",
+      "doi": "10.1037/h0057532",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "barrio2008",
+      "authors": "Barrio-Cantalejo, I. M., Simón-Lorda, P., Melguizo, M., Escalona, I., Marijuán, M. I., & Hernando, P.",
+      "year": 2008,
+      "title": "Validación de la Escala INFLESZ para evaluar la legibilidad de los textos dirigidos a pacientes",
+      "source": "Anales del Sistema Sanitario de Navarra, 31(2)",
+      "doi": "10.4321/s1137-66272008000300004",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "boersma1993",
+      "authors": "Boersma, P.",
+      "year": 1993,
+      "title": "Accurate short-term analysis of the fundamental frequency and the harmonics-to-noise ratio of a sampled sound",
+      "source": "Proceedings of the Institute of Phonetic Sciences, 17, 97–110",
+      "url": "https://www.fon.hum.uva.nl/paul/papers/Proceedings_1993.pdf",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "praat",
+      "authors": "Boersma, P., & Weenink, D.",
+      "year": 2024,
+      "title": "Praat: doing phonetics by computer (version 6.4) [Computer software]",
+      "source": "University of Amsterdam",
+      "url": "https://www.fon.hum.uva.nl/praat/",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "deleeuw2015",
+      "authors": "de Leeuw, J. R.",
+      "year": 2015,
+      "title": "jsPsych: A JavaScript library for creating behavioral experiments in a Web browser",
+      "source": "Behavior Research Methods, 47(1), 1–12",
+      "doi": "10.3758/s13428-014-0458-y",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "deleeuw2023",
+      "authors": "de Leeuw, J. R., Gilbert, R. A., & Luchterhandt, B.",
+      "year": 2023,
+      "title": "jsPsych: Enabling an open-source collaborative ecosystem of behavioral experiments",
+      "source": "Journal of Open Source Software, 8(85), 5351",
+      "doi": "10.21105/joss.05351",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "bridges2020",
+      "authors": "Bridges, D., Pitiot, A., MacAskill, M. R., & Peirce, J. W.",
+      "year": 2020,
+      "title": "The timing mega-study: Comparing a range of experiment generators, both lab-based and online",
+      "source": "PeerJ, 8, e9414",
+      "doi": "10.7717/peerj.9414",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "wittenburg2006",
+      "authors": "Wittenburg, P., Brugman, H., Russel, A., Klassmann, A., & Sloetjes, H.",
+      "year": 2006,
+      "title": "ELAN: A professional framework for multimodality research",
+      "source": "Proceedings of the Fifth International Conference on Language Resources and Evaluation (LREC 2006)",
+      "url": "https://aclanthology.org/L06-1082/",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "glottolog2025",
+      "authors": "Hammarström, H., Forkel, R., Haspelmath, M., & Bank, S.",
+      "year": 2025,
+      "title": "Glottolog 5.2.1 [Data set]",
+      "source": "Max Planck Institute for Evolutionary Anthropology",
+      "url": "https://glottolog.org/",
+      "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "cmudict2015",
+      "authors": "Carnegie Mellon University",
+      "year": 2015,
+      "title": "The CMU Pronouncing Dictionary [Data set]",
+      "source": "Carnegie Mellon University, Speech Group",
+      "url": "https://github.com/cmusphinx/cmudict",
+      "verifiedOn": "2026-11-10"
+    }
+  ]
+}

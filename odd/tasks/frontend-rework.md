@@ -1,5 +1,5 @@
 ---
-status: active
+status: closed
 updated: 2026-11-03
 ---
 

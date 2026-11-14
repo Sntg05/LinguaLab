@@ -1,0 +1,65 @@
+---
+/**
+ * Una lista de referencias en formato APA, cada una con el enlace que abre la
+ * obra. La usan el bloque «teoría» de cada herramienta y la bibliografía de
+ * Acerca, para que la misma obra se cite igual en los dos lugares.
+ */
+import { referenceLink, type Reference } from "@lingualab/core";
+import type { Locale } from "../i18n";
+
+interface Props {
+  locale: Locale;
+  references: readonly Reference[];
+  /** Da a cada obra un ancla `#ref-<id>`. Solo en la lista completa: en una página con dos herramientas la misma obra aparece dos veces. */
+  anchors?: boolean;
+}
+
+const { locale, references, anchors = false } = Astro.props;
+const es = locale === "es";
+---
+
+<ul class="refs" role="list">
+  {
+    references.map((reference) => {
+      const link = referenceLink(reference);
+      return (
+        <li class="refs__item" id={anchors ? `ref-${reference.id}` : undefined}>
+          <span lang="en">
+            {reference.authors} ({reference.year}). <cite>{reference.title}</cite>. {reference.source}.
+          </span>
+          {link && (
+            <a class="refs__link" href={link} target="_blank" rel="noopener noreferrer">
+              {reference.doi ? `https://doi.org/${reference.doi}` : es ? "Abrir la fuente" : "Open the source"}
+              <span class="u-visually-hidden">
+                {es ? " (se abre en una pestaña nueva)" : " (opens in a new tab)"}
+              </span>
+            </a>
+          )}
+        </li>
+      );
+    })
+  }
+</ul>
+
+<style>
+  .refs {
+    display: grid;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .refs__item {
+    padding-inline-start: var(--space-m);
+    text-indent: calc(-1 * var(--space-m));
+    line-height: var(--leading-normal);
+    overflow-wrap: anywhere;
+  }
+
+  .refs__link {
+    display: block;
+    text-indent: 0;
+    font-size: var(--step--1);
+  }
+</style>

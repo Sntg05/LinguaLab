@@ -1,4 +1,5 @@
 ---
+import TheoryNote from "../components/TheoryNote.astro";
 import TextStation from "../components/TextStation.astro";
 import Base from "../layouts/Base.astro";
 ---
@@ -10,4 +11,5 @@ import Base from "../layouts/Base.astro";
   description="Frecuencia, dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad. Todo local, en tu navegador."
 >
   <TextStation locale="es" />
+  <TheoryNote locale="es" tools={["tools"]} />
 </Base>

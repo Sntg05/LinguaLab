@@ -53,7 +53,7 @@
       ]
     },
     {
-      "source": "/espeak-phonemizer/(.*)",
+      "source": "/cmudict/(.*)",
       "headers": [
         {
           "key": "Cache-Control",

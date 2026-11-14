@@ -1,4 +1,5 @@
 ---
+import TheoryNote from "../components/TheoryNote.astro";
 import ArborLab from "../components/ArborLab.astro";
 import Base from "../layouts/Base.astro";
 ---
@@ -10,4 +11,5 @@ import Base from "../layouts/Base.astro";
   description="23 tipos de árbol: dependencia, constituyentes, X-bar, movimiento y estructuras de datos, con exportación a SVG, PNG, JSON, Newick y CoNLL-U."
 >
   <ArborLab locale="es" />
+  <TheoryNote locale="es" tools={["arboles"]} />
 </Base>

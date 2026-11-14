@@ -1,4 +1,5 @@
 ---
+import TheoryNote from "../../components/TheoryNote.astro";
 import PhonemizerLab from "../../components/PhonemizerLab.astro";
 import Base from "../../layouts/Base.astro";
 ---
@@ -6,8 +7,9 @@ import Base from "../../layouts/Base.astro";
 <Base
   locale="en"
   path="/fonemizador"
-  title="IPA phonemizer — Text to transcription with eSpeak NG"
-  description="Turn a text into its IPA transcription for Spanish and English with eSpeak NG compiled to WebAssembly. It runs in a Web Worker inside your browser, next to the grapheme-to-IPA table for comparison."
+  title="IPA transcriber — Text to transcription for Spanish and English"
+  description="Turn a text into its IPA transcription: Spanish with our own phonological rules, syllables and stress; English with the CMUdict dictionary. It runs in your browser, next to the grapheme-to-IPA table for comparison."
 >
   <PhonemizerLab locale="en" />
+  <TheoryNote locale="en" tools={["phonemizer"]} />
 </Base>

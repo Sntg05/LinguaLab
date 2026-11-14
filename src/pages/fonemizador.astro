@@ -1,4 +1,5 @@
 ---
+import TheoryNote from "../components/TheoryNote.astro";
 import PhonemizerLab from "../components/PhonemizerLab.astro";
 import Base from "../layouts/Base.astro";
 ---
@@ -6,8 +7,9 @@ import Base from "../layouts/Base.astro";
 <Base
   locale="es"
   path="/fonemizador"
-  title="Fonemizador AFI — Texto a transcripción con eSpeak NG"
-  description="Convierte un texto en su transcripción AFI para español e inglés con eSpeak NG compilado a WebAssembly. Corre en un Web Worker dentro de tu navegador, con la comparación de la tabla grafema a AFI al lado."
+  title="Transcriptor AFI — Texto a transcripción en español e inglés"
+  description="Convierte un texto en su transcripción AFI: español con reglas fonológicas propias, sílabas y acento; inglés con el diccionario CMUdict. Corre en tu navegador, con la comparación de la tabla grafema a AFI al lado."
 >
   <PhonemizerLab locale="es" />
+  <TheoryNote locale="es" tools={["phonemizer"]} />
 </Base>

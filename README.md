@@ -17,7 +17,7 @@ Las filas siguen el mismo orden que el catálogo: de la fonética hacia el discu
 |---|---|
 | `/fono` | **FonoLab** — alfabeto AFI, corte sagital del aparato fonador, audio con licencia y transcriptor de grafemas a AFI |
 | `/ortografia` | **Ortografía a AFI** — editor de tablas grafema→AFI con contexto, prioridad, capa alofónica y rastro por carácter; trae demos en español, inglés, portugués brasileño y wayuunaiki, y plantillas indígenas vacías |
-| `/fonemizador` | **Fonemizador** — texto a AFI para español e inglés con eSpeak NG compilado a WebAssembly, dentro de un Web Worker |
+| `/fonemizador` | **Transcriptor AFI** — texto a AFI con un motor propio: reglas fonológicas para el español (sílabas, acento, dos variedades) y el diccionario CMUdict para el inglés |
 | `/arboles` | **ArborLab** — 23 tipos de árbol, 4 formatos de entrada, exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat |
 | `/tools` | **Estación textual** — frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad, más un **constructor de n-gramas** (n de 2 a 5) |
 | `/visualizador` | **Visor de audio** — forma de onda, espectrograma y edición de capas de intervalos, con importación y exportación de TextGrid y exportación CSV (**experimental**) |
@@ -132,8 +132,8 @@ git archive <commit> legacy/ | tar -x -C /tmp
   `vercel.json`: `frame-ancestors 'none'`, `X-Frame-Options`,
   `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` y HSTS.
   **El sitio se publica solo en Vercel**, desde `main`.
-- **Los motores pesados llevan su versión en la ruta.** Pyodide, eSpeak NG y
-  praatfan viven en `public/<motor>/<versión>/` y se sirven como inmutables: una
+- **Los motores pesados llevan su versión en la ruta.** Pyodide, el diccionario
+  CMUdict y praatfan viven en `public/<motor>/<versión>/` y se sirven como inmutables: una
   versión nueva es una URL nueva. La versión sale de `src/config/engines.json`.
 - **Sin service worker.** Todo corre en la pestaña y nada sale de ella, pero
   abrir o recargar una página necesita conexión, y el sitio no promete otra cosa.
@@ -226,9 +226,10 @@ computadora—, el estado, el mapa de archivos y las trampas del entorno están 
 
 ## Licencias
 
-El código es **GPL-3.0-only** — ver [`LICENSE`](LICENSE). No fue una elección estética: desde la
-3.0.0 el sitio incluye eSpeak NG compilado a WebAssembly para fonemizar texto, y como ese binario
-viaja al navegador con el resto del bundle, la distribución completa tiene que ser GPL. Lo que se
+El código es **GPL-3.0-only** — ver [`LICENSE`](LICENSE). No fue una elección estética: la
+3.0.0 incluyó eSpeak NG compilado a WebAssembly, y como ese binario viajaba al navegador, la
+distribución completa pasó a ser GPL. eSpeak se retiró después, pero el sitio sigue integrando
+componentes GPL (praatfan) y la licencia no cambió. Lo que se
 publicó antes bajo MIT sigue bajo MIT: una licencia no es retroactiva.
 
 Los datos conservan la licencia de su fuente, indicada en cada ficha; las grabaciones de audio, en la

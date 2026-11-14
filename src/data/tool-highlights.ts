@@ -46,8 +46,8 @@ export const TOOL_HIGHLIGHTS: Readonly<Record<string, ToolHighlight>> = {
   },
   phonemizer: {
     summary: {
-      es: "Texto a AFI aproximado con eSpeak NG, para español latinoamericano e inglés estadounidense.",
-      en: "Approximate text-to-IPA with eSpeak NG, for Latin American Spanish and American English.",
+      es: "Texto a AFI con reglas propias para el español (sílabas, acento, dos variedades) y el diccionario CMUdict para el inglés.",
+      en: "Text to IPA with our own rules for Spanish (syllables, stress, two varieties) and the CMUdict dictionary for English.",
     },
     sample: "/ˈkasa/",
     sampleKind: "ipa",

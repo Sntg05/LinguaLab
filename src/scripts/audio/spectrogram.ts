@@ -128,8 +128,8 @@ export interface Spectrogram {
   readonly columnSeconds: number;
 }
 
-/** Rango dinamico que se mapea a la escala de grises: 80 dB bajo el maximo. */
-const DYNAMIC_RANGE_DB = 80;
+/** Rango dinamico que se mapea a la escala de grises: 70 dB bajo el maximo, como Praat. */
+const DYNAMIC_RANGE_DB = 70;
 
 const emptySpectrogram = (options: SpectrogramOptions): Spectrogram => ({
   columns: 0,

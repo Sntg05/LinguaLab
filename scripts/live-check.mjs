@@ -109,7 +109,7 @@ try {
   const engines = JSON.parse(readFileSync(`${ROOT}src/config/engines.json`, "utf8"));
   const probes = {
     [`/pyodide/${engines.pyodide}/pyodide-lock.json`]: "pyodide",
-    [`/espeak-phonemizer/${engines.espeakPhonemizer}/data/manifest.json`]: "eSpeak",
+    [`/cmudict/${engines.cmudict}/en-us.tsv`]: "CMUdict",
     [`/praatfan/${engines.praatfan}/PROVENANCE.txt`]: "praatfan",
   };
   for (const [path, name] of Object.entries(probes)) {

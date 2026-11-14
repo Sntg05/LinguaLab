@@ -394,7 +394,7 @@ for (const file of pages) {
 }
 
 // ---- No file ships twice ----
-// espeak-ng.wasm (305 KB) shipped in dist/assets/ as well as in its engine
+// espeak-ng.wasm (305 KB, engine since retired) once shipped in dist/assets/ as well as in its engine
 // folder: the package's own glue names it with `new URL(..., import.meta.url)`,
 // so Vite emitted a copy that nothing requests. Any large file that ships
 // twice is a copy someone pays for in every deploy.
@@ -422,9 +422,9 @@ for (const copies of byDigest.values()) {
 // fetched only when a tool runs, so they never counted anywhere and could grow
 // without anyone seeing it. They get their own ceiling, a little above what
 // ships today: raising it is a decision, not a side effect.
-const ENGINE_BUDGET_BYTES = 21 * 1024 * 1024;
+const ENGINE_BUDGET_BYTES = 19 * 1024 * 1024;
 let engineBytes = 0;
-for (const engine of ["pyodide", "espeak-phonemizer", "praatfan"]) {
+for (const engine of ["pyodide", "cmudict", "praatfan"]) {
   const dir = join(DIST, engine);
   if (!existsSync(dir)) continue;
   const bytes = allFiles(dir).reduce((sum, file) => sum + statSync(file).size, 0);

@@ -1,4 +1,5 @@
 import type { PhonemeSequence } from "../domain/index";
+import type { SpanishVariety, TranscriptionLevel } from "../g2p/spanish";
 import type { Result } from "../result";
 
 /**
@@ -12,15 +13,45 @@ export type PhonemizerError =
   | { readonly code: "engine-failed"; readonly detail: string; readonly languageCode?: string };
 
 /**
- * Puerto de salida hacia un fonemizador (eSpeak NG en WebAssembly, o su fake).
+ * Lo que la persona puede elegir al transcribir. Un motor ignora lo que no le
+ * aplica (el ingles no tiene `variety`), pero nunca lo rechaza: asi la interfaz
+ * no necesita saber que motor hay detras.
+ */
+export interface PhonemizeOptions {
+  /** Variedad del espanol: con seseo (por defecto) o con distincion. */
+  readonly variety?: SpanishVariety;
+  /** Fonemica (por defecto) o fonetica, con alofonos. */
+  readonly level?: TranscriptionLevel;
+}
+
+/**
+ * Una transcripcion junto con lo que el motor NO supo resolver.
+ *
+ * `skipped` y `variants` viajan hasta la interfaz porque esconderlos seria
+ * inventar: una palabra que no esta en el diccionario no tiene transcripcion,
+ * y una con dos pronunciaciones («read») no tiene una sola.
+ */
+export interface PhonemizedText extends PhonemeSequence {
+  /** Palabras que el motor no pudo transcribir, tal como se escribieron. */
+  readonly skipped?: readonly string[];
+  /** Palabras con mas de una pronunciacion registrada. */
+  readonly variants?: readonly { readonly word: string; readonly ipa: readonly string[] }[];
+}
+
+/**
+ * Puerto de salida hacia un fonemizador (el motor propio de reglas y
+ * diccionario, o su fake).
  *
  * `isAvailable` y `listLanguages` son sincronos porque el adaptador ya sabe la
- * respuesta sin esperar al motor: el primero refleja si el modulo se cargo, y
- * el segundo, que lenguas incluye la compilacion. Solo `phonemize` necesita
- * asincronia.
+ * respuesta sin esperar al motor. Solo `phonemize` necesita asincronia: el
+ * diccionario del ingles se descarga la primera vez que se pide.
  */
 export interface PhonemizerPort {
   isAvailable(): boolean;
   listLanguages(): readonly string[];
-  phonemize(text: string, languageCode: string): Promise<Result<PhonemeSequence, PhonemizerError>>;
+  phonemize(
+    text: string,
+    languageCode: string,
+    options?: PhonemizeOptions,
+  ): Promise<Result<PhonemizedText, PhonemizerError>>;
 }

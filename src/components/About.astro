@@ -14,6 +14,8 @@ import { GLOSSARY } from "../data/glossary";
 import { BIBLIOGRAPHY } from "../data/bibliography";
 import { localePath, type Locale } from "../i18n";
 import { withBase } from "../lib/paths";
+import { REFERENCES } from "../scripts/referencias/references";
+import ReferenceList from "./ReferenceList.astro";
 
 interface Props {
   locale: Locale;
@@ -21,6 +23,11 @@ interface Props {
 
 const { locale } = Astro.props;
 const es = locale === "es";
+
+/** Orden alfabético por autor y año, como en una lista de referencias APA. */
+const sortedReferences = [...REFERENCES].sort(
+  (a, b) => a.authors.localeCompare(b.authors, "en") || a.year - b.year,
+);
 
 const ipaCount = IPA_CHART.categories.reduce((n, c) => n + c.symbols.length, 0);
 
@@ -238,6 +245,23 @@ const numbers: [string, string][] = es
         ))
       }
     </div>
+  </div>
+</section>
+
+<section class="section section--sunken" id="referencias">
+  <div class="shell">
+    <div class="u-section-head">
+      <h2>{es ? "Referencias" : "References"}</h2>
+      <p class="muted">
+        {
+          es
+            ? `Las ${sortedReferences.length} obras que respaldan las herramientas del sitio, en formato APA. Cada enlace se abrió y se comprobó a mano; la página de cada herramienta explica cuáles usa y para qué.`
+            : `The ${sortedReferences.length} works that support the tools on this site, in APA format. Every link was opened and checked by hand; each tool page explains which ones it uses and what for.`
+        }
+      </p>
+    </div>
+
+    <ReferenceList locale={locale} references={sortedReferences} anchors />
   </div>
 </section>
 
