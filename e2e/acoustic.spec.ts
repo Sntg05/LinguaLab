@@ -36,8 +36,6 @@ const ACOUSTIC_STATUS = "[data-acoustic-status]";
 const MEASURE = "[data-acoustic-measure-run]";
 const MEASURE_ROWS = "[data-acoustic-measure-body] tr";
 const MEASURE_EXPORT = "[data-acoustic-measure-export]";
-const F0_RUN = "[data-acoustic-pitch-run]";
-const F0_CANVAS = "[data-acoustic-f0-canvas]";
 
 /** Wav PCM mono de 16 bits con una sinusoide de 440 Hz. */
 const wavBuffer = (seconds = 1, sampleRate = 8000): Buffer => {
@@ -90,20 +88,90 @@ test("lo que se validó contra Praat y lo que no se ve antes de analizar nada", 
   await expect(panel).toContainText(/la intensidad todavía no/i);
 });
 
-test("calcula el contorno de F0 de un wav y lo dibuja", async ({ page }) => {
-  await loadAudio(page);
+const SPEC = "[data-audio-spec]";
+const OVERLAY_STATUS = "[data-audio-overlay-status]";
+const SHOW = {
+  pitch: "[data-audio-overlay-pitch]",
+  formants: "[data-audio-overlay-formants]",
+  intensity: "[data-audio-overlay-intensity]",
+} as const;
 
-  await page.locator(F0_RUN).click();
-  await expect(page.locator(ACOUSTIC_STATUS)).toHaveAttribute("data-state", "ok", {
-    timeout: 30_000,
+type Curve = keyof typeof SHOW;
+
+/**
+ * Pixeles de cada color de curva en el espectrograma.
+ *
+ * El espectrograma es gris (rojo, verde y azul iguales): un pixel claramente
+ * azul, rojo o amarillo solo puede venir de una curva dibujada encima. Contar
+ * pixeles prueba que se dibujo algo, no que el valor sea correcto: eso lo
+ * prueban las referencias de Praat.
+ */
+const curvePixels = (page: Page): Promise<Record<Curve, number>> =>
+  page.locator(SPEC).evaluate((canvas: HTMLCanvasElement) => {
+    const ctx = canvas.getContext("2d");
+    const counts = { pitch: 0, formants: 0, intensity: 0 };
+    if (ctx === null) {
+      return counts;
+    }
+    const classify = (red: number, green: number, blue: number): keyof typeof counts | null => {
+      if (blue > 200 && red < 90 && green < 120) {
+        return "pitch";
+      }
+      if (red > 200 && green < 70 && blue < 70) {
+        return "formants";
+      }
+      return red > 200 && green > 170 && blue < 70 ? "intensity" : null;
+    };
+    const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    for (let index = 0; index < data.length; index += 4) {
+      const curve = classify(data[index] ?? 0, data[index + 1] ?? 0, data[index + 2] ?? 0);
+      if (curve !== null) {
+        counts[curve] += 1;
+      }
+    }
+    return counts;
   });
 
-  // El canvas se dimensiona y se pinta al dibujar: si el ancho sigue en cero o
-  // el atributo de vacío sigue puesto, no hubo trazo.
-  const canvas = page.locator(F0_CANVAS);
-  const width = await canvas.evaluate((element: HTMLCanvasElement) => element.width);
-  expect(width).toBeGreaterThan(0);
-  await expect(canvas).not.toHaveAttribute("data-empty", "true");
+test("al cargar un audio corto, tono, formantes e intensidad se dibujan solos sobre el espectrograma", async ({
+  page,
+}) => {
+  await loadAudio(page);
+
+  // Sin pulsar nada: el tramo visible se analiza al cargar.
+  await expect(page.locator(SPEC)).toHaveAttribute("data-overlay", "drawn", { timeout: 30_000 });
+  const drawn = await curvePixels(page);
+  expect(drawn.pitch).toBeGreaterThan(0);
+  expect(drawn.formants).toBeGreaterThan(0);
+  expect(drawn.intensity).toBeGreaterThan(0);
+
+  // Cada casilla «mostrar» oculta su curva y deja las otras.
+  const curves = ["pitch", "formants", "intensity"] as const;
+  for (const curve of curves) {
+    await page.locator(SHOW[curve]).uncheck();
+    await expect.poll(async () => (await curvePixels(page))[curve]).toBe(0);
+    const others = await curvePixels(page);
+    const otherCounts = curves.filter((other) => other !== curve).map((other) => others[other]);
+    expect(Math.min(...otherCounts)).toBeGreaterThan(0);
+    await page.locator(SHOW[curve]).check();
+    await expect.poll(async () => (await curvePixels(page))[curve]).toBeGreaterThan(0);
+  }
+});
+
+test("con más de 10 s a la vista no analiza el tramo y lo dice", async ({ page }) => {
+  await page.goto("/visualizador");
+  await page
+    .locator(AUDIO_INPUT)
+    .setInputFiles({ name: "largo.wav", mimeType: "audio/wav", buffer: wavBuffer(12) });
+  await expect(page.locator(STATUS)).toContainText("listo para anotar", { timeout: 15_000 });
+
+  await expect(page.locator(SPEC)).toHaveAttribute("data-overlay", "skipped");
+  await expect(page.locator(OVERLAY_STATUS)).toContainText("10 s");
+  // Ninguna curva inventada: no hay un solo pixel de color.
+  expect(await curvePixels(page)).toEqual({ pitch: 0, formants: 0, intensity: 0 });
+
+  // Al acercarse a 10 s o menos, las curvas aparecen sin pulsar nada mas.
+  await page.locator("[data-audio-zoom-in]").click();
+  await expect(page.locator(SPEC)).toHaveAttribute("data-overlay", "drawn", { timeout: 30_000 });
 });
 
 test("mide un intervalo seleccionado y exporta el CSV", async ({ page }) => {

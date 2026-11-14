@@ -32,12 +32,17 @@
    - `persistence.ts`: autoguardado, restauracion y proyectos guardados.
    - `audio-loading.ts`: carga del audio y espectrograma.
    - `textgrid-io.ts`: importacion, huecos y exportacion.
+   - `acoustic-tracks.ts`: analisis por magnitud y por tramo, compartidos.
+   - `acoustic-overlay.ts`: tono, formantes e intensidad sobre el espectrograma.
+   - `acoustic-analysis.ts`: parametros del analisis y medicion de la seleccion.
    - `viewer-controls.ts`, `shortcuts.ts`, `ipa-panel.ts`: entradas de la persona.
    ============================================================ */
 
 import { createEmptyDocument, intervalTiers, startAnnotationHistory } from "@lingualab/core";
 import { lingualab } from "../../composition-root";
 import { type AcousticPanels, initAcousticPanels } from "./acoustic-analysis";
+import { type AcousticOverlay, createAcousticOverlay } from "./acoustic-overlay";
+import { type AcousticTracks, createAcousticTracks } from "./acoustic-tracks";
 import { createAcousticStrings, parseAcousticStrings } from "./acoustic-strings";
 import { createAnnotationCommands } from "./annotation-commands";
 import { createAudioLoading } from "./audio-loading";
@@ -74,7 +79,11 @@ export { mountIpaKeyboard } from "./ipa-panel";
  * intervalo activo. Se montan una sola vez y sobreviven a los cambios de
  * archivo: `reset` descarta lo que ya no corresponde al audio nuevo.
  */
-const mountAcoustic = (ctx: ViewerContext, renderCanvas: () => void): AcousticPanels | null => {
+const mountAcoustic = (
+  ctx: ViewerContext,
+  tracks: AcousticTracks,
+  renderCanvas: () => void,
+): AcousticPanels | null => {
   const { el, state } = ctx;
   const acousticRoot = el.acousticRoot;
   if (acousticRoot === null) {
@@ -82,17 +91,10 @@ const mountAcoustic = (ctx: ViewerContext, renderCanvas: () => void): AcousticPa
   }
   return initAcousticPanels({
     root: acousticRoot,
-    port: lingualab.acoustic,
+    tracks,
     strings: createAcousticStrings(parseAcousticStrings(acousticRoot.dataset.acousticStrings)),
     es: ctx.es,
-    getAudio: () =>
-      state.audio === null
-        ? null
-        : {
-            samples: state.audio.samples,
-            sampleRate: state.audio.sampleRate,
-            duration: state.audio.duration,
-          },
+    getAudio: () => acousticAudioOf(ctx),
     // La seleccion es el intervalo donde esta el cursor: es el que el
     // visor ya resalta en la onda y en las capas, asi que medir «la
     // seleccion» no puede significar otra cosa.
@@ -105,7 +107,42 @@ const mountAcoustic = (ctx: ViewerContext, renderCanvas: () => void): AcousticPa
       return { start: interval.start, end: interval.end, label: interval.text };
     },
     palette: () => state.palette,
-    onOverlayChange: () => renderCanvas(),
+    onParamsChange: () => renderCanvas(),
+  });
+};
+
+/** El audio cargado, en la forma que piden los analisis. */
+const acousticAudioOf = (ctx: ViewerContext) => {
+  const audio = ctx.state.audio;
+  return audio === null
+    ? null
+    : { samples: audio.samples, sampleRate: audio.sampleRate, duration: audio.duration };
+};
+
+/**
+ * Curvas sobre el espectrograma (unidad 5.3). Comparten los analisis con el
+ * panel acustico y toman de el los parametros; sin panel, los de Praat.
+ */
+const mountOverlay = (
+  ctx: ViewerContext,
+  tracks: AcousticTracks,
+  panels: AcousticPanels | null,
+  renderCanvas: () => void,
+): AcousticOverlay => {
+  const { el } = ctx;
+  return createAcousticOverlay({
+    tracks,
+    strings: ctx.strings,
+    getAudio: () => acousticAudioOf(ctx),
+    params: () => panels?.params() ?? { floor: 75, ceiling: 600, maxFormantHz: 5500 },
+    palette: () => ctx.state.palette,
+    toggles: {
+      pitch: el.overlayPitchToggle,
+      formants: el.overlayFormantsToggle,
+      intensity: el.overlayIntensityToggle,
+    },
+    status: el.overlayStatus,
+    onChange: renderCanvas,
   });
 };
 
@@ -132,10 +169,12 @@ export const initAudioLab = (): void => {
   /* ------------------------------ modulos ----------------------------- */
 
   const canvas = createCanvasView(ctx, {
-    acoustic: () => acoustic,
+    overlay: () => overlay,
     isPlaying: () => transport.isPlaying(),
   });
-  const acoustic = mountAcoustic(ctx, canvas.renderCanvas);
+  const tracks = createAcousticTracks(lingualab.acoustic);
+  const acoustic = mountAcoustic(ctx, tracks, canvas.renderCanvas);
+  const overlay = mountOverlay(ctx, tracks, acoustic, canvas.renderCanvas);
   const transport = createTransport(ctx, {
     ...canvas,
     updateTransport: () => {
@@ -187,7 +226,13 @@ export const initAudioLab = (): void => {
   const loading = createAudioLoading(ctx, {
     decoder: transport.decoder,
     setBuffer: transport.setBuffer,
-    acoustic,
+    acoustic: {
+      reset: () => {
+        tracks.reset();
+        overlay.reset();
+        acoustic?.reset();
+      },
+    },
     renderCanvas: canvas.renderCanvas,
     renderAll,
     updatePersistence: persistence.updatePersistence,

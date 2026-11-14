@@ -25,6 +25,11 @@ export interface AudioLabElements {
   readonly maxHzInput: HTMLInputElement | null;
   readonly spectrogramToggle: HTMLInputElement | null;
   readonly scaleSelect: HTMLSelectElement | null;
+  /** Casillas «mostrar» de las curvas sobre el espectrograma (unidad 5.3). */
+  readonly overlayPitchToggle: HTMLInputElement | null;
+  readonly overlayFormantsToggle: HTMLInputElement | null;
+  readonly overlayIntensityToggle: HTMLInputElement | null;
+  readonly overlayStatus: HTMLElement | null;
   readonly waveCanvas: HTMLCanvasElement | null;
   readonly specCanvas: HTMLCanvasElement | null;
   readonly tiersCanvas: HTMLCanvasElement | null;
@@ -100,6 +105,10 @@ export const queryAudioLabElements = (root: HTMLElement): AudioLabElements => {
     maxHzInput: $<HTMLInputElement>("[data-audio-fmax]"),
     spectrogramToggle: $<HTMLInputElement>("[data-audio-spectrogram]"),
     scaleSelect: $<HTMLSelectElement>("[data-audio-scale]"),
+    overlayPitchToggle: $<HTMLInputElement>("[data-audio-overlay-pitch]"),
+    overlayFormantsToggle: $<HTMLInputElement>("[data-audio-overlay-formants]"),
+    overlayIntensityToggle: $<HTMLInputElement>("[data-audio-overlay-intensity]"),
+    overlayStatus: $<HTMLElement>("[data-audio-overlay-status]"),
     waveCanvas: $<HTMLCanvasElement>("[data-audio-wave]"),
     specCanvas: $<HTMLCanvasElement>("[data-audio-spec]"),
     tiersCanvas: $<HTMLCanvasElement>("[data-audio-tiers]"),

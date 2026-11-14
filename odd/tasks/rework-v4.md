@@ -68,7 +68,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | hecha | `03ec0d8`: motores con rojo y verde. Commit siguiente: CMUdict empaquetado (`scripts/build-cmudict.mts`), adaptador `createNativePhonemizer` (rojo: suite sin módulo; verde: 9 pruebas), página conectada con variedad, nivel, palabras sin transcribir y variantes, y eSpeak retirado. `verify:all` y e2e completa en verde. Español: 96,6 % propio frente a 76,9 % de eSpeak |
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
-| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline, TypeScript; Rust solo si se mide | en curso | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26). Falta 5.3 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
+| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline, TypeScript; Rust solo si se mide | en curso | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26); 5.3 hecha (curvas sobre el espectrograma, L27). Falta 5.4 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
@@ -270,3 +270,30 @@ Se preguntan de a una, al empezar la fase que las necesita.
   espectrograma guardada por lienzo baja a 0,4 ms. Pendiente: (c) ventana gaussiana como la de Praat,
   opcional, y la captura junto a la de Praat en `docs/validation/acoustic.md` (en este equipo no hay
   Praat).
+- **L27 (2026-11-13). T5, unidad 5.3: curvas sobre el espectrograma.** Tono (azul, con su escala a la
+  derecha, del piso al techo), formantes F1–F3 (puntos rojos, sobre la escala en Hz) e intensidad
+  (amarillo, 50–100 dB, el «view range» de Praat) se dibujan sobre el espectrograma y se calculan solos
+  para el tramo visible, con un margen de un cuarto a cada lado; con más de 10 s a la vista no se
+  analiza y se dice sobre el lienzo y en una línea de estado (`[data-audio-overlay-status]`). Casillas
+  «Mostrar tono / formantes / intensidad» en el panel Espectrograma, marcadas por defecto: el editor no
+  crece. El panel acústico pierde los botones «Calcular» y los dos lienzos aparte (F0 e intensidad); los
+  campos de piso, techo y frecuencia máxima recalculan al cambiar. Partición: `acoustic-tracks.ts` (un
+  análisis por magnitud, por tramo, con caché y de a un pedido al worker; la medición y las curvas lo
+  comparten), `acoustic-overlay.ts` (qué se dibuja y cuándo), `acoustic-measure-table.ts` (filas de la
+  tabla); `acoustic-analysis.ts` baja de 725 a ~460 líneas. Rojo: 13 pruebas de `acoustic-tracks` sin
+  módulo y 2 de `acoustic-render` (`formantDots`, colores de Praat) sin exportar. Las dos e2e nuevas se
+  comprobaron por mutación: sin pedir el análisis falla «se dibujan solos», con las casillas ignoradas
+  falla la misma, y con el límite en 1000 s falla «más de 10 s». La e2e «calcula el contorno de F0» se
+  quitó a propósito: su botón y su lienzo ya no existen y la reemplaza la de las curvas. Las claves
+  `acoustic.pitch.run`, `acoustic.formant.run`, `acoustic.formant.overlay`, `acoustic.intensity.run`,
+  `acoustic.canvas.f0`, `acoustic.canvas.intensity` y `acoustic.status.{f0,formants,intensity}` quedan
+  sin uso en `src/i18n/messages/features/acoustic.*.ts` (fuera de lo autorizado en esta unidad).
+  Verde: `verify:all` y la e2e completa.
+- **L28 (2026-11-13). Verificación independiente de 5.3 (riesgo 4: orden asíncrono):** sin bloqueos.
+  Sondas en navegador: audio B cargado antes de terminar el análisis de A (no se filtran curvas de A),
+  15 desplazamientos rápidos fuera del tramo cubierto (termina en `drawn` en ~1,4 s), casillas cambiadas
+  durante el análisis, 12 s a la vista (`skipped`, sin mensajes al worker; un zoom las trae). Suite
+  completa 192 e2e y `verify:all` en verde. Avisos, no bloqueos: los análisis de tramos abandonados no se
+  cancelan (cuestan, no se traban); una curva que falla marca todo el overlay `failed`; el mensaje
+  `audio.status.mismatch` imprime «s s» (defecto previo, no de este cambio). Sobre lo quitado: los botones
+  y lienzos aparte de F0 e intensidad no exportaban valores; la tabla de medidas con CSV sigue igual.

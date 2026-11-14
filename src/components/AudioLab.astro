@@ -240,6 +240,25 @@ const WINDOWS = [
           <span class="badge badge--warn">{t(locale, "audio.experimentalBadge")}</span>
         </div>
         <p class="faint">{t(locale, "audio.spectrogram.note")}</p>
+        {/* Las casillas «mostrar» de las curvas van aqui, con las del
+            espectrograma y no en el editor: asi el editor no crece y cabe en una
+            pantalla (unidades 5.1 y 5.3). Como los menus de Praat, una por magnitud. */}
+        <div class="cluster">
+          <label class="field field--inline">
+            <input type="checkbox" data-audio-overlay-pitch checked />
+            <span class="field__label">{t(locale, "audio.overlay.pitch")}</span>
+          </label>
+          <label class="field field--inline">
+            <input type="checkbox" data-audio-overlay-formants checked />
+            <span class="field__label">{t(locale, "audio.overlay.formants")}</span>
+          </label>
+          <label class="field field--inline">
+            <input type="checkbox" data-audio-overlay-intensity checked />
+            <span class="field__label">{t(locale, "audio.overlay.intensity")}</span>
+          </label>
+        </div>
+        <p class="faint">{t(locale, "audio.overlay.note")}</p>
+        <p class="audiolab__status" data-audio-overlay-status role="status" aria-live="polite"></p>
       </div>
 
       <!-- ----------------------- Análisis acústico --------------------- -->
@@ -300,16 +319,8 @@ const WINDOWS = [
               value="600"
             />
           </label>
-          <button class="btn btn--primary btn--sm" type="button" data-acoustic-pitch-run>
-            {t(locale, "acoustic.pitch.run")}
-          </button>
         </div>
         <p class="faint">{t(locale, "acoustic.pitch.note")}</p>
-        <canvas
-          class="acoustic__plot"
-          data-acoustic-f0-canvas
-          role="img"
-          aria-label={t(locale, "acoustic.canvas.f0")}></canvas>
 
         <h3 class="acoustic__subtitle">{t(locale, "acoustic.formant.title")}</h3>
         <div class="cluster">
@@ -324,28 +335,11 @@ const WINDOWS = [
               value="5500"
             />
           </label>
-          <button class="btn btn--primary btn--sm" type="button" data-acoustic-formant-run>
-            {t(locale, "acoustic.formant.run")}
-          </button>
-          <label class="field field--inline">
-            <input type="checkbox" data-acoustic-formant-overlay />
-            <span class="field__label">{t(locale, "acoustic.formant.overlay")}</span>
-          </label>
         </div>
         <p class="faint">{t(locale, "acoustic.formant.note")}</p>
 
         <h3 class="acoustic__subtitle">{t(locale, "acoustic.intensity.title")}</h3>
-        <div class="cluster">
-          <button class="btn btn--primary btn--sm" type="button" data-acoustic-intensity-run>
-            {t(locale, "acoustic.intensity.run")}
-          </button>
-        </div>
         <p class="faint">{t(locale, "acoustic.intensity.note")}</p>
-        <canvas
-          class="acoustic__plot"
-          data-acoustic-intensity-canvas
-          role="img"
-          aria-label={t(locale, "acoustic.canvas.intensity")}></canvas>
 
         <h3 class="acoustic__subtitle">{t(locale, "acoustic.measure.title")}</h3>
         <div class="cluster">

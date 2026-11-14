@@ -1,6 +1,6 @@
 /**
- * Dibujo de los paneles acusticos: contorno de F0, intensidad, superposicion de
- * formantes y grafico vocalico F1–F2.
+ * Dibujo acustico: tono, formantes e intensidad sobre el espectrograma
+ * (unidad 5.3) y grafico vocalico F1–F2.
  *
  * LA GEOMETRIA SE SEPARA DEL TRAZO
  *
@@ -182,104 +182,193 @@ const tracePath = (ctx: CanvasRenderingContext2D, points: readonly PlotPoint[]):
   ctx.stroke();
 };
 
-export interface TrackPlotOptions extends ContourOptions {
-  readonly track: AcousticTrack;
-  readonly palette: Palette;
-  /** Titulo del panel, ya traducido. */
-  readonly label: string;
-  /** Unidad de la escala: «Hz» o «dB». */
-  readonly unit: string;
+/**
+ * Colores de las curvas sobre el espectrograma, los de Praat: tono azul,
+ * formantes rojos, intensidad amarilla. Son fijos y no del tema porque el
+ * espectrograma es gris en los dos temas, y un estudiante que compare con su
+ * manual tiene que reconocer cada curva por su color.
+ */
+export const OVERLAY_COLORS = {
+  pitch: "#1a3dff",
+  formants: "#e8191c",
+  intensity: "#f2cc00",
+} as const;
+
+/**
+ * Un punto por marco y por formante, como los dibuja Praat.
+ *
+ * Puntos y no lineas: un formante es una estimacion por marco y entre dos
+ * marcos el analisis puede saltar de F2 a F3; una linea uniria dos formantes
+ * distintos y afirmaria una trayectoria que no se midio.
+ */
+export const formantDots = (
+  tracks: readonly AcousticTrack[],
+  options: ContourOptions,
+): PlotPoint[] => tracks.flatMap((track) => contourPoints(track, options));
+
+export interface OverlayLayers {
+  readonly pitch: AcousticTrack | null;
+  readonly formants: readonly AcousticTrack[];
+  readonly intensity: AcousticTrack | null;
 }
 
-/** Contorno en su propio canvas, con la escala escrita al costado. */
-export const drawTrackPlot = (canvas: HTMLCanvasElement, options: TrackPlotOptions): void => {
-  const surface = surfaceOf(canvas, true, options.palette.surface);
+export interface ScaleRange {
+  readonly min: number;
+  readonly max: number;
+}
+
+export interface OverlayOptions {
+  readonly view: ViewWindow;
+  /** Rango del espectrograma: el de los formantes, que son frecuencias de ese eje. */
+  readonly minHz: number;
+  readonly maxHz: number;
+  /** Rango del tono (piso y techo del analisis): su propia escala, a la derecha. */
+  readonly pitchRange: ScaleRange;
+  /** Rango de la intensidad en dB, como el «view range» de Praat. */
+  readonly intensityRange: ScaleRange;
+  readonly palette: Palette;
+}
+
+/** Cuantos puntos de cada curva quedaron dibujados: lo que la pagina puede afirmar. */
+export interface OverlayCounts {
+  readonly pitch: number;
+  readonly formants: number;
+  readonly intensity: number;
+}
+
+/** Rotulo de una escala sobre un fondo, para que se lea sobre el gris. */
+const scaleLabel = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  right: number,
+  y: number,
+  color: string,
+  palette: Palette,
+): number => {
+  const width = ctx.measureText(text).width + 6;
+  ctx.fillStyle = palette.surface;
+  ctx.globalAlpha = 0.8;
+  ctx.fillRect(right - width, y - 6, width, 12);
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = color;
+  ctx.fillText(text, right - width + 3, y);
+  return width;
+};
+
+/**
+ * Tono, formantes e intensidad sobre el espectrograma ya pintado.
+ *
+ * Se dibujan encima y no en lienzos aparte porque lo que se lee es la relacion
+ * entre la curva y el sonido: el formante contra su banda oscura, el tono
+ * contra los tramos con voz. Separarlos obliga a comparar de memoria. El tono y
+ * la intensidad tienen su propia escala, escrita a la derecha como en Praat; los
+ * formantes usan la del espectrograma, que esta a la izquierda.
+ */
+export const drawAcousticOverlay = (
+  canvas: HTMLCanvasElement,
+  layers: OverlayLayers,
+  options: OverlayOptions,
+): OverlayCounts => {
+  const surface = surfaceOf(canvas, false, options.palette.surface);
+  if (surface === null) {
+    return { pitch: 0, formants: 0, intensity: 0 };
+  }
+  const { ctx, width, height } = surface;
+  const area = { view: options.view, width, height };
+  ctx.save();
+
+  let intensityCount = 0;
+  if (layers.intensity !== null) {
+    const points = contourPoints(layers.intensity, {
+      ...area,
+      minValue: options.intensityRange.min,
+      maxValue: options.intensityRange.max,
+    });
+    intensityCount = points.length;
+    // Un borde oscuro debajo: el amarillo solo no se ve sobre el blanco de los
+    // silencios del espectrograma.
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.45)";
+    ctx.lineWidth = 3.5;
+    tracePath(ctx, points);
+    ctx.strokeStyle = OVERLAY_COLORS.intensity;
+    ctx.lineWidth = 2;
+    tracePath(ctx, points);
+  }
+
+  const dots = formantDots(layers.formants, {
+    ...area,
+    minValue: options.minHz,
+    maxValue: options.maxHz,
+  });
+  ctx.fillStyle = OVERLAY_COLORS.formants;
+  for (const dot of dots) {
+    ctx.beginPath();
+    ctx.arc(dot.x, dot.y, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  let pitchCount = 0;
+  if (layers.pitch !== null) {
+    const points = contourPoints(layers.pitch, {
+      ...area,
+      minValue: options.pitchRange.min,
+      maxValue: options.pitchRange.max,
+    });
+    pitchCount = points.length;
+    ctx.strokeStyle = OVERLAY_COLORS.pitch;
+    ctx.lineWidth = 2;
+    tracePath(ctx, points);
+  }
+
+  // Escalas a la derecha: la del tono en el borde y la de la intensidad a su
+  // izquierda, cada una en el color de su curva.
+  ctx.font = "600 10px system-ui, sans-serif";
+  ctx.textBaseline = "middle";
+  let right = width - 2;
+  if (layers.pitch !== null) {
+    const top = scaleLabel(ctx, `${Math.round(options.pitchRange.max)} Hz`, right, 7, OVERLAY_COLORS.pitch, options.palette);
+    const bottom = scaleLabel(ctx, `${Math.round(options.pitchRange.min)} Hz`, right, height - 7, OVERLAY_COLORS.pitch, options.palette);
+    right -= Math.max(top, bottom) + 4;
+  }
+  if (layers.intensity !== null) {
+    // El texto de la intensidad va en tinta: el amarillo no se lee como letra.
+    scaleLabel(ctx, `${Math.round(options.intensityRange.max)} dB`, right, 7, options.palette.ink, options.palette);
+    scaleLabel(ctx, `${Math.round(options.intensityRange.min)} dB`, right, height - 7, options.palette.ink, options.palette);
+  }
+  ctx.restore();
+
+  return { pitch: pitchCount, formants: dots.length, intensity: intensityCount };
+};
+
+/**
+ * Un aviso escrito sobre el espectrograma, donde se esperaban las curvas.
+ *
+ * Praat hace lo mismo cuando no analiza («zoom in to at most 10 seconds»): el
+ * aviso va donde el estudiante busca la curva, no en un panel lejano.
+ */
+export const drawOverlayNotice = (
+  canvas: HTMLCanvasElement,
+  text: string,
+  palette: Palette,
+): void => {
+  const surface = surfaceOf(canvas, false, palette.surface);
   if (surface === null) {
     return;
   }
   const { ctx, width, height } = surface;
-  const { palette } = options;
-  // El tamano real lo manda el canvas ya dimensionado, no lo que crea el
-  // llamador: si los dos numeros no coinciden, el trazo se sale del lienzo.
-  const plot = { ...options, width, height };
-
-  ctx.strokeStyle = palette.line;
-  ctx.lineWidth = 1;
-  ctx.fillStyle = palette.muted;
-  ctx.font = "11px system-ui, sans-serif";
-
-  const steps = 4;
-  for (let step = 0; step <= steps; step += 1) {
-    const value = plot.minValue + ((plot.maxValue - plot.minValue) * step) / steps;
-    const y = valueToY(value, plot);
-    ctx.beginPath();
-    ctx.moveTo(0, y + 0.5);
-    ctx.lineTo(width, y + 0.5);
-    ctx.stroke();
-    ctx.fillText(
-      `${Math.round(value)} ${options.unit}`,
-      4,
-      Math.min(Math.max(y - 3, 9), height - 2),
-    );
-  }
-
-  ctx.strokeStyle = palette.accent;
-  ctx.lineWidth = 1.5;
-  tracePath(ctx, contourPoints(options.track, plot));
-
+  ctx.save();
+  ctx.font = "600 12px system-ui, sans-serif";
+  ctx.textBaseline = "middle";
+  const textWidth = Math.min(ctx.measureText(text).width, width - 24);
+  const x = Math.max((width - textWidth) / 2, 12);
+  const y = height / 2;
+  ctx.fillStyle = palette.surface;
+  ctx.globalAlpha = 0.85;
+  ctx.fillRect(x - 8, y - 11, textWidth + 16, 22);
+  ctx.globalAlpha = 1;
   ctx.fillStyle = palette.ink;
-  ctx.font = "600 11px system-ui, sans-serif";
-  ctx.fillText(options.label, Math.max(width - 8 - ctx.measureText(options.label).width, 4), 14);
-};
-
-export interface OverlayOptions {
-  readonly view: ViewWindow;
-  readonly minHz: number;
-  readonly maxHz: number;
-  readonly palette: Palette;
-}
-
-/**
- * Superpone F1, F2 y F3 sobre el espectrograma ya pintado.
- *
- * Se dibuja encima y no al lado porque lo que hay que leer es la relacion entre
- * la banda oscura del espectrograma y el formante: separarlos en dos graficos
- * obliga a comparar de memoria.
- */
-export const drawFormantOverlay = (
-  canvas: HTMLCanvasElement,
-  tracks: readonly AcousticTrack[],
-  options: OverlayOptions,
-): void => {
-  const surface = surfaceOf(canvas, false, options.palette.surface);
-  if (surface === null || tracks.length === 0) {
-    return;
-  }
-  const { ctx, width, height } = surface;
-  const colors = [options.palette.accent, options.palette.warn, options.palette.ink];
-
-  tracks.slice(0, 3).forEach((track, index) => {
-    ctx.strokeStyle = colors[index] ?? options.palette.accent;
-    ctx.lineWidth = 1.5;
-    tracePath(
-      ctx,
-      contourPoints(track, {
-        view: options.view,
-        width,
-        height,
-        minValue: options.minHz,
-        maxValue: options.maxHz,
-      }),
-    );
-  });
-
-  // La leyenda se escribe en el canvas porque los colores no llevan otro rotulo;
-  // la tabla de mediciones del DOM tiene los valores, que es lo accesible.
-  ctx.font = "600 11px system-ui, sans-serif";
-  tracks.slice(0, 3).forEach((_, index) => {
-    ctx.fillStyle = colors[index] ?? options.palette.accent;
-    ctx.fillText(`F${index + 1}`, 8 + index * 22, 14);
-  });
+  ctx.fillText(text, x, y, width - 24);
+  ctx.restore();
 };
 
 export interface VowelChartOptions {

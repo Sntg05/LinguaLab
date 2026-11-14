@@ -3,12 +3,12 @@
 
    Las funciones de `./render.ts` saben pintar; este modulo sabe QUE pintar con
    el estado actual: la onda con el cursor y la seleccion, el espectrograma con
-   los formantes encima, las capas, la lectura del cursor y el estado de los
+   las curvas acusticas encima, las capas, la lectura del cursor y el estado de los
    botones que dependen del historial y de la reproduccion.
    ============================================================ */
 
 import { canRedoAnnotation, canUndoAnnotation } from "@lingualab/core";
-import type { AcousticPanels } from "./acoustic-analysis";
+import type { AcousticOverlay } from "./acoustic-overlay";
 import { drawSpectrogram, drawTierStrips, drawWaveform } from "./render";
 import { formatSeconds } from "./strings";
 import { playLabel } from "./viewer-rules";
@@ -31,8 +31,8 @@ export interface CanvasView {
 }
 
 export interface CanvasViewDeps {
-  /** Los paneles acusticos, que se montan despues que el dibujo. */
-  readonly acoustic: () => AcousticPanels | null;
+  /** Las curvas sobre el espectrograma, que se montan despues que el dibujo. */
+  readonly overlay: () => AcousticOverlay | null;
   readonly isPlaying: () => boolean;
 }
 
@@ -64,11 +64,12 @@ export const createCanvasView = (ctx: ViewerContext, deps: CanvasViewDeps): Canv
           palette: state.palette,
           scale: el.scaleSelect?.value === "color" ? "color" : "gray",
         });
-        // Los formantes se dibujan ENCIMA del espectrograma ya pintado: es la
-        // unica forma de leer el formante contra su banda oscura.
+        // Tono, formantes e intensidad se dibujan ENCIMA del espectrograma ya
+        // pintado, como en Praat: es la unica forma de leer el formante contra
+        // su banda oscura. Si el tramo visible no esta analizado, se pide aqui.
         deps
-          .acoustic()
-          ?.drawOverlay(el.specCanvas, state.view, spectrogram.minHz, spectrogram.maxHz);
+          .overlay()
+          ?.draw(el.specCanvas, state.view, spectrogram.minHz, spectrogram.maxHz);
       } else {
         el.specCanvas.hidden = true;
       }

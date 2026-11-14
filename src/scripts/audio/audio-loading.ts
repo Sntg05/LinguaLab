@@ -13,7 +13,6 @@
    Ver **P19** de `docs/PENDING.md`. */
 
 import { createEmptyDocument, startAnnotationHistory } from "@lingualab/core";
-import type { AcousticPanels } from "./acoustic-analysis";
 import { readFileBytes } from "./files";
 import { formatBytes, isOverLimit, MAX_AUDIO_BYTES } from "./limits";
 import { spectrogramColumns } from "./spectrogram";
@@ -37,7 +36,8 @@ export interface AudioLoading {
 export interface AudioLoadingDeps {
   readonly decoder: WebAudioDecoder;
   readonly setBuffer: (buffer: AudioBuffer) => void;
-  readonly acoustic: AcousticPanels | null;
+  /** Analisis, curvas y mediciones del audio anterior: se descartan al cargar otro. */
+  readonly acoustic: { reset(): void } | null;
   readonly renderCanvas: () => void;
   readonly renderAll: () => void;
   readonly updatePersistence: () => void;

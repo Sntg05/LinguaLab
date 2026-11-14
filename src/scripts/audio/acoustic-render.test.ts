@@ -11,7 +11,9 @@ import { describe, expect, it } from "vitest";
 import type { AcousticTrack } from "@lingualab/core";
 import {
   contourPoints,
+  formantDots,
   hzToY,
+  OVERLAY_COLORS,
   timeToX,
   valueToY,
   vowelPlotPosition,
@@ -101,5 +103,44 @@ describe("vowelPlotPosition", () => {
 
     expect(corner.x).toBe(0);
     expect(corner.y).toBe(0);
+  });
+});
+
+describe("formantDots", () => {
+  it("da un punto por marco y formante, sin los marcos sin valor ni los de fuera de la vista", () => {
+    const f1: AcousticTrack = { kind: "formant", times: [0, 0.5, 1, 2], values: [500, Number.NaN, 700, 600] };
+    const f2: AcousticTrack = { kind: "formant", times: [0, 0.5], values: [1500, 0] };
+
+    const dots = formantDots([f1, f2], {
+      view: { start: 0, end: 1 },
+      width: 100,
+      height: 100,
+      minValue: 0,
+      maxValue: 5000,
+    });
+
+    expect(dots.map((dot) => dot.value)).toEqual([500, 700, 1500]);
+    expect(dots[0]?.y).toBe(90);
+  });
+});
+
+describe("OVERLAY_COLORS", () => {
+  /** Componentes de un color `#rrggbb`. */
+  const rgb = (hex: string): readonly [number, number, number] => [
+    Number.parseInt(hex.slice(1, 3), 16),
+    Number.parseInt(hex.slice(3, 5), 16),
+    Number.parseInt(hex.slice(5, 7), 16),
+  ];
+
+  it("usa los colores de Praat: tono azul, formantes rojos, intensidad amarilla", () => {
+    const [pr, pg, pb] = rgb(OVERLAY_COLORS.pitch);
+    const [fr, fg, fb] = rgb(OVERLAY_COLORS.formants);
+    const [ir, ig, ib] = rgb(OVERLAY_COLORS.intensity);
+
+    expect(pb).toBeGreaterThan(pr + 100);
+    expect(pb).toBeGreaterThan(pg + 100);
+    expect(fr).toBeGreaterThan(fg + 100);
+    expect(fr).toBeGreaterThan(fb + 100);
+    expect(Math.min(ir, ig)).toBeGreaterThan(ib + 100);
   });
 });
