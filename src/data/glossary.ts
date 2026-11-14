@@ -41,6 +41,17 @@ export const GLOSSARY: readonly GlossaryEntry[] = [
     "ex_en": "/p/ and /b/ contrast: «pat» vs «bat»."
   },
   {
+    "id": "transcripcion-fonologica",
+    "term_es": "Transcripción fonológica",
+    "term_en": "Phonemic transcription",
+    "field_es": "Fonología",
+    "field_en": "Phonology",
+    "def_es": "Transcripción entre barras / / que anota solo los fonemas, sin los alófonos. En manuales escritos en inglés se llama «fonémica» (phonemic); la transcripción fonética, entre corchetes [ ], sí anota los alófonos.",
+    "def_en": "Transcription between slashes / / that records only phonemes, not allophones. Spanish-language manuals call it «fonológica»; a phonetic transcription, in brackets [ ], also records the allophones.",
+    "ex_es": "«dedo»: /ˈde.do/ en transcripción fonológica, [ˈde.ð̞o] en fonética.",
+    "ex_en": "«dedo»: /ˈde.do/ in phonemic transcription, [ˈde.ð̞o] in phonetic transcription."
+  },
+  {
     "id": "alofono",
     "term_es": "Alofono",
     "term_en": "Allophone",

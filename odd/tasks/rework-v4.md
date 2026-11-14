@@ -218,3 +218,8 @@ Se preguntan de a una, al empezar la fase que las necesita.
   pantalla» falló con las capas en 96 px; con 70vh/640 px medía 907 px y se bajó a 68vh/620 px. Verde:
   `verify:all` y la e2e completa. Antes, en este equipo, `npm ci`: `node_modules` era de una versión
   anterior y faltaban las fuentes nuevas (todas las páginas daban 404 en la prueba de consola).
+- **L22 (2026-11-13).** El dueño, textual: «hazlo, prefiero el término fonológico ya que estamos
+  acostumbrados a ese». La interfaz en español y los documentos para el lector dicen «fonológico» por
+  «fonémico» (tradición hispánica); el inglés sigue con «phonemic». El glosario gana la entrada
+  «Transcripción fonológica», que dice que en manuales en inglés se llama fonémica. Rojo: tres pruebas en
+  `src/data/data.test.ts`. Los comentarios de código y los PR archivados no se tocan.

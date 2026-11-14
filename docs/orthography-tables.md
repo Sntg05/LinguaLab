@@ -43,8 +43,8 @@ almacenamiento del navegador (IndexedDB).
 | `name` | sí | Nombre visible en el catálogo del editor. |
 | `version` | sí | Entero. Una tabla nueva nace en `1`. |
 | `classes` | sí | Clases con nombre que las reglas pueden referenciar. Puede ir vacío (`{}`). |
-| `rules` | sí | Capa **fonémica**: la que se aplica siempre. Puede ir vacía (una plantilla en construcción). |
-| `allophonic` | no | Segunda pasada, opcional, aplicada **sobre la salida** de la fonémica. Su ausencia significa «esta lengua no declara alófonos», no «capa vacía». |
+| `rules` | sí | Capa **fonológica**: la que se aplica siempre. Puede ir vacía (una plantilla en construcción). |
+| `allophonic` | no | Segunda pasada, opcional, aplicada **sobre la salida** de la fonológica. Su ausencia significa «esta lengua no declara alófonos», no «capa vacía». |
 | `notes` | no | Texto libre para quien construye la tabla. |
 | `status` | sí | `"draft"` o `"reviewed"`. Las plantillas de lenguas indígenas nacen en `"draft"` a propósito. |
 
@@ -108,7 +108,7 @@ El panel «explicar» del editor muestra, posición a posición, cuál ganó y c
 ## El formato CSV
 
 El CSV es la vista plana y **de una sola capa**: las reglas de la capa que se está editando en ese
-momento (fonémica o alofónica). Es el formato con el que se trabaja en una hoja de cálculo; no lleva
+momento (fonológica o alofónica). Es el formato con el que se trabaja en una hoja de cálculo; no lleva
 `classes`, `notes`, `status` ni la otra capa. Para llevar la tabla completa de un sitio a otro, usa
 el JSON.
 

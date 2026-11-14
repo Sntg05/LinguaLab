@@ -128,12 +128,12 @@
         "en"
       ],
       "notes": {
-        "es": "Texto a AFI con un transcriptor propio. Español: reglas fonológicas con sílabas y acento, variedad latinoamericana o peninsular, nivel fonémico o fonético. Inglés estadounidense: diccionario CMUdict, que se descarga la primera vez que se usa; lo que no está en el diccionario queda marcado, no inventado. Al lado muestra la tabla grafema→AFI de la herramienta de ortografía.",
+        "es": "Texto a AFI con un transcriptor propio. Español: reglas fonológicas con sílabas y acento, variedad latinoamericana o peninsular, nivel fonológico o fonético. Inglés estadounidense: diccionario CMUdict, que se descarga la primera vez que se usa; lo que no está en el diccionario queda marcado, no inventado. Al lado muestra la tabla grafema→AFI de la herramienta de ortografía.",
         "en": "Text to IPA with our own transcriber. Spanish: phonological rules with syllables and stress, Latin American or Peninsular variety, phonemic or phonetic level. American English: the CMUdict dictionary, downloaded on first use; whatever is not in the dictionary is marked, not made up. The grapheme→IPA table from the orthography tool sits next to it."
       },
       "citation": "Carnegie Mellon University. The CMU Pronouncing Dictionary [Data set].",
       "theory": {
-        "es": "El español tiene una ortografía casi fonémica, así que se transcribe con reglas ordenadas de grafema a fonema, silabeo por ataque máximo y las reglas de acento, según la descripción de Hualde. La ortografía del inglés no determina la pronunciación: por eso se consulta un diccionario revisado (CMUdict) y se convierte su notación ARPABET a los símbolos del AFI.",
+        "es": "El español tiene una ortografía casi fonológica, así que se transcribe con reglas ordenadas de grafema a fonema, silabeo por ataque máximo y las reglas de acento, según la descripción de Hualde. La ortografía del inglés no determina la pronunciación: por eso se consulta un diccionario revisado (CMUdict) y se convierte su notación ARPABET a los símbolos del AFI.",
         "en": "Spanish spelling is nearly phonemic, so it is transcribed with ordered grapheme-to-phoneme rules, maximal-onset syllabification and the stress rules, following Hualde's description. English spelling does not determine pronunciation: a reviewed dictionary (CMUdict) is looked up instead, and its ARPABET notation is converted to IPA symbols."
       },
       "references": [
