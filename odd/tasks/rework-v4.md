@@ -79,7 +79,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
-| T11 | S12 | Árboles sin errores y exportaciones válidas en todos los laboratorios | inline | en curso | — |
+| T11 | S12 | Árboles sin errores y exportaciones válidas en todos los laboratorios | inline | hecha | `c48e142` árboles (L37); commit siguiente, `e2e/exports.spec.ts` (L38) |
 | T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
 
 ## Log
@@ -418,4 +418,14 @@ Se preguntan de a una, al empezar la fase que las necesita.
   (UPOS si es de UD, si no XPOS). Brat quitado: solo bajaba el texto de las hojas. El JSON guarda las
   flechas. `e2e/arbor.spec.ts` descarga y valida cada formato. Revisión teórica de cada formalismo: sigue
   en T4, espera D3.
+- **L38 (2026-11-17). T11 cerrada: exportaciones del resto de laboratorios.** `e2e/exports.spec.ts`
+  descarga y lee de vuelta lo que no se validaba por contenido: TextGrid y CSV de intervalos del visor
+  (mismas etiquetas que el TextGrid cargado; intervalos contiguos), ELAN de TextGrid a `.eaf` (XML
+  válido con `ANNOTATION_DOCUMENT`) y de vuelta a TextGrid con las mismas etiquetas, la especificación
+  JSON de experimentos (semilla y estímulos con comillas) y el CSV de reglas de ortografía, reimportado
+  igual. Pasaron a la primera: no se encontró defecto fuera de los árboles. Ya se validaban por contenido
+  y no se repiten: TextGrid contra Praat, CSV de mediciones, CSV de resultados, JSON de la estación de
+  texto y de la tabla ortográfica. Aviso, sin cambio: los CSV no neutralizan celdas que empiezan con
+  `=`, `+`, `-` o `@`; hacerlo alteraría datos lingüísticos legítimos (sufijos «-s», clíticos «=lo»), y los
+  datos son de la propia persona. Verde: `verify:all` y 222 e2e.
 
