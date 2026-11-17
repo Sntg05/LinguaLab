@@ -91,7 +91,6 @@ const MAX_COMPONENT_SCRIPT_LINES = 30;
  */
 const PENDING_EXTRACTION = new Set([
   "src/components/TextStation.astro",
-  "src/components/ArborLab.astro",
 ]);
 
 /**
