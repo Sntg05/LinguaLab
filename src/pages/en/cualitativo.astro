@@ -1,0 +1,16 @@
+---
+import TheoryNote from "../../components/TheoryNote.astro";
+import QualitativeLab from "../../components/QualitativeLab.astro";
+import Base from "../../layouts/Base.astro";
+import { t } from "../../i18n";
+---
+
+<Base
+  locale="en"
+  path="/cualitativo"
+  title={t("en", "qual.meta.title")}
+  description={t("en", "qual.meta.description")}
+>
+  <QualitativeLab locale="en" />
+  <TheoryNote locale="en" tools={["qualitative-coding"]} />
+</Base>

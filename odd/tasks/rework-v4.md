@@ -76,7 +76,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
 | T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline y delegada (5.3–5.7: escritores acotados, contexto y paralelismo) | hecha en código (L21–L32) | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26); 5.3 hecha (curvas sobre el espectrograma, L27); 5.6 y 5.7 hechas (`c9bf799`, `f19f6b6`, L30); 5.4 hecha (`9316dce`, L31); 5.5 hecha (`6726b4a`, L32). Pendiente humano: la persona que no conoce el visor y la captura junto a Praat |
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
-| T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
+| T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | hecha | `c1bed4f` motor contra `irr` de R (L39); commit siguiente, página `/cualitativo` con e2e y axe (L39) |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
 | T11 | S12 | Árboles sin errores y exportaciones válidas en todos los laboratorios | inline | hecha | `c48e142` árboles (L37); commit siguiente, `e2e/exports.spec.ts` (L38) |
@@ -428,4 +428,30 @@ Se preguntan de a una, al empezar la fase que las necesita.
   texto y de la tabla ortográfica. Aviso, sin cambio: los CSV no neutralizan celdas que empiezan con
   `=`, `+`, `-` o `@`; hacerlo alteraría datos lingüísticos legítimos (sufijos «-s», clíticos «=lo»), y los
   datos son de la propia persona. Verde: `verify:all` y 222 e2e.
+- **L39 (2026-11-17). T7: análisis cualitativo.** Decisión del dueño, preguntada antes de empezar: la unidad
+  que se codifica son **segmentos** (línea o párrafo), no tramos libres; con tramos libres el acuerdo
+  pediría la alfa de unitización. Motor en `packages/core/src/qualitative/`: libro de códigos (MacQueen y
+  colaboradores, 1998), hoja de codificación en CSV ancho (`segment,text,<códigos>`, 1/0/vacío = no
+  codificado), frecuencias, coocurrencias, acuerdo porcentual, kappa de Cohen y alfa nominal de
+  Krippendorff. Validación: `scripts/r/build-agreement-reference.R` corre `irr` 0.85 sobre cinco
+  matrices (entre ellas el ejemplo de Krippendorff, α = 0,743) y versiona el resultado; las pruebas
+  exigen las mismas cifras a 1e-12, y mutar el peso de la alfa o el azar de la kappa las rompe. La R de
+  esta máquina es la 4.5.2, no la 4.3.3 que dice la cabecera; `irr` se instaló en una biblioteca temporal,
+  no en la del sistema. Diferencia declarada con R: sin variación la alfa es indefinida (`null`); `irr`
+  da 1. Página `/cualitativo` (área «documentación», estado experimental), con ejemplo inventado en
+  cada idioma, siete referencias verificadas en Crossref o en CRAN y cinco descargas leídas de vuelta en
+  `e2e/qualitative.spec.ts`. axe encontró dos defectos propios antes del commit, ya corregidos: una
+  tabla vacía con cabecera (th-has-data-cells) y botones que no partían su rótulo a 320 px. Se añadió
+  una prueba con axe sobre la página con datos, porque las tablas que construye el navegador no existen
+  cuando `accessibility.spec.ts` mide la página vacía. De paso, el README ya no anuncia la exportación
+  Brat que T11 quitó.
+- **L40 (2026-11-17). Propuesta del dueño, sin decidir todavía.** Textual: «Is it possible to implement
+  some POS tagging, NER tagging, and other NLP tools in the text editor? To complement and reorganize the
+  entire interface of this lab—since it’s the simplest one—I think we could add a feature to the website
+  that would allow users to upload 2 or, at most, 3 documents in docx or PDF format with extractable
+  text and conduct comparative corpus analyses. What do you think?». Respuesta dada: viable; primero la
+  comparación de 2–3 documentos (.docx/PDF con pdf.js, frecuencia normalizada, keyness con log-likelihood
+  y log ratio, diversidad léxica, n-gramas compartidos, KWIC, contrastado con R); después POS y NER,
+  eligiendo el motor por exactitud medida en los conjuntos de prueba de Universal Dependencies (AnCora,
+  EWT). Queda como S13 cuando el dueño lo confirme.
 

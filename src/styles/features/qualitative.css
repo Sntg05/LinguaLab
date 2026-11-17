@@ -1,0 +1,213 @@
+/* ============================================================
+   LinguaLab — estilos del laboratorio de análisis cualitativo (T7)
+
+   En su propio archivo y con el prefijo `qual-` por las mismas razones que
+   `elan.css`: ninguna otra página usa estas piezas, y el archivo es global, así
+   que un nombre suelto podría chocar con el de otra herramienta. Sin `@layer`:
+   ver la explicación en `elan.css`.
+   ============================================================ */
+
+.qual {
+  display: grid;
+  gap: var(--space-m);
+  max-width: 72rem;
+}
+
+/* Una rejilla no deja que sus hijos se encojan por debajo de su contenido: sin
+   esto, una tabla ancha o un botón largo empujan la página fuera de 320 px. */
+.qual > * {
+  min-width: 0;
+}
+
+/* Los rótulos de los botones de este laboratorio son frases («O sigue una
+   codificación guardada»): a 320 px tienen que poder partirse. */
+.qual .btn {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+
+.qual-panel {
+  display: grid;
+  gap: var(--space-s);
+  align-content: start;
+  min-width: 0;
+  padding: var(--space-m);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+}
+
+.qual-panel__title {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--step-1);
+  font-weight: 650;
+}
+
+.qual-panel__subtitle {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--step-0);
+  font-weight: 650;
+}
+
+.qual-hint {
+  max-width: 68ch;
+  margin: 0;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.qual-muted {
+  display: block;
+  font-size: var(--step--2);
+  color: var(--ink-faint);
+}
+
+.qual-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  align-items: center;
+}
+
+/* ---- Formulario del libro de códigos ---- */
+.qual-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-xs) var(--space-s);
+}
+
+.qual-field {
+  display: grid;
+  gap: var(--space-3xs);
+  min-width: 0;
+  font-size: var(--step--2);
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+
+.qual-field input,
+.qual-field textarea,
+.qual-material {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2xs);
+  font: inherit;
+  font-size: var(--step--1);
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--surface-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-s);
+}
+
+.qual-material {
+  min-height: 10rem;
+  resize: vertical;
+}
+
+.qual-field input:focus-visible,
+.qual-field textarea:focus-visible,
+.qual-material:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.qual-fieldset {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s);
+  margin: 0;
+  padding: 0;
+  font-size: var(--step--1);
+  border: 0;
+}
+
+.qual-fieldset legend {
+  float: inline-start;
+  margin-inline-end: var(--space-xs);
+  padding: 0;
+  font-weight: 600;
+}
+
+/* ---- Estado: una frase, un color ---- */
+.qual-status {
+  min-height: 1.4em;
+  margin: 0;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.qual-status[data-state="ok"] {
+  color: var(--ink);
+}
+
+.qual-status[data-state="error"] {
+  color: var(--warn);
+}
+
+/* ---- Tablas ---- */
+.qual-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.qual-table th,
+.qual-table td {
+  padding: var(--space-2xs) var(--space-xs);
+  text-align: start;
+  vertical-align: top;
+  border-block-end: 1px solid var(--line);
+}
+
+.qual-table thead th {
+  font-size: var(--step--2);
+  font-weight: 600;
+  color: var(--ink-faint);
+  border-block-end-color: var(--line-strong);
+}
+
+.qual-table tbody th {
+  font-weight: 600;
+}
+
+.qual-segment {
+  min-width: 16rem;
+  overflow-wrap: anywhere;
+}
+
+.qual-code-head {
+  min-width: 6rem;
+}
+
+.qual-code-head[title] {
+  text-decoration: underline dotted;
+  cursor: help;
+}
+
+.qual-mark {
+  text-align: center;
+}
+
+.qual-mark input {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+}
+
+.qual-number {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.qual-diagonal {
+  font-weight: 650;
+}
+
+.qual-list {
+  margin: 0;
+  padding-inline-start: var(--space-m);
+  font-size: var(--step--1);
+}

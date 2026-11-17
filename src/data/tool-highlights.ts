@@ -68,6 +68,14 @@ export const TOOL_HIGHLIGHTS: Readonly<Record<string, ToolHighlight>> = {
     sample: "RT 412 ms",
     sampleKind: "mono",
   },
+  "qualitative-coding": {
+    summary: {
+      es: "Libro de códigos, codificación por segmentos, coocurrencias y acuerdo entre codificadores (κ de Cohen, α de Krippendorff).",
+      en: "Codebook, segment coding, co-occurrences and intercoder agreement (Cohen's κ, Krippendorff's α).",
+    },
+    sample: "α = 0.743",
+    sampleKind: "mono",
+  },
   "mapa-lenguas-colombia": {
     summary: {
       es: "Las lenguas que Glottolog registra en Colombia, con familia, Glottocode e ISO 639-3, en mapa y en tabla.",

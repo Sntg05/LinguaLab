@@ -146,9 +146,10 @@ test("el estado vacio explica por que no coincide nada", async ({ page }) => {
 test("el catalogo en ingles filtra con sus propias etiquetas", async ({ page }) => {
   await page.goto("/en/catalogo");
 
-  // Diez: las nueve de antes y el conversor ELAN, que corre en el navegador.
+  // Once: las nueve de antes, el conversor ELAN, que corre en el navegador, y
+  // el análisis cualitativo (T7).
   await page.locator(INTEGRATION).selectOption("embedded");
-  await expect(cardsFor(page)).toHaveCount(10);
+  await expect(cardsFor(page)).toHaveCount(11);
 
   await page.locator(AREA).selectOption("fonetica");
   await expect(cardsFor(page)).toHaveCount(2);

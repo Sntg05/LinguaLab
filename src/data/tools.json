@@ -423,6 +423,35 @@
         "es": "Previsto: corpus paralelos y modelos de traducción para wayuunaiki, arhuaco, inga y nasa. No se pudo verificar una URL pública estable el 25 de octubre de 2026, y este catálogo no publica enlaces sin abrirlos antes: queda como previsto hasta que la fuente confirme su dirección.",
         "en": "Planned: parallel corpora and translation models for Wayuunaiki, Arhuaco, Inga and Nasa. No stable public URL could be verified on 25 October 2026, and this catalogue does not publish links it has not opened first: it stays planned until the source confirms its address."
       }
+    },
+    {
+      "id": "qualitative-coding",
+      "name": {
+        "es": "Análisis cualitativo",
+        "en": "Qualitative analysis"
+      },
+      "area": "documentacion",
+      "integration": "embedded",
+      "status": "experimental",
+      "languages": [],
+      "notes": {
+        "es": "Codificación de entrevistas, transcripciones o textos por segmentos (líneas o párrafos) con un libro de códigos propio: frecuencias, coocurrencias entre códigos y acuerdo entre codificadores (acuerdo porcentual, kappa de Cohen y alfa de Krippendorff), con las cifras contrastadas con el paquete irr de R. Todo se guarda y se comparte como CSV; nada sale del navegador. **Límite declarado**: se codifican segmentos completos, no fragmentos libres dentro de un segmento.",
+        "en": "Coding of interviews, transcripts or texts by segment (lines or paragraphs) with your own codebook: frequencies, co-occurrences between codes and intercoder agreement (percent agreement, Cohen's kappa and Krippendorff's alpha), with the figures checked against the R package irr. Everything is saved and shared as CSV; nothing leaves the browser. **Declared limit**: whole segments are coded, not free spans inside a segment."
+      },
+      "citation": "MacQueen, K. M., McLellan, E., Kay, K., & Milstein, B. (1998). Codebook development for team-based qualitative analysis. Cultural Anthropology Methods, 10(2), 31–36.",
+      "theory": {
+        "es": "Sigue el análisis de contenido y la codificación con libro de códigos en equipo (MacQueen y colaboradores, 1998; Krippendorff, 2019). La fiabilidad entre codificadores se mide con la kappa de Cohen (1960), leída con las bandas de Landis y Koch (1977), y con la alfa de Krippendorff (Hayes y Krippendorff, 2007), que admite más de dos personas y datos faltantes. Cuándo y para qué medir el acuerdo en investigación cualitativa lo discuten O'Connor y Joffe (2020).",
+        "en": "It follows content analysis and team-based codebook coding (MacQueen and colleagues, 1998; Krippendorff, 2019). Intercoder reliability is measured with Cohen's kappa (1960), read with Landis and Koch's (1977) bands, and with Krippendorff's alpha (Hayes and Krippendorff, 2007), which admits more than two people and missing data. When and why to measure agreement in qualitative research is discussed by O'Connor and Joffe (2020)."
+      },
+      "references": [
+        "macqueen1998",
+        "krippendorff2019",
+        "cohen1960",
+        "landis1977",
+        "hayes2007",
+        "oconnor2020",
+        "gamer2026irr"
+      ]
     }
   ]
 }

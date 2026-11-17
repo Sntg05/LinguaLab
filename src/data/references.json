@@ -189,6 +189,69 @@
       "source": "Carnegie Mellon University, Speech Group",
       "url": "https://github.com/cmusphinx/cmudict",
       "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "cohen1960",
+      "authors": "Cohen, J.",
+      "year": 1960,
+      "title": "A coefficient of agreement for nominal scales",
+      "source": "Educational and Psychological Measurement, 20(1), 37–46",
+      "doi": "10.1177/001316446002000104",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "hayes2007",
+      "authors": "Hayes, A. F., & Krippendorff, K.",
+      "year": 2007,
+      "title": "Answering the call for a standard reliability measure for coding data",
+      "source": "Communication Methods and Measures, 1(1), 77–89",
+      "doi": "10.1080/19312450709336664",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "krippendorff2019",
+      "authors": "Krippendorff, K.",
+      "year": 2019,
+      "title": "Content analysis: An introduction to its methodology (4th ed.)",
+      "source": "SAGE",
+      "doi": "10.4135/9781071878781",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "landis1977",
+      "authors": "Landis, J. R., & Koch, G. G.",
+      "year": 1977,
+      "title": "The measurement of observer agreement for categorical data",
+      "source": "Biometrics, 33(1), 159–174",
+      "doi": "10.2307/2529310",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "macqueen1998",
+      "authors": "MacQueen, K. M., McLellan, E., Kay, K., & Milstein, B.",
+      "year": 1998,
+      "title": "Codebook development for team-based qualitative analysis",
+      "source": "Cultural Anthropology Methods, 10(2), 31–36",
+      "doi": "10.1177/1525822X980100020301",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "oconnor2020",
+      "authors": "O'Connor, C., & Joffe, H.",
+      "year": 2020,
+      "title": "Intercoder reliability in qualitative research: Debates and practical guidelines",
+      "source": "International Journal of Qualitative Methods, 19",
+      "doi": "10.1177/1609406919899220",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "gamer2026irr",
+      "authors": "Gamer, M., Lemon, J., Fellows, I., & Singh, P.",
+      "year": 2026,
+      "title": "irr: Various coefficients of interrater reliability and agreement (R package version 0.85)",
+      "source": "Comprehensive R Archive Network",
+      "url": "https://CRAN.R-project.org/package=irr",
+      "verifiedOn": "2026-11-17"
     }
   ]
 }
