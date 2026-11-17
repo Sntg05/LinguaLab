@@ -2,4 +2,5 @@
 export * from "./descriptive";
 export * from "./distributions";
 export * from "./effects";
+export * from "./regression";
 export * from "./tests";

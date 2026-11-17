@@ -89,7 +89,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T6.2 | S9 | Descriptivos: n, media, mediana, moda, varianza, desviación, cuantiles tipo 7, rango, asimetría | inline | hecha | commit de L45 |
 | T6.4 | S9 | Pruebas: t (una muestra, Welch, pareada), χ² (independencia, bondad de ajuste), Pearson, Spearman, ANOVA de un factor, Mann–Whitney, Wilcoxon | inline | hecha | commit de L46 |
 | T6.5 | S9 | Tamaños del efecto e intervalos al 95 % | inline | hecha sin intervalos de d, η² y V (L47) | commit de L47 |
-| T6.6 | S9 | Regresión lineal simple y múltiple | inline | pendiente | — |
+| T6.6 | S9 | Regresión lineal simple y múltiple | inline | hecha | commit de L48 |
 | T6.1, T6.7, T6.8 | S9, S6 | Datos CSV/TSV, gráficos SVG y página `/estadistica` con asistente e informe APA | inline | pendiente | — |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | hecha en lo pedido por S9; quedan unidades del plan del traspaso (L43) | `c1bed4f` motor contra `irr` de R; `b5e1707` página `/cualitativo` con e2e y axe (L39) |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
@@ -559,4 +559,12 @@ Se preguntan de a una, al empezar la fase que las necesita.
   rompe una prueba cada una. **Sin intervalos** para d, η² y V: necesitan las distribuciones t y χ² no
   centrales, que el motor no tiene; los intervalos de las diferencias de medias (T6.4) y de r (Fisher)
   sí están.
+- **L48 (2026-11-17). T6.6.** `packages/core/src/stats/regression.ts`: regresión lineal con intercepto por QR
+  de Householder (no por ecuaciones normales), con coeficientes, errores estándar, t, p, σ residual, R², R²
+  ajustado, F con su p, residuos y ajustados; predictores colineales, pocos datos, largos distintos o una
+  respuesta constante son errores con nombre. `scripts/r/build-regression-reference.R` corre `lm` y
+  `summary.lm` sobre cuatro modelos (mtcars simple y con tres predictores, iris, ToothGrowth): todo coincide
+  a 1e-9. Usar n en vez de n − p en la varianza residual rompe cuatro. Con esto el motor de T6 (6.2 a 6.6)
+  está completo; faltan los datos (6.1), los gráficos (6.7) y la página (6.8). T6.5 se commiteó sin
+  `verify:all` (solo pruebas, lint y tipos del núcleo); la puerta completa corrió aquí, en verde.
 
