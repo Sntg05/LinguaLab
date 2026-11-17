@@ -69,12 +69,12 @@
         "en"
       ],
       "notes": {
-        "es": "Análisis de corpus: frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad. No hay lematización.",
-        "en": "Corpus analysis: frequency with dispersion, collocations with log-Dice and PMI, KWIC concordances, lexical statistics and readability. There is no lemmatisation."
+        "es": "Análisis de corpus: frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad. No hay lematización. Compara además dos o tres documentos (.docx, PDF con texto o .txt): palabras clave con G² y log ratio contrastados con R, vocabulario compartido, diversidad léxica y concordancias por documento.",
+        "en": "Corpus analysis: frequency with dispersion, collocations with log-Dice and PMI, KWIC concordances, lexical statistics and readability. There is no lemmatisation. It also compares two or three documents (.docx, PDF with text or .txt): keywords with G² and log ratio checked against R, shared vocabulary, lexical diversity and concordances by document."
       },
       "theory": {
-        "es": "Aplica medidas de la lingüística de corpus: asociación entre palabras (información mutua, razón de verosimilitud G², log-Dice), dispersión de una palabra a lo largo del texto e índices de legibilidad (Flesch para el inglés; la escala INFLESZ y sus antecesoras para el español). Sin lematizar, cada forma flexionada cuenta por separado.",
-        "en": "It applies corpus-linguistics measures: word association (mutual information, the G² likelihood ratio, log-Dice), dispersion of a word across the text, and readability indices (Flesch for English; the INFLESZ scale and its predecessors for Spanish). Without lemmatisation, each inflected form counts separately."
+        "es": "Aplica medidas de la lingüística de corpus: asociación entre palabras (información mutua, razón de verosimilitud G², log-Dice), dispersión de una palabra a lo largo del texto e índices de legibilidad (Flesch para el inglés; la escala INFLESZ y sus antecesoras para el español). Sin lematizar, cada forma flexionada cuenta por separado. La comparación de dos o tres documentos busca las palabras clave de cada uno frente a los demás con la razón de verosimilitud G² (Dunning, 1993), como en el perfil de frecuencias de Rayson y Garside (2000), y mide el tamaño de la diferencia con el log ratio de Hardie (2014); los valores p usan la aproximación de Cody (1969) a la cola normal.",
+        "en": "It applies corpus-linguistics measures: word association (mutual information, the G² likelihood ratio, log-Dice), dispersion of a word across the text, and readability indices (Flesch for English; the INFLESZ scale and its predecessors for Spanish). Without lemmatisation, each inflected form counts separately. The comparison of two or three documents finds the keywords of each one against the others with the log-likelihood ratio G² (Dunning, 1993), as in Rayson and Garside's (2000) frequency profiling, and measures the size of the difference with Hardie's (2014) log ratio; p values use Cody's (1969) approximation to the normal tail."
       },
       "references": [
         "church1990",
@@ -82,7 +82,10 @@
         "rychly2008",
         "gries2008",
         "flesch1948",
-        "barrio2008"
+        "barrio2008",
+        "rayson2000",
+        "hardie2014",
+        "cody1969"
       ]
     },
     {

@@ -8,6 +8,7 @@ import { experimentsEn } from "./features/experiments.en";
 import { elanEn } from "./features/elan.en";
 import { languagesEn } from "./features/languages.en";
 import { qualitativeEn } from "./features/qualitative.en";
+import { compareEn } from "./features/compare.en";
 import { acousticEn } from "./features/acoustic.en";
 
 export const en = {
@@ -544,6 +545,7 @@ export const en = {
   ...experimentsEn,
   ...elanEn,
   ...qualitativeEn,
+  ...compareEn,
   ...languagesEn,
   ...acousticEn,
 } as const;

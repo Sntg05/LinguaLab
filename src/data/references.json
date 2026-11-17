@@ -252,6 +252,33 @@
       "source": "Comprehensive R Archive Network",
       "url": "https://CRAN.R-project.org/package=irr",
       "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "rayson2000",
+      "authors": "Rayson, P., & Garside, R.",
+      "year": 2000,
+      "title": "Comparing corpora using frequency profiling",
+      "source": "Proceedings of the Workshop on Comparing Corpora, 1–6. Association for Computational Linguistics",
+      "url": "https://aclanthology.org/W00-0901/",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "hardie2014",
+      "authors": "Hardie, A.",
+      "year": 2014,
+      "title": "Log Ratio – an informal introduction",
+      "source": "ESRC Centre for Corpus Approaches to Social Science (CASS), Lancaster University",
+      "url": "https://cass.lancs.ac.uk/log-ratio-an-informal-introduction/",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "cody1969",
+      "authors": "Cody, W. J.",
+      "year": 1969,
+      "title": "Rational Chebyshev approximations for the error function",
+      "source": "Mathematics of Computation, 23(107), 631–637",
+      "doi": "10.1090/S0025-5718-1969-0247736-4",
+      "verifiedOn": "2026-11-17"
     }
   ]
 }

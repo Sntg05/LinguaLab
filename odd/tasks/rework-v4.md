@@ -89,10 +89,10 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
 | T11 | S12 | Árboles sin errores y exportaciones válidas en todos los laboratorios | inline | hecha | `c48e142` árboles (L37); commit siguiente, `e2e/exports.spec.ts` (L38) |
-| T12 | S13 | Lectura de documentos: puerto en el núcleo, .txt y .docx propios (ZIP + XML, sin dependencia) | inline | pendiente | — |
-| T13 | S13 | PDF con pdf.js (dependencia nueva: riesgo 5), rechazo de PDF sin texto | inline + verificador | pendiente | — |
-| T14 | S13 | Motor de comparación: frecuencia por 10 000, G² y p, log ratio, diversidad, vocabulario compartido; contrastado con R base | inline | pendiente | — |
-| T15 | S13 | Sección «Comparar documentos» en la estación, exportaciones leídas de vuelta, e2e y axe | inline | pendiente | — |
+| T12 | S13 | Lectura de documentos: puerto en el núcleo, .txt y .docx propios (ZIP + XML, sin dependencia) | inline | hecha | `eba3a16` (L42) |
+| T13 | S13 | PDF con pdf.js (dependencia nueva: riesgo 5), rechazo de PDF sin texto | inline + verificador | hecha; verificador al cerrar S13 | `a609b8c` (L42) |
+| T14 | S13 | Motor de comparación: frecuencia por 10 000, G² y p, log ratio, diversidad, vocabulario compartido; contrastado con R base | inline | hecha | `e49851f`, `d86fa57` (L42) |
+| T15 | S13 | Sección «Comparar documentos» en la estación, exportaciones leídas de vuelta, e2e y axe | inline | hecha | commit siguiente (L42) |
 | T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
 
 ## Log
@@ -473,4 +473,21 @@ Se preguntan de a una, al empezar la fase que las necesita.
   clave se contrastan con R base (devianza de un modelo de Poisson de independencia sobre la tabla 2×2 =
   G²; `pchisq` para p), sin paquetes. Para D4 se dio la comparación webR / motor propio (ver respuesta
   del 2026-11-17); D4 sigue abierta.
+- **L42 (2026-11-17). S13: comparación de documentos (T12 a T15).** Lectura propia de .docx (directorio
+  central del ZIP, `DecompressionStream` con tope contado contra bombas, `w:t`/`w:tab`/`w:br`, sin texto
+  borrado ni copias `mc:Fallback`); PDF con pdf.js 6.5.438 (Apache-2.0, exacta, anotada) cargado con su
+  worker al leer el primer PDF, `isEvalSupported: false`. Fixtures reales con pandoc y xelatex; la
+  extracción del PDF coincide palabra por palabra con `pdftotext`. Motor: G² de Dunning sobre la tabla
+  2×2, p con la cola normal de Cody y log ratio, contrastados con R base (G² = devianza de `glm`
+  Poisson; `pchisq`), ocho casos hasta p = 1e-88 a 1e-10; mutar una celda rompe 11 pruebas. Tres
+  afirmaciones mías no se sostenían al verificarlas y se corrigieron antes de publicarlas: (1) que el 0,5
+  del log ratio fuera la convención de Hardie (su entrada no lo dice; es el ajuste de quanteda); (2) que
+  Rayson y Garside (2000) propusieran G² ≥ 15,13 (no lo dicen; se cita lo que sí dicen, Kilgarriff 1996);
+  (3) mis recuentos a mano de palabras en la e2e (30, no 26). Seis constantes de Cody escritas de
+  memoria quedan cubiertas por la comparación con R. El linter marcó que esas constantes tenían más
+  dígitos de los que un double guarda: se escriben en su forma exacta, y la referencia que genera R lleva
+  una exención explicada. Página: sección «Compara dos o tres documentos» bajo la estación, con
+  perfil, palabras clave, vocabulario, frecuencias, concordancias y tres CSV. e2e con los tres formatos,
+  un PDF escaneado, un cuarto documento, uno repetido, y axe con resultados. La reorganización completa
+  de la estación y POS/NER (L40) siguen sin empezar.
 

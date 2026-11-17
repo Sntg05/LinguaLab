@@ -3,6 +3,8 @@ import { en } from "./messages/en";
 import { es } from "./messages/es";
 import { acousticEn } from "./messages/features/acoustic.en";
 import { acousticEs } from "./messages/features/acoustic.es";
+import { compareEn } from "./messages/features/compare.en";
+import { compareEs } from "./messages/features/compare.es";
 import { elanEn } from "./messages/features/elan.en";
 import { elanEs } from "./messages/features/elan.es";
 import { experimentsEn } from "./messages/features/experiments.en";
@@ -31,6 +33,7 @@ const MODULES = [
   { name: "languages", prefix: "map.", es: languagesEs, en: languagesEn },
   { name: "acoustic", prefix: "acoustic.", es: acousticEs, en: acousticEn },
   { name: "qualitative", prefix: "qual.", es: qualitativeEs, en: qualitativeEn },
+  { name: "compare", prefix: "cmp.", es: compareEs, en: compareEn },
 ] as const;
 
 describe("los mensajes de cada herramienta", () => {
