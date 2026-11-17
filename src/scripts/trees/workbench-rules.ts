@@ -8,6 +8,7 @@
 import { TREE_EXAMPLES } from "../../data/trees/examples";
 import type { TreeType } from "../../data/trees/types";
 import type { TreeNode } from "./parse";
+import type { MovementArrow } from "./render";
 import { ParseError, buildFromSentence, buildTree } from "./pipeline";
 
 export type InputMode = "easy" | "text";
@@ -53,9 +54,20 @@ export const exampleOptions = (typeId: string, es: boolean): readonly ExampleOpt
   })),
 ];
 
+export interface WorkbenchTree {
+  readonly tree: TreeNode;
+  /** Las flechas de las líneas `move:`; una frase sin notación no tiene. */
+  readonly arrows: MovementArrow[];
+}
+
 /** El modo frase solo cuenta en un tipo que lo admite; si no, se lee la notación. */
-export const buildWorkbenchTree = (type: TreeType, value: string, mode: InputMode): TreeNode =>
-  mode === "easy" && canUseSentence(type) ? buildFromSentence(value) : buildTree(type.id, value).tree;
+export const buildWorkbenchTree = (type: TreeType, value: string, mode: InputMode): WorkbenchTree => {
+  if (mode === "easy" && canUseSentence(type)) {
+    return { tree: buildFromSentence(value), arrows: [] };
+  }
+  const { tree, arrows } = buildTree(type.id, value);
+  return { tree, arrows };
+};
 
 /** Un error de análisis lleva su posición; el resto, su texto. */
 export const errorMessage = (thrown: unknown): string => {
@@ -68,3 +80,8 @@ export const copyStatus = (copied: boolean, es: boolean): string => {
   if (copied) return es ? "SVG copiado." : "SVG copied.";
   return es ? "No se pudo copiar al portapapeles." : "Could not copy to the clipboard.";
 };
+
+export const pngFailure = (es: boolean): string =>
+  es
+    ? "No se pudo crear el PNG en este navegador. Guarda el SVG y conviértelo con otro programa."
+    : "This browser could not create the PNG. Save the SVG and convert it with another program.";

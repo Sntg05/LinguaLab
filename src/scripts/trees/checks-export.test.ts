@@ -9,7 +9,7 @@ import {
 } from "./checks";
 import { parseBrackets, parseDependency } from "./parse";
 import { parseLabel, labelWidth, parseMovementDirectives } from "./render";
-import { fromJSON, guessUPOS, leavesOf, suggestName, toCoNLLU, toJSON, toNewick, toBrat } from "./export";
+import { fromJSON, leavesOf, suggestName, toCoNLLU, toJSON, toNewick } from "./export";
 
 /* ============================================================
    Label notation
@@ -257,19 +257,33 @@ describe("badProjections", () => {
 describe("movement checks", () => {
   const tree = parseBrackets("[CP [DP#wh quien] [C' [C c] [TP [DP#tr t] [T' [T t]]]]]");
 
-  it("reports c-command when the trace is under the landing site", () => {
+  // La ayuda de la página dice «move: origen -> destino» y así escriben todos los
+  // ejemplos: `from` es la huella, `to` el sitio de aterrizaje.
+  it("reports c-command when the landing site c-commands the trace", () => {
+    const results = checkMovement(tree, [{ from: "tr", to: "wh" }], "es");
+    expect(results[0]?.level).toBe("ok");
+  });
+
+  it("climbs past non-branching nodes: c-command is defined by the first branching node", () => {
+    // `which_road#wh` es una hoja bajo `Spec`, que no ramifica: quien manda-c es
+    // el primer nodo que ramifica por encima (CP), y ese domina la huella.
+    const unary = parseBrackets("[CP [Spec [DP who#wh]] [C' [C Ø] [TP [DP t#tr] [T' [T is]]]]]");
+    expect(checkMovement(unary, [{ from: "tr", to: "wh" }], "es")[0]?.level).toBe("ok");
+  });
+
+  it("flags a movement written downwards, from the high position to the low one", () => {
     const results = checkMovement(tree, [{ from: "wh", to: "tr" }], "es");
-    expect(results[0]!.level).toBe("ok");
+    expect(results[0]?.level).toBe("note");
   });
 
   it("notes a missing pair", () => {
-    const results = checkMovement(tree, [{ from: "nope", to: "tr" }], "es");
+    const results = checkMovement(tree, [{ from: "nope", to: "wh" }], "es");
     expect(results[0]!.level).toBe("note");
     expect(results[0]!.message).toMatch(/No se encontró/);
   });
 
   it("includes the arrow label when given", () => {
-    const results = checkMovement(tree, [{ from: "wh", to: "tr", label: "A-movimiento" }], "es");
+    const results = checkMovement(tree, [{ from: "tr", to: "wh", label: "A-movimiento" }], "es");
     expect(results[0]!.message).toContain("A-movimiento");
   });
 
@@ -282,6 +296,63 @@ describe("movement checks", () => {
    Export
    ============================================================ */
 
+/** Lector mínimo de Newick (etiquetas sin comillas o entre comillas simples), solo para la prueba. */
+interface NewickNode {
+  readonly label: string;
+  readonly children: readonly NewickNode[];
+}
+
+const readNewick = (text: string): NewickNode => {
+  let i = 0;
+  const label = (): string => {
+    if (text[i] === "'") {
+      let out = "";
+      i += 1;
+      for (;;) {
+        if (i >= text.length) throw new Error("comilla sin cerrar");
+        if (text[i] === "'" && text[i + 1] === "'") {
+          out += "'";
+          i += 2;
+        } else if (text[i] === "'") {
+          i += 1;
+          return out;
+        } else {
+          out += text[i];
+          i += 1;
+        }
+      }
+    }
+    let out = "";
+    while (i < text.length && !"(),;".includes(text[i] ?? "")) {
+      out += text[i];
+      i += 1;
+    }
+    return out.replace(/_/g, " ");
+  };
+  const node = (): NewickNode => {
+    const children: NewickNode[] = [];
+    if (text[i] === "(") {
+      i += 1;
+      children.push(node());
+      while (text[i] === ",") {
+        i += 1;
+        children.push(node());
+      }
+      if (text[i] !== ")") throw new Error(`se esperaba ) en ${i}`);
+      i += 1;
+    }
+    return { label: label(), children };
+  };
+  const root = node();
+  if (text.slice(i) !== ";") throw new Error(`sobra texto: ${text.slice(i)}`);
+  return root;
+};
+
+const shape = (node: { readonly label: string; readonly children: readonly unknown[] }): NewickNode => ({
+  label: node.label,
+  children: node.children.map((child) => shape(child as NewickNode)),
+});
+
 describe("toNewick", () => {
   it("produces a single terminated statement", () => {
     const newick = toNewick(parseBrackets("[S [NP el] [VP duerme]]"));
@@ -293,25 +364,26 @@ describe("toNewick", () => {
     expect(toNewick(parseBrackets("[NP [N gato negro]]"))).toContain("gato_negro");
   });
 
-  it("strips the characters Newick reserves", () => {
-    // The wrapper parentheses and the terminating semicolon are Newick
-    // syntax; the payload must not contain any.
-    // Reserved characters in the payload, but no brackets: a bracket would
-    // be a syntax error in the input notation.
-    const newick = toNewick(parseBrackets("[NP [N x,y:z;w]]"));
-    // The commas, colon and semicolon are stripped; the letters survive.
-    expect(newick).toContain("xyzw");
-    // Everything before the terminating semicolon is free of reserved
-    // punctuation. Parentheses are the tree syntax and are expected.
-    expect(newick.slice(0, -1)).not.toMatch(/[,:;'"]/);
+  it("quotes a label with reserved characters instead of deleting them", () => {
+    const newick = toNewick(parseBrackets("[NP [N x,y:z;w] [P .]]"));
+    expect(newick).toContain("'x,y:z;w'");
+    // Antes se borraban: «.» quedaba vacío y se escribía la etiqueta inventada «nodo».
+    expect(newick).not.toContain("nodo");
   });
 
-  it("never emits a nested pair that would break the parse", () => {
-    const newick = toNewick(parseBrackets("[S [A a] [B b]]"));
-    // Balanced parentheses, one pair per internal node.
-    const opens = (newick.match(/\(/g) ?? []).length;
-    const closes = (newick.match(/\)/g) ?? []).length;
-    expect(opens).toBe(closes);
+  it("doubles a quote inside a quoted label", () => {
+    expect(toNewick(parseBrackets("[N' it's]"))).toBe("('it''s')'N''';");
+  });
+
+  it("reads back to the same tree", () => {
+    for (const source of [
+      "[S [NP [Det el] [N gato negro]] [VP duerme]]",
+      "[CP [Spec qué] [C' [C Ø] [TP [DP t_i] [T' [T va] [VP comer]]]]]",
+      "[N' [N x,y] [P .] [A it's]]",
+    ]) {
+      const tree = parseBrackets(source);
+      expect(shape(readNewick(toNewick(tree)))).toEqual(shape(tree));
+    }
   });
 
   it("emits a leaf for a single-node tree", () => {
@@ -320,61 +392,49 @@ describe("toNewick", () => {
 });
 
 describe("toCoNLLU", () => {
-  const conllu = toCoNLLU(parseBrackets("[S [NP [Det el] [N gato]] [VP duerme]]"));
+  const dependency = parseDependency(
+    "1 el 2 det DET\n2 gato 3 nsubj NOUN\n3 duerme 0 root VERB\n4 . 3 punct PUNCT",
+  );
+  const conllu = toCoNLLU(dependency) ?? "";
+  const rows = conllu.split("\n").filter((line) => line && !line.startsWith("#"));
 
-  it("emits one token per leaf", () => {
-    const rows = conllu.split("\n").filter((l) => l && !l.startsWith("#"));
-    expect(rows).toHaveLength(3);
+  it("only exists for dependency trees: a constituency tree has no heads to write", () => {
+    expect(toCoNLLU(parseBrackets("[S [NP el gato] [VP duerme]]"))).toBeNull();
   });
 
-  it("emits ten tab-separated columns per row", () => {
-    for (const row of conllu.split("\n").filter((l) => l && !l.startsWith("#"))) {
-      expect(row.split("\t")).toHaveLength(10);
-    }
+  it("emits one token per word with ten tab-separated columns", () => {
+    expect(rows).toHaveLength(4);
+    for (const row of rows) expect(row.split("\t")).toHaveLength(10);
   });
 
-  it("writes a # text line", () => {
-    expect(conllu).toContain("# text = el gato duerme");
+  it("writes sent_id and text, as the CoNLL-U format asks", () => {
+    expect(conllu.startsWith("# sent_id = 1\n# text = el gato duerme .\n")).toBe(true);
   });
 
-  it("gives the first token head 0 and root", () => {
-    const first = conllu.split("\n").find((l) => l.startsWith("1\t"))!;
-    const cols = first.split("\t");
-    expect(cols[6]).toBe("0");
-    expect(cols[7]).toBe("root");
+  it("keeps the heads and relations that were written, not invented ones", () => {
+    expect(
+      rows.map((row) => {
+        const columns = row.split("\t");
+        return [columns[0], columns[1], columns[6], columns[7]];
+      }),
+    ).toEqual([
+      ["1", "el", "2", "det"],
+      ["2", "gato", "3", "nsubj"],
+      ["3", "duerme", "0", "root"],
+      ["4", ".", "3", "punct"],
+    ]);
   });
 
-  it("never emits a constituency node as a token", () => {
-    const forms = conllu
-      .split("\n")
-      .filter((l) => l && !l.startsWith("#"))
-      .map((l) => l.split("\t")[1]);
-    expect(forms).not.toContain("S");
-    expect(forms).not.toContain("NP");
-  });
-});
-
-describe("guessUPOS", () => {
-  it("recognises closed classes", () => {
-    expect(guessUPOS("el")).toBe("DET");
-    expect(guessUPOS("de")).toBe("ADP");
-    expect(guessUPOS("y")).toBe("CCONJ");
-    expect(guessUPOS("es")).toBe("AUX");
+  it("puts a UD tag in UPOS and any other tag in XPOS", () => {
+    expect(rows[1]?.split("\t")[3]).toBe("NOUN");
+    const other = toCoNLLU(parseDependency("1 gato 0 root NC")) ?? "";
+    const columns = other.split("\n").find((line) => line.startsWith("1\t"))?.split("\t") ?? [];
+    expect(columns[3]).toBe("_");
+    expect(columns[4]).toBe("NC");
   });
 
-  it("recognises punctuation", () => {
-    expect(guessUPOS(".")).toBe("PUNCT");
-    expect(guessUPOS("?")).toBe("PUNCT");
-  });
-
-  it("falls back to a content-word guess", () => {
-    expect(["NOUN", "VERB"]).toContain(guessUPOS("biblioteca"));
-  });
-});
-
-describe("toBrat", () => {
-  it("emits the leaf text on one line", () => {
-    expect(toBrat(parseBrackets("[S [NP el] [VP duerme]]"))).toBe("el duerme\n");
+  it("ends the sentence with a blank line", () => {
+    expect(conllu.endsWith("\n\n")).toBe(true);
   });
 });
 
@@ -384,6 +444,11 @@ describe("JSON round-trip", () => {
     const restored = fromJSON(toJSON(source));
     expect(restored.label).toBe("S");
     expect(leavesOf(restored).map((n) => n.label)).toEqual(["el", "gato", "duerme"]);
+  });
+
+  it("keeps the movement directives", () => {
+    const arrows = [{ from: "tr", to: "wh", label: "wh" }];
+    expect(toJSON(parseBrackets("[S el]"), { directives: arrows }).directives).toEqual(arrows);
   });
 
   it("records the format and a timestamp", () => {

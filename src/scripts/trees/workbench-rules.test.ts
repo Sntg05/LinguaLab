@@ -11,6 +11,7 @@ import {
   exampleOptions,
   fitZoom,
   nextZoom,
+  pngFailure,
   zoomLabel,
 } from "./workbench-rules";
 
@@ -68,13 +69,13 @@ describe("exampleOptions", () => {
 
 describe("buildWorkbenchTree", () => {
   it("en modo texto lee la notación del tipo", () => {
-    const tree = buildWorkbenchTree(constituency, "[S [N a] [V b]]", "text");
+    const { tree } = buildWorkbenchTree(constituency, "[S [N a] [V b]]", "text");
     expect(tree.label).toBe("S");
     expect(tree.children).toHaveLength(2);
   });
 
   it("en modo frase arma el árbol desde una oración", () => {
-    expect(buildWorkbenchTree(constituency, "el perro ladra", "easy").label).not.toBe("");
+    expect(buildWorkbenchTree(constituency, "el perro ladra", "easy").tree.label).not.toBe("");
   });
 
   it("en un tipo que no es de corchetes, el modo frase se ignora y se lee la notación", () => {
@@ -94,6 +95,11 @@ describe("mensajes", () => {
   it("cualquier otro error muestra su texto", () => {
     expect(errorMessage(new Error("raro"))).toBe("raro");
     expect(errorMessage("texto")).toBe("texto");
+  });
+
+  it("si el PNG no se pudo crear, lo dice y ofrece el SVG", () => {
+    expect(pngFailure(true)).toMatch(/No se pudo crear el PNG.*SVG/);
+    expect(pngFailure(false)).toMatch(/could not create the PNG.*SVG/);
   });
 
   it("copiar dice si salió o no", () => {

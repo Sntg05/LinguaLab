@@ -28,6 +28,9 @@ export interface BuildOptions {
   solveOptions?: SolveOptions;
 }
 
+/** Una línea entera de instrucción de movimiento (`move: a -> b "etiqueta"`). */
+const MOVE_LINE = /^[ \t]*move:.*$/gim;
+
 /** The kinds `solve` accepts, as a set for membership tests. */
 const SOLVABLE: ReadonlySet<string> = new Set(DATA_KINDS);
 
@@ -45,8 +48,12 @@ export function buildTree(
   const type = treeType(typeId);
   if (!type) throw new ParseError(`Tipo de árbol desconocido: «${typeId}»`);
 
-  const source = String(input ?? "");
-  const arrows = parseMovementDirectives(source);
+  const raw = String(input ?? "");
+  const arrows = parseMovementDirectives(raw);
+  // Las líneas `move:` son instrucciones para dibujar flechas, no parte del
+  // árbol: se leen arriba y se quitan antes de analizar. Antes llegaban al
+  // analizador y todo ejemplo con movimiento fallaba con «Texto sobrante».
+  const source = raw.replace(MOVE_LINE, "");
 
   switch (type.mode) {
     case "dep":

@@ -22,6 +22,7 @@ import {
   exampleOptions,
   fitZoom,
   nextZoom,
+  pngFailure,
   zoomLabel,
 } from "./workbench-rules";
 
@@ -61,7 +62,9 @@ const setExportsEnabled = (enabled: boolean): void => {
   for (const button of document.querySelectorAll<HTMLButtonElement>(
     "[data-export], [data-script]",
   )) {
-    button.disabled = !enabled;
+    // CoNLL-U solo tiene sentido con núcleos y relaciones: los de un árbol de dependencias.
+    const needsDependencies = button.dataset["script"] === "conllu";
+    button.disabled = !enabled || (needsDependencies && state.tree?.depMeta === undefined);
   }
 };
 
@@ -190,8 +193,8 @@ const drawCurrent = (): void => {
   }
 
   try {
-    const tree = buildWorkbenchTree(state.type, value, state.mode);
-    draw(tree, []);
+    const { tree, arrows } = buildWorkbenchTree(state.type, value, state.mode);
+    draw(tree, arrows);
     renderChecks(tree, state.type);
   } catch (thrown) {
     setText("[data-tree-error]", errorMessage(thrown));
@@ -319,7 +322,11 @@ export const initTreeExports = (): void => {
           saveSVG(svg, name);
           break;
         case "png":
-          savePNG(svg, name);
+          try {
+            await savePNG(svg, name);
+          } catch {
+            setText("[data-live-region]", pngFailure(isSpanish()));
+          }
           break;
         case "copy": {
           let copied = true;
@@ -343,6 +350,7 @@ export const initTreeExports = (): void => {
         name: suggestName(tree),
         kind: type.id,
         lang: locale(),
+        directives: state.arrows,
       });
     }
   });

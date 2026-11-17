@@ -284,6 +284,22 @@ function indexTree(root: TreeNode): IndexedNode[] {
   return index;
 }
 
+/** El nodo en una ruta de índices desde la raíz. */
+function nodeAt(root: TreeNode, path: readonly number[]): TreeNode | undefined {
+  let node: TreeNode | undefined = root;
+  for (const index of path) node = node?.children[index];
+  return node;
+}
+
+/** La ruta del primer antecesor con más de una hija, o `null` si no hay. */
+function firstBranchingAncestor(root: TreeNode, path: readonly number[]): number[] | null {
+  for (let length = path.length - 1; length >= 0; length -= 1) {
+    const ancestor = path.slice(0, length);
+    if ((nodeAt(root, ancestor)?.children.length ?? 0) > 1) return ancestor;
+  }
+  return null;
+}
+
 /** Extract the `#id` marker a label may carry. */
 function movementId(label: string): string | null {
   return /#(\w+)/.exec(label)?.[1] ?? null;
@@ -311,10 +327,13 @@ export function checkMovement(
   }
 
   for (const directive of directives) {
-    const from = byId.get(directive.from);
-    const to = byId.get(directive.to);
+    // `move: origen -> destino`, como dice la ayuda de la página y como escriben
+    // los ejemplos: `from` es la huella (o copia baja) y `to` el sitio de
+    // aterrizaje. La versión anterior los leía al revés.
+    const trace = byId.get(directive.from);
+    const landing = byId.get(directive.to);
 
-    if (!from || !to) {
+    if (!trace || !landing) {
       out.push({
         level: "note",
         message: es(locale)
@@ -324,14 +343,17 @@ export function checkMovement(
       continue;
     }
 
-    // C-command: the landing site c-commands its trace when the trace is
-    // dominated by the landing site's PARENT. Comparing the other way round
-    // (as the original did) asks whether the landing site is inside the
-    // trace, which is never true for a real movement dependency.
-    const parentPath = from.path.slice(0, -1);
+    // Mando-c (Reinhart 1976): el sitio de aterrizaje manda-c a la huella si no
+    // la domina y el primer nodo que RAMIFICA por encima de él sí la domina. Con
+    // solo el padre, una marca sobre una hoja bajo un nodo unario (`[Spec qué#wh]`)
+    // nunca mandaba-c a nada.
+    const dominates = (ancestor: readonly number[], path: readonly number[]): boolean =>
+      path.length > ancestor.length && ancestor.every((value, index) => value === path[index]);
+    const branchingAbove = firstBranchingAncestor(tree, landing.path);
     const under =
-      to.path.length >= parentPath.length &&
-      parentPath.every((value, index) => value === to.path[index]);
+      branchingAbove !== null &&
+      !dominates(landing.path, trace.path) &&
+      dominates(branchingAbove, trace.path);
 
     const suffix = directive.label ? ` (${directive.label})` : "";
 

@@ -40,6 +40,12 @@ validar: **Praat 6.4.06** y **R 4.3.3**.
   persona pueda hacer sus experimentos y hacer gráficos o cálculos estadísticos en ciencias sociales».
 - **S10 (forma de trabajo).** «pregúntame y explícame lo más posible de lo que vayas a hacer y montalo en
   una branch para mergearlo después de probar localmente como queda todo».
+- **S12 (árboles y exportaciones, 2026-11-17).** «revisa adicionalmente los errores en los árboles y en
+  las exportaciones de cada herramienta que sean correctas en todos los formatos, si debes eliminar
+  algunos formatos hazlo pero necesito que funcione» y «not only in trees, review the exportation in all
+  labs». Hecho cuando: cada ejemplo de cada tipo de árbol se dibuja sin error; cada formato que ofrece
+  cada laboratorio se descarga y su contenido se valida (o se reimporta) en una prueba; un formato que no
+  es lo que su nombre promete se corrige o se quita.
 - **S11 (diseño).** «me gusta mucho el front pero puedes hacerlo mejor, revisa páginas parecidas y copia
   diseños o escanea repositorios de diseño para que sea más llamativa, intuitiva y útil para los
   estudiantes».
@@ -73,6 +79,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
+| T11 | S12 | Árboles sin errores y exportaciones válidas en todos los laboratorios | inline | en curso | — |
 | T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
 
 ## Log
@@ -382,4 +389,33 @@ Se preguntan de a una, al empezar la fase que las necesita.
   fija 44,1 kHz, comprobada por mutación (con el código anterior falla). En el mismo PR, CodeQL marcó
   `js/bad-tag-filter` en el contador de líneas de `architecture.test.ts`: ahora reconoce `</SCRIPT >`,
   con prueba. Verde: `verify:all` y 210 e2e.
+- **L36 (2026-11-17). T11 abierta (S12).** PR #22 fusionado (`769b233`) con CI, CodeQL y Vercel en verde;
+  producción desplegada y `live:check` en verde en las 30 páginas. Auditoría de árboles, construyendo cada
+  ejemplo de cada tipo: seis fallan al dibujarse («Texto sobrante tras el árbol» o «Carácter inesperado»).
+  Causas: (a) las líneas `move:` no se quitan antes de analizar los corchetes, y el banco descarta las
+  flechas que sí se leen (`draw(tree, [])`), así que ningún movimiento se dibujó ni se comprobó;
+  (b) `checkMovement` lee `move: a -> b` al revés de lo que dice la ayuda («origen -> destino») y de lo
+  que escriben todos los ejemplos; (c) ejemplos rotos: `ccg#0` es una categoría y no un árbol,
+  `semantic#1` tiene una estructura que el analizador no lee, `movement#1` y `minimalist#2` apuntan a
+  marcas `#id` que no existen, `lfg#0` usa una línea `note:` que nada interpreta. Exportaciones de
+  árboles: «Brat» descarga solo el texto de las hojas (Brat es un formato de anotación con `.ann`:
+  no lo es); CoNLL-U inventa núcleos («todo depende de la palabra 1») y categorías por la longitud de la
+  palabra para árboles que no son de dependencias; Newick borra caracteres reservados y puede inventar
+  la etiqueta «nodo». Los cuatro escritores de CSV (anotaciones, mediciones, resultados, reglas)
+  entrecomillan bien según RFC 4180.
+- **L37 (2026-11-17). T11, árboles.** Arreglado, cada cosa con su prueba en rojo primero: (a) las líneas
+  `move:` se quitan antes de analizar y las flechas llegan al dibujo y a las comprobaciones; (b) el
+  mando-c lee `move: origen -> destino` como dice la ayuda, y usa el primer nodo que ramifica por encima
+  del sitio de aterrizaje (Reinhart 1976), no su padre: una marca sobre una hoja bajo un nodo unario no
+  mandaba-c a nada; (c) ejemplos: elevación, pasiva («Pasoiva» y el sintagma con «by» colgado de un CP),
+  fases y QR reescritos en su estructura estándar con marcas y flechas que pasan el mando-c; `lfg#0` sin
+  la línea `note:` que nada interpretaba; `ccg#0` quitado (una categoría no es una derivación; CCG sigue
+  en D3). `src/scripts/trees/examples.test.ts` dibuja todos los ejemplos y exige que toda flecha pase.
+  Exportaciones: **el SVG no era XML válido** (la familia tipográfica `"Noto IPA", …` cerraba el
+  atributo) y por eso **el PNG nunca se descargaba** (el error se tragaba en silencio): ahora se escapa,
+  los colores `lab()`/`oklch()` pasan a hex sRGB y el PNG avisa si falla. Newick entrecomilla en vez de
+  borrar caracteres. CoNLL-U solo para árboles de dependencias, con los núcleos y relaciones escritos
+  (UPOS si es de UD, si no XPOS). Brat quitado: solo bajaba el texto de las hojas. El JSON guarda las
+  flechas. `e2e/arbor.spec.ts` descarga y valida cada formato. Revisión teórica de cada formalismo: sigue
+  en T4, espera D3.
 
