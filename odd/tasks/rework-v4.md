@@ -70,7 +70,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 - **D3 (T4).** Qué hacer con los formalismos que hoy son solo una etiqueta: rehacerlos con su notación
   propia o retirarlos hasta hacerlos bien; y si las estructuras de datos (AVL, heap, trie…) siguen en un
   sitio para lingüistas.
-- **D4 (T6).** Motor de estadística cuantitativa: R real en el navegador (webR) o un motor propio
+- **D4 (resuelta el 2026-11-17: «our own engine validated against R»).** Motor de estadística cuantitativa: R real en el navegador (webR) o un motor propio
   validado contra R.
 - **D5 (T8).** Dirección de diseño, sobre maquetas.
 
@@ -84,7 +84,13 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
 | T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline y delegada (5.3–5.7: escritores acotados, contexto y paralelismo) | hecha en código (L21–L32) | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26); 5.3 hecha (curvas sobre el espectrograma, L27); 5.6 y 5.7 hechas (`c9bf799`, `f19f6b6`, L30); 5.4 hecha (`9316dce`, L31); 5.5 hecha (`6726b4a`, L32). Pendiente humano: la persona que no conoce el visor y la captura junto a Praat |
-| T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
+| T6 | S9 | Estadística cuantitativa, contrastada con R (D4: motor propio) | inline | en curso | ver T6.1–T6.8 |
+| T6.3 | S9 | Distribuciones normal, t, χ², F (función de distribución y cuantiles) en `packages/core/src/stats/` | inline | hecha | commit de L45 |
+| T6.2 | S9 | Descriptivos: n, media, mediana, moda, varianza, desviación, cuantiles tipo 7, rango, asimetría | inline | hecha | commit de L45 |
+| T6.4 | S9 | Pruebas: t (una muestra, Welch, pareada), χ² (independencia, bondad de ajuste), Pearson, Spearman, ANOVA de un factor, Mann–Whitney, Wilcoxon | inline | pendiente | — |
+| T6.5 | S9 | Tamaños del efecto e intervalos al 95 % | inline | pendiente | — |
+| T6.6 | S9 | Regresión lineal simple y múltiple | inline | pendiente | — |
+| T6.1, T6.7, T6.8 | S9, S6 | Datos CSV/TSV, gráficos SVG y página `/estadistica` con asistente e informe APA | inline | pendiente | — |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | hecha en lo pedido por S9; quedan unidades del plan del traspaso (L43) | `c1bed4f` motor contra `irr` de R; `b5e1707` página `/cualitativo` con e2e y axe (L39) |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
@@ -518,4 +524,19 @@ Se preguntan de a una, al empezar la fase que las necesita.
   y que siga ahí), jerarquía, colores y memos de códigos, exportación REFI-QDA `.qdc` y «recuperar todos los
   segmentos de un código». No se hicieron; quedan como T7b, sin decisión pendiente. El traspaso no se leyó
   al empezar esta sesión (se trabajó desde la tabla de tareas): por eso T7 se dio por hecha de más.
+- **L44 (2026-11-17). D4 resuelta.** Textual: «our own engine validated against R». T6 se parte en las
+  unidades del plan del traspaso (§6): primero las distribuciones (6.3) y los descriptivos (6.2), en
+  `packages/core/src/stats/`, contrastados con R por `scripts/r/build-stats-reference.R`. La cola normal de
+  Cody que hoy vive en `src/scripts/tools/keyness.ts` pasa al núcleo para que haya una sola.
+- **L45 (2026-11-17). T6.3 y T6.2.** `packages/core/src/stats/`: normal (Cody, en el mismo orden que
+  `pnorm`), t, χ² y F por beta y gamma incompletas regularizadas (Numerical Recipes, Lanczos), con cola
+  superior calculada sin restar; cuantiles por bisección logarítmica sobre la cola precisa. Descriptivos:
+  media, mediana, modas, varianza y desviación (n − 1), cuantiles tipo 7, rango, IQR y asimetría G1;
+  una muestra vacía o con un valor no finito es un `Result` con error, no NaN. Validación:
+  `scripts/r/build-stats-reference.R` (R base; iris, mtcars, ToothGrowth) escribe 330 casos de
+  distribución y 5 muestras; todo coincide a 1e-10 relativo (1e-12 los descriptivos). Mutar un coeficiente
+  de Lanczos, la fracción de la beta o la serie de la gamma rompe 63, 149 y 15 pruebas. **R se equivoca en
+  `qf` con p muy pequeño:** `qf(1e-8, 1, 1)` da 2,22e-16 (el épsilon de la máquina) y `pf` de ese valor
+  da 9,49e-9; la referencia usa `qbeta`, que coincide con la forma cerrada tan²(πp/2) de F(1, 1). La cola
+  normal de Cody que tenía la estación pasa al núcleo: una sola implementación.
 

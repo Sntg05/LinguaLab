@@ -25,3 +25,5 @@ export * from "./ports/index";
 export * from "./g2p/index";
 // Análisis cualitativo: códigos, segmentos, coocurrencias y acuerdo.
 export * from "./qualitative/index";
+// Estadística cuantitativa: distribuciones y descriptivos contrastados con R.
+export * from "./stats/index";

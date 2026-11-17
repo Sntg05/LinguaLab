@@ -21,83 +21,14 @@
      freedom, the reference distribution of G² for a 2×2 table.
    ============================================================ */
 
-/* ---------------------------------------------------------------
-   Normal upper tail (W. J. Cody, 1969), as in R's `pnorm`.
-   p for χ²(1) is 2·Φ(−√G²), so the precision of p is the precision of Φ.
-   A series or a crude approximation loses the tiny p values (1e-80) that
-   frequent keywords produce; Cody's rational approximations keep full
-   double precision across the whole range.
-   --------------------------------------------------------------- */
-
-const A = [
-  2.2352520354606837, 161.02823106855587, 1067.6894854603709, 18154.98125334356,
-  0.06568233791820745,
-];
-const B = [47.202581904688245, 976.0985517377767, 10260.932208618979, 45507.78933502673];
-const C = [
-  0.39894151208813466, 8.883149794388377, 93.50665613217785, 597.2702763948002,
-  2494.5375852903726, 6848.190450536283, 11602.65143764735, 9842.714838383978,
-  1.0765576773720192e-8,
-];
-const D = [
-  22.266688044328117, 235.387901782625, 1519.3775994075547, 6485.558298266761,
-  18615.571640885097, 34900.95272114598, 38912.00328609327, 19685.429676859992,
-];
-const P = [
-  0.215898534057957, 0.12740116116024736, 0.022235277870649807, 0.0014216191932278934,
-  0.000029112874951168793, 0.023073441764940174,
-];
-const Q = [1.284260096144911, 0.4682382124808651, 0.06598813786892856, 0.0037823963320275824,
-  0.00007297515550839662];
-
-const SQRT_32 = 5.656854249492381;
-const ONE_OVER_SQRT_2PI = 0.3989422804014327;
-
-const at = (values: readonly number[], index: number): number => values[index] ?? 0;
+import { normalCdf } from "@lingualab/core";
 
 /**
- * exp(−y²/2) in two products, as R's `pnorm` does: y² rounded to 1/16 plus the
- * small remainder. Measured against R, this form reproduces `pnorm` exactly at
- * y = 8.3, 15.7, 26.9 and 37.5; computed in one go it drifts by up to 1.2e-14
- * (see the test "matches pnorm bit for bit far into the tail").
+ * P(Z > y) for a standard normal Z. The implementation (Cody's rational
+ * approximations, as R's `pnorm`) lives in the core, `packages/core/src/stats/`,
+ * so the station and the statistics tool share one normal tail.
  */
-const gaussian = (y: number): number => {
-  const rounded = Math.trunc(y * 16) / 16;
-  const delta = (y - rounded) * (y + rounded);
-  return Math.exp(-rounded * rounded * 0.5) * Math.exp(-delta * 0.5);
-};
-
-/** P(Z > y) for a standard normal Z and y ≥ 0. */
-export const normalUpperTail = (y: number): number => {
-  if (y <= 0.67448975) {
-    const square = y * y;
-    let numerator = at(A, 4) * square;
-    let denominator = square;
-    for (let i = 0; i < 3; i += 1) {
-      numerator = (numerator + at(A, i)) * square;
-      denominator = (denominator + at(B, i)) * square;
-    }
-    return 0.5 - (y * (numerator + at(A, 3))) / (denominator + at(B, 3));
-  }
-  if (y <= SQRT_32) {
-    let numerator = at(C, 8) * y;
-    let denominator = y;
-    for (let i = 0; i < 7; i += 1) {
-      numerator = (numerator + at(C, i)) * y;
-      denominator = (denominator + at(D, i)) * y;
-    }
-    return gaussian(y) * ((numerator + at(C, 7)) / (denominator + at(D, 7)));
-  }
-  const inverse = 1 / (y * y);
-  let numerator = at(P, 5) * inverse;
-  let denominator = inverse;
-  for (let i = 0; i < 4; i += 1) {
-    numerator = (numerator + at(P, i)) * inverse;
-    denominator = (denominator + at(Q, i)) * inverse;
-  }
-  const ratio = (inverse * (numerator + at(P, 4))) / (denominator + at(Q, 4));
-  return (gaussian(y) * (ONE_OVER_SQRT_2PI - ratio)) / y;
-};
+export const normalUpperTail = (y: number): number => normalCdf(y, { upper: true });
 
 /** P(χ²₁ > x): the p value of a G² or a chi-square with one degree of freedom. */
 export const chiSquareOneDfUpperTail = (x: number): number =>
