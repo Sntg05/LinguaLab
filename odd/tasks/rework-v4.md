@@ -72,7 +72,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
-| T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | en curso | `0b514b7`: FonoLab usa el transcriptor del sitio (rojo: `claims.test` y una e2e que esperaba /s/ en «zapato»). Inventario y trinquete en `src/lib/architecture.test.ts`; PhonemizerLab migrada (L33). Faltan TextStation, ArborLab, FonoLab, ExperimentsLab, Glossary y Bibliography |
+| T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
 | T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
 
 ## Log
@@ -358,3 +358,16 @@ Se preguntan de a una, al empezar la fase que las necesita.
   `src/scripts/phonemizer/rules.ts` (opciones, mensajes, errores, comparación con la tabla) y el
   cableado a `index.ts`. Rojo: el trinquete marcó `PhonemizerLab.astro: 242`; 15 pruebas de reglas sin
   módulo. Verde: `verify:all` y 202 e2e.
+- **L34 (2026-11-17). T9 cerrada.** El dueño, textual: «do the task and push it to github repo, when all
+  the validations are ok merge to main, push and implement, review in vercel and finish». Migrados, uno
+  por commit: FonoLab (`src/scripts/fono/rules.ts` e `index.ts`), Glosario y Bibliografía (tenían el
+  mismo script copiado; ahora comparten `initCatalogueFilter`, con prueba sobre un DOM que no existía),
+  ArborLab (`src/scripts/trees/workbench-rules.ts` y `workbench.ts`) y la estación de texto
+  (`src/scripts/tools/station-rules.ts` y `station.ts`; la prueba fija las claves de la exportación).
+  ExperimentsLab ya solo conectaba: el contador contaba de más porque un comentario del frontmatter
+  nombraba `<script>`; se corrigió con su prueba. ArborLab no tenía e2e funcional: `e2e/arbor.spec.ts`
+  (siete casos) se escribió contra el código anterior, pasó, y sigue pasando después de mover el código.
+  La lista de pendientes quedó vacía y se quitó: el tope de 30 líneas vale para todos. `claims.test`
+  ahora busca la llamada al motor en `src/scripts/fono/index.ts`. Verde: `verify:all` y 209 e2e, solo
+  Chromium; el peso de la peor página no cambió. La portada sigue con la tabla de Ortografía (decisión
+  menor abierta).

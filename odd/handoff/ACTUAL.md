@@ -20,7 +20,7 @@ Pega esto como primera instrucción, o síguelo tal cual:
 > fusiones a `main` sin que el dueño lo pida. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
 > Háblale en español. Al terminar, reescribe este archivo.
 
-Estado al 2026-11-17: T5 hecha en código (5.1–5.8). **T9 en curso:** inventario hecho, trinquete en `src/lib/architecture.test.ts` (`PENDING_EXTRACTION`, tope de 30 líneas) y PhonemizerLab migrada (`d45b8e9`, Log L33). Siguiente: FonoLab, ExperimentsLab, ArborLab, TextStation, Glossary y Bibliography, uno por commit, sacando cada uno de la lista. Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
+Estado al 2026-11-17: T5 y T9 hechas (Log L33–L34) y fusionadas a `main`. La siguiente sin bloqueo es **T7** (análisis cualitativo); T4, T6 y T8 esperan D3, D4 y D5. Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
 decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
 
 ## 1. Qué se está haciendo y dónde
@@ -130,7 +130,7 @@ fuera de nvm; cumple el `>=22.12` del proyecto, pero `.nvmrc` pide 22: si algo d
 | `c9bf799`, `f19f6b6` | **T5, 5.6 y 5.7:** intensidad y TextGrid contrastados con Praat 7.0.03 (`npm run validate:textgrid-praat`) |
 | `9316dce` | **T5, 5.4:** selección por arrastre, lecturas, barras de reproducción y zoom; aviso «experimental» quitado |
 | (commit de 5.5) | **T5, 5.5:** consultas «Obtener tono / F1 / F2 / intensidad» con las teclas de Praat; e2e de la tabla y del teclado contra las referencias |
-| `d45b8e9` | **T9:** trinquete de líneas de script por componente; PhonemizerLab con sus reglas en `src/scripts/phonemizer/` |
+| `d45b8e9`, `4417cac`, `e56b84a`, `c565ee5` | **T9:** tope de 30 líneas de script por componente; PhonemizerLab, FonoLab, Glosario, Bibliografía, ArborLab (con `e2e/arbor.spec.ts`) y la estación de texto con sus reglas en `src/scripts/<área>/` |
 | `4d8d32b` | **T5, 5.2:** FFT rellenada a 1024, eje en Hz, espectrograma nítido en pantallas de doble densidad y guardado entre cuadros |
 
 Puerta completa y e2e en verde en el último commit de código.
@@ -181,7 +181,7 @@ desde `public/`, regla 9 de §3. Si se puede escribir en menos de ~200 líneas p
 | Tarea | Estado | Bloqueada por | Tamaño |
 |---|---|---|---|
 | T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | **hecha en código**: 5.1–5.8 (ver §4 y el Log L21–L32). Pendiente humano: la persona que no conoce el visor, y la captura del espectrograma junto a Praat | nada | — |
-| T9 Contrato único de herramienta | en curso: 1 de 7 componentes migrado; sin `defineTool` (L33: `safeInit` + `initX` ya es el contrato) | nada | mediana |
+| T9 Contrato único de herramienta | **hecha**: ningún componente pasa de 30 líneas de script (`src/lib/architecture.test.ts`); el contrato es `safeInit("x", initX)` con `initX` en `src/scripts/<área>/` | nada | — |
 | T7 Análisis cualitativo | sin empezar | nada | grande |
 | T4 Árboles | ficha corregida; falta lo demás | D3 | grande |
 | T6 Estadística cuantitativa | sin empezar | D4 | grande |
