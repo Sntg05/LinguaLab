@@ -59,3 +59,4 @@ export type {
 } from "./tool-descriptor";
 export type { Reference, ScholarlySupportIssue, SupportedTool } from "./reference";
 export { checkScholarlySupport, referenceLink } from "./reference";
+export * from "./document";

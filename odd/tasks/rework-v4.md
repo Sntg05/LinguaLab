@@ -46,6 +46,15 @@ validar: **Praat 6.4.06** y **R 4.3.3**.
   labs». Hecho cuando: cada ejemplo de cada tipo de árbol se dibuja sin error; cada formato que ofrece
   cada laboratorio se descarga y su contenido se valida (o se reimporta) en una prueba; un formato que no
   es lo que su nombre promete se corrige o se quita.
+- **S13 (comparación de documentos, 2026-11-17).** «I think we could add a feature to the website that would
+  allow users to upload 2 or, at most, 3 documents in docx or PDF format with extractable text and conduct
+  comparative corpus analyses» y «start the document comparison first». Hecho cuando: en la estación de
+  texto se cargan de 2 a 3 documentos .docx, PDF con texto extraíble (o .txt); un PDF sin texto se rechaza
+  diciéndolo; se comparan frecuencias normalizadas, palabras clave de cada documento frente al resto
+  (log-likelihood y log ratio, con cifras contrastadas con R), diversidad léxica, vocabulario compartido y
+  propio, y concordancias por documento; los resultados se descargan y se leen de vuelta en una prueba.
+  Supuesto, sin pedir: la comparación entra como una sección nueva de la estación; la reorganización
+  completa de su interfaz y el etiquetado POS/NER de la misma propuesta (L40) quedan para después.
 - **S11 (diseño).** «me gusta mucho el front pero puedes hacerlo mejor, revisa páginas parecidas y copia
   diseños o escanea repositorios de diseño para que sea más llamativa, intuitiva y útil para los
   estudiantes».
@@ -80,6 +89,10 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
 | T11 | S12 | Árboles sin errores y exportaciones válidas en todos los laboratorios | inline | hecha | `c48e142` árboles (L37); commit siguiente, `e2e/exports.spec.ts` (L38) |
+| T12 | S13 | Lectura de documentos: puerto en el núcleo, .txt y .docx propios (ZIP + XML, sin dependencia) | inline | pendiente | — |
+| T13 | S13 | PDF con pdf.js (dependencia nueva: riesgo 5), rechazo de PDF sin texto | inline + verificador | pendiente | — |
+| T14 | S13 | Motor de comparación: frecuencia por 10 000, G² y p, log ratio, diversidad, vocabulario compartido; contrastado con R base | inline | pendiente | — |
+| T15 | S13 | Sección «Comparar documentos» en la estación, exportaciones leídas de vuelta, e2e y axe | inline | pendiente | — |
 | T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
 
 ## Log
@@ -454,4 +467,10 @@ Se preguntan de a una, al empezar la fase que las necesita.
   y log ratio, diversidad léxica, n-gramas compartidos, KWIC, contrastado con R); después POS y NER,
   eligiendo el motor por exactitud medida en los conjuntos de prueba de Universal Dependencies (AnCora,
   EWT). Queda como S13 cuando el dueño lo confirme.
+- **L41 (2026-11-17). S13 empieza.** Pedido textual: «start the document comparison first, and give me the
+  differences between webR and our own engine for maths». Plan: T12 a T15. Fixtures reales: .docx con
+  pandoc y PDF con pandoc + xelatex, versionados con el script que los genera. Las cifras de palabras
+  clave se contrastan con R base (devianza de un modelo de Poisson de independencia sobre la tabla 2×2 =
+  G²; `pchisq` para p), sin paquetes. Para D4 se dio la comparación webR / motor propio (ver respuesta
+  del 2026-11-17); D4 sigue abierta.
 

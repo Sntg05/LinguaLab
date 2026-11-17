@@ -13,6 +13,10 @@
     "./experiment": {
       "types": "./src/experiment/index.ts",
       "default": "./src/experiment/index.ts"
+    },
+    "./document": {
+      "types": "./src/document/index.ts",
+      "default": "./src/document/index.ts"
     }
   },
   "types": "./src/index.ts",
