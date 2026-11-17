@@ -11,7 +11,8 @@
 #   fitting code rather than by re-typing the formula.
 # - p: pchisq(g2, df = 1, lower.tail = FALSE).
 # - log_ratio: Hardie's (2014) log ratio, log2 of the ratio of relative
-#   frequencies, with a zero frequency replaced by 0.5.
+#   frequencies. Hardie does not say how to handle a zero frequency; it is
+#   replaced by 0.5, the adjustment quanteda's textstat_keyness applies.
 #
 # Usage: Rscript scripts/r/build-keyness-reference.R
 

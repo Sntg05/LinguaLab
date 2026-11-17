@@ -13,7 +13,9 @@
      so it says how sure we are, not how big the difference is.
    - Log ratio (Hardie, 2014): log2 of the ratio of the two relative
      frequencies. It says how big the difference is: 1 means twice as frequent,
-     2 four times. A zero frequency is replaced by 0.5, Hardie's convention.
+     2 four times. Hardie's post does not say what to do with a zero frequency
+     (the ratio would be infinite); it is replaced by 0.5, the same adjustment
+     quanteda's `textstat_keyness` applies.
    - p: the upper tail of the chi-square distribution with one degree of
      freedom, the reference distribution of G² for a 2×2 table.
    ============================================================ */
@@ -122,6 +124,6 @@ export const logLikelihood = (a: number, b: number, n1: number, n2: number): num
   return Math.max(0, g2);
 };
 
-/** Hardie's log ratio: log2 of the ratio of relative frequencies, zeros as 0.5. */
+/** Hardie's log ratio: log2 of the ratio of relative frequencies, a zero frequency counted as 0.5. */
 export const logRatio = (a: number, b: number, n1: number, n2: number): number =>
   Math.log2((Math.max(a, 0.5) / n1) / (Math.max(b, 0.5) / n2));
