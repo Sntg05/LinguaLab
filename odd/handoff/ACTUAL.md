@@ -20,7 +20,7 @@ Pega esto como primera instrucción, o síguelo tal cual:
 > fusiones a `main` sin que el dueño lo pida. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
 > Háblale en español. Al terminar, reescribe este archivo.
 
-Estado al 2026-11-17: T5 y T9 hechas (Log L33–L34) y fusionadas a `main`. La siguiente sin bloqueo es **T7** (análisis cualitativo); T4, T6 y T8 esperan D3, D4 y D5. Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
+Estado al 2026-11-17: T5, T9 y T11 (árboles y exportaciones) hechas y en producción (PR #22 y #24; Log L33–L38). La siguiente sin bloqueo es **T7** (análisis cualitativo); T4, T6 y T8 esperan D3, D4 y D5. Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
 decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
 
 ## 1. Qué se está haciendo y dónde
@@ -182,6 +182,7 @@ desde `public/`, regla 9 de §3. Si se puede escribir en menos de ~200 líneas p
 |---|---|---|---|
 | T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | **hecha en código**: 5.1–5.8 (ver §4 y el Log L21–L32). Pendiente humano: la persona que no conoce el visor, y la captura del espectrograma junto a Praat | nada | — |
 | T9 Contrato único de herramienta | **hecha**: ningún componente pasa de 30 líneas de script (`src/lib/architecture.test.ts`); el contrato es `safeInit("x", initX)` con `initX` en `src/scripts/<área>/` | nada | — |
+| T11 Árboles y exportaciones (S12) | **hecha**: todos los ejemplos se dibujan (`src/scripts/trees/examples.test.ts`); cada formato de cada laboratorio se valida en `e2e/arbor.spec.ts` y `e2e/exports.spec.ts` | nada | — |
 | T7 Análisis cualitativo | sin empezar | nada | grande |
 | T4 Árboles | ficha corregida; falta lo demás | D3 | grande |
 | T6 Estadística cuantitativa | sin empezar | D4 | grande |
@@ -494,6 +495,7 @@ Se le pregunta **una** cuando se llega a la tarea que la necesita, con la recome
 - **Límite de uso del dueño:** trabaja con un plan con tope de cinco horas y otro semanal. Conviene
   commitear seguido, no releer archivos ya leídos, limitar la salida de los comandos (`| tail`, `| grep`)
   y dejar este traspaso al día antes de agotar la sesión.
+- **CI sube los rastros de Playwright** (`playwright-traces`) cuando falla la e2e: así se encontró el cuelgue a 44,1 kHz (L35). Esta máquina decodifica a 48 kHz; un defecto que solo aparece a 44,1 kHz no se ve aquí sin forzarlo.
 - **Pendientes anteriores** que siguen en `docs/HUMAN-EVIDENCE.md`: descartar en GitHub siete alertas de
   CodeQL justificadas, proteger `main` también para administradores, subir el piso de Node para Astro
   7.4.2 (P23), etiquetas `v3.0.0` y `v3.1.0`.
