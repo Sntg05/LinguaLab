@@ -90,12 +90,15 @@ const MAX_COMPONENT_SCRIPT_LINES = 30;
  * Se quita antes el frontmatter (`---` … `---`): es código del servidor, y un
  * comentario suyo que nombre la etiqueta `<script>` hacía contar desde ahí hasta
  * el cierre del script real. Las etiquetas que se cierran solas (`<script … />`,
- * los datos JSON) no abren un bloque.
+ * los datos JSON) no abren un bloque. El cierre admite mayúsculas, espacios y
+ * atributos (`</SCRIPT >`), como lo admite el navegador.
  */
+const SCRIPT_BLOCK = /<script\b(?![^>]*\/>)[^>]*>([\s\S]*?)<\/script\b[^>]*>/gi;
+
 const scriptLines = (source: string): number => {
   const markup = source.replace(/^---\n[\s\S]*?\n---\n/, "");
   let count = 0;
-  for (const match of markup.matchAll(/<script(?:\s[^>]*[^/])?>([\s\S]*?)<\/script>/g)) {
+  for (const match of markup.matchAll(SCRIPT_BLOCK)) {
     count += (match[1] ?? "").split("\n").filter((line) => line.trim() !== "").length;
   }
   return count;
@@ -136,5 +139,10 @@ describe("los componentes solo conectan (T9)", () => {
       "</script>",
     ].join("\n");
     expect(scriptLines(sample)).toBe(1);
+  });
+
+  it("reconoce el cierre con mayúsculas o con espacio, como el navegador", () => {
+    expect(scriptLines("<SCRIPT>\n  one();\n</SCRIPT >")).toBe(1);
+    expect(scriptLines('<script type="module">\n  one();\n  two();\n</script\n>')).toBe(2);
   });
 });
