@@ -30,6 +30,6 @@
     "jspsych": "8.3.0"
   },
   "devDependencies": {
-    "fake-indexeddb": "6.2.6"
+    "fake-indexeddb": "6.2.8"
   }
 }
