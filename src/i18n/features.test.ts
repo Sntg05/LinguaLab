@@ -11,6 +11,8 @@ import { experimentsEn } from "./messages/features/experiments.en";
 import { experimentsEs } from "./messages/features/experiments.es";
 import { languagesEn } from "./messages/features/languages.en";
 import { languagesEs } from "./messages/features/languages.es";
+import { statisticsEn } from "./messages/features/statistics.en";
+import { statisticsEs } from "./messages/features/statistics.es";
 import { qualitativeEn } from "./messages/features/qualitative.en";
 import { qualitativeEs } from "./messages/features/qualitative.es";
 
@@ -34,6 +36,7 @@ const MODULES = [
   { name: "acoustic", prefix: "acoustic.", es: acousticEs, en: acousticEn },
   { name: "qualitative", prefix: "qual.", es: qualitativeEs, en: qualitativeEn },
   { name: "compare", prefix: "cmp.", es: compareEs, en: compareEn },
+  { name: "statistics", prefix: "stats.", es: statisticsEs, en: statisticsEn },
 ] as const;
 
 describe("los mensajes de cada herramienta", () => {

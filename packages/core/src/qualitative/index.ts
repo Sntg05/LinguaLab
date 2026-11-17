@@ -4,4 +4,4 @@ export * from "./agreement";
 export * from "./codebook";
 export * from "./coding";
 export * from "./cooccurrence";
-export { parseCsvRecords, toCsv, type CsvReadError } from "./csv";
+export { parseCsvRecords, toCsv, type CsvDelimiter, type CsvReadError } from "./csv";

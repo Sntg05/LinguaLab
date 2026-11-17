@@ -1,0 +1,16 @@
+---
+import TheoryNote from "../../components/TheoryNote.astro";
+import StatisticsLab from "../../components/StatisticsLab.astro";
+import Base from "../../layouts/Base.astro";
+import { t } from "../../i18n";
+---
+
+<Base
+  locale="en"
+  path="/estadistica"
+  title={t("en", "stats.meta.title")}
+  description={t("en", "stats.meta.description")}
+>
+  <StatisticsLab locale="en" />
+  <TheoryNote locale="en" tools={["statistics"]} />
+</Base>

@@ -84,13 +84,13 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
 | T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline y delegada (5.3–5.7: escritores acotados, contexto y paralelismo) | hecha en código (L21–L32) | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26); 5.3 hecha (curvas sobre el espectrograma, L27); 5.6 y 5.7 hechas (`c9bf799`, `f19f6b6`, L30); 5.4 hecha (`9316dce`, L31); 5.5 hecha (`6726b4a`, L32). Pendiente humano: la persona que no conoce el visor y la captura junto a Praat |
-| T6 | S9 | Estadística cuantitativa, contrastada con R (D4: motor propio) | inline | en curso | ver T6.1–T6.8 |
+| T6 | S9 | Estadística cuantitativa, contrastada con R (D4: motor propio) | inline | hecha (L44–L49) | ver T6.1–T6.8 |
 | T6.3 | S9 | Distribuciones normal, t, χ², F (función de distribución y cuantiles) en `packages/core/src/stats/` | inline | hecha | commit de L45 |
 | T6.2 | S9 | Descriptivos: n, media, mediana, moda, varianza, desviación, cuantiles tipo 7, rango, asimetría | inline | hecha | commit de L45 |
 | T6.4 | S9 | Pruebas: t (una muestra, Welch, pareada), χ² (independencia, bondad de ajuste), Pearson, Spearman, ANOVA de un factor, Mann–Whitney, Wilcoxon | inline | hecha | commit de L46 |
 | T6.5 | S9 | Tamaños del efecto e intervalos al 95 % | inline | hecha sin intervalos de d, η² y V (L47) | commit de L47 |
 | T6.6 | S9 | Regresión lineal simple y múltiple | inline | hecha | commit de L48 |
-| T6.1, T6.7, T6.8 | S9, S6 | Datos CSV/TSV, gráficos SVG y página `/estadistica` con asistente e informe APA | inline | pendiente | — |
+| T6.1, T6.7, T6.8 | S9, S6 | Datos CSV/TSV, gráficos SVG y página `/estadistica` con asistente e informe APA | inline | hecha | commit de L49 |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | hecha en lo pedido por S9; quedan unidades del plan del traspaso (L43) | `c1bed4f` motor contra `irr` de R; `b5e1707` página `/cualitativo` con e2e y axe (L39) |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
@@ -567,4 +567,18 @@ Se preguntan de a una, al empezar la fase que las necesita.
   a 1e-9. Usar n en vez de n − p en la varianza residual rompe cuatro. Con esto el motor de T6 (6.2 a 6.6)
   está completo; faltan los datos (6.1), los gráficos (6.7) y la página (6.8). T6.5 se commiteó sin
   `verify:all` (solo pruebas, lint y tipos del núcleo); la puerta completa corrió aquí, en verde.
+- **L49 (2026-11-17). T6.1, T6.7 y T6.8: la página `/estadistica`.** Datos: `packages/core/src/stats/dataset.ts`
+  detecta el separador (coma, punto y coma o tabulador), acepta la coma decimal cuando el separador lo
+  permite, cuenta los faltantes (vacío, «NA», «N/A») sin rellenarlos y clasifica numérica o nominal; la
+  ordinal la marca la persona. El lector de CSV del núcleo (de T7) ganó el separador como parámetro en vez
+  de escribirse otro. Página: datos con un ejemplo **inventado** (40 participantes ficticios, semilla fija,
+  dicho en la página), tabla de variables con su tipo, descripción con tabla y gráfico, y un asistente de
+  siete preguntas que muestra los supuestos antes del resultado, propone la prueba paramétrica y su
+  alternativa por rangos, da siempre el tamaño del efecto, el umbral α = .05 a la vista y la frase en
+  formato APA (punto decimal, sin cero inicial, signo menos), con gráficos SVG propios (histograma de
+  Sturges, cajas de Tukey, dispersión con recta, barras) descargables. Catorce referencias verificadas
+  en Crossref o en su página. e2e: la frase de la página es la del motor para los mismos datos, cada
+  pregunta responde, un error dice por qué, el CSV de Excel en español se lee, el SVG es XML válido y
+  axe no encuentra violaciones con resultados; accesibilidad de la página en los dos idiomas, temas y a
+  320 px. **Sin cambio:** no hay Kruskal–Wallis ni modelos mixtos, ni intervalos de d, η² y V.
 

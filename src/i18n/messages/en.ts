@@ -9,6 +9,7 @@ import { elanEn } from "./features/elan.en";
 import { languagesEn } from "./features/languages.en";
 import { qualitativeEn } from "./features/qualitative.en";
 import { compareEn } from "./features/compare.en";
+import { statisticsEn } from "./features/statistics.en";
 import { acousticEn } from "./features/acoustic.en";
 
 export const en = {
@@ -21,6 +22,7 @@ export const en = {
   "nav.elan": "ELAN ↔ TextGrid",
   "nav.experiments": "Experiments",
   "nav.qualitative": "Qualitative analysis",
+  "nav.statistics": "Statistics",
   "nav.ipa": "PhonoLab",
   "nav.trees": "ArborLab",
   "nav.resources": "Bibliography",
@@ -546,6 +548,7 @@ export const en = {
   ...elanEn,
   ...qualitativeEn,
   ...compareEn,
+  ...statisticsEn,
   ...languagesEn,
   ...acousticEn,
 } as const;

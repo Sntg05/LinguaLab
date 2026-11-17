@@ -279,6 +279,132 @@
       "source": "Mathematics of Computation, 23(107), 631–637",
       "doi": "10.1090/S0025-5718-1969-0247736-4",
       "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "welch1947",
+      "authors": "Welch, B. L.",
+      "year": 1947,
+      "title": "The generalization of ‘Student's’ problem when several different population variances are involved",
+      "source": "Biometrika, 34(1–2), 28–35",
+      "doi": "10.1093/biomet/34.1-2.28",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "mann1947",
+      "authors": "Mann, H. B., & Whitney, D. R.",
+      "year": 1947,
+      "title": "On a test of whether one of two random variables is stochastically larger than the other",
+      "source": "The Annals of Mathematical Statistics, 18(1), 50–60",
+      "doi": "10.1214/aoms/1177730491",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "wilcoxon1945",
+      "authors": "Wilcoxon, F.",
+      "year": 1945,
+      "title": "Individual comparisons by ranking methods",
+      "source": "Biometrics Bulletin, 1(6), 80–83",
+      "doi": "10.2307/3001968",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "spearman1904",
+      "authors": "Spearman, C.",
+      "year": 1904,
+      "title": "The proof and measurement of association between two things",
+      "source": "The American Journal of Psychology, 15(1), 72–101",
+      "doi": "10.2307/1412159",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "hyndman1996",
+      "authors": "Hyndman, R. J., & Fan, Y.",
+      "year": 1996,
+      "title": "Sample quantiles in statistical packages",
+      "source": "The American Statistician, 50(4), 361–365",
+      "doi": "10.1080/00031305.1996.10473566",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "joanes1998",
+      "authors": "Joanes, D. N., & Gill, C. A.",
+      "year": 1998,
+      "title": "Comparing measures of sample skewness and kurtosis",
+      "source": "Journal of the Royal Statistical Society: Series D (The Statistician), 47(1), 183–189",
+      "doi": "10.1111/1467-9884.00122",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "cohen2013",
+      "authors": "Cohen, J.",
+      "year": 2013,
+      "title": "Statistical power analysis for the behavioral sciences (2nd ed.)",
+      "source": "Routledge (original work published 1988)",
+      "doi": "10.4324/9780203771587",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "bergsma2013",
+      "authors": "Bergsma, W.",
+      "year": 2013,
+      "title": "A bias-correction for Cramér's V and Tschuprow's T",
+      "source": "Journal of the Korean Statistical Society, 42(3), 323–328",
+      "doi": "10.1016/j.jkss.2012.10.002",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "sturges1926",
+      "authors": "Sturges, H. A.",
+      "year": 1926,
+      "title": "The choice of a class interval",
+      "source": "Journal of the American Statistical Association, 21(153), 65–66",
+      "doi": "10.1080/01621459.1926.10502161",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "mcgill1978",
+      "authors": "McGill, R., Tukey, J. W., & Larsen, W. A.",
+      "year": 1978,
+      "title": "Variations of box plots",
+      "source": "The American Statistician, 32(1), 12–16",
+      "doi": "10.1080/00031305.1978.10479236",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "lanczos1964",
+      "authors": "Lanczos, C.",
+      "year": 1964,
+      "title": "A precision approximation of the gamma function",
+      "source": "Journal of the Society for Industrial and Applied Mathematics, Series B: Numerical Analysis, 1(1), 86–96",
+      "doi": "10.1137/0701008",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "benshachar2020",
+      "authors": "Ben-Shachar, M. S., Lüdecke, D., & Makowski, D.",
+      "year": 2020,
+      "title": "effectsize: Estimation of effect size indices and standardized parameters",
+      "source": "Journal of Open Source Software, 5(56), 2815",
+      "doi": "10.21105/joss.02815",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "rcore",
+      "authors": "R Core Team",
+      "year": 2025,
+      "title": "R: A language and environment for statistical computing (version 4.5.2)",
+      "source": "R Foundation for Statistical Computing",
+      "url": "https://www.R-project.org/",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "apa2020",
+      "authors": "American Psychological Association",
+      "year": 2020,
+      "title": "Publication manual of the American Psychological Association (7th ed.)",
+      "source": "American Psychological Association",
+      "url": "https://apastyle.apa.org/products/publication-manual-7th-edition",
+      "verifiedOn": "2026-11-17"
     }
   ]
 }

@@ -6,6 +6,8 @@
 import { GUARDRAILS, REVIEW_DATE } from "../data/guardrails";
 import { MAX_TEXT_BYTES, ALLOWED_EXT } from "../scripts/core/guardrails";
 import { t, type Locale } from "../i18n";
+import { es as spanishMessages } from "../i18n/messages/es";
+import type { MessageKey } from "../i18n";
 
 interface Props {
   locale: Locale;
@@ -71,6 +73,12 @@ const policies: { heading: string; body: string }[] = es
         body: "Some protections only work as response headers, and the server sends them with every page: 'frame-ancestors' 'none' and X-Frame-Options stop other sites from showing this page inside a frame, and HSTS enforces HTTPS. A page cannot read its own response headers, so the panel above does not check them: the repository's check of the published site does.",
       },
     ];
+/** Solo las frases que el script escribe al cargar (ADR 0004): el diccionario no viaja al navegador. */
+const runtimeStrings = Object.fromEntries(
+  (Object.keys(spanishMessages) as MessageKey[])
+    .filter((key) => key.startsWith("sec.") || key.startsWith("check.detail."))
+    .map((key) => [key, t(locale, key)]),
+);
 ---
 
 <section class="section">
@@ -137,17 +145,23 @@ const policies: { heading: string; body: string }[] = es
   </div>
 </section>
 
-<p class="u-visually-hidden" role="status" aria-live="polite" data-live-region></p>
+<p class="u-visually-hidden" role="status" aria-live="polite" data-live-region data-sec-strings={JSON.stringify(runtimeStrings)}></p>
 
 <script>
   import { initWipeButtons, renderGuardrailPanel, renderSecurityPanel } from "../scripts/core/panels";
   import { safeInit, safeInitAll } from "../scripts/core/safe";
-  import { t, type Locale } from "../i18n";
+  import type { Locale } from "../i18n";
 
   const locale = (document.documentElement.lang === "en" ? "en" : "es") as Locale;
-  // Only the dynamic message keys are needed at runtime; the static copy was
-  // already rendered by Astro.
-  const tRuntime = (key: string): string => t(locale, key as Parameters<typeof t>[1]);
+  // Solo las claves que se escriben al cargar, ya traducidas en el servidor.
+  const raw = document.querySelector<HTMLElement>("[data-sec-strings]")?.dataset["secStrings"] ?? "{}";
+  let strings: Record<string, string> = {};
+  try {
+    strings = JSON.parse(raw) as Record<string, string>;
+  } catch {
+    strings = {};
+  }
+  const tRuntime = (key: string): string => strings[key] ?? key;
 
   safeInitAll({
     "security panel": () => {

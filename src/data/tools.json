@@ -455,6 +455,42 @@
         "oconnor2020",
         "gamer2026irr"
       ]
+    },
+    {
+      "id": "statistics",
+      "name": {
+        "es": "Estadística",
+        "en": "Statistics"
+      },
+      "area": "documentacion",
+      "integration": "embedded",
+      "status": "experimental",
+      "languages": [],
+      "notes": {
+        "es": "Datos por CSV o TSV (también el de Excel en español), descriptivos, gráficos y un asistente que lleva de la pregunta a la prueba: t (una muestra, Welch, pareada), Mann–Whitney y Wilcoxon, ANOVA de un factor, Pearson y Spearman, χ² y regresión lineal, siempre con tamaño del efecto, supuestos y una frase en formato APA. El motor es propio y cada cifra se contrasta con R. Todo corre en el navegador. **Límite declarado**: sin modelos mixtos ni intervalos de d, η² y V.",
+        "en": "Data from CSV or TSV (Spanish-locale Excel too), descriptives, charts and an assistant that goes from the question to the test: t (one-sample, Welch, paired), Mann–Whitney and Wilcoxon, one-way ANOVA, Pearson and Spearman, χ² and linear regression, always with effect size, assumptions and an APA-style sentence. The engine is this site's own and every figure is checked against R. Everything runs in the browser. **Declared limit**: no mixed models and no intervals for d, η² and V."
+      },
+      "citation": "R Core Team (2025). R: A language and environment for statistical computing. R Foundation for Statistical Computing.",
+      "theory": {
+        "es": "Implementa la estadística inferencial clásica que se enseña en ciencias sociales: la t de Welch (1947), las pruebas de rangos de Wilcoxon (1945) y de Mann y Whitney (1947), la correlación de Spearman (1904), el ANOVA, χ² y la regresión por mínimos cuadrados, con los tamaños del efecto de Cohen (1988/2013) y la corrección de Bergsma (2013) para la V de Cramér. Los cuantiles siguen a Hyndman y Fan (1996), la asimetría a Joanes y Gill (1998), los histogramas a Sturges (1926) y los gráficos de caja a McGill, Tukey y Larsen (1978); la función gamma, a Lanczos (1964). Cada resultado se contrasta con R (R Core Team) y con el paquete effectsize (Ben-Shachar y colaboradores, 2020), y las frases siguen el manual de la APA (2020).",
+        "en": "It implements the classical inferential statistics taught in the social sciences: Welch's (1947) t, the rank tests of Wilcoxon (1945) and of Mann and Whitney (1947), Spearman's (1904) correlation, ANOVA, χ² and least-squares regression, with Cohen's (1988/2013) effect sizes and Bergsma's (2013) correction for Cramér's V. Quantiles follow Hyndman and Fan (1996), skewness Joanes and Gill (1998), histograms Sturges (1926) and box plots McGill, Tukey and Larsen (1978); the gamma function, Lanczos (1964). Every result is checked against R (R Core Team) and the effectsize package (Ben-Shachar and colleagues, 2020), and the sentences follow the APA manual (2020)."
+      },
+      "references": [
+        "welch1947",
+        "wilcoxon1945",
+        "mann1947",
+        "spearman1904",
+        "cohen2013",
+        "bergsma2013",
+        "hyndman1996",
+        "joanes1998",
+        "sturges1926",
+        "mcgill1978",
+        "lanczos1964",
+        "rcore",
+        "benshachar2020",
+        "apa2020"
+      ]
     }
   ]
 }

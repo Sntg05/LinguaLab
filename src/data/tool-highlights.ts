@@ -76,6 +76,14 @@ export const TOOL_HIGHLIGHTS: Readonly<Record<string, ToolHighlight>> = {
     sample: "α = 0.743",
     sampleKind: "mono",
   },
+  statistics: {
+    summary: {
+      es: "Descriptivos, gráficos y un asistente que lleva de la pregunta a la prueba, con tamaño del efecto y frase APA.",
+      en: "Descriptives, charts and an assistant from the question to the test, with effect size and an APA sentence.",
+    },
+    sample: "t(38) = 2.41, p = .021",
+    sampleKind: "mono",
+  },
   "mapa-lenguas-colombia": {
     summary: {
       es: "Las lenguas que Glottolog registra en Colombia, con familia, Glottocode e ISO 639-3, en mapa y en tabla.",

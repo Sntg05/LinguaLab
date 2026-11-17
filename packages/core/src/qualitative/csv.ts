@@ -12,12 +12,24 @@ import { err, ok, type Result } from "../result";
 
 export type CsvReadError = { readonly code: "unclosed-quote"; readonly line: number };
 
-/** Lee todas las filas. Las líneas vacías no son filas. */
-export const parseCsvRecords = (text: string): Result<string[][], CsvReadError> => {
+/** Separadores admitidos: coma (RFC 4180), punto y coma (Excel en español) y tabulador (TSV). */
+export type CsvDelimiter = "," | ";" | "\t";
+
+/**
+ * Lee todas las filas. Las líneas vacías no son filas. El separador es la coma
+ * salvo que se pida otro; la estadística (T6) lee también `;` y tabulador.
+ */
+export const parseCsvRecords = (
+  text: string,
+  delimiter: CsvDelimiter = ",",
+): Result<string[][], CsvReadError> => {
   const source = text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
-  // Un campo entre comillas completo, un trozo sin comillas, una coma, un final
-  // de línea, o una comilla que abre y nunca cierra.
-  const token = /"((?:[^"]|"")*)"|([^",\r\n]+)|(,)|(\r\n|\r|\n)|(")/gy;
+  // Un campo entre comillas completo, un trozo sin comillas, un separador, un
+  // final de línea, o una comilla que abre y nunca cierra.
+  const token = new RegExp(
+    `"((?:[^"]|"")*)"|([^"${delimiter}\\r\\n]+)|(${delimiter})|(\\r\\n|\\r|\\n)|(")`,
+    "gy",
+  );
   const rows: string[][] = [];
   let row: string[] = [];
   let field = "";
