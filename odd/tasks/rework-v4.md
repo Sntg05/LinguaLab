@@ -1,6 +1,6 @@
 ---
 status: active
-updated: 2026-11-10
+updated: 2026-11-17
 ---
 
 # Rework v4: cada herramienta con su teoría, sus motores y su validación
@@ -68,11 +68,11 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | hecha | `03ec0d8`: motores con rojo y verde. Commit siguiente: CMUdict empaquetado (`scripts/build-cmudict.mts`), adaptador `createNativePhonemizer` (rojo: suite sin módulo; verde: 9 pruebas), página conectada con variedad, nivel, palabras sin transcribir y variantes, y eSpeak retirado. `verify:all` y e2e completa en verde. Español: 96,6 % propio frente a 76,9 % de eSpeak |
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
-| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline y delegada (5.3–5.7: escritores acotados, contexto y paralelismo) | hecha en código (L21–L32) | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26); 5.3 hecha (curvas sobre el espectrograma, L27). Falta 5.4 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
+| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline y delegada (5.3–5.7: escritores acotados, contexto y paralelismo) | hecha en código (L21–L32) | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26); 5.3 hecha (curvas sobre el espectrograma, L27); 5.6 y 5.7 hechas (`c9bf799`, `f19f6b6`, L30); 5.4 hecha (`9316dce`, L31); 5.5 hecha (`6726b4a`, L32). Pendiente humano: la persona que no conoce el visor y la captura junto a Praat |
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
-| T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | en curso | `0b514b7`: FonoLab usa el transcriptor del sitio (rojo: `claims.test` y una e2e que esperaba /s/ en «zapato»). Falta el resto: `odd/handoff/ACTUAL.md` §6 |
+| T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | en curso | `0b514b7`: FonoLab usa el transcriptor del sitio (rojo: `claims.test` y una e2e que esperaba /s/ en «zapato»). Inventario y trinquete en `src/lib/architecture.test.ts`; PhonemizerLab migrada (L33). Faltan TextStation, ArborLab, FonoLab, ExperimentsLab, Glossary y Bibliography |
 | T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
 
 ## Log
@@ -346,3 +346,15 @@ Se preguntan de a una, al empezar la fase que las necesita.
   las referencias se midieron con 5000 Hz, y la e2e fija ese valor. Rojo: 14 pruebas unitarias; e2e por
   mutación (sin el campo de frecuencia máxima, con F1 tomado de F2, sin F8: fallan). Verde: `verify:all`
   y 202 e2e; solo Chromium. **Con esto T5 queda hecha en código.**
+- **L33 (2026-11-17). T9, inventario y primera migración.** El dueño, textual: «read the handoff of the
+  project, and continue with the pending tasks, give me a report of the actual situation of the
+  project». Inventario de líneas de script por componente: TextStation 638, ArborLab 369, FonoLab 319,
+  ExperimentsLab 318, PhonemizerLab 267, Glossary y Bibliography 62, SecurityPage 26; los que ya siguen
+  el patrón del visor, de 1 a 7. Decisión: **no** se crea `defineTool`; el contrato común ya existe y lo
+  usan nueve componentes: el `<script>` hace `safeInit("x", initX)` e `initX`, en
+  `src/scripts/<área>/index.ts`, busca su raíz por `data-*`. Un envoltorio más sería una segunda forma
+  de hacer lo mismo. Tope fijado en 30 líneas de script, con trinquete: `PENDING_EXTRACTION` lista los
+  que faltan y la prueba falla si uno de la lista ya cumple. PhonemizerLab pasa sus reglas a
+  `src/scripts/phonemizer/rules.ts` (opciones, mensajes, errores, comparación con la tabla) y el
+  cableado a `index.ts`. Rojo: el trinquete marcó `PhonemizerLab.astro: 242`; 15 pruebas de reglas sin
+  módulo. Verde: `verify:all` y 202 e2e.
