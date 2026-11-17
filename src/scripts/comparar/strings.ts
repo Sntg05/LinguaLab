@@ -22,6 +22,7 @@ const KEYS = [
   "cmp.error.corrupt",
   "cmp.error.encrypted",
   "cmp.error.no-text",
+  "cmp.error.reader-unavailable",
   "cmp.error.read",
   "cmp.keywords.positive",
   "cmp.keywords.negative",

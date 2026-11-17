@@ -88,6 +88,14 @@ describe("docxXmlToText", () => {
   });
 });
 
+describe("docxXmlToText with hostile entities", () => {
+  it("leaves a character number outside Unicode as written instead of throwing", () => {
+    expect(docxXmlToText("<w:p><w:t>a &#x110000; b &#99999999;</w:t></w:p>")).toBe(
+      "a &#x110000; b &#99999999;",
+    );
+  });
+});
+
 describe("plain text", () => {
   it("reads UTF-8, drops the byte-order mark, and falls back to Windows-1252", () => {
     expect(decodePlainText(bytes("﻿niño"))).toBe("niño");

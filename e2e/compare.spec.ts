@@ -99,6 +99,12 @@ test("un .docx, un PDF y un .txt se leen, se comparan y sus descargas traen las 
     "radio.txt_per_10k",
   ]);
 
+  // Cambiar el ajuste después de comparar no cambia lo que se descarga: las
+  // descargas usan las palabras vacías de la comparación que está en pantalla.
+  await page.locator("[data-cmp-stopwords]").selectOption("none");
+  const again = await downloadOf(page, page.locator('[data-cmp-export="profile"]'));
+  expect(again.text).toBe(profile.text);
+
   await page.locator("[data-cmp-kwic-word]").fill("lengua");
   await page.locator("[data-cmp-kwic] button").click();
   await expect(status(page)).toContainText("2 apariciones de «lengua»");

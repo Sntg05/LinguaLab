@@ -76,6 +76,8 @@ export const initDocumentCompare = (): void => {
   let documents: PreparedDocument[] = [];
   let details: { format: string; pages?: number }[] = [];
   let lists: KeywordList[] = [];
+  /** Las palabras vacías de la comparación en pantalla: las descargas usan las mismas. */
+  let comparedMode: StopwordMode = "none";
 
   const say = (message: string, state: StatusState): void => {
     status.textContent = message;
@@ -155,6 +157,7 @@ export const initDocumentCompare = (): void => {
       return;
     }
     const mode = stopwords();
+    comparedMode = mode;
     const minCount = Math.max(1, Number.parseInt(minCountInput.value, 10) || 1);
     const alpha = Number(alphaSelect.value) || 0.05;
     lists = documents.map((_, index) => keywords(documents, index, { stopwords: mode, minCount, limit: KEYWORD_ROWS, alpha }));
@@ -191,8 +194,8 @@ export const initDocumentCompare = (): void => {
 
   const exports: Record<string, () => [string, string]> = {
     keywords: () => ["keywords.csv", keywordsCsv(documents, lists)],
-    frequency: () => ["frequencies.csv", frequencyCsv(documents, stopwords(), FREQUENCY_TOP)],
-    profile: () => ["profile.csv", profileCsv(documents, stopwords())],
+    frequency: () => ["frequencies.csv", frequencyCsv(documents, comparedMode, FREQUENCY_TOP)],
+    profile: () => ["profile.csv", profileCsv(documents, comparedMode)],
   };
   for (const button of exportButtons) {
     button.addEventListener("click", () => {

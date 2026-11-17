@@ -55,6 +55,16 @@ describe("pdf text assembly", () => {
     expect(joinHyphenated("pre-\nÉpoca")).toBe("pre-\nÉpoca");
   });
 
+  it("names a reader that could not be downloaded, so the page can say to retry", async () => {
+    const offline = createPdfTextReader(async () => {
+      throw new TypeError("Failed to fetch dynamically imported module");
+    });
+    expect(await offline(new Uint8Array([1]))).toEqual({
+      ok: false,
+      error: { code: "reader-unavailable" },
+    });
+  });
+
   it("names a password-protected PDF instead of calling it corrupt", async () => {
     const locked: PdfjsLike = {
       getDocument: () => ({

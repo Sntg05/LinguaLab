@@ -23,7 +23,9 @@ export type DocumentReadError =
   /** PDF con contraseña: su texto no se puede leer sin ella. */
   | { readonly code: "encrypted" }
   /** Abre, pero no trae texto: un PDF escaneado o un documento vacío. */
-  | { readonly code: "no-text" };
+  | { readonly code: "no-text" }
+  /** El lector (pdf.js) no se pudo descargar: se puede volver a intentar. */
+  | { readonly code: "reader-unavailable" };
 
 /**
  * Tope por archivo. Un .docx o un PDF de texto de 10 MB ya son cientos de

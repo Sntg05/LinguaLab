@@ -25,12 +25,16 @@ const ENTITIES: Readonly<Record<string, string>> = {
   apos: "'",
 };
 
+/** Un número de carácter fuera de Unicode no se descifra: queda escrito como venía. */
+const codePoint = (value: number, match: string): string =>
+  Number.isInteger(value) && value >= 0 && value <= 0x10ffff ? String.fromCodePoint(value) : match;
+
 const decodeEntities = (text: string): string =>
   text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, name: string) => {
     if (name.startsWith("#x") || name.startsWith("#X")) {
-      return String.fromCodePoint(Number.parseInt(name.slice(2), 16));
+      return codePoint(Number.parseInt(name.slice(2), 16), match);
     }
-    if (name.startsWith("#")) return String.fromCodePoint(Number.parseInt(name.slice(1), 10));
+    if (name.startsWith("#")) return codePoint(Number.parseInt(name.slice(1), 10), match);
     return ENTITIES[name] ?? match;
   });
 

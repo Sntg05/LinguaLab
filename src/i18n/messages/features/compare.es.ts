@@ -94,6 +94,8 @@ export const compareEs = {
   "cmp.error.encrypted": "«{name}» tiene contraseña: guárdalo sin ella y vuelve a cargarlo.",
   "cmp.error.no-text":
     "«{name}» no tiene texto que leer. Si es un PDF escaneado, hace falta pasarlo antes por reconocimiento de texto (OCR).",
+  "cmp.error.reader-unavailable":
+    "«{name}» no se pudo leer porque el lector no se descargó. Revisa tu conexión y vuelve a cargarlo.",
   "cmp.error.read": "No se pudo leer «{name}».",
   "cmp.remove": "Quitar",
   "cmp.removeLabel": "Quitar {name}",

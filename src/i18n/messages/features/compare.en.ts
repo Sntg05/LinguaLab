@@ -93,6 +93,8 @@ export const compareEn: Record<keyof typeof compareEs, string> = {
   "cmp.error.encrypted": "“{name}” has a password: save it without one and load it again.",
   "cmp.error.no-text":
     "“{name}” has no text to read. If it is a scanned PDF, it needs text recognition (OCR) first.",
+  "cmp.error.reader-unavailable":
+    "“{name}” could not be read because the reader did not download. Check your connection and load it again.",
   "cmp.error.read": "“{name}” could not be read.",
   "cmp.remove": "Remove",
   "cmp.removeLabel": "Remove {name}",

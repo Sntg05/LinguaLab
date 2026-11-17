@@ -9,7 +9,7 @@
   "description": "Plataforma de analisis linguistico que corre enteramente en el navegador: fonetica AFI, arboles sintacticos, analisis de corpus y bibliografia.",
   "license": "GPL-3.0-only",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.13.0"
   },
   "scripts": {
     "dev": "astro dev",

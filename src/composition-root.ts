@@ -172,10 +172,18 @@ const createExperimentRunner: CreateExperimentRunner = async (
  */
 let documentReader: Promise<DocumentReaderPort> | null = null;
 const readDocument: DocumentReaderPort["read"] = async (name, bytes) => {
-  documentReader ??= import("@lingualab/adapters/document").then((module) =>
-    module.createBrowserDocumentReader(),
-  );
-  return (await documentReader).read(name, bytes);
+  documentReader ??= import("@lingualab/adapters/document")
+    .then((module) => module.createBrowserDocumentReader())
+    .catch((error: unknown) => {
+      // Un fallo de red no se guarda para siempre: el próximo archivo reintenta.
+      documentReader = null;
+      throw error;
+    });
+  try {
+    return await (await documentReader).read(name, bytes);
+  } catch {
+    return { ok: false, error: { code: "reader-unavailable" } };
+  }
 };
 
 /** El caso de uso solo traduce el texto a AFI; no decide que se muestra. */

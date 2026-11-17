@@ -66,7 +66,14 @@ export const createPdfTextReader =
   async (
     bytes,
   ): Promise<Result<{ readonly text: string; readonly pages: number }, DocumentReadError>> => {
-    const pdfjs = await load();
+    let pdfjs: PdfjsLike;
+    try {
+      pdfjs = await load();
+    } catch {
+      // Sin red o con un despliegue nuevo a medias, el módulo no llega: se dice,
+      // y el siguiente intento vuelve a pedirlo (ver `pdf-browser.ts`).
+      return err({ code: "reader-unavailable" });
+    }
     // pdf.js se queda con el búfer que recibe (lo transfiere al worker): se le da una copia.
     const task = pdfjs.getDocument({
       data: new Uint8Array(bytes),

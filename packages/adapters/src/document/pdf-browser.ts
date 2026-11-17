@@ -8,11 +8,20 @@ import type { PdfjsLike } from "./pdf";
 let loading: Promise<PdfjsLike> | null = null;
 
 export const loadBrowserPdfjs = (): Promise<PdfjsLike> => {
-  loading ??= import("pdfjs-dist").then((pdfjs) => {
-    pdfjs.GlobalWorkerOptions.workerPort = new Worker(new URL("./pdf-worker.ts", import.meta.url), {
-      type: "module",
+  loading ??= import("pdfjs-dist")
+    .then((pdfjs) => {
+      pdfjs.GlobalWorkerOptions.workerPort = new Worker(
+        new URL("./pdf-worker.ts", import.meta.url),
+        {
+          type: "module",
+        },
+      );
+      return pdfjs as unknown as PdfjsLike;
+    })
+    .catch((error: unknown) => {
+      // Un fallo no se guarda: el próximo PDF vuelve a intentarlo.
+      loading = null;
+      throw error;
     });
-    return pdfjs as unknown as PdfjsLike;
-  });
   return loading;
 };

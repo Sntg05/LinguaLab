@@ -14,8 +14,9 @@
    - Log ratio (Hardie, 2014): log2 of the ratio of the two relative
      frequencies. It says how big the difference is: 1 means twice as frequent,
      2 four times. Hardie's post does not say what to do with a zero frequency
-     (the ratio would be infinite); it is replaced by 0.5, the same adjustment
-     quanteda's `textstat_keyness` applies.
+     (the ratio would be infinite). Here it is replaced by 0.5, a common
+     practice in keyness tools (AntConc users report the same substitution);
+     no primary source for it was found, so treat it as this site's convention.
    - p: the upper tail of the chi-square distribution with one degree of
      freedom, the reference distribution of G² for a 2×2 table.
    ============================================================ */
@@ -55,11 +56,16 @@ const ONE_OVER_SQRT_2PI = 0.3989422804014327;
 const at = (values: readonly number[], index: number): number => values[index] ?? 0;
 
 /**
- * exp(−y²/2). R splits it in two products to save the last bits for large y;
- * against R's own values that refinement changes nothing measurable here (the
- * reference cases pass to 1e-10 either way), so the plain form stays.
+ * exp(−y²/2) in two products, as R's `pnorm` does: y² rounded to 1/16 plus the
+ * small remainder. Measured against R, this form reproduces `pnorm` exactly at
+ * y = 8.3, 15.7, 26.9 and 37.5; computed in one go it drifts by up to 1.2e-14
+ * (see the test "matches pnorm bit for bit far into the tail").
  */
-const gaussian = (y: number): number => Math.exp(-y * y * 0.5);
+const gaussian = (y: number): number => {
+  const rounded = Math.trunc(y * 16) / 16;
+  const delta = (y - rounded) * (y + rounded);
+  return Math.exp(-rounded * rounded * 0.5) * Math.exp(-delta * 0.5);
+};
 
 /** P(Z > y) for a standard normal Z and y ≥ 0. */
 export const normalUpperTail = (y: number): number => {
