@@ -92,16 +92,20 @@ const MAX_COMPONENT_SCRIPT_LINES = 30;
 const PENDING_EXTRACTION = new Set([
   "src/components/TextStation.astro",
   "src/components/ArborLab.astro",
-  "src/components/FonoLab.astro",
-  "src/components/ExperimentsLab.astro",
-  "src/components/Glossary.astro",
-  "src/components/Bibliography.astro",
 ]);
 
-/** Líneas de código dentro de los bloques `<script>` del cliente. */
+/**
+ * Líneas de código dentro de los bloques `<script>` del cliente.
+ *
+ * Se quita antes el frontmatter (`---` … `---`): es código del servidor, y un
+ * comentario suyo que nombre la etiqueta `<script>` hacía contar desde ahí hasta
+ * el cierre del script real. Las etiquetas que se cierran solas (`<script … />`,
+ * los datos JSON) no abren un bloque.
+ */
 const scriptLines = (source: string): number => {
+  const markup = source.replace(/^---\n[\s\S]*?\n---\n/, "");
   let count = 0;
-  for (const match of source.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)) {
+  for (const match of markup.matchAll(/<script(?:\s[^>]*[^/])?>([\s\S]*?)<\/script>/g)) {
     count += (match[1] ?? "").split("\n").filter((line) => line.trim() !== "").length;
   }
   return count;
@@ -137,5 +141,19 @@ describe("los componentes solo conectan (T9)", () => {
     // Sin esto, un contador roto que siempre diera 0 haría pasar las dos de arriba.
     const sample = "---\nconst a = 1;\n---\n<p>x</p>\n<script>\n  one();\n\n  two();\n</script>";
     expect(scriptLines(sample)).toBe(2);
+  });
+
+  it("no cuenta el frontmatter ni las etiquetas de datos que se cierran solas", () => {
+    const sample = [
+      "---",
+      "// Este import vive en el `<script>` del componente.",
+      "---",
+      '<script is:inline type="application/json" data-x set:html={x} />',
+      "<p>x</p>",
+      "<script>",
+      "  one();",
+      "</script>",
+    ].join("\n");
+    expect(scriptLines(sample)).toBe(1);
   });
 });

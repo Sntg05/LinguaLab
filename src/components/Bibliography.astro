@@ -128,68 +128,10 @@ const sorted = [...BIBLIOGRAPHY].sort((a, b) => b.year - a.year);
 </section>
 
 <script>
-  import { filterCatalogue } from "../scripts/tools/catalogue";
-  import { safeInitAll } from "../scripts/core/safe";
-  import type { Locale } from "../i18n";
+  import { initCatalogueFilter } from "../scripts/tools/catalogue-filter";
+  import { safeInit } from "../scripts/core/safe";
 
-  const locale = (document.documentElement.lang === "en" ? "en" : "es") as Locale;
-
-  safeInitAll({
-    "bibliography filter": () => {
-      const root = document.querySelector<HTMLElement>("[data-catalogue]");
-      const list = root?.querySelector<HTMLElement>("[data-list]");
-      if (!root || !list) return;
-
-      const records = [...list.querySelectorAll<HTMLElement>("[data-record]")].map((element) => ({
-        element,
-        facet: element.dataset["facetValue"] ?? "",
-        search: element.dataset["search"] ?? "",
-      }));
-
-      const query = root.querySelector<HTMLInputElement>("[data-query]");
-      const count = root.querySelector<HTMLElement>("[data-count]");
-      const empty = root.querySelector<HTMLElement>("[data-empty]");
-      let facet = "";
-
-      const apply = (): void => {
-        const visible = filterCatalogue(records, {
-          query: query?.value ?? "",
-          facet,
-          fields: (record) => [record.search],
-          facetValue: (record) => record.facet,
-        });
-
-        const shown = new Set(visible.map((record) => record.element));
-        for (const record of records) {
-          record.element.toggleAttribute("hidden", !shown.has(record.element));
-        }
-
-        if (count) {
-          count.textContent =
-            locale === "es"
-              ? `${visible.length} de ${records.length} recursos`
-              : `${visible.length} of ${records.length} resources`;
-        }
-        empty?.toggleAttribute("hidden", visible.length > 0);
-      };
-
-      root.addEventListener("click", (event) => {
-        const target = event.target;
-        if (!(target instanceof Element)) return;
-        const button = target.closest<HTMLButtonElement>("[data-facet]");
-        if (!button) return;
-
-        facet = button.dataset["facet"] ?? "";
-        for (const other of root.querySelectorAll<HTMLButtonElement>("[data-facet]")) {
-          other.setAttribute("aria-pressed", other === button ? "true" : "false");
-        }
-        apply();
-      });
-
-      query?.addEventListener("input", apply);
-      apply();
-    },
-  });
+  safeInit("bibliography filter", () => initCatalogueFilter({ es: "recursos", en: "resources" }));
 </script>
 
 <style>
