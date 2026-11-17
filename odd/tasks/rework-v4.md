@@ -85,12 +85,13 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
 | T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline y delegada (5.3–5.7: escritores acotados, contexto y paralelismo) | hecha en código (L21–L32) | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26); 5.3 hecha (curvas sobre el espectrograma, L27); 5.6 y 5.7 hechas (`c9bf799`, `f19f6b6`, L30); 5.4 hecha (`9316dce`, L31); 5.5 hecha (`6726b4a`, L32). Pendiente humano: la persona que no conoce el visor y la captura junto a Praat |
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
-| T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | hecha | `c1bed4f` motor contra `irr` de R; `b5e1707` página `/cualitativo` con e2e y axe (L39). `verify:all` 1593 pruebas y e2e completa (236) en verde |
+| T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | hecha en lo pedido por S9; quedan unidades del plan del traspaso (L43) | `c1bed4f` motor contra `irr` de R; `b5e1707` página `/cualitativo` con e2e y axe (L39) |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
 | T11 | S12 | Árboles sin errores y exportaciones válidas en todos los laboratorios | inline | hecha | `c48e142` árboles (L37); commit siguiente, `e2e/exports.spec.ts` (L38) |
+| T7b | S9 | Lo que falta del plan de T7 (traspaso §6): guardado en IndexedDB, jerarquía, colores y memos de códigos, exportación REFI-QDA `.qdc`, recuperar los segmentos de un código | inline | pendiente | — |
 | T12 | S13 | Lectura de documentos: puerto en el núcleo, .txt y .docx propios (ZIP + XML, sin dependencia) | inline | hecha | `eba3a16` (L42) |
-| T13 | S13 | PDF con pdf.js (dependencia nueva: riesgo 5), rechazo de PDF sin texto | inline + verificador | hecha; verificador al cerrar S13 | `a609b8c` (L42) |
+| T13 | S13 | PDF con pdf.js (dependencia nueva: riesgo 5), rechazo de PDF sin texto | inline + verificador | hecha; verificador sin bloqueos y revisión de Gentle AI aprobada (L43) | `a609b8c` (L42) |
 | T14 | S13 | Motor de comparación: frecuencia por 10 000, G² y p, log ratio, diversidad, vocabulario compartido; contrastado con R base | inline | hecha | `e49851f`, `d86fa57` (L42) |
 | T15 | S13 | Sección «Comparar documentos» en la estación, exportaciones leídas de vuelta, e2e y axe | inline | hecha | commit siguiente (L42) |
 | T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
@@ -490,4 +491,31 @@ Se preguntan de a una, al empezar la fase que las necesita.
   perfil, palabras clave, vocabulario, frecuencias, concordancias y tres CSV. e2e con los tres formatos,
   un PDF escaneado, un cuarto documento, uno repetido, y axe con resultados. La reorganización completa
   de la estación y POS/NER (L40) siguen sin empezar.
+- **L43 (2026-11-17). Cierre de S13: verificación independiente, revisión y correcciones.** El verificador
+  independiente (riesgo 5, dependencia nueva) no encontró bloqueos y dio PASS a cada cláusula de S13 y a
+  las comprobaciones de la dependencia (versión exacta, licencia compatible, pdf.js solo por import
+  dinámico, nada de otro origen, el worker permitido por `script-src 'self'`). Revisión de Gentle AI: la
+  candidata entera (T7 + S13) pasaba del presupuesto de contexto del revisor; el dueño eligió revisar solo
+  la unidad de riesgo, `a609b8c`, en un worktree aparte, con las lentes de riesgo y resiliencia: aprobada y
+  acusada (`review-89ad239830174cae`), con tres avisos no bloqueantes. Correcciones, cada una con prueba:
+  (1) **mi segunda atribución del 0,5 también era falsa**: `textstat_keyness` de quanteda no tiene log
+  ratio; ahora se dice que es una práctica habitual sin fuente primaria encontrada; (2) la prueba de p
+  aceptaba cualquier p por debajo de 1e-9 (un verificador cambió una constante de Cody y pasó): ahora se
+  compara por error relativo y p se evalúa en el G² de R, porque el de `glm` es iterativo y difiere 1e-12
+  del cerrado, error que p multiplica por G²/2; (3) **la forma de exp en dos productos que quité en T14
+  sí importaba**: con ella `normalUpperTail` reproduce `pnorm` exactamente en y = 8,3 a 37,5, sin ella se
+  desvía hasta 1,2e-14; vuelve, con una prueba que lo exige; (4) una entidad XML fuera de Unicode en un
+  .docx hacía lanzar a `read()`: ahora queda escrita como venía; (5) cambiar las palabras vacías después
+  de comparar hacía que dos descargas no coincidieran con la pantalla: ahora usan las de la comparación;
+  (6) avisos de la revisión: un fallo al descargar el lector ya no se guarda para siempre (se reintenta
+  con el siguiente archivo) y se nombra (`reader-unavailable`, con su frase); (7) `engines.node` sube a
+  `>=22.13.0`, el mínimo de pdf.js. Pendiente, sin cambio: `@napi-rs/canvas` (dependencia opcional de
+  pdf.js, solo para Node) suma binarios nativos al lockfile; el texto de la licencia Apache de pdf.js no
+  viaja con el bundle minificado, igual que con las demás dependencias; las celdas CSV no neutralizan `=`
+  (decisión de L38).
+  **T7 frente al plan del traspaso:** lo hecho cubre S9 (libro de códigos, codificación, coocurrencias,
+  acuerdo contra R), pero el plan de `odd/handoff/ACTUAL.md` §6 pedía además guardar en IndexedDB (recargar
+  y que siga ahí), jerarquía, colores y memos de códigos, exportación REFI-QDA `.qdc` y «recuperar todos los
+  segmentos de un código». No se hicieron; quedan como T7b, sin decisión pendiente. El traspaso no se leyó
+  al empezar esta sesión (se trabajó desde la tabla de tareas): por eso T7 se dio por hecha de más.
 

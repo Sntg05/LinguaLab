@@ -20,8 +20,11 @@ Pega esto como primera instrucción, o síguelo tal cual:
 > fusiones a `main` sin que el dueño lo pida. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
 > Háblale en español. Al terminar, reescribe este archivo.
 
-Estado al 2026-11-17: T5, T9 y T11 (árboles y exportaciones) hechas y en producción (PR #22 y #24; Log L33–L38). La siguiente sin bloqueo es **T7** (análisis cualitativo); T4, T6 y T8 esperan D3, D4 y D5. Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
-decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
+Estado al 2026-11-17 (tarde): T5, T9 y T11 en producción (PR #22 y #24). En la rama, sin fusionar: **T7**
+(análisis cualitativo, `/cualitativo`; Log L39) y **S13** (comparar 2 o 3 documentos .docx, PDF o .txt en
+`/tools`; tareas T12–T15, Log L41–L43). Lo siguiente sin bloqueo es **T7b** (lo que falta del plan de T7,
+§6). T4, T6 y T8 esperan D3, D4 y D5; para D4 el dueño ya recibió la comparación webR / motor propio
+(§8). La parte de POS/NER de la propuesta del dueño (Log L40) no está especificada todavía.
 
 ## 1. Qué se está haciendo y dónde
 
@@ -45,7 +48,7 @@ decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
 
 ```bash
 git fetch && git checkout feat/rework-v4 && git pull --ff-only
-nvm use 22                       # Node 22.x; el proyecto fija >=22.12
+nvm use 22                       # Node 22.x; el proyecto fija >=22.13 (pdf.js lo pide)
 npm install
 npx playwright install chromium  # una vez por máquina
 npm run doctor                   # rama frente a origin, Chromium, puerto 4331, documentos ODD
@@ -56,7 +59,7 @@ Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya es
 `~/.cargo/bin` (rustc 1.99.1, destino `wasm32-unknown-unknown`), **sin** tocar el `PATH`: se invoca como
 `~/.cargo/bin/cargo`. En otra máquina: `rustup` con `--profile minimal --target wasm32-unknown-unknown`.
 En el segundo equipo del dueño (CachyOS) **no hay Rust**, hay Go en `/usr/bin/go` (no se usa) y Node 26
-fuera de nvm; cumple el `>=22.12` del proyecto, pero `.nvmrc` pide 22: si algo difiere, `nvm use 22`.
+fuera de nvm; cumple el `>=22.13` del proyecto, pero `.nvmrc` pide 22: si algo difiere, `nvm use 22`.
 
 ### Las puertas, y cuándo correrlas
 
@@ -132,6 +135,11 @@ fuera de nvm; cumple el `>=22.12` del proyecto, pero `.nvmrc` pide 22: si algo d
 | (commit de 5.5) | **T5, 5.5:** consultas «Obtener tono / F1 / F2 / intensidad» con las teclas de Praat; e2e de la tabla y del teclado contra las referencias |
 | `d45b8e9`, `4417cac`, `e56b84a`, `c565ee5` | **T9:** tope de 30 líneas de script por componente; PhonemizerLab, FonoLab, Glosario, Bibliografía, ArborLab (con `e2e/arbor.spec.ts`) y la estación de texto con sus reglas en `src/scripts/<área>/` |
 | `4d8d32b` | **T5, 5.2:** FFT rellenada a 1024, eje en Hz, espectrograma nítido en pantallas de doble densidad y guardado entre cuadros |
+| `c48e142`, `377f45d` | **T11:** árboles que se dibujan sin error y cada exportación de cada laboratorio leída de vuelta (en `main`) |
+| `c1bed4f`, `b5e1707` | **T7:** motor cualitativo (`packages/core/src/qualitative/`) contra `irr` de R (`scripts/r/build-agreement-reference.R`) y página `/cualitativo` |
+| `eba3a16`, `a609b8c` | **S13, T12–T13:** lectura de .docx propia y de PDF con pdf.js 6.5.438 (`packages/adapters/src/document/`, fixtures con `scripts/build-document-fixtures.sh`) |
+| `e49851f`, `6991aac` | **S13, T14–T15:** G², p y log ratio contra R base (`scripts/r/build-keyness-reference.R`) y la sección «Compara dos o tres documentos» en `/tools` |
+| (commit de L43) | Correcciones del verificador independiente y de la revisión de Gentle AI (Log L43) |
 
 Puerta completa y e2e en verde en el último commit de código.
 
@@ -149,7 +157,7 @@ Puerta completa y e2e en verde en el último commit de código.
 | Calidad | Biome 2.6.3, dependency-cruiser, commitlint, Husky + lint-staged | |
 | Motores servidos | Pyodide 314.0.7 (conversor ELAN), praatfan 0.1.13 (acústica), CMUdict 2025.10.24 | En `public/<motor>/<versión>/`, inmutables |
 | Despliegue | Vercel, solo estático; cabeceras en `vercel.json` | CSP `default-src 'self'`: ningún CDN |
-| En la máquina del dueño | Node 22.23.3, Praat 6.4.49, R 4.3.3, ffmpeg, Rust 1.99.1 (`~/.cargo/bin`, destino wasm32), sin Go | |
+| En la máquina del dueño | Node 22.23.3, Praat 6.4.49, R 4.5.2 (este traspaso decía 4.3.3; `irr` no está instalado en el sistema: se instala en una biblioteca temporal con `R_LIBS_USER`), pandoc, xelatex, poppler, ffmpeg, Rust 1.99.1 (`~/.cargo/bin`, destino wasm32), sin Go | |
 
 ### Lo que se propone, por tarea
 
@@ -337,6 +345,12 @@ puerta y la e2e siguen en verde; el peso por página no sube.
 
 ### T7 — Análisis cualitativo (S9)
 
+**Estado (2026-11-17):** hecho lo que pide S9, con la decisión del dueño de codificar **segmentos** (línea o
+párrafo) y no tramos libres (Log L39): libro de códigos, codificación, frecuencias, coocurrencias, acuerdo
+(porcentual, κ, α) contra `irr` de R, CSV de ida y vuelta. Del plan de abajo **falta (T7b)**: guardado en
+IndexedDB (7.6), jerarquía, colores y memos (7.1–7.2), exportación `.qdc` (7.2) y recuperar los segmentos de
+un código (7.4). 7.3 cambia por la decisión de segmentos: no hay selección libre.
+
 **Pedido textual:** «una herramienta de estadística para ciencias sociales, ya sea a nivel cualitativo o
 cuantitativo, has la diferenciación».
 
@@ -353,6 +367,16 @@ cuantitativo, has la diferenciación».
 
 **Límites que la interfaz debe decir:** no codifica sola ni «encuentra temas»; el acuerdo solo vale si los
 dos codificadores trabajaron sobre las mismas unidades; es para corpus de tamaño de trabajo de curso.
+
+### S13 — Comparar documentos (T12–T15) — hecho en la rama
+
+Pedido en Log L40–L41. `packages/core/src/domain/document.ts` (formato por contenido, tope de 10 MB) y el
+puerto `DocumentReaderPort`; el adaptador `@lingualab/adapters/document` (ZIP propio con tope contado,
+.docx, PDF con pdf.js y su worker, cargado con el primer PDF); `src/scripts/tools/keyness.ts` y
+`compare.ts`; la página en `src/components/DocumentCompare.astro` y `src/scripts/comparar/`. Verificador
+independiente sin bloqueos y revisión de Gentle AI de `a609b8c` aprobada (L43). **Queda de la propuesta del
+dueño:** etiquetado POS/NER y reorganizar la interfaz de la estación. Para POS/NER, elegir el motor por
+exactitud medida sobre los conjuntos de prueba de Universal Dependencies (AnCora, EWT) antes de escribirlo.
 
 ### T4 — Árboles sintácticos fieles a su teoría (S4) — espera D3
 
@@ -475,16 +499,20 @@ Se le pregunta **una** cuando se llega a la tarea que la necesita, con la recome
 | D1 Dónde corren los motores | **Resuelta:** navegador; Rust a WebAssembly solo donde se mida | — |
 | D2 Lenguas del transcriptor | **Resuelta:** solo español e inglés | — |
 | D3 Formalismos de árbol sin reglas propias, y estructuras de datos | Abierta | Validar seis de verdad; retirar con explicación el resto; estructuras de datos, fuera o aparte (§6, T4) |
-| D4 Motor de estadística | Abierta | Motor propio en TypeScript validado contra R; webR solo si se piden modelos avanzados (§6, T6) |
+| D4 Motor de estadística | Abierta; el 2026-11-17 se le dio al dueño la comparación (webR ≈ 40 MB, necesita COEP `require-corp` para su canal rápido y paquetes de `repo.r-wasm.org` salvo que se alojen aquí; motor propio liviano pero limitado a lo que se escriba) | Motor propio en TypeScript validado contra R; webR solo si se piden modelos avanzados (§6, T6) |
 | D5 Dirección de diseño | Abierta | Se decide sobre tres maquetas (§6, T8) |
 | Portada: ¿motor nuevo o tabla de Ortografía? | Abierta, menor | Dejarla como está (§6, T9) |
 | Licencia: seguir en GPL-3.0-only | Abierta, menor | No tocarla: praatfan es GPL |
 
 ## 9. Asuntos abiertos fuera del código
 
-- **Revisión de gentle-ai: APAGADA desde el 2026-11-14** por pedido del dueño (`gentle-ai review mode
-  disable`, ámbito global; Log L29). No se enciende sin que el dueño lo pida. Lo que sigue describe cómo
-  funcionaba.
+- **Revisión de gentle-ai: el 2026-11-17 está ENCENDIDA** (`gentle-ai review mode status`: «on, decided
+  by global»), aunque este traspaso decía que el dueño la apagó el 2026-11-14 (Log L29). Ningún agente la
+  encendió en esta sesión; el dueño aceptó dos consultas de revisión ese día (L43). No se toca el
+  interruptor sin que el dueño lo pida; si quiere volver a apagarla, `gentle-ai review mode disable`.
+  Una candidata grande (T7 + S13) no cabe en el presupuesto del revisor: se revisa por unidades, en un
+  worktree en el commit de la unidad (`git worktree add --detach … <commit>`) con
+  `gentle-ai review assess --base-ref <padre> --committed-only`.
 - **Revisión de gentle-ai (histórico).** El repositorio tiene activo el desarrollo guiado por recibos: al terminar un
   turno con commits nuevos, un gancho pide correr `gentle-ai review start …` tal como lo entrega. Si
   devuelve una consulta de consentimiento (`consent_required`), **se le traslada completa al dueño y no se
