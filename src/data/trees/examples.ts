@@ -99,12 +99,12 @@ export const TREE_EXAMPLES: Readonly<Record<string, readonly TreeExample[]>> = {
     {
       "name_es": "Elevación (raising)",
       "name_en": "Raising",
-      "text": "[TP [Spec [DP John]] [T' [T seems] [IP [VP [V t_seem] [AP [DP John] [A' [A to] [VP [V sleep]]]]]]]]\nmove: lower -> upper \"A-movement\""
+      "text": "[TP [DP John#upper] [T' [T -s] [VP [V seem] [TP [DP t#lower] [T' [T to] [VP [V sleep]]]]]]]\nmove: lower -> upper \"A-movement\""
     },
     {
-      "name_es": "Pasoiva",
+      "name_es": "Pasiva",
       "name_en": "Passive",
-      "text": "[TP [Spec [DP The book]] [T' [T was] [VP [V read] [CP [by [DP Mary]]]]]]"
+      "text": "[TP [DP The book#upper] [T' [T was] [VP [V read] [DP t#lower] [PP [P by] [DP Mary]]]]]\nmove: lower -> upper \"A-movement\""
     }
   ],
   "minimalist": [
@@ -121,7 +121,7 @@ export const TREE_EXAMPLES: Readonly<Record<string, readonly TreeExample[]>> = {
     {
       "name_es": "Fases CP y vP",
       "name_en": "CP and vP phases",
-      "text": "[CP [Spec what] [C' [C Ø] [TP [Spec you] [T' [T will] [vP [Spec t] [v' buy [DP what#low]]]]]]]\nmove: low -> what \"internal Merge\""
+      "text": "[CP [Spec what#high] [C' [C Ø] [TP [Spec you] [T' [T will] [vP [Spec t] [v' buy [DP what#low]]]]]]]\nmove: low -> high \"internal Merge\""
     }
   ],
   "cartography": [
@@ -162,7 +162,7 @@ export const TREE_EXAMPLES: Readonly<Record<string, readonly TreeExample[]>> = {
     {
       "name_es": "Elevación de cuantificador",
       "name_en": "Quantifier raising",
-      "text": "[TP [S [VP λx.sleep(x) [type ⟨e,t⟩]] [every student [type ⟨⟨e,t⟩,t⟩]_i]] [T' [T Ø] [t_i]]]"
+      "text": "[TP [DP every student#qr] [TP [DP t#tr] [T' [T Ø] [VP sleeps]]]]\nmove: tr -> qr \"QR\""
     }
   ],
   "tag": [
@@ -181,7 +181,7 @@ export const TREE_EXAMPLES: Readonly<Record<string, readonly TreeExample[]>> = {
     {
       "name_es": "c-estructura",
       "name_en": "c-structure",
-      "text": "[IP [NP María] [I' [I Ø] [VP [V lee] [NP un libro]]]]\nnote: (↑SUBJ)=↓ en el NP sujeto"
+      "text": "[IP [NP María] [I' [I Ø] [VP [V lee] [NP un libro]]]]"
     },
     {
       "name_es": "f-estructura compartida",
@@ -202,11 +202,6 @@ export const TREE_EXAMPLES: Readonly<Record<string, readonly TreeExample[]>> = {
     }
   ],
   "ccg": [
-    {
-      "name_es": "Verbo transitivo",
-      "name_en": "Transitive verb",
-      "text": "[S\\NP]/NP"
-    },
     {
       "name_es": "Derivación con coordinación",
       "name_en": "Coordination derivation",

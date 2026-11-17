@@ -144,13 +144,19 @@ const es = locale === "es";
             <button class="btn btn--sm" type="button" data-script="json" disabled>JSON</button>
             <button class="btn btn--sm" type="button" data-script="newick" disabled>Newick</button>
             <button class="btn btn--sm" type="button" data-script="conllu" disabled>CoNLL-U</button>
-            <button class="btn btn--sm" type="button" data-script="brat" disabled>Brat</button>
           </div>
           <p class="faint u-text-2xs u-mt-2xs">
             {
               es
                 ? "El SVG se guarda con los colores resueltos y sin atributos vacíos, para que sea XML válido y se abra en Illustrator, Inkscape o rsvg."
                 : "The SVG is saved with resolved colours and no empty attributes, so it is valid XML and opens in Illustrator, Inkscape or rsvg."
+            }
+          </p>
+          <p class="faint u-text-2xs u-mt-2xs">
+            {
+              es
+                ? "CoNLL-U solo se ofrece para árboles de dependencias: un árbol de constituyentes no tiene núcleos ni relaciones que escribir. El JSON guarda también las flechas de movimiento."
+                : "CoNLL-U is offered only for dependency trees: a constituency tree has no heads or relations to write. The JSON also keeps the movement arrows."
             }
           </p>
         </section>

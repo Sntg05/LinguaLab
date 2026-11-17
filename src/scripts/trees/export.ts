@@ -5,7 +5,8 @@
      - SVG (self-contained and XML-valid)
      - PNG (rasterised through a canvas)
      - JSON (re-importable)
-     - Newick, CoNLL-U, Brat
+     - Newick (etiquetas entre comillas cuando hace falta)
+     - CoNLL-U, solo para árboles de dependencias
 
    The SVG path deliberately resolves CSS custom properties to concrete
    colours and strips nothing that carries meaning. A standalone file that
@@ -54,12 +55,42 @@ const THEME_VARS = [
   "--font-mono",
 ] as const;
 
+/** Lo que el XML no admite tal cual dentro de un atributo entre comillas dobles. */
+const xmlAttribute = (value: string): string =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/**
+ * Un color de CSS a hex sRGB, pintando un píxel. Los tokens del sitio están en
+ * `lab()` y `oklch()`, que Inkscape, Illustrator y rsvg no leen: un SVG que
+ * «se abre en cualquier programa» tiene que llevar colores que cualquiera lea.
+ * Sin lienzo (o si el valor no es un color) devuelve el valor tal cual.
+ */
+function toSrgb(value: string): string {
+  if (!/^(?:lab|lch|oklab|oklch|color|hsl|hwb)\(/i.test(value)) return value;
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1;
+    canvas.height = 1;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) return value;
+    context.fillStyle = value;
+    context.fillRect(0, 0, 1, 1);
+    const [r = 0, g = 0, b = 0, a = 255] = context.getImageData(0, 0, 1, 1).data;
+    const hex = (n: number): string => n.toString(16).padStart(2, "0");
+    return a === 255 ? `#${hex(r)}${hex(g)}${hex(b)}` : `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(3)})`;
+  } catch {
+    return value;
+  }
+}
+
 /**
  * Resolve every `var(--x)` in the serialized markup to its computed value.
  *
- * This is what makes the exported file stand alone: a viewer that has never
- * seen our stylesheet still paints the right colours. Unknown properties fall
- * back to a literal so no `var()` survives into the file.
+ * Lo que hace que el archivo se sostenga solo: un visor que nunca vio nuestra
+ * hoja de estilos pinta los colores correctos. Cada valor se escapa para el
+ * atributo donde cae: la familia tipográfica del sitio lleva comillas dobles
+ * (`"Noto IPA", …`) y, sin escape, cerraba el atributo y dejaba el archivo
+ * como XML inválido, que ningún programa abría (tampoco el paso a PNG).
  */
 export function resolveCustomProperties(markup: string, root: Element): string {
   const computed = getComputedStyle(root);
@@ -67,14 +98,17 @@ export function resolveCustomProperties(markup: string, root: Element): string {
 
   for (const name of THEME_VARS) {
     const value = computed.getPropertyValue(name).trim();
-    values.set(name, value || "currentColor");
+    if (value === "") continue;
+    // Las comillas de una familia tipográfica pasan a simples: en un atributo
+    // con comillas dobles se leen igual y el archivo queda legible.
+    values.set(name, name.startsWith("--font-") ? value.replace(/"/g, "'") : toSrgb(value));
   }
 
-  return markup.replace(/var\(\s*(--[a-z0-9-]+)\s*(?:,\s*([^)]*))?\)/gi, (_match, name: string, fallback?: string) => {
-    const resolved = values.get(name);
-    if (resolved && resolved !== "currentColor") return resolved;
-    return fallback?.trim() || resolved || "currentColor";
-  });
+  return markup.replace(
+    /var\(\s*(--[a-z0-9-]+)\s*(?:,\s*([^)]*))?\)/gi,
+    (_match, name: string, fallback?: string) =>
+      xmlAttribute(values.get(name) ?? (fallback?.trim() || "currentColor")),
+  );
 }
 
 /**
@@ -107,7 +141,12 @@ export async function copySVG(svg: SVGSVGElement): Promise<void> {
   await navigator.clipboard.writeText(text);
 }
 
-export function savePNG(svg: SVGSVGElement, name = "arborlab"): void {
+/**
+ * Rasteriza el SVG y descarga el PNG. Devuelve una promesa que falla si el
+ * navegador no pudo cargar la imagen o crear el archivo: antes el fallo se
+ * tragaba en silencio y el botón «no hacía nada».
+ */
+export function savePNG(svg: SVGSVGElement, name = "arborlab"): Promise<void> {
   const width = Number.parseInt(svg.getAttribute("width") ?? "800", 10) || 800;
   const height = Number.parseInt(svg.getAttribute("height") ?? "600", 10) || 600;
 
@@ -118,37 +157,50 @@ export function savePNG(svg: SVGSVGElement, name = "arborlab"): void {
   const url = URL.createObjectURL(blob);
   const image = new Image();
 
-  image.addEventListener("load", () => {
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(width * scale);
-    canvas.height = Math.round(height * scale);
+  return new Promise<void>((resolve, reject) => {
+    image.addEventListener("load", () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(height * scale);
 
-    const context = canvas.getContext("2d");
-    if (!context) {
+      const context = canvas.getContext("2d");
+      if (!context) {
+        URL.revokeObjectURL(url);
+        reject(new Error("canvas 2d no disponible"));
+        return;
+      }
+
+      // Opaque background: a transparent PNG is unreadable on a dark viewer.
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.setTransform(scale, 0, 0, scale, 0, 0);
+      context.drawImage(image, 0, 0);
       URL.revokeObjectURL(url);
-      return;
-    }
 
-    // Opaque background: a transparent PNG is unreadable on a dark viewer.
-    context.fillStyle = "#ffffff";
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.setTransform(scale, 0, 0, scale, 0, 0);
-    context.drawImage(image, 0, 0);
-    URL.revokeObjectURL(url);
-
-    canvas.toBlob((result) => {
-      if (!result) return;
-      const resultUrl = URL.createObjectURL(result);
-      const anchor = document.createElement("a");
-      anchor.href = resultUrl;
-      anchor.download = `${name}.png`;
-      anchor.click();
-      setTimeout(() => URL.revokeObjectURL(resultUrl), 1500);
+      canvas.toBlob((result) => {
+        if (!result) {
+          reject(new Error("el navegador no creó el PNG"));
+          return;
+        }
+        const resultUrl = URL.createObjectURL(result);
+        const anchor = document.createElement("a");
+        anchor.href = resultUrl;
+        anchor.download = `${name}.png`;
+        // En el documento, como en `download`: Firefox no sigue un enlace suelto.
+        document.body.append(anchor);
+        anchor.click();
+        anchor.remove();
+        setTimeout(() => URL.revokeObjectURL(resultUrl), 1500);
+        resolve();
+      }, "image/png");
     });
-  });
 
-  image.addEventListener("error", () => URL.revokeObjectURL(url));
-  image.src = url;
+    image.addEventListener("error", () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("el SVG no se pudo cargar como imagen"));
+    });
+    image.src = url;
+  });
 }
 
 /* ---------------------------------------------------------------
@@ -217,27 +269,34 @@ export function fromJSON(value: unknown): TreeNode {
    Newick
    --------------------------------------------------------------- */
 
-/** Newick reserves these characters, and spaces are not allowed. */
-function newickEscape(value: string): string {
-  return String(value ?? "")
-    .replace(/\s+/g, "_")
-    .replace(/[(),:;'"[\]{}]/g, "");
+/**
+ * Una etiqueta de Newick. Sin caracteres reservados va tal cual (los espacios
+ * se escriben como `_`, que el formato lee como espacio); si tiene alguno, va
+ * entre comillas simples con la comilla interna doblada, como pide el formato.
+ * Antes se borraban: `x,y` llegaba como `xy`, y una etiqueta que quedaba vacía
+ * se reemplazaba por «nodo», una etiqueta que nadie escribió.
+ */
+function newickLabel(value: string): string {
+  const label = String(value ?? "");
+  if (label !== "" && !/[\s(),:;'"[\]_]/.test(label)) return label;
+  if (!/[(),:;'"[\]_]/.test(label)) return label.replace(/ /g, "_");
+  return `'${label.replace(/'/g, "''")}'`;
 }
 
 export function toNewick(tree: TreeNode): string {
   const serialize = (node: TreeNode): string => {
-    const label = newickEscape(node.label);
-    if (node.children.length === 0) return label || "nodo";
+    const label = newickLabel(node.label);
+    if (node.children.length === 0) return label;
     return `(${node.children.map(serialize).join(",")})${label}`;
   };
   return `${serialize(tree)};`;
 }
 
 /* ---------------------------------------------------------------
-   CoNLL-U and Brat
+   CoNLL-U
    --------------------------------------------------------------- */
 
-/** Leaves in reading order, which is the token order for UD output. */
+/** Leaves in reading order. */
 export function leavesOf(tree: TreeNode): TreeNode[] {
   const leaves: TreeNode[] = [];
   const walk = (node: TreeNode): void => {
@@ -251,69 +310,71 @@ export function leavesOf(tree: TreeNode): TreeNode[] {
   return leaves;
 }
 
-const DETERMINERS = ["el", "la", "los", "las", "un", "una", "the", "a", "an", "this", "that"];
-const ADPOSITIONS = ["de", "en", "con", "por", "para", "sobre", "of", "in", "with", "by", "for", "on"];
-const CONJUNCTIONS = ["y", "o", "pero", "and", "or", "but"];
-const AUXILIARIES = ["es", "está", "was", "is", "son", "era"];
+/** Las 17 categorías universales de UD v2 (universaldependencies.org/u/pos/). */
+const UPOS = new Set([
+  "ADJ", "ADP", "ADV", "AUX", "CCONJ", "DET", "INTJ", "NOUN", "NUM",
+  "PART", "PRON", "PROPN", "PUNCT", "SCONJ", "SYM", "VERB", "X",
+]);
 
-/** Rough UPOS guess, for producing syntactically valid CoNLL-U. */
-export function guessUPOS(word: string): string {
-  const value = word.toLowerCase();
-  if (/^[.,;:!?…]$/.test(value)) return "PUNCT";
-  if (DETERMINERS.includes(value)) return "DET";
-  if (ADPOSITIONS.includes(value)) return "ADP";
-  if (CONJUNCTIONS.includes(value)) return "CCONJ";
-  if (AUXILIARIES.includes(value)) return "AUX";
-  if (/[áéíóú]|\d/.test(value) || value.length > 3) {
-    return /[aeiou]$/.test(value) ? "VERB" : "NOUN";
-  }
-  return "NOUN";
-}
+/** Un campo de CoNLL-U no puede estar vacío ni llevar tabuladores ni saltos. */
+const conlluField = (value: string | undefined): string => {
+  const clean = String(value ?? "").replace(/[\t\r\n]+/g, " ").trim();
+  return clean === "" ? "_" : clean;
+};
 
 /**
- * Emit CoNLL-U.
+ * CoNLL-U de un árbol de dependencias, con lo que la persona escribió: id,
+ * palabra, núcleo y relación. Una etiqueta que no es de las 17 de UD va en
+ * XPOS y UPOS queda «_» (sin especificar), en vez de forzarla o adivinarla.
  *
- * Only leaves become tokens, which is what makes the output valid UD: a
- * constituency node is not a token.
- *
- * Note the head assignment: every token but the first points at token 1,
- * which mirrors the legacy behaviour. It is a syntactically valid tree, not a
- * linguistically analysed one, and the UI says so.
+ * Un árbol de constituyentes no tiene núcleos ni relaciones que escribir:
+ * devuelve `null`. La versión anterior los inventaba (todo dependía de la
+ * primera palabra, y la categoría salía de la longitud de la palabra).
  */
-export function toCoNLLU(tree: TreeNode): string {
-  const leaves = leavesOf(tree);
-  const forms = leaves.map((n) => n.label.replace(/_/g, " "));
+export function toCoNLLU(tree: TreeNode): string | null {
+  const meta = tree.depMeta;
+  if (meta === undefined) return null;
 
-  const lines = [`# text = ${forms.join(" ")}`];
-  forms.forEach((form, index) => {
-    const id = index + 1;
-    const head = id === 1 ? 0 : 1;
-    const rel = id === 1 ? "root" : "dep";
+  const tokens = [...meta.nodes].sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
+  const lines = ["# sent_id = 1", `# text = ${tokens.map((node) => conlluField(node.word)).join(" ")}`];
+  for (const node of tokens) {
+    const pos = conlluField(node.pos);
+    const upos = UPOS.has(pos) ? pos : "_";
+    const xpos = UPOS.has(pos) ? "_" : pos;
     lines.push(
-      [id, form, form.toLowerCase(), guessUPOS(form), "_", "_", head, rel, "_", "_"].join("\t"),
+      [
+        String(node.id),
+        conlluField(node.word),
+        "_",
+        upos,
+        xpos,
+        "_",
+        String(node.head ?? 0),
+        conlluField(node.rel),
+        "_",
+        "_",
+      ].join("\t"),
     );
-  });
-
-  lines.push("");
-  return lines.join("\n");
-}
-
-/** Brat stand-off is text-only in this export. */
-export function toBrat(tree: TreeNode): string {
-  return `${leavesOf(tree)
-    .map((n) => n.label.replace(/_/g, " "))
-    .join(" ")}\n`;
+  }
+  // Cada oración termina con una línea en blanco, también la última.
+  return `${lines.join("\n")}\n\n`;
 }
 
 /* ---------------------------------------------------------------
    Script download menu
    --------------------------------------------------------------- */
 
-export type ScriptKind = "json" | "newick" | "conllu" | "brat";
+export type ScriptKind = "json" | "newick" | "conllu";
 
 export function downloadScript(
   tree: TreeNode,
-  meta: { scriptKind?: ScriptKind; name?: string; kind?: string; lang?: string } = {},
+  meta: {
+    scriptKind?: ScriptKind;
+    name?: string;
+    kind?: string;
+    lang?: string;
+    directives?: unknown[];
+  } = {},
 ): void {
   const kind = meta.scriptKind ?? "json";
   const name = meta.name ?? "arborlab-arbol";
@@ -322,12 +383,12 @@ export function downloadScript(
     case "newick":
       download(`${name}.nwk`, toNewick(tree));
       return;
-    case "conllu":
-      download(`${name}.conllu`, toCoNLLU(tree));
+    case "conllu": {
+      const conllu = toCoNLLU(tree);
+      // El botón solo se habilita para árboles de dependencias; esto es la red.
+      if (conllu !== null) download(`${name}.conllu`, conllu);
       return;
-    case "brat":
-      download(`${name}.txt`, toBrat(tree));
-      return;
+    }
     default:
       download(
         `${name}.json`,
@@ -359,8 +420,6 @@ export const EXPORTER = {
   fromJSON,
   toNewick,
   toCoNLLU,
-  toBrat,
-  guessUPOS,
   downloadScript,
   download,
   suggestName,
