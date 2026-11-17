@@ -87,7 +87,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T6 | S9 | Estadística cuantitativa, contrastada con R (D4: motor propio) | inline | en curso | ver T6.1–T6.8 |
 | T6.3 | S9 | Distribuciones normal, t, χ², F (función de distribución y cuantiles) en `packages/core/src/stats/` | inline | hecha | commit de L45 |
 | T6.2 | S9 | Descriptivos: n, media, mediana, moda, varianza, desviación, cuantiles tipo 7, rango, asimetría | inline | hecha | commit de L45 |
-| T6.4 | S9 | Pruebas: t (una muestra, Welch, pareada), χ² (independencia, bondad de ajuste), Pearson, Spearman, ANOVA de un factor, Mann–Whitney, Wilcoxon | inline | pendiente | — |
+| T6.4 | S9 | Pruebas: t (una muestra, Welch, pareada), χ² (independencia, bondad de ajuste), Pearson, Spearman, ANOVA de un factor, Mann–Whitney, Wilcoxon | inline | hecha | commit de L46 |
 | T6.5 | S9 | Tamaños del efecto e intervalos al 95 % | inline | pendiente | — |
 | T6.6 | S9 | Regresión lineal simple y múltiple | inline | pendiente | — |
 | T6.1, T6.7, T6.8 | S9, S6 | Datos CSV/TSV, gráficos SVG y página `/estadistica` con asistente e informe APA | inline | pendiente | — |
@@ -539,4 +539,15 @@ Se preguntan de a una, al empezar la fase que las necesita.
   `qf` con p muy pequeño:** `qf(1e-8, 1, 1)` da 2,22e-16 (el épsilon de la máquina) y `pf` de ese valor
   da 9,49e-9; la referencia usa `qbeta`, que coincide con la forma cerrada tan²(πp/2) de F(1, 1). La cola
   normal de Cody que tenía la estación pasa al núcleo: una sola implementación.
+- **L46 (2026-11-17). T6.4.** `packages/core/src/stats/tests.ts`: t de una muestra, pareada, de Welch y de
+  Student (con intervalo al 95 % y las tres alternativas), χ² de independencia (Yates solo en 2×2, una sola
+  corrección para toda la tabla, como R) y de bondad de ajuste, Pearson (intervalo por z de Fisher),
+  Spearman (aproximación t), ANOVA de un factor, Mann–Whitney y Wilcoxon pareada (exactas sin empates y con
+  menos de 50 valores; si no, normal con corrección de continuidad y de empates). Cada fallo esperado
+  (pocos datos, sin variación, tabla o proporciones inválidas) es un `Result` con nombre.
+  `scripts/r/build-tests-reference.R` escribe 24 casos con datos de R (mtcars, sleep, iris y los ejemplos
+  de `wilcox.test`); todos coinciden a 1e-10. Mi primera versión de Spearman tomaba `q − 1` en una rama:
+  falló contra R por un 2 %, y el código de `cor.test.default` mostró que esa corrección es solo de la
+  rama exacta. Mutar Yates, los grados de libertad de Welch o la decisión de usar la distribución exacta
+  rompe 1, 3 y 3 pruebas.
 
