@@ -85,15 +85,6 @@ describe("la regla de dependencias del hexágono", () => {
 const MAX_COMPONENT_SCRIPT_LINES = 30;
 
 /**
- * Los que todavía tienen su lógica dentro. Es un trinquete: cada commit de T9
- * saca uno y lo borra de aquí. La prueba falla también si uno de la lista ya
- * cumple, para que la lista no se quede vieja.
- */
-const PENDING_EXTRACTION = new Set([
-  "src/components/TextStation.astro",
-]);
-
-/**
  * Líneas de código dentro de los bloques `<script>` del cliente.
  *
  * Se quita antes el frontmatter (`---` … `---`): es código del servidor, y un
@@ -118,26 +109,17 @@ describe("los componentes solo conectan (T9)", () => {
       lines: scriptLines(readFileSync(path, "utf8")),
     }));
 
-  it("ningún componente fuera de la lista pasa del tope de líneas de script", () => {
+  it("ningún componente pasa del tope de líneas de script", () => {
+    // T9 vació la lista de pendientes con que empezó: desde aquí no hay excepciones.
     const offenders = components
-      .filter(({ path }) => !PENDING_EXTRACTION.has(path))
       .filter(({ lines }) => lines > MAX_COMPONENT_SCRIPT_LINES)
       .map(({ path, lines }) => `${path}: ${lines}`);
 
     expect(offenders).toEqual([]);
   });
 
-  it("la lista de pendientes no tiene componentes que ya cumplen", () => {
-    const stale = components
-      .filter(({ path }) => PENDING_EXTRACTION.has(path))
-      .filter(({ lines }) => lines <= MAX_COMPONENT_SCRIPT_LINES)
-      .map(({ path }) => path);
-
-    expect(stale).toEqual([]);
-  });
-
   it("cuenta las líneas del script y no las del marcado", () => {
-    // Sin esto, un contador roto que siempre diera 0 haría pasar las dos de arriba.
+    // Sin esto, un contador roto que siempre diera 0 haría pasar la de arriba.
     const sample = "---\nconst a = 1;\n---\n<p>x</p>\n<script>\n  one();\n\n  two();\n</script>";
     expect(scriptLines(sample)).toBe(2);
   });
