@@ -32,12 +32,18 @@
    - `persistence.ts`: autoguardado, restauracion y proyectos guardados.
    - `audio-loading.ts`: carga del audio y espectrograma.
    - `textgrid-io.ts`: importacion, huecos y exportacion.
+   - `acoustic-tracks.ts`: analisis por magnitud y por tramo, compartidos.
+   - `acoustic-overlay.ts`: tono, formantes e intensidad sobre el espectrograma.
+   - `acoustic-analysis.ts`: parametros del analisis y medicion de la seleccion.
    - `viewer-controls.ts`, `shortcuts.ts`, `ipa-panel.ts`: entradas de la persona.
    ============================================================ */
 
 import { createEmptyDocument, intervalTiers, startAnnotationHistory } from "@lingualab/core";
 import { lingualab } from "../../composition-root";
 import { type AcousticPanels, initAcousticPanels } from "./acoustic-analysis";
+import { type AcousticOverlay, createAcousticOverlay } from "./acoustic-overlay";
+import { createAcousticQuery } from "./acoustic-query";
+import { type AcousticTracks, createAcousticTracks } from "./acoustic-tracks";
 import { createAcousticStrings, parseAcousticStrings } from "./acoustic-strings";
 import { createAnnotationCommands } from "./annotation-commands";
 import { createAudioLoading } from "./audio-loading";
@@ -50,14 +56,18 @@ import { readPalette } from "./render";
 import { listenForShortcuts, type ShortcutCommand } from "./shortcuts";
 import { createAudioStrings, parseAudioStrings } from "./strings";
 import { createTextGridIo } from "./textgrid-io";
+import { listenToTierPointer } from "./tier-pointer";
+import { annotationCounts, createExample } from "./example";
 import { createTransport } from "./transport";
 import { listenToViewerControls } from "./viewer-controls";
 import {
   activeIntervalIndexOf,
   activeSheetOf,
   createViewerContext,
+  draggedSelectionOf,
   createViewerState,
   currentDocument,
+  selectionOf,
   type ViewerContext,
 } from "./viewer-state";
 
@@ -71,7 +81,11 @@ export { mountIpaKeyboard } from "./ipa-panel";
  * intervalo activo. Se montan una sola vez y sobreviven a los cambios de
  * archivo: `reset` descarta lo que ya no corresponde al audio nuevo.
  */
-const mountAcoustic = (ctx: ViewerContext, renderCanvas: () => void): AcousticPanels | null => {
+const mountAcoustic = (
+  ctx: ViewerContext,
+  tracks: AcousticTracks,
+  renderCanvas: () => void,
+): AcousticPanels | null => {
   const { el, state } = ctx;
   const acousticRoot = el.acousticRoot;
   if (acousticRoot === null) {
@@ -79,21 +93,19 @@ const mountAcoustic = (ctx: ViewerContext, renderCanvas: () => void): AcousticPa
   }
   return initAcousticPanels({
     root: acousticRoot,
-    port: lingualab.acoustic,
+    tracks,
     strings: createAcousticStrings(parseAcousticStrings(acousticRoot.dataset.acousticStrings)),
     es: ctx.es,
-    getAudio: () =>
-      state.audio === null
-        ? null
-        : {
-            samples: state.audio.samples,
-            sampleRate: state.audio.sampleRate,
-            duration: state.audio.duration,
-          },
-    // La seleccion es el intervalo donde esta el cursor: es el que el
-    // visor ya resalta en la onda y en las capas, asi que medir «la
-    // seleccion» no puede significar otra cosa.
+    getAudio: () => acousticAudioOf(ctx),
+    // La seleccion es la del visor: el tramo arrastrado, si lo hay (sin
+    // etiqueta: la fila se nombra por su rango), o el intervalo donde esta el
+    // cursor. Es lo que se resalta en la onda, asi que medir «la seleccion» no
+    // puede significar otra cosa.
     getSelection: () => {
+      const region = selectionOf(state);
+      if (region !== null && draggedSelectionOf(state) !== null) {
+        return { start: region.start, end: region.end, label: "" };
+      }
       const active = activeSheetOf(state);
       const interval = active?.tier.items[activeIntervalIndexOf(state)];
       if (active === null || interval === undefined) {
@@ -102,7 +114,46 @@ const mountAcoustic = (ctx: ViewerContext, renderCanvas: () => void): AcousticPa
       return { start: interval.start, end: interval.end, label: interval.text };
     },
     palette: () => state.palette,
-    onOverlayChange: () => renderCanvas(),
+    onParamsChange: () => renderCanvas(),
+  });
+};
+
+/** El audio cargado, en la forma que piden los analisis. */
+const acousticAudioOf = (ctx: ViewerContext) => {
+  const audio = ctx.state.audio;
+  return audio === null
+    ? null
+    : { samples: audio.samples, sampleRate: audio.sampleRate, duration: audio.duration };
+};
+
+/** Los parametros de los campos del panel acustico; sin panel, los de Praat. */
+const paramsOf = (panels: AcousticPanels | null) =>
+  panels?.params() ?? { floor: 75, ceiling: 600, maxFormantHz: 5500 };
+
+/**
+ * Curvas sobre el espectrograma (unidad 5.3). Comparten los analisis con el
+ * panel acustico y toman de el los parametros; sin panel, los de Praat.
+ */
+const mountOverlay = (
+  ctx: ViewerContext,
+  tracks: AcousticTracks,
+  panels: AcousticPanels | null,
+  renderCanvas: () => void,
+): AcousticOverlay => {
+  const { el } = ctx;
+  return createAcousticOverlay({
+    tracks,
+    strings: ctx.strings,
+    getAudio: () => acousticAudioOf(ctx),
+    params: () => paramsOf(panels),
+    palette: () => ctx.state.palette,
+    toggles: {
+      pitch: el.overlayPitchToggle,
+      formants: el.overlayFormantsToggle,
+      intensity: el.overlayIntensityToggle,
+    },
+    status: el.overlayStatus,
+    onChange: renderCanvas,
   });
 };
 
@@ -129,11 +180,23 @@ export const initAudioLab = (): void => {
   /* ------------------------------ modulos ----------------------------- */
 
   const canvas = createCanvasView(ctx, {
-    acoustic: () => acoustic,
+    overlay: () => overlay,
     isPlaying: () => transport.isPlaying(),
   });
-  const acoustic = mountAcoustic(ctx, canvas.renderCanvas);
-  const transport = createTransport(ctx, canvas);
+  const tracks = createAcousticTracks(lingualab.acoustic);
+  const acoustic = mountAcoustic(ctx, tracks, canvas.renderCanvas);
+  const overlay = mountOverlay(ctx, tracks, acoustic, canvas.renderCanvas);
+  // Consultas (unidad 5.5): mismos analisis y parametros que la tabla de medidas.
+  const query = createAcousticQuery(ctx, { tracks, params: () => paramsOf(acoustic) });
+  const transport = createTransport(ctx, {
+    ...canvas,
+    updateTransport: () => {
+      canvas.updateTransport();
+      if (transport.isPlaying()) {
+        example.notify("played");
+      }
+    },
+  });
   const persistence = createProjectPersistence(ctx);
 
   const commands = createAnnotationCommands(ctx, {
@@ -145,6 +208,16 @@ export const initAudioLab = (): void => {
     updateCursor: canvas.updateCursor,
     updateHistory: canvas.updateHistory,
     scheduleAutosave: persistence.scheduleAutosave,
+    onChange: (previous, next) => {
+      const before = annotationCounts(previous);
+      const after = annotationCounts(next);
+      if (after.intervals > before.intervals) {
+        example.notify("boundary-added");
+      }
+      if (after.labels > before.labels) {
+        example.notify("label-written");
+      }
+    },
   });
 
   const table = createIntervalTable(ctx, {
@@ -166,7 +239,17 @@ export const initAudioLab = (): void => {
   const loading = createAudioLoading(ctx, {
     decoder: transport.decoder,
     setBuffer: transport.setBuffer,
-    acoustic,
+    acoustic: {
+      reset: () => {
+        // Un audio nuevo no hereda la seleccion ni los zooms del anterior.
+        state.selection = null;
+        state.viewHistory = [];
+        tracks.reset();
+        overlay.reset();
+        acoustic?.reset();
+        query.reset();
+      },
+    },
     renderCanvas: canvas.renderCanvas,
     renderAll,
     updatePersistence: persistence.updatePersistence,
@@ -182,7 +265,7 @@ export const initAudioLab = (): void => {
 
   /* ---------------------------- entradas ------------------------------ */
 
-  listenToViewerControls(ctx, {
+  const view = listenToViewerControls(ctx, {
     transport,
     loadAudioFile: loading.loadAudioFile,
     importTextGrid: textGrid.importTextGrid,
@@ -202,8 +285,44 @@ export const initAudioLab = (): void => {
     next: () => commands.moveCursorToInterval(1),
     undo: commands.undo,
     redo: commands.redo,
+    "add-boundary": commands.splitAtCursor,
+    "remove-boundary": commands.removeSelectedBoundary,
+    "play-interval": () => transport.toggleRegion(selectionOf(state)),
+    "zoom-all": view.zoomAll,
+    "zoom-in": view.zoomIn,
+    "zoom-out": view.zoomOut,
+    "zoom-selection": view.zoomSelection,
+    "extend-selection-left": () => view.extendSelection(-1),
+    "extend-selection-right": () => view.extendSelection(1),
+    "query-pitch": () => query.run("pitch"),
+    "query-f1": () => query.run("f1"),
+    "query-f2": () => query.run("f2"),
+    "query-intensity": () => query.run("intensity"),
   };
-  listenForShortcuts((command) => shortcuts[command]());
+  listenForShortcuts((command) => shortcuts[command](), el.canvasFrame);
+
+  const example = createExample(ctx, {
+    loadAudioFile: loading.loadAudioFile,
+    importTextGrid: textGrid.importTextGrid,
+  });
+  el.exampleSolvedButton?.addEventListener("click", () => void example.loadSolved());
+  el.examplePracticeButton?.addEventListener("click", () => void example.loadPractice());
+  // Un audio elegido a mano termina la guia: ya no habla de «pato».
+  el.audioInput.addEventListener("change", () => example.cancel());
+
+  listenToTierPointer(ctx, {
+    applyDocument: commands.applyDocument,
+    renderCanvas: canvas.renderCanvas,
+    renderTierSelect: () => table.renderTierSelect(),
+  });
+
+  el.labelInput?.addEventListener("input", () => {
+    commands.setActiveText(el.labelInput?.value ?? "");
+  });
+  el.labelInput?.addEventListener("focus", () => {
+    // El teclado AFI escribe en el ultimo campo de texto enfocado.
+    state.lastTextInput = el.labelInput;
+  });
 
   /* ------------------------------ arranque ---------------------------- */
 

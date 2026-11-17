@@ -28,7 +28,25 @@
  * más cercano. El arnés toma el marco más cercano, así que medir en instantes
  * de marco evita comparar dos interpolaciones distintas.
  *
- * Uso: node scripts/build-acoustic-reference.mjs
+ * La intensidad (`To Intensity: 100, 0, "yes"`, el piso de 100 Hz que usa el
+ * visor y la resta de la media que Praat trae marcada) se mide en el marco de
+ * intensidad más cercano a cada uno de esos instantes, con `Get value at
+ * time` y "nearest": el valor del marco, sin interpolar. Va en un bloque
+ * `intensity` aparte, con su propia versión de Praat, porque se añadió después
+ * que F0 y formantes.
+ *
+ * Uso:
+ *   node scripts/build-acoustic-reference.mjs              regenera todo
+ *   node scripts/build-acoustic-reference.mjs --intensity  solo añade o rehace
+ *     el bloque `intensity`, sobre el WAV y los instantes que ya están, sin
+ *     tocar F0, F1, F2 ni su versión de Praat
+ *
+ * Por qué existe `--intensity`: F0 y formantes se midieron con Praat 6.4.49 y
+ * praatfan coincide con esa versión con cuatro decimales. Praat 7.0.03 da en
+ * [e] F1 = 358,0499 Hz donde 6.4.49 daba 357,6936 (medido el 2026-11-14):
+ * regenerar todo con otra versión cambiaría la referencia sin que haya
+ * cambiado el motor. Una versión por bloque deja ver con cuál se midió cada
+ * cosa.
  */
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -47,6 +65,9 @@ const VOWELS = [
 const PITCH = { floorHz: 75, ceilingHz: 600 };
 /** 5000 Hz y cinco formantes: el ajuste estándar de Praat para una voz masculina adulta. */
 const FORMANT = { maxFormantHz: 5000, count: 5 };
+/** El piso que usa el visor (`INTENSITY_MIN_PITCH_HZ`) y la resta de la media de Praat. */
+const INTENSITY = { minimumPitchHz: 100, subtractMean: true };
+const INTENSITY_ONLY = process.argv.includes("--intensity");
 
 const PRAAT_SCRIPT = `
 form: "Referencia"
@@ -86,16 +107,72 @@ for i from 1 to 3
 endfor
 `;
 
+/** Tres instantes: tantos como mide `PRAAT_SCRIPT`, y la misma cantidad que exige el bucle. */
+const INTENSITY_SCRIPT = `
+form: "Intensidad"
+  sentence: "wav", ""
+  real: "t1", "0"
+  real: "t2", "0"
+  real: "t3", "0"
+endform
+sound = Read from file: wav$
+intensity = To Intensity: ${INTENSITY.minimumPitchHz}, 0, "${INTENSITY.subtractMean ? "yes" : "no"}"
+writeInfoLine: ""
+for i from 1 to 3
+  t = t'i'
+  frame = Get frame number from time: t
+  ft = Get time from frame number: round (frame)
+  db = Get value at time: ft, "nearest"
+  appendInfoLine: fixed$ (ft, 6), tab$, fixed$ (db, 4)
+endfor
+`;
+
+/** Mide la intensidad en el marco más cercano a cada instante, con el Praat instalado. */
+const measureIntensity = (wav, times) => {
+  if (times.length !== 3) throw new Error(`build-acoustic-reference: se esperaban 3 instantes y hay ${times.length}`);
+  const output = execFileSync("praat", ["--run", intensityPath, wav, ...times.map(String)], {
+    encoding: "utf8",
+  });
+  const points = output
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [time, db] = line.split("\t").map(Number);
+      if (![time, db].every(Number.isFinite)) {
+        throw new Error(`build-acoustic-reference: intensidad indefinida en ${wav}: «${line}»`);
+      }
+      return { time, db };
+    });
+  if (points.length !== 3) throw new Error(`build-acoustic-reference: ${wav} dio ${points.length} intensidades`);
+  return { praatVersion, ...INTENSITY, points };
+};
+
 mkdirSync(OUT, { recursive: true });
 mkdirSync(SCRATCH, { recursive: true });
 const scriptPath = join(SCRATCH, "reference.praat");
 writeFileSync(scriptPath, PRAAT_SCRIPT);
+const intensityPath = join(SCRATCH, "intensity.praat");
+writeFileSync(intensityPath, INTENSITY_SCRIPT);
 
 const praatVersion = execFileSync("praat", ["--version"], { encoding: "utf8" })
   .match(/Praat (\S+)/)?.[1];
 if (!praatVersion) throw new Error("build-acoustic-reference: no se pudo leer la versión de Praat");
 
 for (const { name, source } of VOWELS) {
+  if (INTENSITY_ONLY) {
+    // Se relee el JSON y se reescribe con el mismo formato: los campos que ya
+    // estaban quedan igual, byte a byte, y solo cambia el bloque `intensity`.
+    const jsonPath = join(OUT, `${name}.json`);
+    const current = JSON.parse(readFileSync(jsonPath, "utf8"));
+    const intensity = measureIntensity(
+      join(OUT, current.audio),
+      current.points.map((point) => point.time),
+    );
+    writeFileSync(jsonPath, `${JSON.stringify({ ...current, intensity }, null, 2)}\n`);
+    process.stdout.write(`build-acoustic-reference: ${name} intensidad ${JSON.stringify(intensity.points)}\n`);
+    continue;
+  }
   const wav = join(OUT, `${name}.wav`);
   execFileSync("ffmpeg", [
     "-v", "error", "-y",
@@ -119,9 +196,10 @@ for (const { name, source } of VOWELS) {
     });
   rmSync(tsv);
   if (points.length !== 3) throw new Error(`build-acoustic-reference: ${name} dio ${points.length} puntos`);
+  const intensity = measureIntensity(wav, points.map((point) => point.time));
   writeFileSync(
     join(OUT, `${name}.json`),
-    `${JSON.stringify({ praatVersion, audio: `${name}.wav`, source: `public/audio/ipa/${source}`, pitch: PITCH, formant: FORMANT, points }, null, 2)}\n`,
+    `${JSON.stringify({ praatVersion, audio: `${name}.wav`, source: `public/audio/ipa/${source}`, pitch: PITCH, formant: FORMANT, points, intensity }, null, 2)}\n`,
   );
   process.stdout.write(`build-acoustic-reference: ${name} ${JSON.stringify(points)}\n`);
 }

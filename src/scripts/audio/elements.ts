@@ -16,8 +16,19 @@ export interface AudioLabElements {
   readonly loopInput: HTMLInputElement | null;
   readonly cursorInput: HTMLInputElement | null;
   readonly cursorReadout: HTMLOutputElement | null;
+  /** Lectura de la seleccion (inicio, fin, duracion) y del puntero (tiempo, Hz). */
+  readonly selectionReadout: HTMLElement | null;
+  readonly pointerReadout: HTMLElement | null;
   readonly zoomInButton: HTMLButtonElement | null;
   readonly zoomOutButton: HTMLButtonElement | null;
+  /** Zoom de Praat que faltaban: todo, a la seleccion y atras (unidad 5.4). */
+  readonly zoomAllButton: HTMLButtonElement | null;
+  readonly zoomSelectionButton: HTMLButtonElement | null;
+  readonly zoomBackButton: HTMLButtonElement | null;
+  /** Barras de reproduccion de Praat, como botones: visible, seleccion, todo. */
+  readonly playVisibleButton: HTMLButtonElement | null;
+  readonly playSelectionButton: HTMLButtonElement | null;
+  readonly playAllButton: HTMLButtonElement | null;
   readonly panLeftButton: HTMLButtonElement | null;
   readonly panRightButton: HTMLButtonElement | null;
   readonly windowSelect: HTMLSelectElement | null;
@@ -25,10 +36,23 @@ export interface AudioLabElements {
   readonly maxHzInput: HTMLInputElement | null;
   readonly spectrogramToggle: HTMLInputElement | null;
   readonly scaleSelect: HTMLSelectElement | null;
+  /** Casillas «mostrar» de las curvas sobre el espectrograma (unidad 5.3). */
+  readonly overlayPitchToggle: HTMLInputElement | null;
+  readonly overlayFormantsToggle: HTMLInputElement | null;
+  readonly overlayIntensityToggle: HTMLInputElement | null;
+  readonly overlayStatus: HTMLElement | null;
   readonly waveCanvas: HTMLCanvasElement | null;
   readonly specCanvas: HTMLCanvasElement | null;
   readonly tiersCanvas: HTMLCanvasElement | null;
   readonly canvasFrame: HTMLElement | null;
+  /** Barra de carga y transporte, el borde de arriba del editor. */
+  readonly editorBar: HTMLElement | null;
+  /** Ventana de texto del intervalo seleccionado, como la de Praat. */
+  readonly labelInput: HTMLInputElement | null;
+  readonly exampleSolvedButton: HTMLButtonElement | null;
+  readonly examplePracticeButton: HTMLButtonElement | null;
+  /** Credito del audio de ejemplo; se muestra al cargarlo. */
+  readonly exampleCredit: HTMLElement | null;
   readonly tierSelect: HTMLSelectElement | null;
   readonly tierNameInput: HTMLInputElement | null;
   readonly tierAddButton: HTMLButtonElement | null;
@@ -83,8 +107,16 @@ export const queryAudioLabElements = (root: HTMLElement): AudioLabElements => {
     loopInput: $<HTMLInputElement>("[data-audio-loop]"),
     cursorInput: $<HTMLInputElement>("[data-audio-cursor]"),
     cursorReadout: $<HTMLOutputElement>("[data-audio-cursor-readout]"),
+    selectionReadout: $<HTMLElement>("[data-audio-selection-readout]"),
+    pointerReadout: $<HTMLElement>("[data-audio-pointer-readout]"),
     zoomInButton: $<HTMLButtonElement>("[data-audio-zoom-in]"),
     zoomOutButton: $<HTMLButtonElement>("[data-audio-zoom-out]"),
+    zoomAllButton: $<HTMLButtonElement>("[data-audio-zoom-all]"),
+    zoomSelectionButton: $<HTMLButtonElement>("[data-audio-zoom-selection]"),
+    zoomBackButton: $<HTMLButtonElement>("[data-audio-zoom-back]"),
+    playVisibleButton: $<HTMLButtonElement>("[data-audio-play-visible]"),
+    playSelectionButton: $<HTMLButtonElement>("[data-audio-play-selection]"),
+    playAllButton: $<HTMLButtonElement>("[data-audio-play-all]"),
     panLeftButton: $<HTMLButtonElement>("[data-audio-pan-left]"),
     panRightButton: $<HTMLButtonElement>("[data-audio-pan-right]"),
     windowSelect: $<HTMLSelectElement>("[data-audio-window]"),
@@ -92,10 +124,19 @@ export const queryAudioLabElements = (root: HTMLElement): AudioLabElements => {
     maxHzInput: $<HTMLInputElement>("[data-audio-fmax]"),
     spectrogramToggle: $<HTMLInputElement>("[data-audio-spectrogram]"),
     scaleSelect: $<HTMLSelectElement>("[data-audio-scale]"),
+    overlayPitchToggle: $<HTMLInputElement>("[data-audio-overlay-pitch]"),
+    overlayFormantsToggle: $<HTMLInputElement>("[data-audio-overlay-formants]"),
+    overlayIntensityToggle: $<HTMLInputElement>("[data-audio-overlay-intensity]"),
+    overlayStatus: $<HTMLElement>("[data-audio-overlay-status]"),
     waveCanvas: $<HTMLCanvasElement>("[data-audio-wave]"),
     specCanvas: $<HTMLCanvasElement>("[data-audio-spec]"),
     tiersCanvas: $<HTMLCanvasElement>("[data-audio-tiers]"),
     canvasFrame: $<HTMLElement>("[data-audio-canvas]"),
+    editorBar: $<HTMLElement>("[data-audio-bar]"),
+    labelInput: $<HTMLInputElement>("[data-audio-label]"),
+    exampleSolvedButton: $<HTMLButtonElement>("[data-audio-example-solved]"),
+    examplePracticeButton: $<HTMLButtonElement>("[data-audio-example-practice]"),
+    exampleCredit: $<HTMLElement>("[data-audio-example-credit]"),
     tierSelect: $<HTMLSelectElement>("[data-audio-tier]"),
     tierNameInput: $<HTMLInputElement>("[data-audio-tier-name]"),
     tierAddButton: $<HTMLButtonElement>("[data-audio-tier-add]"),

@@ -89,9 +89,13 @@ describe("la variedad de español declarada", () => {
     // FonoLab tenía reglas propias con distinción (`z` → /θ/) mientras el
     // transcriptor del sitio usaba seseo: la misma palabra daba dos resultados
     // según la página. Ahora hay un solo motor, y el de FonoLab es ese.
+    // Desde T9 el cableado vive en `src/scripts/fono/index.ts`: la página lo
+    // carga y es ese módulo el que llama al motor del sitio.
     const page = read("src/components/FonoLab.astro");
+    const wiring = read("src/scripts/fono/index.ts");
     expect(page).not.toMatch(/scripts\/fono\/phonetics/);
-    expect(page).toMatch(/lingualab\.phonemizeText/);
+    expect(page).toMatch(/from "\.\.\/scripts\/fono\/index"/);
+    expect(wiring).toMatch(/lingualab\.phonemizeText/);
     expect(page).toMatch(/seseo[^"]*«zapato»/);
     expect(page).toMatch(/seseo[^"]*«zapato»[^"]*\/s\//);
   });

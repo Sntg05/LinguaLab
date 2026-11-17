@@ -3,14 +3,16 @@
  *
  * QUE DECIDE ESTE ARCHIVO Y QUE NO
  *
- * Decide que se analiza, con que parametros y que se muestra. No mide: el
- * analisis viaja al puerto inyectado —`AcousticAnalysisPort`, implementado por
- * el adaptador de praatfan sobre un Web Worker— y aqui solo se comprueba el
- * `Result`. No dibuja geometria: eso vive en `acoustic-render.ts`, que tiene sus
- * propias pruebas. No calcula estadistica: eso vive en `acoustic-measure.ts`,
- * por la misma razon.
+ * Decide con que parametros se analiza (piso y techo del tono, frecuencia
+ * maxima de los formantes) y mide la seleccion. No pide nada al motor
+ * directamente: los analisis, uno por magnitud, viven en `acoustic-tracks.ts`,
+ * que los guarda y los manda al worker de a uno. Las curvas sobre el
+ * espectrograma son de `acoustic-overlay.ts` (unidad 5.3): este panel ya no
+ * tiene botones ni lienzos por magnitud, porque en Praat las curvas se ven
+ * solas sobre el espectrograma. No dibuja geometria (`acoustic-render.ts`) ni
+ * calcula estadistica (`acoustic-measure.ts`).
  *
- * POR QUE EL PUERTO LLEGA COMO PARAMETRO
+ * POR QUE LOS ANALISIS LLEGAN COMO PARAMETRO
  *
  * La interfaz no puede construir un adaptador —la regla hexagonal solo deja
  * cablearlos en `src/composition-root.ts`— y ademas asi este controlador se
@@ -24,8 +26,7 @@
  * texto, no una condicion aqui.
  */
 
-import type { AcousticAnalysisPort, AcousticError, AcousticTrack } from "@lingualab/core";
-import type { ViewWindow } from "./view";
+import type { AcousticError } from "@lingualab/core";
 import type { Palette } from "./render";
 import {
   measureSelection,
@@ -34,17 +35,14 @@ import {
   type AcousticRange,
   type SelectionMeasurement,
 } from "./acoustic-measure";
-import { drawFormantOverlay, drawTrackPlot, drawVowelChart } from "./acoustic-render";
+import { measurementRow } from "./acoustic-measure-table";
+import { drawVowelChart } from "./acoustic-render";
+import type { AcousticAudio, AcousticTracks, TrackParams } from "./acoustic-tracks";
 import { format } from "./strings";
 import type { AcousticStrings } from "./acoustic-strings";
 import { downloadText, toFileName } from "./files";
 
-/** Lo que el visor tiene cargado y el analisis necesita. */
-export interface AcousticAudio {
-  readonly samples: Float32Array;
-  readonly sampleRate: number;
-  readonly duration: number;
-}
+export type { AcousticAudio } from "./acoustic-tracks";
 
 /** Intervalo elegido en el visor, con su texto: la etiqueta de la medicion. */
 export interface AcousticSelection {
@@ -74,32 +72,25 @@ export const VOICE_PRESETS: Readonly<Record<string, VoicePreset>> = {
 
 export interface AcousticPanelOptions {
   readonly root: HTMLElement;
-  readonly port: AcousticAnalysisPort;
+  readonly tracks: AcousticTracks;
   readonly strings: AcousticStrings;
   readonly es: boolean;
   readonly getAudio: () => AcousticAudio | null;
   readonly getSelection: () => AcousticSelection | null;
   readonly palette: () => Palette;
-  /** Se llama cuando cambia la superposicion: el visor vuelve a pintar el espectrograma. */
-  readonly onOverlayChange: () => void;
+  /** Cambio un parametro: el visor vuelve a pintar y las curvas se recalculan. */
+  readonly onParamsChange: () => void;
 }
 
 export interface AcousticPanels {
-  /** Superpone los formantes sobre el espectrograma ya pintado, si estan pedidos. */
-  drawOverlay(
-    canvas: HTMLCanvasElement,
-    view: ViewWindow,
-    minHz: number,
-    maxHz: number,
-  ): void;
-  /** El audio cambio: los analisis y las mediciones anteriores ya no valen. */
+  /** Los parametros saneados que se ven en los campos del panel. */
+  params(): TrackParams;
+  /** El audio cambio: las mediciones anteriores ya no valen. */
   reset(): void;
 }
 
 const DEFAULT_PITCH = { floorHz: 75, ceilingHz: 600 };
 const DEFAULT_FORMANT_HZ = 5500;
-const FORMANT_COUNT = 3;
-const INTENSITY_MIN_PITCH_HZ = 100;
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);
@@ -110,11 +101,7 @@ export interface AcousticParamsInput {
   readonly maxFormantHz: number;
 }
 
-export interface AcousticParams {
-  readonly floor: number;
-  readonly ceiling: number;
-  readonly maxFormantHz: number;
-}
+export type AcousticParams = TrackParams;
 
 /**
  * Parametros saneados antes de llegar al worker.
@@ -143,26 +130,20 @@ const numberFrom = (input: HTMLInputElement | null, fallback: number): number =>
 const rounded = (value: number, digits = 0): string => value.toFixed(digits);
 
 export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanels | null => {
-  const { root, strings, port } = options;
+  const { root, strings, tracks } = options;
   const $ = <T extends Element>(selector: string): T | null => root.querySelector<T>(selector);
 
   const status = $<HTMLElement>("[data-acoustic-status]");
   const presetSelect = $<HTMLSelectElement>("[data-acoustic-preset]");
   const pitchFloor = $<HTMLInputElement>("[data-acoustic-pitch-floor]");
   const pitchCeiling = $<HTMLInputElement>("[data-acoustic-pitch-ceiling]");
-  const pitchRun = $<HTMLButtonElement>("[data-acoustic-pitch-run]");
   const formantMax = $<HTMLInputElement>("[data-acoustic-formant-max]");
-  const formantRun = $<HTMLButtonElement>("[data-acoustic-formant-run]");
-  const formantOverlay = $<HTMLInputElement>("[data-acoustic-formant-overlay]");
-  const intensityRun = $<HTMLButtonElement>("[data-acoustic-intensity-run]");
   const measureRun = $<HTMLButtonElement>("[data-acoustic-measure-run]");
   const measureExport = $<HTMLButtonElement>("[data-acoustic-measure-export]");
   const measureClear = $<HTMLButtonElement>("[data-acoustic-measure-clear]");
   const measureEmpty = $<HTMLElement>("[data-acoustic-measure-empty]");
   const measureBody = $<HTMLTableSectionElement>("[data-acoustic-measure-body]");
   const measureTable = $<HTMLTableElement>("[data-acoustic-measure-table]");
-  const f0Canvas = $<HTMLCanvasElement>("[data-acoustic-f0-canvas]");
-  const intensityCanvas = $<HTMLCanvasElement>("[data-acoustic-intensity-canvas]");
   const vowelCanvas = $<HTMLCanvasElement>("[data-acoustic-vowels-canvas]");
   const vowelEmpty = $<HTMLElement>("[data-acoustic-vowels-empty]");
 
@@ -170,12 +151,6 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
     return null;
   }
 
-  let pitch: AcousticTrack | null = null;
-  let pitchKey = "";
-  let formants: readonly AcousticTrack[] = [];
-  let formantKey = "";
-  let intensity: AcousticTrack | null = null;
-  let intensityKey = "";
   let measurements: SelectionMeasurement[] = [];
   let busy = false;
 
@@ -190,12 +165,6 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
       ceilingHz: numberFrom(pitchCeiling, DEFAULT_PITCH.ceilingHz),
       maxFormantHz: numberFrom(formantMax, DEFAULT_FORMANT_HZ),
     });
-
-  const decoded = (audio: AcousticAudio) => ({
-    sampleRate: audio.sampleRate,
-    durationSeconds: audio.duration,
-    channels: [audio.samples],
-  });
 
   /** Un fallo del puerto, en el idioma de la pagina y con lo que haga falta saber. */
   const describe = (error: AcousticError): string => {
@@ -237,56 +206,6 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
     // El canvas vacio no es un dato: se marca como oculto para que el lector de
     // pantalla no anuncie un grafico que no tiene nada.
     canvas.dataset.empty = "true";
-  };
-
-  const drawPitch = (): void => {
-    if (f0Canvas === null) {
-      return;
-    }
-    if (pitch === null) {
-      clearCanvas(f0Canvas);
-      return;
-    }
-    const { floor, ceiling } = params();
-    delete f0Canvas.dataset.empty;
-    drawTrackPlot(f0Canvas, {
-      track: pitch,
-      view: { start: 0, end: Math.max(options.getAudio()?.duration ?? 1, 0.001) },
-      // El alto y el ancho los fija `drawTrackPlot` a partir del canvas: aqui
-      // solo hace falta un valor que no restrinja el trazo.
-      width: f0Canvas.clientWidth || 320,
-      height: f0Canvas.clientHeight || 140,
-      minValue: floor,
-      maxValue: ceiling,
-      palette: options.palette(),
-      label: "F0",
-      unit: "Hz",
-    });
-  };
-
-  const drawIntensity = (): void => {
-    if (intensityCanvas === null) {
-      return;
-    }
-    if (intensity === null) {
-      clearCanvas(intensityCanvas);
-      return;
-    }
-    const values = intensity.values.filter((value) => Number.isFinite(value));
-    const minValue = Math.min(40, ...values);
-    const maxValue = Math.max(100, ...values);
-    delete intensityCanvas.dataset.empty;
-    drawTrackPlot(intensityCanvas, {
-      track: intensity,
-      view: { start: 0, end: Math.max(options.getAudio()?.duration ?? 1, 0.001) },
-      width: intensityCanvas.clientWidth || 320,
-      height: intensityCanvas.clientHeight || 140,
-      minValue,
-      maxValue,
-      palette: options.palette(),
-      label: options.es ? "Intensidad" : "Intensity",
-      unit: "dB",
-    });
   };
 
   /**
@@ -336,75 +255,11 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
 
   /* ---------------------------- mediciones ---------------------------- */
 
-  const cell = (text: string): HTMLTableCellElement => {
-    const td = document.createElement("td");
-    td.textContent = text;
-    return td;
-  };
-
-  const sampleCell = (value: number | undefined): HTMLTableCellElement =>
-    cell(value === undefined ? "—" : rounded(value, 0));
-
-  /**
-   * Una cifra del resumen de F0, o una raya cuando ese intervalo no tiene voz.
-   *
-   * «Sin voz» se escribe solo en la media: repetirlo en las cuatro columnas
-   * convertiria la fila en una frase. Las rayas dicen «aqui no hay numero» sin
-   * inventar un 0 Hz.
-   */
-  const statsCell = (
-    measurement: SelectionMeasurement,
-    pick: (stats: NonNullable<SelectionMeasurement["f0"]>) => number,
-  ): HTMLTableCellElement => {
-    const stats = measurement.f0;
-    if (stats === null) {
-      return cell("—");
-    }
-    return cell(rounded(pick(stats), 1));
-  };
-
-  const measurementRow = (
-    measurement: SelectionMeasurement,
-    index: number,
-  ): HTMLTableRowElement => {
-    const row = document.createElement("tr");
-    row.dataset.measurement = String(index);
-
-    const head = document.createElement("th");
-    head.scope = "row";
-    head.textContent = measurement.label;
-
-    row.append(
-      head,
-      cell(`${rounded(measurement.start, 3)}–${rounded(measurement.end, 3)}`),
-      cell(
-        measurement.f0 === null
-          ? options.es
-            ? "sin voz"
-            : "unvoiced"
-          : rounded(measurement.f0.mean, 1),
-      ),
-      statsCell(measurement, (stats) => stats.median),
-      statsCell(measurement, (stats) => stats.min),
-      statsCell(measurement, (stats) => stats.max),
-      cell(measurement.intensity === null ? "—" : rounded(measurement.intensity.mean, 1)),
-    );
-
-    for (const sample of measurement.f1) {
-      row.append(sampleCell(sample.value));
-    }
-    for (const sample of measurement.f2) {
-      row.append(sampleCell(sample.value));
-    }
-
-    return row;
-  };
-
   const renderMeasurements = (): void => {
     if (measureBody !== null) {
       measureBody.replaceChildren();
       measurements.forEach((measurement, index) => {
-        measureBody.append(measurementRow(measurement, index));
+        measureBody.append(measurementRow(measurement, index, options.es));
       });
     }
 
@@ -426,62 +281,6 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
   };
 
   /* ----------------------------- acciones ----------------------------- */
-
-  /**
-   * Analisis con cache por parametros.
-   *
-   * La clave incluye los parametros porque cambiar el techo de F0 invalida el
-   * contorno: reutilizarlo daria un grafico que no corresponde a los campos que
-   * se ven en pantalla, que es peor que recalcular.
-   */
-  const ensurePitch = async (audio: AcousticAudio): Promise<AcousticError | null> => {
-    const { floor, ceiling } = params();
-    const key = `${floor}:${ceiling}:${audio.duration}`;
-    if (pitch !== null && pitchKey === key) {
-      return null;
-    }
-    const result = await port.pitch(decoded(audio), { floorHz: floor, ceilingHz: ceiling });
-    if (!result.ok) {
-      return result.error;
-    }
-    pitch = result.value;
-    pitchKey = key;
-    return null;
-  };
-
-  const ensureFormants = async (audio: AcousticAudio): Promise<AcousticError | null> => {
-    const { maxFormantHz } = params();
-    const key = `${maxFormantHz}:${audio.duration}`;
-    if (formants.length > 0 && formantKey === key) {
-      return null;
-    }
-    const result = await port.formants(decoded(audio), {
-      maxFormantHz,
-      count: FORMANT_COUNT,
-    });
-    if (!result.ok) {
-      return result.error;
-    }
-    formants = result.value;
-    formantKey = key;
-    return null;
-  };
-
-  const ensureIntensity = async (audio: AcousticAudio): Promise<AcousticError | null> => {
-    const key = `${INTENSITY_MIN_PITCH_HZ}:${audio.duration}`;
-    if (intensity !== null && intensityKey === key) {
-      return null;
-    }
-    const result = await port.intensity(decoded(audio), {
-      minimumPitchHz: INTENSITY_MIN_PITCH_HZ,
-    });
-    if (!result.ok) {
-      return result.error;
-    }
-    intensity = result.value;
-    intensityKey = key;
-    return null;
-  };
 
   /**
    * Envuelve una accion asincrona con los tres estados que la pagina necesita:
@@ -508,71 +307,33 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
       });
   };
 
-  const runPitch = (): void => {
-    guarded(async () => {
-      const audio = withAudio();
-      if (audio === null) {
-        return;
-      }
-      const failure = await ensurePitch(audio);
-      if (failure !== null) {
-        say(describe(failure), "error");
-        return;
-      }
-      drawPitch();
-      const voiced = pitch?.values.filter((value) => value > 0).length ?? 0;
-      say(format(strings.text("acoustic.status.f0"), { count: voiced }), "ok");
-    });
-  };
-
-  const runFormants = (): void => {
-    guarded(async () => {
-      const audio = withAudio();
-      if (audio === null) {
-        return;
-      }
-      const failure = await ensureFormants(audio);
-      if (failure !== null) {
-        say(describe(failure), "error");
-        return;
-      }
-      // La superposicion es la forma de ver los formantes; se enciende al
-      // pedirlos para que el resultado no quede en un canvas invisible.
-      if (formantOverlay !== null && !formantOverlay.checked) {
-        formantOverlay.checked = true;
-      }
-      options.onOverlayChange();
-      say(strings.text("acoustic.status.formants"), "ok");
-    });
-  };
-
-  const runIntensity = (): void => {
-    guarded(async () => {
-      const audio = withAudio();
-      if (audio === null) {
-        return;
-      }
-      const failure = await ensureIntensity(audio);
-      if (failure !== null) {
-        say(describe(failure), "error");
-        return;
-      }
-      drawIntensity();
-      say(strings.text("acoustic.status.intensity"), "ok");
-    });
-  };
-
-  /** Los tres analisis que una medicion necesita, en orden y con el primer fallo. */
-  const ensureAnalyses = async (audio: AcousticAudio): Promise<AcousticError | null> => {
-    const pitchFailure = await ensurePitch(audio);
-    if (pitchFailure !== null) {
-      return pitchFailure;
+  /**
+   * Los tres analisis que una medicion necesita, sobre el audio completo.
+   *
+   * Pasan por `acoustic-tracks.ts`, que guarda cada resultado con su tramo y sus
+   * parametros: cambiar el techo de F0 invalida el contorno, y reutilizarlo
+   * mediria con parametros que no son los de los campos. Si el audio se ve
+   * entero, el tramo es el mismo que el de las curvas y no se recalcula.
+   */
+  const analyseAll = async (audio: AcousticAudio) => {
+    const range = { start: 0, end: audio.duration };
+    const current = params();
+    const pitch = await tracks.pitch(audio, range, current);
+    if (!pitch.ok) {
+      return pitch;
     }
-    const formantFailure = await ensureFormants(audio);
-    if (formantFailure !== null) {
-      return formantFailure;
+    const formants = await tracks.formants(audio, range, current);
+    if (!formants.ok) {
+      return formants;
     }
-    return ensureIntensity(audio);
+    const intensity = await tracks.intensity(audio, range, current);
+    if (!intensity.ok) {
+      return intensity;
+    }
+    return {
+      ok: true as const,
+      value: { pitch: pitch.value, formants: formants.value, intensity: intensity.value },
+    };
   };
 
   /**
@@ -622,11 +383,12 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
       }
       const { range, selection } = target;
 
-      const failure = await ensureAnalyses(audio);
-      if (failure !== null) {
-        say(describe(failure), "error");
+      const analyses = await analyseAll(audio);
+      if (!analyses.ok) {
+        say(describe(analyses.error), "error");
         return;
       }
+      const { pitch, formants, intensity } = analyses.value;
 
       const label = labelFor(selection, range);
 
@@ -662,19 +424,17 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
     if (formantMax !== null) {
       formantMax.value = String(preset.maxFormantHz);
     }
-    // Los rangos cambiaron: lo dibujado ya no corresponde a los campos visibles.
-    pitch = null;
-    formants = [];
+    // Los rangos cambiaron: las curvas se recalculan con los campos visibles.
+    options.onParamsChange();
   });
 
-  pitchRun?.addEventListener("click", runPitch);
-  formantRun?.addEventListener("click", runFormants);
-  intensityRun?.addEventListener("click", runIntensity);
+  // Cambiar un campo a mano tambien recalcula, como al cambiar un ajuste en
+  // Praat. `change` y no `input`: escribir «600» no debe analizar con 6 y 60.
+  for (const input of [pitchFloor, pitchCeiling, formantMax]) {
+    input?.addEventListener("change", () => options.onParamsChange());
+  }
+
   measureRun?.addEventListener("click", runMeasure);
-
-  formantOverlay?.addEventListener("change", () => {
-    options.onOverlayChange();
-  });
 
   measureExport?.addEventListener("click", () => {
     if (measurements.length === 0) {
@@ -695,30 +455,9 @@ export const initAcousticPanels = (options: AcousticPanelOptions): AcousticPanel
   say(strings.text("acoustic.status.idle"), "idle");
 
   return {
-    drawOverlay(canvas, view, minHz, maxHz) {
-      if (formantOverlay === null || !formantOverlay.checked) {
-        return;
-      }
-      if (formants.length === 0) {
-        return;
-      }
-      drawFormantOverlay(canvas, formants, {
-        view,
-        minHz,
-        maxHz,
-        palette: options.palette(),
-      });
-    },
+    params,
     reset() {
-      pitch = null;
-      pitchKey = "";
-      formants = [];
-      formantKey = "";
-      intensity = null;
-      intensityKey = "";
       measurements = [];
-      clearCanvas(f0Canvas);
-      clearCanvas(intensityCanvas);
       renderMeasurements();
     },
   };

@@ -25,9 +25,6 @@ import type { MessageKey } from "../../i18n";
 const KEYS = [
   "acoustic.status.idle",
   "acoustic.status.analysing",
-  "acoustic.status.f0",
-  "acoustic.status.formants",
-  "acoustic.status.intensity",
   "acoustic.status.measured",
   "acoustic.status.exported",
   "acoustic.status.cleared",

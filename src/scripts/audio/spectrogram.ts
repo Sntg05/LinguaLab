@@ -126,7 +126,21 @@ export interface Spectrogram {
   readonly hopSeconds: number;
   /** Segundos entre columnas contiguas, ya aplicado el paso para caber en el tope. */
   readonly columnSeconds: number;
+  /** Ancho de cada banda en Hz (frecuencia de muestreo / puntos de la FFT). */
+  readonly bandHz: number;
+  /** Frecuencia de la primera banda guardada, en Hz. */
+  readonly firstBandHz: number;
 }
+
+/**
+ * Puntos minimos de la FFT. Con la ventana de 5 ms de Praat, 44,1 kHz son 220
+ * muestras: una FFT de 256 puntos da bandas de 172 Hz y el dibujo sale en
+ * escalones. Rellenar con ceros hasta 1024 no agrega informacion, pero muestrea
+ * el espectro de la ventana cada 43 Hz y el dibujo queda continuo, como el de
+ * Praat. Medido (2026-11-13): sigue muy por debajo de los ~300 ms que pedirian
+ * pasarlo a Rust (Log L20 de `odd/tasks/rework-v4.md`).
+ */
+export const MIN_FFT_SIZE = 1024;
 
 /** Rango dinamico que se mapea a la escala de grises: 70 dB bajo el maximo, como Praat. */
 const DYNAMIC_RANGE_DB = 70;
@@ -140,6 +154,8 @@ const emptySpectrogram = (options: SpectrogramOptions): Spectrogram => ({
   windowSeconds: options.windowSeconds,
   hopSeconds: options.hopSeconds,
   columnSeconds: options.hopSeconds,
+  bandHz: 0,
+  firstBandHz: options.minHz,
 });
 
 /**
@@ -221,7 +237,7 @@ export const spectrogramColumns = (
     return emptySpectrogram(options);
   }
 
-  const fftSize = nextPowerOfTwo(windowLength);
+  const fftSize = Math.max(nextPowerOfTwo(windowLength), MIN_FFT_SIZE);
   const hop = Math.max(1, Math.round(options.hopSeconds * options.sampleRate));
   const total = Math.floor((samples.length - windowLength) / hop) + 1;
   const maxColumns = options.maxColumns ?? 512;
@@ -257,6 +273,8 @@ export const spectrogramColumns = (
     windowSeconds: options.windowSeconds,
     hopSeconds: options.hopSeconds,
     columnSeconds: (hop * stride) / options.sampleRate,
+    bandHz: bandWidthHz,
+    firstBandHz: bandFrom * bandWidthHz,
   };
 };
 

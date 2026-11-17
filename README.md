@@ -1,7 +1,7 @@
 # LinguaLab
 
 Herramientas de lingüística que corren enteramente en tu navegador: fonética con
-corte sagital, transcripción ortográfica y fonémica, árboles sintácticos y de
+corte sagital, transcripción ortográfica y fonológica, árboles sintácticos y de
 estructuras de datos, y análisis de corpus. Sin cuentas, sin servidor de análisis,
 sin telemetría.
 

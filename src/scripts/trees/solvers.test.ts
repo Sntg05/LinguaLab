@@ -121,7 +121,7 @@ function evalExpr(node: TreeNode): number {
     case "%":
       return a % b;
     case "^":
-      return Math.pow(a, b);
+      return a ** b;
     case "−":
       return a - b;
     default:

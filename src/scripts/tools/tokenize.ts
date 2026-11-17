@@ -271,7 +271,7 @@ export interface Token {
  * A word is a run of letters, optionally with internal apostrophes or hyphens
  * and digits. Unicode-aware, so `ñ`, `ü` and accented vowels are letters.
  */
-const WORD_PATTERN = /[\p{L}\p{N}]+(?:['’\-][\p{L}\p{N}]+)*/gu;
+const WORD_PATTERN = /[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu;
 
 export interface TokenizeOptions {
   /** Keep punctuation and numbers as tokens. Default false: words only. */

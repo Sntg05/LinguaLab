@@ -71,3 +71,78 @@ describe("la regla de dependencias del hexágono", () => {
     expect(ADAPTER_IMPORT.test(root)).toBe(true);
   });
 });
+
+/**
+ * T9 (S1, «quiero que hagas las cosas más modulares»): el `<script>` de un
+ * componente solo conecta elementos con funciones. Toda regla vive en
+ * `src/scripts/<área>/`, con prueba, o en `packages/core`.
+ *
+ * El tope sale del inventario del 2026-11-17: los componentes que ya siguen el
+ * patrón del visor (`safeInit("x", initX)`) tienen de 1 a 7 líneas de script y el
+ * más largo de los demás, `SecurityPage`, 26. Treinta deja margen para un
+ * segundo `safeInit` sin dejar pasar un archivo de reglas.
+ */
+const MAX_COMPONENT_SCRIPT_LINES = 30;
+
+/**
+ * Líneas de código dentro de los bloques `<script>` del cliente.
+ *
+ * Se quita antes el frontmatter (`---` … `---`): es código del servidor, y un
+ * comentario suyo que nombre la etiqueta `<script>` hacía contar desde ahí hasta
+ * el cierre del script real. Las etiquetas que se cierran solas (`<script … />`,
+ * los datos JSON) no abren un bloque. El cierre admite mayúsculas, espacios y
+ * atributos (`</SCRIPT >`), como lo admite el navegador.
+ */
+const SCRIPT_BLOCK = /<script\b(?![^>]*\/>)[^>]*>([\s\S]*?)<\/script\b[^>]*>/gi;
+
+const scriptLines = (source: string): number => {
+  const markup = source.replace(/^---\n[\s\S]*?\n---\n/, "");
+  let count = 0;
+  for (const match of markup.matchAll(SCRIPT_BLOCK)) {
+    count += (match[1] ?? "").split("\n").filter((line) => line.trim() !== "").length;
+  }
+  return count;
+};
+
+describe("los componentes solo conectan (T9)", () => {
+  const components = walk(join(ROOT, "src/components"))
+    .filter((path) => path.endsWith(".astro"))
+    .map((path) => ({
+      path: path.slice(ROOT.length),
+      lines: scriptLines(readFileSync(path, "utf8")),
+    }));
+
+  it("ningún componente pasa del tope de líneas de script", () => {
+    // T9 vació la lista de pendientes con que empezó: desde aquí no hay excepciones.
+    const offenders = components
+      .filter(({ lines }) => lines > MAX_COMPONENT_SCRIPT_LINES)
+      .map(({ path, lines }) => `${path}: ${lines}`);
+
+    expect(offenders).toEqual([]);
+  });
+
+  it("cuenta las líneas del script y no las del marcado", () => {
+    // Sin esto, un contador roto que siempre diera 0 haría pasar la de arriba.
+    const sample = "---\nconst a = 1;\n---\n<p>x</p>\n<script>\n  one();\n\n  two();\n</script>";
+    expect(scriptLines(sample)).toBe(2);
+  });
+
+  it("no cuenta el frontmatter ni las etiquetas de datos que se cierran solas", () => {
+    const sample = [
+      "---",
+      "// Este import vive en el `<script>` del componente.",
+      "---",
+      '<script is:inline type="application/json" data-x set:html={x} />',
+      "<p>x</p>",
+      "<script>",
+      "  one();",
+      "</script>",
+    ].join("\n");
+    expect(scriptLines(sample)).toBe(1);
+  });
+
+  it("reconoce el cierre con mayúsculas o con espacio, como el navegador", () => {
+    expect(scriptLines("<SCRIPT>\n  one();\n</SCRIPT >")).toBe(1);
+    expect(scriptLines('<script type="module">\n  one();\n  two();\n</script\n>')).toBe(2);
+  });
+});

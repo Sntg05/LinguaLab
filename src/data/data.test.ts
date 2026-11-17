@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { BIBLIOGRAPHY } from "./bibliography";
 import { GLOSSARY } from "./glossary";
@@ -68,8 +68,18 @@ describe("IPA audio manifest", () => {
 });
 
 describe("glossary", () => {
-  it("ships 16 bilingual entries", () => {
-    expect(GLOSSARY).toHaveLength(16);
+  it("ships 17 bilingual entries", () => {
+    expect(GLOSSARY).toHaveLength(17);
+  });
+
+  it("explains that a phonological transcription is what some books call phonemic", () => {
+    // Decided by the owner on 2026-11-13 (rework v4, L22): the Spanish interface says
+    // "fonológico", the term of the Hispanic tradition, and the glossary keeps the bridge
+    // to "fonémico" for readers who meet it in English-language manuals.
+    const entry = GLOSSARY.find((e) => e.id === "transcripcion-fonologica");
+    expect(entry?.term_es).toBe("Transcripción fonológica");
+    expect(entry?.def_es).toMatch(/fonémica/);
+    expect(entry?.def_es).toMatch(/\/ \//);
   });
 
   it("has unique ids", () => {
@@ -83,6 +93,18 @@ describe("glossary", () => {
         expect(e[key].length, `${e.id}.${key} is empty`).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+describe("Spanish terminology", () => {
+  it("never labels the phoneme level as «fonémico» in Spanish interface text", () => {
+    const es = readFileSync(new URL("../i18n/messages/es.ts", import.meta.url), "utf8");
+    const tools = JSON.parse(readFileSync(new URL("./tools.json", import.meta.url), "utf8"));
+    const spanishToolText = JSON.stringify(tools, (key, value) =>
+      key === "en" ? undefined : value,
+    );
+    expect(es).not.toMatch(/fon[eé]mic/i);
+    expect(spanishToolText).not.toMatch(/fon[eé]mic/i);
   });
 });
 

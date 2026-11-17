@@ -13,6 +13,7 @@ import { describe, expect, it } from "vitest";
 import type { AcousticTrack } from "@lingualab/core";
 import {
   measureSelection,
+  queryTrack,
   measurementsToCsv,
   sampleAtPercents,
   summarize,
@@ -180,5 +181,75 @@ describe("measurementsToCsv", () => {
     const csv = measurementsToCsv([]);
 
     expect(csv.trim().split("\n").length).toBe(1);
+  });
+});
+
+describe("queryTrack (consultas de Praat: «Get pitch», «Get first formant»…)", () => {
+  const f0 = track([0, 120, 130, 0, 140], [0.1, 0.2, 0.3, 0.4, 0.5]);
+
+  it("en el cursor da el valor del marco mas cercano y el instante de ese marco", () => {
+    expect(queryTrack(f0, { kind: "cursor", time: 0.29 }, "frequency")).toEqual({
+      kind: "value",
+      time: 0.3,
+      value: 130,
+    });
+  });
+
+  it("en el cursor sobre un marco sin voz no inventa un valor", () => {
+    expect(queryTrack(f0, { kind: "cursor", time: 0.41 }, "frequency")).toEqual({
+      kind: "undefined",
+    });
+  });
+
+  it("fuera de los marcos analizados (mas lejos que un paso) no da valor", () => {
+    expect(queryTrack(f0, { kind: "cursor", time: 0.75 }, "frequency")).toEqual({
+      kind: "undefined",
+    });
+  });
+
+  it("con una seleccion da la media de los marcos medidos dentro, sin contar los sordos", () => {
+    expect(queryTrack(f0, { kind: "selection", start: 0.15, end: 0.55 }, "frequency")).toEqual({
+      kind: "mean",
+      start: 0.15,
+      end: 0.55,
+      value: 130,
+      count: 3,
+    });
+  });
+
+  it("una seleccion sin ningun marco medido no tiene media", () => {
+    expect(queryTrack(f0, { kind: "selection", start: 0.35, end: 0.45 }, "frequency")).toEqual({
+      kind: "undefined",
+    });
+  });
+
+  it("un formante indefinido (NaN) cuenta como sin valor", () => {
+    const f1 = track([Number.NaN, 700], [0.1, 0.2]);
+    expect(queryTrack(f1, { kind: "cursor", time: 0.1 }, "frequency")).toEqual({
+      kind: "undefined",
+    });
+  });
+
+  it("la intensidad de una seleccion es la media de energia, como «Get mean… energy» de Praat", () => {
+    const db = track([60, 80], [0.1, 0.2]);
+    const answer = queryTrack(db, { kind: "selection", start: 0, end: 0.3 }, "intensity");
+    // 10·log10((10^6 + 10^8) / 2) = 77,0329 dB, no la media aritmetica de 70 dB.
+    expect(answer.kind).toBe("mean");
+    expect(answer.kind === "mean" ? answer.value : 0).toBeCloseTo(77.0329, 3);
+  });
+
+  it("la intensidad en el cursor acepta 0 dB: es un valor, no un hueco", () => {
+    const db = track([0, 50], [0.1, 0.2]);
+    expect(queryTrack(db, { kind: "cursor", time: 0.1 }, "intensity")).toEqual({
+      kind: "value",
+      time: 0.1,
+      value: 0,
+    });
+  });
+
+  it("sin pista no hay respuesta", () => {
+    expect(queryTrack(undefined, { kind: "cursor", time: 0.1 }, "frequency")).toEqual({
+      kind: "undefined",
+    });
   });
 });

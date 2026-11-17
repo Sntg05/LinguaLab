@@ -29,5 +29,24 @@
       "f1": 226.791,
       "f2": 2608.6047
     }
-  ]
+  ],
+  "intensity": {
+    "praatVersion": "7.0.03",
+    "minimumPitchHz": 100,
+    "subtractMean": true,
+    "points": [
+      {
+        "time": 0.178567,
+        "db": 76.2683
+      },
+      {
+        "time": 0.290567,
+        "db": 81.1313
+      },
+      {
+        "time": 0.402567,
+        "db": 77.1223
+      }
+    ]
+  }
 }

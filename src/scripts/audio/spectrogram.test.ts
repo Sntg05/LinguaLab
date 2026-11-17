@@ -172,3 +172,25 @@ describe("spectrogramColumns", () => {
     expect(spectrogram.columns).toBeLessThanOrEqual(400);
   });
 });
+
+describe("spectrogramColumns con la ventana de Praat (5 ms)", () => {
+  const sampleRate = 44100;
+  const samples = sine(1000, sampleRate, sampleRate / 2);
+  const praat = { sampleRate, windowSeconds: 0.005, hopSeconds: 0.002, minHz: 0, maxHz: 5000 };
+
+  it("rellena la FFT con ceros: las bandas miden menos de 50 Hz, no los 172 Hz de 256 puntos", () => {
+    const spectrogram = spectrogramColumns(samples, praat);
+    expect(spectrogram.bandHz).toBeLessThan(50);
+  });
+
+  it("un tono de 1000 Hz cae en la banda que le toca con un error menor de 50 Hz", () => {
+    const spectrogram = spectrogramColumns(samples, praat);
+    const middle = Math.floor(spectrogram.columns / 2);
+    const column = spectrogram.values.slice(
+      middle * spectrogram.columnLength,
+      (middle + 1) * spectrogram.columnLength,
+    );
+    const hz = spectrogram.firstBandHz + peakBin(column) * spectrogram.bandHz;
+    expect(Math.abs(hz - 1000)).toBeLessThan(50);
+  });
+});

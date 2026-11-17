@@ -3,16 +3,22 @@
 
    Las funciones de `./render.ts` saben pintar; este modulo sabe QUE pintar con
    el estado actual: la onda con el cursor y la seleccion, el espectrograma con
-   los formantes encima, las capas, la lectura del cursor y el estado de los
+   las curvas acusticas encima, las capas, la lectura del cursor y el estado de los
    botones que dependen del historial y de la reproduccion.
    ============================================================ */
 
 import { canRedoAnnotation, canUndoAnnotation } from "@lingualab/core";
-import type { AcousticPanels } from "./acoustic-analysis";
+import type { AcousticOverlay } from "./acoustic-overlay";
 import { drawSpectrogram, drawTierStrips, drawWaveform } from "./render";
-import { formatSeconds } from "./strings";
+import { format, formatSeconds } from "./strings";
 import { playLabel } from "./viewer-rules";
-import { currentDocument, loopRegionOf, type ViewerContext } from "./viewer-state";
+import {
+  activeIntervalIndexOf,
+  activeSheetOf,
+  currentDocument,
+  selectionOf,
+  type ViewerContext,
+} from "./viewer-state";
 
 export interface CanvasView {
   /** Onda, espectrograma (con formantes) y capas. No hace nada sin audio. */
@@ -25,8 +31,8 @@ export interface CanvasView {
 }
 
 export interface CanvasViewDeps {
-  /** Los paneles acusticos, que se montan despues que el dibujo. */
-  readonly acoustic: () => AcousticPanels | null;
+  /** Las curvas sobre el espectrograma, que se montan despues que el dibujo. */
+  readonly overlay: () => AcousticOverlay | null;
   readonly isPlaying: () => boolean;
 }
 
@@ -45,7 +51,7 @@ export const createCanvasView = (ctx: ViewerContext, deps: CanvasViewDeps): Canv
         duration: audio.duration,
         palette: state.palette,
         cursor: state.cursor,
-        selection: loopRegionOf(state),
+        selection: selectionOf(state),
       });
     }
     if (el.specCanvas !== null) {
@@ -58,25 +64,74 @@ export const createCanvasView = (ctx: ViewerContext, deps: CanvasViewDeps): Canv
           palette: state.palette,
           scale: el.scaleSelect?.value === "color" ? "color" : "gray",
         });
-        // Los formantes se dibujan ENCIMA del espectrograma ya pintado: es la
-        // unica forma de leer el formante contra su banda oscura.
+        // Tono, formantes e intensidad se dibujan ENCIMA del espectrograma ya
+        // pintado, como en Praat: es la unica forma de leer el formante contra
+        // su banda oscura. Si el tramo visible no esta analizado, se pide aqui.
         deps
-          .acoustic()
-          ?.drawOverlay(el.specCanvas, state.view, spectrogram.minHz, spectrogram.maxHz);
+          .overlay()
+          ?.draw(el.specCanvas, state.view, spectrogram.minHz, spectrogram.maxHz);
       } else {
         el.specCanvas.hidden = true;
       }
     }
     renderTiers();
+    updateSelection();
+  };
+
+  /**
+   * Lectura de la seleccion arriba, como en Praat: inicio, fin y duracion. Solo
+   * se escribe si cambio: es una region viva y repetir el mismo texto en cada
+   * cuadro de la reproduccion lo volveria a anunciar.
+   */
+  const updateSelection = (): void => {
+    const readout = el.selectionReadout;
+    if (readout === null) {
+      return;
+    }
+    const region = selectionOf(state);
+    const text =
+      region === null
+        ? ctx.strings.text("audio.readout.noSelection")
+        : format(ctx.strings.text("audio.readout.selection"), {
+            start: formatSeconds(region.start),
+            end: formatSeconds(region.end),
+            duration: formatSeconds(region.end - region.start),
+          });
+    if (readout.textContent !== text) {
+      readout.textContent = text;
+    }
+  };
+
+  /**
+   * La ventana de texto muestra la etiqueta del intervalo seleccionado, como la
+   * de Praat. Mientras alguien escribe en ella no se le pisa el valor: ya es el
+   * mismo, y reescribirlo moveria el cursor de texto al final.
+   */
+  const syncLabel = (): void => {
+    const input = el.labelInput;
+    if (input === null) {
+      return;
+    }
+    const sheet = activeSheetOf(state);
+    const index = activeIntervalIndexOf(state);
+    const interval = sheet === null || state.audio === null ? undefined : sheet.tier.items[index];
+    input.disabled = interval === undefined;
+    if (document.activeElement !== input) {
+      input.value = interval?.text ?? "";
+    }
   };
 
   const renderTiers = (): void => {
+    syncLabel();
     if (el.tiersCanvas !== null) {
       drawTierStrips(el.tiersCanvas, {
-        document: currentDocument(state),
+        document: state.dragPreview ?? currentDocument(state),
         view: state.view,
         activeTier: state.activeTier,
         palette: state.palette,
+        selectedInterval: activeIntervalIndexOf(state),
+        selectedBoundary: state.selectedBoundary,
+        cursor: state.audio === null ? undefined : state.cursor,
       });
     }
   };

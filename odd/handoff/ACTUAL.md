@@ -1,6 +1,6 @@
 ---
 status: current
-updated: 2026-11-12
+updated: 2026-11-17
 ---
 
 # Traspaso vigente: rework v4
@@ -17,10 +17,10 @@ Pega esto como primera instrucción, o síguelo tal cual:
 > Lee `odd/handoff/ACTUAL.md` entero y `odd/tasks/rework-v4.md` hasta `## Log`. No leas más documentos
 > todavía. Trabaja en la rama `feat/rework-v4`. Toma la **primera tarea sin bloquear** de la tabla de §6,
 > sigue sus pasos en orden, corre las puertas de §2 y haz commit y push al terminar cada unidad. No
-> fusiones a `main`. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
+> fusiones a `main` sin que el dueño lo pida. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
 > Háblale en español. Al terminar, reescribe este archivo.
 
-Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
+Estado al 2026-11-17: T5 y T9 hechas (Log L33–L34) y fusionadas a `main`. La siguiente sin bloqueo es **T7** (análisis cualitativo); T4, T6 y T8 esperan D3, D4 y D5. Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
 decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
 
 ## 1. Qué se está haciendo y dónde
@@ -29,9 +29,11 @@ decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
   Público: estudiantes de lenguas y de lingüística. Publicado desde `main` en
   `https://lingualab-beta.vercel.app`.
 - **Rama de trabajo:** `feat/rework-v4`, publicada en `origin`. Sale de `main` @ `baa8322`.
+- **Primera entrega ya en `main`:** el 2026-11-13 el dueño pidió fusionar lo hecho hasta T5.2 y T9 en
+  parte (PR #20, merge commit `7a7ecf9`; Log L18). La rama quedó igual a `main` y se sigue usando.
 - **Regla del dueño:** commit y push a esta rama después de cada unidad terminada, para que el equipo
   la trabaje desde otros equipos. **No se fusiona a `main` ni se abre PR de merge** hasta que el dueño
-  diga que todo funciona.
+  lo pida otra vez.
 - **Fuente de verdad de la entrega:** [`odd/tasks/rework-v4.md`](../tasks/rework-v4.md): el pedido textual
   del dueño (L1), las especificaciones S1–S11, las decisiones, la tabla de tareas y la bitácora.
   **Toda decisión o avance nuevo se anota ahí, en `## Log`,** y la fila de la tarea se actualiza con su
@@ -53,6 +55,8 @@ npm run dev                      # http://localhost:4321
 Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya está instalado en
 `~/.cargo/bin` (rustc 1.99.1, destino `wasm32-unknown-unknown`), **sin** tocar el `PATH`: se invoca como
 `~/.cargo/bin/cargo`. En otra máquina: `rustup` con `--profile minimal --target wasm32-unknown-unknown`.
+En el segundo equipo del dueño (CachyOS) **no hay Rust**, hay Go en `/usr/bin/go` (no se usa) y Node 26
+fuera de nvm; cumple el `>=22.12` del proyecto, pero `.nvmrc` pide 22: si algo difiere, `nvm use 22`.
 
 ### Las puertas, y cuándo correrlas
 
@@ -115,7 +119,19 @@ Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya es
 | `0b514b7` | **T5, primera parte.** F0, F1 y F2 validados contra Praat 6.4.49 en tres vocales (`scripts/build-acoustic-reference.mjs`, `e2e/fixtures/reference/`, `docs/validation/acoustic.md`). **T9, primera parte:** FonoLab usa el transcriptor del sitio. Ficha de X-barra corregida |
 
 | `c9a8b1a` | **T5, unidad 5.2 en parte:** espectrograma en grises, 5 ms, 0–5000 Hz, 70 dB, lienzos más altos |
-| (commit siguiente) | **Corrige los formantes de la página:** se analizaba con 3 formantes en vez de los 5 de Praat |
+| `d7b96c3` | **Corrige los formantes de la página:** se analizaba con 3 formantes en vez de los 5 de Praat |
+| `bd6a08b`, `2d8b93b` | Alertas de CodeQL del PR #20: limpieza de bordes lineal en los transcriptores (`packages/core/src/g2p/trim-edges.ts`), descarga de CMUdict verificada antes de escribir |
+| `7a7ecf9` | Fusión de la primera entrega a `main` (PR #20) |
+| `a5bd0f1` | Traspaso al día y medición del espectrograma frente a Rust (decisión L20: medir y decidir) |
+| `b0bdb2c` | **T5, 5.1:** editor de una pantalla |
+| `d5df5a6` | Terminología: «fonológico» en vez de «fonémico» en la interfaz en español (L22) |
+| `ee27ef5`, `27c120b`, `c6877fa` | **T5, 5.8:** gestos de Praat (Intro, arrastre, Supr, Tab, ventana de texto), panel «Segmentar» con lo demás plegado, barra compacta, ejemplo «pato» con licencia y modo guiado |
+| `a6ba11b` | **T5, 5.3:** tono, formantes e intensidad sobre el espectrograma, análisis automático del tramo visible (verificado aparte: L28) |
+| `c9bf799`, `f19f6b6` | **T5, 5.6 y 5.7:** intensidad y TextGrid contrastados con Praat 7.0.03 (`npm run validate:textgrid-praat`) |
+| `9316dce` | **T5, 5.4:** selección por arrastre, lecturas, barras de reproducción y zoom; aviso «experimental» quitado |
+| (commit de 5.5) | **T5, 5.5:** consultas «Obtener tono / F1 / F2 / intensidad» con las teclas de Praat; e2e de la tabla y del teclado contra las referencias |
+| `d45b8e9`, `4417cac`, `e56b84a`, `c565ee5` | **T9:** tope de 30 líneas de script por componente; PhonemizerLab, FonoLab, Glosario, Bibliografía, ArborLab (con `e2e/arbor.spec.ts`) y la estación de texto con sus reglas en `src/scripts/<área>/` |
+| `4d8d32b` | **T5, 5.2:** FFT rellenada a 1024, eje en Hz, espectrograma nítido en pantallas de doble densidad y guardado entre cuadros |
 
 Puerta completa y e2e en verde en el último commit de código.
 
@@ -146,6 +162,16 @@ Puerta completa y e2e en verde en el último commit de código.
 | T4 árboles | TypeScript; un analizador y un validador **por formalismo** | Cada teoría tiene su notación; un analizador de corchetes no sirve para todas | — |
 | Go / servidor | **No** | Decisión D1 del dueño y ADR 0002: nada de servidor propio | — |
 
+**Dónde ya hay Rust:** praatfan, el motor de todo el análisis acústico (F0, formantes, intensidad), es
+Rust compilado a WebAssembly (`public/praatfan/0.1.13/PROVENANCE.txt`). Lo que queda en TypeScript es el
+espectrograma de pantalla.
+
+**Medición del espectrograma (2026-11-13, Node 26, 60 s de audio a 44,1 kHz, ventana de 5 ms, paso de
+2 ms, mediana de 15 corridas):** con el tope actual de 512 columnas, 2,3 ms; con 2720 columnas (una
+pantalla de 1360 px a doble densidad), 11,9 ms; sin tope (unas 30 000 columnas), 134 ms. Todo queda bajo
+el umbral de ~300 ms, así que pasarlo a Rust no se nota todavía. Se vuelve a medir en 5.2, al rellenar la
+FFT con ceros hasta 512 o 1024 puntos, que multiplica el costo.
+
 **Regla para añadir una dependencia:** versión fijada exacta; licencia compatible con GPL-3.0 leída del
 propio paquete; publicada hace al menos catorce días; anotada en `THIRD_PARTY_NOTICES.md`; si se sirve
 desde `public/`, regla 9 de §3. Si se puede escribir en menos de ~200 líneas probadas, no se añade.
@@ -154,8 +180,8 @@ desde `public/`, regla 9 de §3. Si se puede escribir en menos de ~200 líneas p
 
 | Tarea | Estado | Bloqueada por | Tamaño |
 |---|---|---|---|
-| T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | validación hecha; falta la interfaz | nada | grande |
-| T9 Contrato único de herramienta | empezada | nada | mediana |
+| T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | **hecha en código**: 5.1–5.8 (ver §4 y el Log L21–L32). Pendiente humano: la persona que no conoce el visor, y la captura del espectrograma junto a Praat | nada | — |
+| T9 Contrato único de herramienta | **hecha**: ningún componente pasa de 30 líneas de script (`src/lib/architecture.test.ts`); el contrato es `safeInit("x", initX)` con `initX` en `src/scripts/<área>/` | nada | — |
 | T7 Análisis cualitativo | sin empezar | nada | grande |
 | T4 Árboles | ficha corregida; falta lo demás | D3 | grande |
 | T6 Estadística cuantitativa | sin empezar | D4 | grande |
@@ -204,8 +230,8 @@ manual, ver búsquedas):
 
 | # | Unidad | Archivos principales | Hecho cuando |
 |---|---|---|---|
-| 5.1 | **Editor de una pantalla.** Rehacer el marcado: zona de lienzos alta (onda ~25 %, espectrograma ~45 %, capas el resto de `min(70vh, 640px)`), barra de herramientas arriba, y todo lo demás (proyecto, exportar, tabla de medidas, gráfico vocálico) en pestañas o paneles plegables debajo | `src/components/AudioLab.astro`, `src/scripts/audio/elements.ts`, `canvas-view.ts`, `render.ts` | Con audio cargado, onda + espectrograma + capas + transporte caben en 900 px de alto; e2e nueva que lo mide con `boundingBox()`; reflujo a 320 px sigue en verde |
-| 5.2 | **Espectrograma como el de Praat.** *Hecho en parte:* grises por defecto con selector de paleta, ventana de 5 ms, 0–5000 Hz, 70 dB, lienzos más altos. **Falta:** (a) el dibujo queda en bloques: 5 ms a 22 kHz son 110 muestras y la FFT de 128 da bandas de ~172 Hz; rellenar con ceros hasta 512 o 1024 puntos e interpolar entre bandas al pintar; (b) eje de frecuencia rotulado en Hz; (c) ventana gaussiana como la de Praat, si se quiere el mismo dibujo | `src/scripts/audio/spectrogram.ts` (`spectrogramColumns`: `fftSize`), `render.ts` (`drawSpectrogram`) | Prueba: un tono de 1000 Hz cae en la fila correcta con error menor de 50 Hz; captura junto a la de Praat en `docs/validation/acoustic.md` |
+| 5.1 | **Hecha** (`b0bdb2c`, ajustada en `27c120b`): editor `min(68vh, 620px)`, barra compacta; la cabecera fija del sitio reserva 88 px, medido.  **Editor de una pantalla.** Rehacer el marcado: zona de lienzos alta (onda ~25 %, espectrograma ~45 %, capas el resto de `min(70vh, 640px)`), barra de herramientas arriba, y todo lo demás (proyecto, exportar, tabla de medidas, gráfico vocálico) en pestañas o paneles plegables debajo | `src/components/AudioLab.astro`, `src/scripts/audio/elements.ts`, `canvas-view.ts`, `render.ts` | Con audio cargado, onda + espectrograma + capas + transporte caben en 900 px de alto; e2e nueva que lo mide con `boundingBox()`; reflujo a 320 px sigue en verde |
+| 5.2 | **Hecha** (`4d8d32b`) salvo la ventana gaussiana opcional y la captura junto a Praat.  **Espectrograma como el de Praat.** *Hecho en parte:* grises por defecto con selector de paleta, ventana de 5 ms, 0–5000 Hz, 70 dB, lienzos más altos. **Falta:** (a) el dibujo queda en bloques: 5 ms a 22 kHz son 110 muestras y la FFT de 128 da bandas de ~172 Hz; rellenar con ceros hasta 512 o 1024 puntos e interpolar entre bandas al pintar; (b) eje de frecuencia rotulado en Hz; (c) ventana gaussiana como la de Praat, si se quiere el mismo dibujo | `src/scripts/audio/spectrogram.ts` (`spectrogramColumns`: `fftSize`), `render.ts` (`drawSpectrogram`) | Prueba: un tono de 1000 Hz cae en la fila correcta con error menor de 50 Hz; captura junto a la de Praat en `docs/validation/acoustic.md` |
 | 5.3 | **Curvas superpuestas.** Tono, formantes e intensidad sobre el espectrograma, con casillas «mostrar», y análisis automático del tramo visible (con el límite de duración que Praat también aplica: no analizar si se ven más de 10 s) | `acoustic-render.ts`, `acoustic-analysis.ts` (725 líneas: partirlo por magnitud al tocarlo) | e2e: al cargar un audio corto las tres curvas se dibujan sin pulsar nada; se pueden ocultar |
 | 5.4 | **Selección y lecturas.** Arrastre para seleccionar, lectura de inicio/fin/duración, cursor con Hz, barras de reproducción, zoom a la selección | `selection.ts` (existe y tiene pruebas), `transport.ts`, `playback.ts`, `viewer-controls.ts` | Pruebas unitarias de la geometría de la selección; e2e de arrastre con `page.mouse` |
 | 5.5 | **Consultas y atajos.** «Obtener tono / F1 / F2 / intensidad» en el cursor o en la selección; atajos de Praat; ayuda de atajos visible | `acoustic-measure.ts`, `viewer-controls.ts` | Los valores de consulta coinciden con los de `e2e/fixtures/reference/*.json`; e2e de teclado |
@@ -221,6 +247,9 @@ el motor no valida la página. Falta una e2e que lea F1 y F2 de la tabla de medi
 `vocal-a.wav` y los compare con el JSON de referencia (unidad 5.5).
 
 #### 5.8 — Segmentación sencilla, como en Praat y para enseñar
+
+**Estado (2026-11-13): hecha en código** (`ee27ef5`, `27c120b`, `c6877fa`; Log L23–L25). Falta solo la
+evidencia humana anotada en `docs/HUMAN-EVIDENCE.md`. Lo que sigue describe el plan con que se hizo.
 
 **Pedido textual (2026-11-12):** «revisa que también la segmentación sea un poco más sencillan y acorde
 con el programa original, necesitamos que sea sencillo e intuitivo de usar así no tenga todas las
@@ -452,7 +481,10 @@ Se le pregunta **una** cuando se llega a la tarea que la necesita, con la recome
 
 ## 9. Asuntos abiertos fuera del código
 
-- **Revisión de gentle-ai.** El repositorio tiene activo el desarrollo guiado por recibos: al terminar un
+- **Revisión de gentle-ai: APAGADA desde el 2026-11-14** por pedido del dueño (`gentle-ai review mode
+  disable`, ámbito global; Log L29). No se enciende sin que el dueño lo pida. Lo que sigue describe cómo
+  funcionaba.
+- **Revisión de gentle-ai (histórico).** El repositorio tiene activo el desarrollo guiado por recibos: al terminar un
   turno con commits nuevos, un gancho pide correr `gentle-ai review start …` tal como lo entrega. Si
   devuelve una consulta de consentimiento (`consent_required`), **se le traslada completa al dueño y no se
   responde por él**. El dueño declinó la revisión del commit `69e7cbb`. Un agente que no sea Claude Code

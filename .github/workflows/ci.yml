@@ -113,6 +113,17 @@ jobs:
       - name: End-to-end and accessibility tests
         run: npm run test:e2e
 
+      # El rastro de Playwright se graba en el primer reintento (playwright.config.ts),
+      # pero sin subirlo se pierde con el runner: una prueba que solo falla aqui
+      # quedaba sin evidencia. Solo cuando algo fallo; en verde no hay nada que mirar.
+      - name: Upload Playwright traces
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+
       - name: Upload build artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:

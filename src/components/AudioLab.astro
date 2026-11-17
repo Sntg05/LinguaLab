@@ -58,6 +58,18 @@ const acousticStrings = Object.fromEntries(
   ACOUSTIC_STRING_KEYS.map((key) => [key, t(locale, key)]),
 );
 
+/**
+ * Consultas de Praat con sus teclas (manual, «Keyboard shortcuts»): F5 «Get
+ * pitch» en Windows y Linux, F10 en Mac; F1 y F2 los formantes; F8 la
+ * intensidad. `aria-keyshortcuts` se lo dice a un lector de pantalla.
+ */
+const queryButtons = [
+  { magnitude: "pitch", label: "audio.query.pitch", keys: "F5 F10" },
+  { magnitude: "f1", label: "audio.query.f1", keys: "F1" },
+  { magnitude: "f2", label: "audio.query.f2", keys: "F2" },
+  { magnitude: "intensity", label: "audio.query.intensity", keys: "F8" },
+] as const;
+
 const WINDOWS = [
   { value: "0.005", label: "5 ms" },
   { value: "0.01", label: "10 ms" },
@@ -76,22 +88,24 @@ const WINDOWS = [
       <!-- El aviso de privacidad va visible: quien abre una herramienta tiene que
            poder saber, sin buscarlo, que su grabacion no sale del equipo. -->
       <p class="callout">{t(locale, "audio.privacy")}</p>
-      <p class="callout callout--warn">{t(locale, "audio.experimental")}</p>
     </div>
 
     <div class="audiolab">
-      <!-- ---------------------------- Carga ---------------------------- -->
-      <div class="panel">
-        <h2 class="panel__title">{t(locale, "audio.load.title")}</h2>
-        <p class="faint">{t(locale, "audio.load.note")}</p>
-        <div class="field">
-          {/* Un solo `label` por control: si el texto de arriba fuera un segundo
-              `label`, axe marca `form-field-multiple-labels` y el lector de
-              pantalla lee dos nombres. El nombre es el del botón («Elegir
-              archivo») y el texto de arriba queda como descripción. */}
-          <span class="field__label" id="audio-file-label">
-            {t(locale, "audio.load.pick")}
-          </span>
+      <!-- Barra del editor: cargar y reproducir en una barra compacta encima de los
+           lienzos, como la de una ventana de Praat, para que barra, onda,
+           espectrograma y capas quepan en una pantalla (unidades 5.1 y 5.8). -->
+      <div class="audiolab__editor">
+      <div class="panel audiolab__bar" data-audio-bar>
+        <h2 class="u-visually-hidden">{t(locale, "audio.bar.title")}</h2>
+        {/* Un solo `label` por control: si el texto de arriba fuera un segundo
+            `label`, axe marca `form-field-multiple-labels` y el lector de
+            pantalla lee dos nombres. El nombre es el del botón («Elegir
+            archivo»); «Archivo de audio» queda como descripción. Las
+            descripciones van fuera de la fila: dentro, aun invisibles, ocupan un
+            hueco del `gap` y parten la fila en dos. */}
+        <span class="u-visually-hidden" id="audio-file-label">{t(locale, "audio.load.pick")}</span>
+        <span class="u-visually-hidden" id="audio-rate-note">0.5× – 2×</span>
+        <div class="cluster">
           <label class="btn btn--quiet u-file">
             {t(locale, "file.choose")}
             <input
@@ -103,16 +117,6 @@ const WINDOWS = [
               accept="audio/*,.wav,.mp3,.ogg,.oga,.opus,.m4a,.flac,.webm"
             />
           </label>
-        </div>
-        <p class="audiolab__status" data-audio-status role="status" aria-live="polite" data-state="idle">
-          {t(locale, "audio.status.idle")}
-        </p>
-      </div>
-
-      <!-- ------------------------- Reproduccion ------------------------ -->
-      <div class="panel">
-        <h2 class="panel__title">{t(locale, "audio.transport.title")}</h2>
-        <div class="cluster">
           <button class="btn btn--primary" type="button" data-audio-play aria-pressed="false">
             {t(locale, "audio.play")}
           </button>
@@ -131,37 +135,10 @@ const WINDOWS = [
               aria-describedby="audio-rate-note"
             />
           </label>
-          <span class="faint" id="audio-rate-note">0.5× – 2×</span>
           <label class="field field--inline">
             <input type="checkbox" data-audio-loop />
             <span class="field__label">{t(locale, "audio.loop")}</span>
           </label>
-        </div>
-
-        <div class="field">
-          <label class="field__label" for="audio-cursor">{t(locale, "audio.cursor")}</label>
-          <div class="audiolab__cursor">
-            <input
-              id="audio-cursor"
-              type="range"
-              data-audio-cursor
-              min="0"
-              max="1"
-              step="0.001"
-              value="0"
-              disabled
-            />
-            <output class="audiolab__readout" data-audio-cursor-readout>0.000 s</output>
-          </div>
-        </div>
-
-        <div class="cluster">
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-in>
-            {t(locale, "audio.zoomIn")}
-          </button>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-out>
-            {t(locale, "audio.zoomOut")}
-          </button>
           <button class="btn btn--quiet btn--sm" type="button" data-audio-pan-left>
             {t(locale, "audio.panLeft")}
           </button>
@@ -169,10 +146,55 @@ const WINDOWS = [
             {t(locale, "audio.panRight")}
           </button>
         </div>
+
+        <div class="audiolab__cursor">
+          <label class="field__label" for="audio-cursor">{t(locale, "audio.cursor")}</label>
+          <input
+            id="audio-cursor"
+            type="range"
+            data-audio-cursor
+            min="0"
+            max="1"
+            step="0.001"
+            value="0"
+            disabled
+          />
+          <output class="audiolab__readout" data-audio-cursor-readout>0.000 s</output>
+          {/* Lecturas de Praat (unidad 5.4): la seleccion, region viva porque cambia
+              con cada gesto; el puntero, no, porque cambia con cada movimiento
+              del raton y su anuncio taparia lo demas. */}
+          <span class="audiolab__readout" data-audio-selection-readout aria-live="polite"
+            >{t(locale, "audio.readout.noSelection")}</span
+          >
+          <span class="audiolab__readout audiolab__readout--pointer" data-audio-pointer-readout></span>
+        </div>
+        <p class="audiolab__status" data-audio-status role="status" aria-live="polite" data-state="idle">
+          {t(locale, "audio.status.idle")}
+        </p>
       </div>
 
       <!-- --------------------------- Canvas ---------------------------- -->
-      <div class="audiolab__canvas" data-audio-canvas>
+      {/* El marco es el editor: recibe el foco (un clic en un lienzo lo enfoca) y
+          con el foco dentro valen los atajos de Praat: Intro, Supr y Tab. */}
+      <div
+        class="audiolab__canvas"
+        data-audio-canvas
+        tabindex="0"
+        role="group"
+        aria-label={t(locale, "audio.editor.label")}
+        aria-describedby="audio-editor-hint">
+        <div class="audiolab__label">
+          <label class="field__label" for="audio-label">{t(locale, "audio.label.title")}</label>
+          <input
+            id="audio-label"
+            class="audiolab__label-input"
+            type="text"
+            data-audio-label
+            autocomplete="off"
+            spellcheck="false"
+            disabled
+          />
+        </div>
         <canvas
           class="audiolab__wave"
           data-audio-wave
@@ -188,7 +210,53 @@ const WINDOWS = [
           data-audio-tiers
           role="img"
           aria-label={t(locale, "audio.canvas.tiers")}></canvas>
-        <p class="faint">{t(locale, "audio.canvas.note")}</p>
+        {/* Bajo las capas, como en Praat: las barras de reproduccion (visible,
+            seleccion, total) y los botones de zoom. Las barras son botones en una
+            fila: tres barras apiladas empujaban el editor fuera de la pantalla. */}
+        <div class="audiolab__bottombar" role="group" aria-label={t(locale, "audio.bottombar.title")}>
+          <span class="field__label" aria-hidden="true">{t(locale, "audio.playbar.label")}</span>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-play-visible>
+            <span class="u-visually-hidden">{t(locale, "audio.playbar.label")} </span>{t(locale, "audio.playbar.visible")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-play-selection>
+            <span class="u-visually-hidden">{t(locale, "audio.playbar.label")} </span>{t(locale, "audio.playbar.selection")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-play-all>
+            <span class="u-visually-hidden">{t(locale, "audio.playbar.label")} </span>{t(locale, "audio.playbar.all")}
+          </button>
+          <span class="field__label audiolab__bottombar-gap" aria-hidden="true">{t(locale, "audio.zoombar.label")}</span>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-all>
+            <span class="u-visually-hidden">{t(locale, "audio.zoombar.label")} </span>{t(locale, "audio.zoomAll")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-in>
+            {t(locale, "audio.zoomIn")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-out>
+            {t(locale, "audio.zoomOut")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-selection>
+            <span class="u-visually-hidden">{t(locale, "audio.zoombar.label")} </span>{t(locale, "audio.zoomSelection")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-zoom-back>
+            {t(locale, "audio.zoomBack")}
+          </button>
+          {/* Consultas de Praat (unidad 5.5) en la misma fila: debajo de las capas,
+              para que el editor siga cabiendo en una pantalla. La respuesta es
+              region viva porque solo cambia cuando se pide. */}
+          <span class="field__label audiolab__bottombar-gap" aria-hidden="true">{t(locale, "audio.querybar.label")}</span>
+          {queryButtons.map((query) => (
+            <button
+              class="btn btn--quiet btn--sm"
+              type="button"
+              data-audio-query={query.magnitude}
+              aria-keyshortcuts={query.keys}>
+              <span class="u-visually-hidden">{t(locale, "audio.querybar.get")} </span>{t(locale, query.label)}
+            </button>
+          ))}
+          <output class="audiolab__readout audiolab__query" data-audio-query-result aria-live="polite" data-state="empty"></output>
+        </div>
+        <p class="faint" id="audio-editor-hint">{t(locale, "audio.canvas.note")}</p>
+      </div>
       </div>
 
       <!-- ------------------------ Espectrograma ------------------------ -->
@@ -229,6 +297,25 @@ const WINDOWS = [
           <span class="badge badge--warn">{t(locale, "audio.experimentalBadge")}</span>
         </div>
         <p class="faint">{t(locale, "audio.spectrogram.note")}</p>
+        {/* Las casillas «mostrar» de las curvas van aqui, con las del
+            espectrograma y no en el editor: asi el editor no crece y cabe en una
+            pantalla (unidades 5.1 y 5.3). Como los menus de Praat, una por magnitud. */}
+        <div class="cluster">
+          <label class="field field--inline">
+            <input type="checkbox" data-audio-overlay-pitch checked />
+            <span class="field__label">{t(locale, "audio.overlay.pitch")}</span>
+          </label>
+          <label class="field field--inline">
+            <input type="checkbox" data-audio-overlay-formants checked />
+            <span class="field__label">{t(locale, "audio.overlay.formants")}</span>
+          </label>
+          <label class="field field--inline">
+            <input type="checkbox" data-audio-overlay-intensity checked />
+            <span class="field__label">{t(locale, "audio.overlay.intensity")}</span>
+          </label>
+        </div>
+        <p class="faint">{t(locale, "audio.overlay.note")}</p>
+        <p class="audiolab__status" data-audio-overlay-status role="status" aria-live="polite"></p>
       </div>
 
       <!-- ----------------------- Análisis acústico --------------------- -->
@@ -289,16 +376,8 @@ const WINDOWS = [
               value="600"
             />
           </label>
-          <button class="btn btn--primary btn--sm" type="button" data-acoustic-pitch-run>
-            {t(locale, "acoustic.pitch.run")}
-          </button>
         </div>
         <p class="faint">{t(locale, "acoustic.pitch.note")}</p>
-        <canvas
-          class="acoustic__plot"
-          data-acoustic-f0-canvas
-          role="img"
-          aria-label={t(locale, "acoustic.canvas.f0")}></canvas>
 
         <h3 class="acoustic__subtitle">{t(locale, "acoustic.formant.title")}</h3>
         <div class="cluster">
@@ -313,28 +392,11 @@ const WINDOWS = [
               value="5500"
             />
           </label>
-          <button class="btn btn--primary btn--sm" type="button" data-acoustic-formant-run>
-            {t(locale, "acoustic.formant.run")}
-          </button>
-          <label class="field field--inline">
-            <input type="checkbox" data-acoustic-formant-overlay />
-            <span class="field__label">{t(locale, "acoustic.formant.overlay")}</span>
-          </label>
         </div>
         <p class="faint">{t(locale, "acoustic.formant.note")}</p>
 
         <h3 class="acoustic__subtitle">{t(locale, "acoustic.intensity.title")}</h3>
-        <div class="cluster">
-          <button class="btn btn--primary btn--sm" type="button" data-acoustic-intensity-run>
-            {t(locale, "acoustic.intensity.run")}
-          </button>
-        </div>
         <p class="faint">{t(locale, "acoustic.intensity.note")}</p>
-        <canvas
-          class="acoustic__plot"
-          data-acoustic-intensity-canvas
-          role="img"
-          aria-label={t(locale, "acoustic.canvas.intensity")}></canvas>
 
         <h3 class="acoustic__subtitle">{t(locale, "acoustic.measure.title")}</h3>
         <div class="cluster">
@@ -403,46 +465,17 @@ const WINDOWS = [
         <p class="faint">{t(locale, "acoustic.limits")}</p>
       </div>
 
-      <!-- --------------------------- Capas ----------------------------- -->
-      <div class="panel">
-        <h2 class="panel__title">{t(locale, "audio.tiers.title")}</h2>
+      <!-- -------------------------- Segmentar -------------------------- -->
+      {/* Unidad 5.8 del rework v4: lo que hace falta en la primera clase, a la vista
+          (capa, poner limite, moverse, deshacer, el teclado AFI); lo demas, plegado.
+          La tabla se conserva: es el equivalente accesible del lienzo. */}
+      <div class="panel" data-audio-segment>
+        <h2 class="panel__title">{t(locale, "audio.segment.title")}</h2>
         <div class="cluster">
           <label class="field field--inline">
             <span class="field__label">{t(locale, "audio.tier.active")}</span>
             <select data-audio-tier></select>
           </label>
-          <label class="field field--inline">
-            <span class="field__label">{t(locale, "audio.tier.name")}</span>
-            <input type="text" data-audio-tier-name aria-describedby="audio-tier-note" />
-          </label>
-        </div>
-        <p class="faint" id="audio-tier-note">{t(locale, "audio.tier.note")}</p>
-        <div class="cluster">
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-add>
-            {t(locale, "audio.tier.add")}
-          </button>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-remove>
-            {t(locale, "audio.tier.remove")}
-          </button>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-up>
-            {t(locale, "audio.tier.up")}
-          </button>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-down>
-            {t(locale, "audio.tier.down")}
-          </button>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-undo>
-            {t(locale, "audio.history.undo")}
-          </button>
-          <button class="btn btn--quiet btn--sm" type="button" data-audio-redo>
-            {t(locale, "audio.history.redo")}
-          </button>
-        </div>
-      </div>
-
-      <!-- ------------------------- Intervalos -------------------------- -->
-      <div class="panel">
-        <h2 class="panel__title">{t(locale, "audio.intervals.title")}</h2>
-        <div class="cluster">
           <button class="btn btn--primary btn--sm" type="button" data-audio-interval-split>
             {t(locale, "audio.interval.split")}
           </button>
@@ -452,41 +485,86 @@ const WINDOWS = [
           <button class="btn btn--quiet btn--sm" type="button" data-audio-interval-next>
             {t(locale, "audio.interval.next")}
           </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-undo>
+            {t(locale, "audio.history.undo")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-redo>
+            {t(locale, "audio.history.redo")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-add>
+            {t(locale, "audio.tier.add")}
+          </button>
         </div>
-        <p class="faint">{t(locale, "audio.intervals.note")}</p>
-        {/* Misma razón que en la tabla de mediciones: el contenedor se desplaza
-            en horizontal y tiene que poder recorrerse con el teclado. */}
-        <div
-          class="audiolab__table-wrap"
-          tabindex="0"
-          role="region"
-          aria-label={t(locale, "audio.intervals.caption")}
-        >
-          <table class="audiolab__table">
-            <caption>
-              <span class="field__label">{t(locale, "audio.intervals.caption")}</span>
-              <span class="audiolab__caption-tier" data-audio-intervals-caption></span>
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">{t(locale, "audio.intervals.head.index")}</th>
-                <th scope="col">{t(locale, "audio.intervals.head.start")}</th>
-                <th scope="col">{t(locale, "audio.intervals.head.end")}</th>
-                <th scope="col">{t(locale, "audio.intervals.head.text")}</th>
-                <th scope="col">{t(locale, "audio.intervals.head.actions")}</th>
-              </tr>
-            </thead>
-            <tbody data-audio-intervals></tbody>
-          </table>
+        <p class="faint">{t(locale, "audio.segment.scope")}</p>
+
+        <div class="cluster audiolab__example">
+          <span class="field__label">{t(locale, "audio.example.title")}</span>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-example-practice>
+            {t(locale, "audio.example.practice")}
+          </button>
+          <button class="btn btn--quiet btn--sm" type="button" data-audio-example-solved>
+            {t(locale, "audio.example.solved")}
+          </button>
         </div>
+        <p class="faint" data-audio-example-credit hidden>{t(locale, "audio.example.credit")}</p>
+
+        <details class="audiolab__more" data-audio-ipa-panel>
+          <summary>{t(locale, "audio.ipa.title")}</summary>
+          <p class="faint">{t(locale, "audio.ipa.note")}</p>
+          <div class="audiolab__ipa" data-audio-ipa></div>
+        </details>
+
+        <details class="audiolab__more" data-audio-tier-more>
+          <summary>{t(locale, "audio.tier.more")}</summary>
+          <div class="cluster">
+            <label class="field field--inline">
+              <span class="field__label">{t(locale, "audio.tier.name")}</span>
+              <input type="text" data-audio-tier-name aria-describedby="audio-tier-note" />
+            </label>
+            <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-remove>
+              {t(locale, "audio.tier.remove")}
+            </button>
+            <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-up>
+              {t(locale, "audio.tier.up")}
+            </button>
+            <button class="btn btn--quiet btn--sm" type="button" data-audio-tier-down>
+              {t(locale, "audio.tier.down")}
+            </button>
+          </div>
+          <p class="faint" id="audio-tier-note">{t(locale, "audio.tier.note")}</p>
+        </details>
+
+        <details class="audiolab__more" data-audio-table>
+          <summary>{t(locale, "audio.table.show")}</summary>
+          <p class="faint">{t(locale, "audio.intervals.note")}</p>
+          {/* Misma razón que en la tabla de mediciones: el contenedor se desplaza
+              en horizontal y tiene que poder recorrerse con el teclado. */}
+          <div
+            class="audiolab__table-wrap"
+            tabindex="0"
+            role="region"
+            aria-label={t(locale, "audio.intervals.caption")}
+          >
+            <table class="audiolab__table">
+              <caption>
+                <span class="field__label">{t(locale, "audio.intervals.caption")}</span>
+                <span class="audiolab__caption-tier" data-audio-intervals-caption></span>
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">{t(locale, "audio.intervals.head.index")}</th>
+                  <th scope="col">{t(locale, "audio.intervals.head.start")}</th>
+                  <th scope="col">{t(locale, "audio.intervals.head.end")}</th>
+                  <th scope="col">{t(locale, "audio.intervals.head.text")}</th>
+                  <th scope="col">{t(locale, "audio.intervals.head.actions")}</th>
+                </tr>
+              </thead>
+              <tbody data-audio-intervals></tbody>
+            </table>
+          </div>
+        </details>
       </div>
 
-      <!-- ------------------------ Teclado IPA -------------------------- -->
-      <details class="panel">
-        <summary class="panel__title">{t(locale, "audio.ipa.title")}</summary>
-        <p class="faint">{t(locale, "audio.ipa.note")}</p>
-        <div class="audiolab__ipa" data-audio-ipa></div>
-      </details>
 
       <!-- ------------------------ Datos y archivos --------------------- -->
       <div class="panel">
@@ -576,6 +654,21 @@ const WINDOWS = [
           <dd>{t(locale, "audio.keys.split")}</dd>
           <dt><kbd>,</kbd> <kbd>.</kbd></dt>
           <dd>{t(locale, "audio.keys.move")}</dd>
+          <dt><kbd>{es ? "Intro" : "Enter"}</kbd></dt>
+          <dd>{t(locale, "audio.keys.boundary")}</dd>
+          <dt><kbd>{es ? "Supr" : "Delete"}</kbd></dt>
+          <dd>{t(locale, "audio.keys.remove")}</dd>
+          <dt><kbd>Tab</kbd></dt>
+          <dd>{t(locale, "audio.keys.interval")}</dd>
+          <dt>
+            <kbd>Ctrl</kbd>+<kbd>A</kbd> <kbd>Ctrl</kbd>+<kbd>I</kbd> <kbd>Ctrl</kbd>+<kbd>O</kbd>
+            <kbd>Ctrl</kbd>+<kbd>N</kbd>
+          </dt>
+          <dd>{t(locale, "audio.keys.zoom")}</dd>
+          <dt><kbd>{es ? "Mayús" : "Shift"}</kbd>+<kbd>←</kbd> <kbd>→</kbd></dt>
+          <dd>{t(locale, "audio.keys.extend")}</dd>
+          <dt><kbd>F1</kbd> <kbd>F2</kbd> <kbd>F5</kbd> <kbd>F8</kbd></dt>
+          <dd>{t(locale, "audio.keys.query")}</dd>
           <dt><kbd>Ctrl</kbd>+<kbd>Z</kbd></dt>
           <dd>{t(locale, "audio.keys.undo")}</dd>
         </dl>
@@ -672,13 +765,38 @@ const WINDOWS = [
 
   .audiolab__cursor {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: var(--space-s);
+    gap: var(--space-2xs) var(--space-s);
   }
 
+  /* En pantallas estrechas el deslizador baja a su propia linea en vez de
+     empujar la pagina hacia la derecha. */
   .audiolab__cursor input {
-    flex: 1 1 auto;
+    flex: 1 1 10rem;
     min-width: 0;
+  }
+
+  /* Fila de reproducir y ver bajo las capas, compacta como la de Praat. */
+  .audiolab__bottombar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs) var(--space-xs);
+  }
+
+  .audiolab__bottombar-gap {
+    margin-left: var(--space-s);
+  }
+
+  /* La respuesta de la consulta ocupa lo que queda de la fila y, si no cabe,
+     baja a la suya: debajo de las capas no empuja el editor. */
+  .audiolab__query {
+    flex: 1 1 14rem;
+  }
+
+  .audiolab__query[data-state="error"] {
+    color: var(--warn);
   }
 
   .audiolab__readout {
@@ -689,7 +807,28 @@ const WINDOWS = [
     min-width: 5.5rem;
   }
 
+  /* Barra compacta: botones en una fila (se parte en pantallas estrechas), el
+     cursor debajo y el estado en una linea. */
+  .audiolab__bar {
+    gap: var(--space-2xs);
+    padding: var(--space-s);
+  }
+
+  /* Barra y lienzos son una sola pieza, como la ventana de Praat: entre ellos
+     va un hueco corto, no el de una seccion a otra. */
+  .audiolab__bar input[data-audio-rate] {
+    width: 6rem;
+  }
+
+  .audiolab__editor {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
   .audiolab__canvas {
+    /* Altura del editor completo, repartida como en Praat: la onda arriba, el
+       espectrograma, que es lo que mas se mira, en el centro, y las capas debajo. */
+    --editor-h: min(68vh, 620px);
     display: grid;
     gap: 0.35rem;
     padding: var(--space-s);
@@ -708,17 +847,53 @@ const WINDOWS = [
 
   /* La onda y el espectrograma son lo que se viene a mirar: ocupan la altura
      que ocupan en Praat frente a los controles, no una franja. */
+  .audiolab__canvas:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* Ventana de texto del intervalo seleccionado, arriba como en Praat. */
+  .audiolab__label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+  }
+
+  .audiolab__label-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--step-0);
+  }
+
+  /* Las tres piezas suman el 92 % de la altura del editor: el resto es para la
+     ventana de texto, y asi todo sigue cabiendo en una pantalla. */
   .audiolab__wave {
-    height: clamp(120px, 18vh, 180px);
+    height: max(120px, calc(var(--editor-h) * 0.22));
     cursor: crosshair;
   }
 
   .audiolab__spec {
-    height: clamp(180px, 34vh, 340px);
+    height: max(180px, calc(var(--editor-h) * 0.42));
   }
 
   .audiolab__tiers {
-    height: 96px;
+    height: max(120px, calc(var(--editor-h) * 0.28));
+  }
+
+  /* Paneles plegables dentro de «Segmentar»: lo que no hace falta el primer dia. */
+  .audiolab__more {
+    border-top: 1px solid var(--line);
+    padding-top: var(--space-xs);
+  }
+
+  .audiolab__more > summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: var(--step--1);
+  }
+
+  .audiolab__more[open] > summary {
+    margin-bottom: var(--space-xs);
   }
 
   .audiolab__table-wrap {

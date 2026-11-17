@@ -1,6 +1,6 @@
 ---
 status: active
-updated: 2026-11-10
+updated: 2026-11-17
 ---
 
 # Rework v4: cada herramienta con su teoría, sus motores y su validación
@@ -68,11 +68,11 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | hecha | `03ec0d8`: motores con rojo y verde. Commit siguiente: CMUdict empaquetado (`scripts/build-cmudict.mts`), adaptador `createNativePhonemizer` (rojo: suite sin módulo; verde: 9 pruebas), página conectada con variedad, nivel, palabras sin transcribir y variantes, y eSpeak retirado. `verify:all` y e2e completa en verde. Español: 96,6 % propio frente a 76,9 % de eSpeak |
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
 | T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
-| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline, TypeScript; Rust solo si se mide | en curso | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). Falta la interfaz: unidades 5.1 a 5.7 de `odd/handoff/ACTUAL.md` §6 |
+| T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline y delegada (5.3–5.7: escritores acotados, contexto y paralelismo) | hecha en código (L21–L32) | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26); 5.3 hecha (curvas sobre el espectrograma, L27); 5.6 y 5.7 hechas (`c9bf799`, `f19f6b6`, L30); 5.4 hecha (`9316dce`, L31); 5.5 hecha (`6726b4a`, L32). Pendiente humano: la persona que no conoce el visor y la captura junto a Praat |
 | T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
-| T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | en curso | `0b514b7`: FonoLab usa el transcriptor del sitio (rojo: `claims.test` y una e2e que esperaba /s/ en «zapato»). Falta el resto: `odd/handoff/ACTUAL.md` §6 |
+| T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
 | T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
 
 ## Log
@@ -204,3 +204,182 @@ Se preguntan de a una, al empezar la fase que las necesita.
   caché sin preguntar antes si existe. `scripts/eval-g2p.mts` se corre ahora con `node scripts/run-ts.mjs`,
   porque Node no resuelve las importaciones sin extensión del núcleo. Se fusiona con merge commit para que
   `feat/rework-v4` siga en uso.
+- **L19 (2026-11-13).** El dueño, textual: «actualiza el traspaso y empieza con la T5, vamos a trabajar
+  hasta terminar el rework, recuerdas el cambio de motores y el traspaso a rust o go para que sea más
+  optimizado? hazlo efectivo». Lo que consta: D1 dice navegador y Rust a WebAssembly solo donde se mida;
+  Go se descartó con el servidor. praatfan, el motor acústico, ya es Rust en WebAssembly. Medido el
+  espectrograma de TypeScript sobre 60 s a 44,1 kHz: 2,3 ms con 512 columnas, 11,9 ms con 2720, 134 ms
+  sin tope; bajo el umbral de ~300 ms. Traspaso actualizado con la fusión del PR #20 y esta medición.
+- **L20 (2026-11-13).** El dueño elige «Medir y decidir»: el espectrograma sigue en TypeScript y se mide
+  otra vez en 5.2 con la FFT rellenada; pasa a Rust solo si supera ~300 ms. La misma regla vale para T6.
+- **L21 (2026-11-13). T5, unidad 5.1.** Cargar y reproducir pasan a una barra encima de los lienzos
+  (el zoom va en la fila de reproducir) y los tres lienzos se reparten la altura del editor,
+  `min(68vh, 620px)`: onda 25 %, espectrograma 45 %, capas 30 %. Rojo: la e2e nueva «caben en una
+  pantalla» falló con las capas en 96 px; con 70vh/640 px medía 907 px y se bajó a 68vh/620 px. Verde:
+  `verify:all` y la e2e completa. Antes, en este equipo, `npm ci`: `node_modules` era de una versión
+  anterior y faltaban las fuentes nuevas (todas las páginas daban 404 en la prueba de consola).
+- **L22 (2026-11-13).** El dueño, textual: «hazlo, prefiero el término fonológico ya que estamos
+  acostumbrados a ese». La interfaz en español y los documentos para el lector dicen «fonológico» por
+  «fonémico» (tradición hispánica); el inglés sigue con «phonemic». El glosario gana la entrada
+  «Transcripción fonológica», que dice que en manuales en inglés se llama fonémica. Rojo: tres pruebas en
+  `src/data/data.test.ts`. Los comentarios de código y los PR archivados no se tocan.
+- **L23 (2026-11-13). T5, unidad 5.8, primera parte: los gestos de Praat.** Atajos verificados en el
+  manual de Praat («TextGridEditor»): Intro pone un límite en la capa seleccionada, Tab reproduce o para
+  el intervalo seleccionado, un límite se mueve arrastrándolo y un clic en una capa o en un intervalo lo
+  selecciona; quitar un límite es un menú en Praat y aquí es Supr o Retroceso. Intro, Supr y Tab solo
+  valen con el foco en el editor (el marco de los lienzos, enfocable) y Mayús+Tab sale de él, para no
+  atrapar el teclado. Ventana de texto arriba (`[data-audio-label]`) con la etiqueta del intervalo
+  seleccionado; el teclado AFI escribe en ella. Sin ratón, el límite recién puesto y el que alcanzan coma
+  y punto quedan seleccionados, para que Supr funcione. La geometría de la franja vive en
+  `src/scripts/audio/tier-geometry.ts` (dibujo y puntero usan la misma). Rojo: 10 pruebas de geometría
+  sin módulo y 3 de atajos; las dos e2e de flujo completo (ratón y teclado, con TextGrid exportado) se
+  comprobaron por mutación: sin Intro fallan las dos, sin aplicar el arrastre falla la de ratón.
+  Hallazgo: a 1360×900 el editor empieza debajo del primer pliegue, porque la cabecera de la página y los
+  avisos lo empujan; queda para la segunda parte de 5.8.
+- **L24 (2026-11-13). T5, unidad 5.8, segunda parte: menos a la vista.** Capas e Intervalos pasan a un
+  solo panel «Segmentar» con lo de la primera clase (capa activa, «Poner límite en el cursor», anterior,
+  siguiente, deshacer, rehacer, añadir capa); plegados: teclado AFI, «Más opciones de capas» (renombrar,
+  quitar, subir, bajar) y «Ver como tabla». El panel dice qué queda fuera (capas de puntos, varias pistas).
+  La barra de cargar y reproducir es una sola fila compacta y, al cargar el audio, el editor se desplaza a
+  la vista (`instant`: `auto` hereda el `scroll-behavior: smooth` del sitio). Medido a 1360×900: la
+  cabecera fija reserva 88 px; barra y editor caben en los 812 restantes. Rojo: la e2e «queda a la vista»
+  falló con las capas en 1730 px; las e2e que tocan la tabla la abren primero, como una persona.
+  Textos más cortos en la barra («Ver antes», «Ver después», «Repetir intervalo»); los formatos de audio
+  van en el mensaje inicial. Falta de 5.8: «Cargar ejemplo» y el modo guiado.
+- **L25 (2026-11-13). T5, unidad 5.8, tercera parte: ejemplo y modo guiado.** «Practicar con «pato»»
+  carga el audio sin anotar y guía tres pasos en la línea de estado (escuchar, poner un límite, escribir
+  la etiqueta), que avanzan solos con cada gesto (`src/scripts/audio/guide.ts`, pura y probada). «Ver
+  «pato» resuelto» carga el mismo audio con su TextGrid. Audio: «pato» de Lingua Libre, hablante Millars,
+  CC BY-SA 4.0, original sin cambios (SHA-1 igual al de Commons), en `public/audio/ejemplos/` con su
+  `ATTRIBUTION.md`; el crédito se ve en la página al cargarlo. El TextGrid lo segmentó LinguaLab a mano
+  sobre la energía en ventanas de 5 ms y un espectrograma, y lo dice: no es una referencia de Praat
+  (en este equipo no hay Praat). Rojo: seis pruebas de la guía sin módulo; las dos e2e se comprobaron por
+  mutación (la guía que no avanza y el ejemplo sin TextGrid fallan). Queda como evidencia humana, en
+  `docs/HUMAN-EVIDENCE.md`, que alguien que no conoce el visor lo consiga sin leer la ayuda.
+  Con esto 5.8 queda hecha en código. Siguen 5.2 (resto), 5.3–5.7.
+- **L26 (2026-11-13). T5, unidad 5.2, resto.** (a) La FFT se rellena con ceros hasta 1024 puntos
+  (`MIN_FFT_SIZE`): con la ventana de 5 ms las bandas pasan de 172 Hz a 43 Hz, y al pintar se interpola
+  entre bandas vecinas. (b) Eje de frecuencia rotulado en Hz cada 1000 (o 500) Hz. Defecto encontrado y
+  corregido: el espectrograma se pintaba con `putImageData` en píxeles CSS y en pantallas de doble
+  densidad ocupaba solo el cuarto de arriba a la izquierda; ahora se arma en píxeles del dispositivo.
+  Rojo: dos pruebas de resolución (banda < 50 Hz; tono de 1000 Hz con error < 50 Hz) y una e2e a DPR 2
+  (la fila del tono de 440 Hz caía en 0,44 de la altura). Medido según L20, Node 26, 60 s a 44,1 kHz,
+  FFT de 1024: análisis 9,7 ms con 512 columnas y 48 ms con 2720; bajo ~300 ms, se queda en TypeScript.
+  Medido en Chromium a 1360×900: el redibujo completo costaba 15 ms por cuadro a DPR 2 (casi todo el
+  cuadro de 16,7 ms, y durante la reproducción se redibuja en cada cuadro); con la imagen del
+  espectrograma guardada por lienzo baja a 0,4 ms. Pendiente: (c) ventana gaussiana como la de Praat,
+  opcional, y la captura junto a la de Praat en `docs/validation/acoustic.md` (en este equipo no hay
+  Praat).
+- **L27 (2026-11-13). T5, unidad 5.3: curvas sobre el espectrograma.** Tono (azul, con su escala a la
+  derecha, del piso al techo), formantes F1–F3 (puntos rojos, sobre la escala en Hz) e intensidad
+  (amarillo, 50–100 dB, el «view range» de Praat) se dibujan sobre el espectrograma y se calculan solos
+  para el tramo visible, con un margen de un cuarto a cada lado; con más de 10 s a la vista no se
+  analiza y se dice sobre el lienzo y en una línea de estado (`[data-audio-overlay-status]`). Casillas
+  «Mostrar tono / formantes / intensidad» en el panel Espectrograma, marcadas por defecto: el editor no
+  crece. El panel acústico pierde los botones «Calcular» y los dos lienzos aparte (F0 e intensidad); los
+  campos de piso, techo y frecuencia máxima recalculan al cambiar. Partición: `acoustic-tracks.ts` (un
+  análisis por magnitud, por tramo, con caché y de a un pedido al worker; la medición y las curvas lo
+  comparten), `acoustic-overlay.ts` (qué se dibuja y cuándo), `acoustic-measure-table.ts` (filas de la
+  tabla); `acoustic-analysis.ts` baja de 725 a ~460 líneas. Rojo: 13 pruebas de `acoustic-tracks` sin
+  módulo y 2 de `acoustic-render` (`formantDots`, colores de Praat) sin exportar. Las dos e2e nuevas se
+  comprobaron por mutación: sin pedir el análisis falla «se dibujan solos», con las casillas ignoradas
+  falla la misma, y con el límite en 1000 s falla «más de 10 s». La e2e «calcula el contorno de F0» se
+  quitó a propósito: su botón y su lienzo ya no existen y la reemplaza la de las curvas. Las claves
+  `acoustic.pitch.run`, `acoustic.formant.run`, `acoustic.formant.overlay`, `acoustic.intensity.run`,
+  `acoustic.canvas.f0`, `acoustic.canvas.intensity` y `acoustic.status.{f0,formants,intensity}` quedan
+  sin uso en `src/i18n/messages/features/acoustic.*.ts` (fuera de lo autorizado en esta unidad).
+  Verde: `verify:all` y la e2e completa.
+- **L28 (2026-11-13). Verificación independiente de 5.3 (riesgo 4: orden asíncrono):** sin bloqueos.
+  Sondas en navegador: audio B cargado antes de terminar el análisis de A (no se filtran curvas de A),
+  15 desplazamientos rápidos fuera del tramo cubierto (termina en `drawn` en ~1,4 s), casillas cambiadas
+  durante el análisis, 12 s a la vista (`skipped`, sin mensajes al worker; un zoom las trae). Suite
+  completa 192 e2e y `verify:all` en verde. Avisos, no bloqueos: los análisis de tramos abandonados no se
+  cancelan (cuestan, no se traban); una curva que falla marca todo el overlay `failed`; el mensaje
+  `audio.status.mismatch` imprime «s s» (defecto previo, no de este cambio). Sobre lo quitado: los botones
+  y lienzos aparte de F0 e intensidad no exportaban valores; la tabla de medidas con CSV sigue igual.
+- **L29 (2026-11-14).** El dueño, textual: «desactiva el RDD review de gentle ai». Hecho con
+  `gentle-ai review mode disable`: queda apagado en el ámbito global. Las pruebas, la verificación
+  independiente de lo de alto riesgo y la revisión del diff antes de cada commit siguen igual.
+- **L30 (2026-11-14). T5, unidades 5.6 y 5.7: intensidad y TextGrid contra Praat.** En esta máquina hay
+  Praat **7.0.03**. (a) Intensidad: `To Intensity: 100, 0, "yes"` (el piso del visor) y `Get value at
+  time` con "nearest"; bloque `intensity` aparte en cada JSON de referencia, con su versión
+  (`build-acoustic-reference.mjs --intensity`), sin tocar F0, F1 ni F2. Tolerancia de ±0,5 dB absolutos,
+  fijada antes de medir; las nueve comparaciones dan 0,0000 dB. Praat 7.0.03 no reproduce exactamente
+  6.4.49 (en [e], F1 358,0499 Hz frente a 357,6936: 0,10 %) y praatfan coincide con 6.4.49, así que esas
+  referencias no se regeneraron. Rojo: tres pruebas del arnés y la de fixtures; mutación: +0,6 dB en una
+  referencia la hace fallar. (b) TextGrid: `scripts/textgrid-praat-roundtrip.mts`
+  (`npm run validate:textgrid-praat`) exporta con `serializeTextGrid`, lo abre con `praat --run`, compara
+  capas, intervalos, puntos y etiquetas y relee lo que Praat guarda: 5 de 5 casos iguales (varias capas,
+  etiquetas vacías, AFI, comillas, tiempos sin decimal exacto y `pato.TextGrid`). Mutación: sin doblar
+  comillas Praat rechaza el archivo; un límite movido se marca. La prueba solo corre con `praat` en el
+  PATH. P17 cerrada en lo del TextGrid. La interfaz ya dice que la intensidad está validada y la ficha
+  `textgrid-viewer` pasa a `stable` (su nota decía que no había análisis acústico y que Praat no se podía
+  medir). Queda el aviso `audio.experimental` del visor, que se quita junto con 5.4 (mismo archivo).
+- **L31 (2026-11-14). T5, unidad 5.4: selección, lecturas, barras y zoom.** Arrastrar sobre la onda o el
+  espectrograma selecciona un tramo (desde 4 px; menos es un clic y pone el cursor). El cursor va al
+  inicio del tramo, como en Praat, y la selección vale mientras siga ahí; sin arrastre, la selección es el
+  intervalo bajo el cursor. Lecturas en la fila del cursor: selección (inicio, fin, duración;
+  `aria-live`) y puntero (tiempo y, sobre el espectrograma, Hz). Bajo las capas, «Reproducir» Visible,
+  Selección, Todo (las barras de Praat como botones: tres barras apiladas no cabían en una pantalla) y
+  «Ver» Todo, Acercar, Alejar, Selección, Atrás. Atajos con el foco en el editor, verificados en el
+  manual de Praat («Keyboard shortcuts»): Ctrl+A, I, O, N; «Atrás» no tiene atajo porque el manual no lo
+  lista; Chrome se queda Ctrl+N y la ayuda lo dice. Mayús+←/→ extienden la selección (propio de
+  LinguaLab: en Praat Mayús+Tab reproduce la ventana, y aquí Mayús+Tab sale del editor). Cambio de
+  comportamiento: al terminar o interrumpir un tramo, el cursor vuelve a donde estaba; antes quedaba al
+  final y la selección saltaba al intervalo siguiente. Rojo: 23 pruebas unitarias; cuatro e2e por
+  mutación. Verificación independiente sin bloqueos (arrastre, clic de 2 px, Tab y barras, zoom e
+  historia, Hz en el puntero, Ctrl+A fuera del editor sin interceptar, guía de «pato»); solo hay Chromium
+  en esta máquina, Firefox y Safari sin probar. En el mismo commit: se quita el aviso «experimental» del
+  visor (la ida y vuelta por Praat pasa, L30) y se corrige `audio.status.mismatch`, que imprimía «s s»
+  (rojo: `src/scripts/audio/strings.test.ts`).
+- **L32 (2026-11-14). T5, unidad 5.5: consultas y atajos.** «Consultar» en la fila de abajo del editor
+  (Tono, F1, F2, Intensidad) y, con el foco en el editor, las teclas del manual de Praat («Keyboard
+  shortcuts»): F1 «Get first formant», F2 «Get second formant», F5 «Get pitch» (F10 en Mac) y F8 «Get
+  intensity»; fuera del editor F1, F5 y F10 siguen siendo del navegador, y la ayuda lo dice. Con un tramo
+  arrastrado se da la media en el tramo; si no, el valor en el cursor (manual, «Intro 4.3» y «5.3»). La
+  respuesta va en una línea `aria-live` y dice «tramo sordo» o «sin valor» en vez de 0 Hz. Diferencias
+  con Praat, a la vista: el cursor toma el marco más cercano (Praat interpola), la intensidad de un tramo
+  es la media de energía y la selección no se recorta a lo visible. Nueva e2e que lee F1 y F2 de la tabla
+  de medidas sobre `vocal-{a,e,i}.wav` (la lección del defecto de los 3 formantes) y otra de teclado que
+  compara F0, F1, F2 e intensidad con el JSON de referencia, con `DEFAULT_TOLERANCES`: error máximo
+  0,10 % y 0,04 dB. Nota: con el techo de formantes por defecto de la página (5500 Hz) [a] da F1 ≈ 800 Hz;
+  las referencias se midieron con 5000 Hz, y la e2e fija ese valor. Rojo: 14 pruebas unitarias; e2e por
+  mutación (sin el campo de frecuencia máxima, con F1 tomado de F2, sin F8: fallan). Verde: `verify:all`
+  y 202 e2e; solo Chromium. **Con esto T5 queda hecha en código.**
+- **L33 (2026-11-17). T9, inventario y primera migración.** El dueño, textual: «read the handoff of the
+  project, and continue with the pending tasks, give me a report of the actual situation of the
+  project». Inventario de líneas de script por componente: TextStation 638, ArborLab 369, FonoLab 319,
+  ExperimentsLab 318, PhonemizerLab 267, Glossary y Bibliography 62, SecurityPage 26; los que ya siguen
+  el patrón del visor, de 1 a 7. Decisión: **no** se crea `defineTool`; el contrato común ya existe y lo
+  usan nueve componentes: el `<script>` hace `safeInit("x", initX)` e `initX`, en
+  `src/scripts/<área>/index.ts`, busca su raíz por `data-*`. Un envoltorio más sería una segunda forma
+  de hacer lo mismo. Tope fijado en 30 líneas de script, con trinquete: `PENDING_EXTRACTION` lista los
+  que faltan y la prueba falla si uno de la lista ya cumple. PhonemizerLab pasa sus reglas a
+  `src/scripts/phonemizer/rules.ts` (opciones, mensajes, errores, comparación con la tabla) y el
+  cableado a `index.ts`. Rojo: el trinquete marcó `PhonemizerLab.astro: 242`; 15 pruebas de reglas sin
+  módulo. Verde: `verify:all` y 202 e2e.
+- **L34 (2026-11-17). T9 cerrada.** El dueño, textual: «do the task and push it to github repo, when all
+  the validations are ok merge to main, push and implement, review in vercel and finish». Migrados, uno
+  por commit: FonoLab (`src/scripts/fono/rules.ts` e `index.ts`), Glosario y Bibliografía (tenían el
+  mismo script copiado; ahora comparten `initCatalogueFilter`, con prueba sobre un DOM que no existía),
+  ArborLab (`src/scripts/trees/workbench-rules.ts` y `workbench.ts`) y la estación de texto
+  (`src/scripts/tools/station-rules.ts` y `station.ts`; la prueba fija las claves de la exportación).
+  ExperimentsLab ya solo conectaba: el contador contaba de más porque un comentario del frontmatter
+  nombraba `<script>`; se corrigió con su prueba. ArborLab no tenía e2e funcional: `e2e/arbor.spec.ts`
+  (siete casos) se escribió contra el código anterior, pasó, y sigue pasando después de mover el código.
+  La lista de pendientes quedó vacía y se quitó: el tope de 30 líneas vale para todos. `claims.test`
+  ahora busca la llamada al motor en `src/scripts/fono/index.ts`. Verde: `verify:all` y 209 e2e, solo
+  Chromium; el peso de la peor página no cambió. La portada sigue con la tabla de Ortografía (decisión
+  menor abierta).
+- **L35 (2026-11-17). Defecto real del visor, encontrado por la CI del PR #22.** «Ver pato resuelto»
+  fallaba en CI y no en esta máquina. La prueba de CI no guardaba evidencia: se añadió subir los rastros
+  de Playwright solo cuando falla la e2e. El rastro mostró que la página dejaba de pintar cuadros. La
+  causa, reproducida forzando el `AudioContext` a 44,1 kHz (esta máquina decodifica a 48 kHz; el runner,
+  sin tarjeta de sonido, y muchos equipos, a 44,1): «pato» está a 48 kHz y su TextGrid termina en el
+  último instante; decodificado a 44,1 kHz el audio queda un poco más corto, lo analizado se corta en
+  el audio y `planVisibleAnalysis` nunca lo daba por cubierto, así que cada redibujo volvía a analizar sin
+  fin. Ahora compara con la parte de la vista que tiene audio. Rojo: dos pruebas unitarias; una e2e que
+  fija 44,1 kHz, comprobada por mutación (con el código anterior falla). En el mismo PR, CodeQL marcó
+  `js/bad-tag-filter` en el contador de líneas de `architecture.test.ts`: ahora reconoce `</SCRIPT >`,
+  con prueba. Verde: `verify:all` y 210 e2e.
+

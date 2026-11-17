@@ -3,10 +3,17 @@ import { describe, expect, it } from "vitest";
 import {
   activeSheet,
   clamp,
+  DRAG_THRESHOLD_PX,
+  dragSelection,
+  effectiveSelection,
+  extendSelection,
+  frequencyAtRatio,
   intervalIndexAt,
+  isDragGesture,
   loopRegionAt,
   neighbourInterval,
   type Sheet,
+  selectionRegion,
 } from "./selection";
 
 /**
@@ -103,5 +110,88 @@ describe("neighbourInterval", () => {
   it("en los bordes se queda en el extremo", () => {
     expect(neighbourInterval(sheet, 0, -1)?.text).toBe("a");
     expect(neighbourInterval(sheet, 2, 1)?.text).toBe("c");
+  });
+});
+
+/* ---------------- 5.4: seleccion por arrastre, como en Praat ---------------- */
+
+describe("selectionRegion / dragSelection", () => {
+  it("un arrastre hacia la derecha da el tramo de donde se apreto a donde se solto", () => {
+    expect(selectionRegion(dragSelection(1.2, 2.7, 4))).toEqual({ start: 1.2, end: 2.7 });
+  });
+
+  it("un arrastre hacia la izquierda da el mismo tramo, ordenado", () => {
+    expect(selectionRegion(dragSelection(2.7, 1.2, 4))).toEqual({ start: 1.2, end: 2.7 });
+  });
+
+  it("el arrastre no se sale del audio por ningun lado", () => {
+    expect(selectionRegion(dragSelection(-1, 9, 4))).toEqual({ start: 0, end: 4 });
+  });
+
+  it("una seleccion sin duracion no es un tramo: es un cursor", () => {
+    expect(selectionRegion(dragSelection(1.5, 1.5, 4))).toBeNull();
+    expect(selectionRegion(null)).toBeNull();
+  });
+});
+
+describe("isDragGesture", () => {
+  it("moverse menos que el umbral es un clic: pone el cursor, no selecciona", () => {
+    expect(isDragGesture(100, 100 + DRAG_THRESHOLD_PX - 1)).toBe(false);
+  });
+
+  it("moverse el umbral o mas, en cualquier sentido, es un arrastre", () => {
+    expect(isDragGesture(100, 100 + DRAG_THRESHOLD_PX)).toBe(true);
+    expect(isDragGesture(100, 100 - DRAG_THRESHOLD_PX)).toBe(true);
+  });
+});
+
+describe("extendSelection (Mayus+flechas)", () => {
+  it("sin seleccion, parte del cursor y mueve el otro extremo", () => {
+    expect(selectionRegion(extendSelection(null, 1, 0.25, 4))).toEqual({ start: 1, end: 1.25 });
+  });
+
+  it("con seleccion, el extremo que se apreto primero queda fijo", () => {
+    const first = extendSelection(null, 1, 0.25, 4);
+    const back = extendSelection(extendSelection(first, 1, -0.25, 4), 1, -0.25, 4);
+    expect(selectionRegion(back)).toEqual({ start: 0.75, end: 1 });
+  });
+
+  it("no pasa del final del audio", () => {
+    expect(selectionRegion(extendSelection(null, 3.9, 0.5, 4))).toEqual({ start: 3.9, end: 4 });
+  });
+});
+
+describe("effectiveSelection", () => {
+  const interval = { start: 1, end: 2.5 };
+
+  it("sin arrastre, la seleccion es el intervalo bajo el cursor (como hasta ahora)", () => {
+    expect(effectiveSelection(null, 1.4, interval)).toEqual(interval);
+  });
+
+  it("con un arrastre vigente, la seleccion es el tramo arrastrado", () => {
+    const dragged = dragSelection(2, 3, 4);
+    expect(effectiveSelection(dragged, 2, interval)).toEqual({ start: 2, end: 3 });
+  });
+
+  it("si el cursor se movio despues, el arrastre caduca y vuelve el intervalo", () => {
+    const dragged = dragSelection(2, 3, 4);
+    expect(effectiveSelection(dragged, 1.4, interval)).toEqual(interval);
+  });
+});
+
+describe("frequencyAtRatio", () => {
+  it("arriba del espectrograma es la frecuencia maxima y abajo la minima", () => {
+    expect(frequencyAtRatio(0, 0, 5000)).toBe(5000);
+    expect(frequencyAtRatio(1, 0, 5000)).toBe(0);
+  });
+
+  it("en medio, la frecuencia crece hacia arriba en linea recta", () => {
+    expect(frequencyAtRatio(0.25, 0, 5000)).toBe(3750);
+    expect(frequencyAtRatio(0.5, 1000, 3000)).toBe(2000);
+  });
+
+  it("fuera del lienzo se queda en el borde", () => {
+    expect(frequencyAtRatio(-0.2, 0, 5000)).toBe(5000);
+    expect(frequencyAtRatio(1.3, 0, 5000)).toBe(0);
   });
 });
