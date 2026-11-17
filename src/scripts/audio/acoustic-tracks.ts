@@ -84,7 +84,13 @@ export const planVisibleAnalysis = (
   if (span > LONGEST_ANALYSIS_SECONDS) {
     return { kind: "skip", span };
   }
-  if (covered !== undefined && covered.start <= view.start && covered.end >= view.end) {
+  // Lo que se compara es la parte de la vista que tiene audio. Un TextGrid puede
+  // terminar un poco después del audio (otra frecuencia de muestreo al
+  // decodificar), y lo analizado se corta en el audio: comparar con la vista
+  // entera no daba nunca por cubierto y cada redibujo volvía a analizar, sin fin.
+  const wantedStart = Math.max(0, view.start);
+  const wantedEnd = Math.min(duration, view.end);
+  if (covered !== undefined && covered.start <= wantedStart && covered.end >= wantedEnd) {
     return { kind: "reuse" };
   }
   const margin = Math.max(span * 0.25, 0.05);

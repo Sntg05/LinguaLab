@@ -371,3 +371,15 @@ Se preguntan de a una, al empezar la fase que las necesita.
   ahora busca la llamada al motor en `src/scripts/fono/index.ts`. Verde: `verify:all` y 209 e2e, solo
   Chromium; el peso de la peor página no cambió. La portada sigue con la tabla de Ortografía (decisión
   menor abierta).
+- **L35 (2026-11-17). Defecto real del visor, encontrado por la CI del PR #22.** «Ver pato resuelto»
+  fallaba en CI y no en esta máquina. La prueba de CI no guardaba evidencia: se añadió subir los rastros
+  de Playwright solo cuando falla la e2e. El rastro mostró que la página dejaba de pintar cuadros. La
+  causa, reproducida forzando el `AudioContext` a 44,1 kHz (esta máquina decodifica a 48 kHz; el runner,
+  sin tarjeta de sonido, y muchos equipos, a 44,1): «pato» está a 48 kHz y su TextGrid termina en el
+  último instante; decodificado a 44,1 kHz el audio queda un poco más corto, lo analizado se corta en
+  el audio y `planVisibleAnalysis` nunca lo daba por cubierto, así que cada redibujo volvía a analizar sin
+  fin. Ahora compara con la parte de la vista que tiene audio. Rojo: dos pruebas unitarias; una e2e que
+  fija 44,1 kHz, comprobada por mutación (con el código anterior falla). En el mismo PR, CodeQL marcó
+  `js/bad-tag-filter` en el contador de líneas de `architecture.test.ts`: ahora reconoce `</SCRIPT >`,
+  con prueba. Verde: `verify:all` y 210 e2e.
+

@@ -66,6 +66,27 @@ describe("planVisibleAnalysis", () => {
       "analyse",
     );
   });
+
+  it("una vista que pasa del final del audio se da por cubierta hasta donde hay audio", () => {
+    // El TextGrid de «pato» termina en 0,882667 s (48 kHz); decodificado a 44,1 kHz
+    // el audio dura un poco menos. Lo analizado se corta en el audio, y antes eso
+    // nunca «cubría» la vista: cada redibujo volvía a analizar, sin fin, y la
+    // página se quedaba sin cuadros. Pasaba en CI y en cualquier equipo a 44,1 kHz.
+    const view = { start: 0, end: 0.8826666666666667 };
+    // 42 368 muestras a 48 kHz dan 38 925,6 a 44,1 kHz: el audio queda más corto.
+    const duration = 38925 / 44100;
+    expect(duration).toBeLessThan(view.end);
+    const first = planVisibleAnalysis(view, duration);
+    if (first.kind !== "analyse") throw new Error("la primera vez tiene que analizar");
+    expect(first.range.end).toBe(duration);
+    expect(planVisibleAnalysis(view, duration, first.range)).toEqual({ kind: "reuse" });
+  });
+
+  it("lo mismo para una vista que empieza antes de cero", () => {
+    expect(planVisibleAnalysis({ start: -0.2, end: 0.5 }, 2, { start: 0, end: 0.7 })).toEqual({
+      kind: "reuse",
+    });
+  });
 });
 
 describe("sliceAudio", () => {

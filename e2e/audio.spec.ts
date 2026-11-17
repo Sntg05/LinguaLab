@@ -646,6 +646,34 @@ test("«Ver pato resuelto» carga el audio con su TextGrid y dice de donde sale"
   await expect(page.locator("[data-audio-example-credit]")).toContainText("CC BY-SA 4.0");
 });
 
+test("«Ver pato resuelto» no se cuelga cuando el equipo decodifica a 44,1 kHz", async ({
+  page,
+}) => {
+  // «pato» esta grabado a 48 kHz y su TextGrid termina en el ultimo instante del
+  // audio. Decodificado a 44,1 kHz (la frecuencia de muchos equipos, y la del
+  // runner de CI, que no tiene tarjeta de sonido) el audio queda un poco mas
+  // corto que el TextGrid, y el analisis de las curvas se repetia sin fin: la
+  // pagina dejaba de pintar cuadros. En un equipo a 48 kHz no se veia nunca, por
+  // eso la frecuencia se fija aqui.
+  await page.addInitScript(() => {
+    const Base = window.AudioContext;
+    window.AudioContext = class extends Base {
+      constructor(options?: AudioContextOptions) {
+        super({ ...options, sampleRate: 44_100 });
+      }
+    };
+  });
+  await page.goto("/visualizador");
+  await page.locator("[data-audio-example-solved]").click();
+
+  await expect(page.locator(STATUS)).toContainText("importado", { timeout: 15_000 });
+  await expect(page.locator("[data-audio-overlay-status]")).toContainText("Curvas calculadas", {
+    timeout: 15_000,
+  });
+  await openIntervalTable(page);
+  await expect(page.locator(ROWS)).toHaveCount(6);
+});
+
 test("«Practicar con pato» guia tres pasos en la linea de estado y avanza con cada gesto", async ({
   page,
 }) => {
