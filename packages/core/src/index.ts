@@ -23,3 +23,5 @@ export * from "./data/index";
 // Contratos de salida hacia el mundo exterior (adaptadores secundarios).
 export * from "./ports/index";
 export * from "./g2p/index";
+// Análisis cualitativo: códigos, segmentos, coocurrencias y acuerdo.
+export * from "./qualitative/index";
