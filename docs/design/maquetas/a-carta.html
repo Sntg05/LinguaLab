@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maqueta A · Carta AFI</title>
+<link rel="stylesheet" href="fonts.css" />
+<style>
+  :root {
+    --paper: #eef1f4;
+    --sheet: #ffffff;
+    --ink: #1a2433;
+    --muted: #4d5b6e;
+    --rule: #c5cdd8;
+    --chart: #2457a6;
+    --chart-soft: #dce6f5;
+    --mark: #e3b23c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 400 1.0625rem/1.55 "Atkinson", system-ui, sans-serif;
+  }
+  a { color: var(--chart); }
+  :focus-visible { outline: 3px solid var(--mark); outline-offset: 2px; }
+  .wrap { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem; }
+
+  header.top {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 1rem;
+    padding: 1.1rem 0; border-bottom: 2px solid var(--ink);
+  }
+  .brand { font-weight: 800; font-size: 1.35rem; letter-spacing: -0.01em; }
+  .brand span { font-family: "Noto", sans-serif; font-weight: 400; color: var(--chart); }
+  nav.top a { margin-left: 1.25rem; color: var(--ink); text-decoration: none; }
+  nav.top a[aria-current] { border-bottom: 2px solid var(--chart); }
+
+  .hero { display: grid; grid-template-columns: 1fr 1.15fr; gap: 3rem; padding: 3.5rem 0 2.5rem; align-items: end; }
+  .hero h1 { font-size: clamp(2.2rem, 4.4vw, 3.4rem); line-height: 1.05; margin: 0 0 1rem; font-weight: 800; letter-spacing: -0.02em; }
+  .hero p { max-width: 34rem; color: var(--muted); margin: 0 0 1.25rem; }
+  .btn { display: inline-block; padding: .7rem 1.1rem; background: var(--chart); color: #fff; text-decoration: none; font-weight: 700; border-radius: 3px; }
+  .btn--plain { background: transparent; color: var(--chart); border: 2px solid var(--chart); margin-left: .5rem; }
+
+  /* El rasgo memorable: un pedazo de la carta AFI, que es lo que todo
+     estudiante reconoce. Las celdas son botones: se oyen y se transcriben. */
+  .ipa { background: var(--sheet); border: 2px solid var(--ink); }
+  .ipa table { border-collapse: collapse; width: 100%; font-family: "Noto", sans-serif; }
+  .ipa th, .ipa td { border: 1px solid var(--rule); text-align: center; padding: .45rem .3rem; }
+  .ipa th { font: 700 .78rem/1.2 "Atkinson", sans-serif; color: var(--muted); }
+  .ipa td { font-size: 1.45rem; }
+  .ipa td.on { background: var(--chart-soft); outline: 2px solid var(--chart); outline-offset: -2px; }
+  .ipa caption { caption-side: bottom; text-align: left; padding: .6rem .8rem; font-size: .9rem; color: var(--muted); }
+
+  h2 { font-size: 1.6rem; margin: 0 0 .4rem; letter-spacing: -0.01em; }
+  .lead { color: var(--muted); max-width: 46rem; margin: 0 0 1.25rem; }
+
+  /* El catálogo es otra carta: filas por área, columnas por tarea. Una celda
+     vacía dice «esto todavía no lo hacemos», que también es información. */
+  .chart { background: var(--sheet); border: 2px solid var(--ink); overflow-x: auto; }
+  .chart table { border-collapse: collapse; width: 100%; min-width: 46rem; }
+  .chart th, .chart td { border: 1px solid var(--rule); padding: .7rem .8rem; vertical-align: top; text-align: left; }
+  .chart thead th { background: var(--ink); color: #fff; font-size: .95rem; }
+  .chart tbody th { width: 11rem; font-size: .95rem; }
+  .chart td a { display: block; font-weight: 700; text-decoration: none; }
+  .chart td a:hover { text-decoration: underline; }
+  .chart td small { display: block; color: var(--muted); font-size: .85rem; margin-top: .2rem; }
+  .chart td.empty { background: repeating-linear-gradient(135deg, transparent 0 6px, #f3f5f8 6px 12px); }
+
+  .tool { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 2px solid var(--ink); background: var(--sheet); margin-bottom: 4rem; }
+  .tool > div { padding: 1.25rem 1.4rem; }
+  .tool > div + div { border-left: 2px solid var(--ink); background: #f8fafc; }
+  label { display: block; font-weight: 700; margin-bottom: .35rem; }
+  textarea { width: 100%; min-height: 5.5rem; font: inherit; padding: .6rem; border: 2px solid var(--rule); border-radius: 3px; }
+  .choices { display: flex; gap: 1rem; margin: .8rem 0 1rem; flex-wrap: wrap; }
+  .out { font: 400 1.6rem/1.5 "Noto", sans-serif; margin: .2rem 0 1rem; }
+  .why { border-top: 1px solid var(--rule); padding-top: .8rem; color: var(--muted); font-size: .95rem; }
+  .why b { color: var(--ink); }
+  section { margin-top: 3rem; }
+  @media (max-width: 52rem) {
+    .hero, .tool { grid-template-columns: 1fr; }
+    .tool > div + div { border-left: 0; border-top: 2px solid var(--ink); }
+    nav.top { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">LinguaLab <span>/ˈliŋ.ɡwa.lab/</span></div>
+    <nav class="top" aria-label="Principal"><a href="#" aria-current="page">Herramientas</a><a href="#">Bibliografía</a><a href="#">Glosario</a><a href="#">Acerca de</a></nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1>Las herramientas del laboratorio de lingüística, en tu navegador.</h1>
+      <p>Transcribe, segmenta, anota y mide sin instalar nada. Lo que cargas no sale de tu equipo, y cada herramienta dice de qué teoría sale.</p>
+      <a class="btn" href="#">Ver las herramientas</a><a class="btn btn--plain" href="#">Empezar por un ejemplo</a>
+    </div>
+    <div class="ipa">
+      <table>
+        <caption>Pulsa un sonido para oírlo y ver dónde se articula. Fragmento de la carta del AFI (2020).</caption>
+        <thead><tr><th scope="col"></th><th scope="col">Bilabial</th><th scope="col">Dental</th><th scope="col">Alveolar</th><th scope="col">Palatal</th><th scope="col">Velar</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Oclusiva</th><td>p b</td><td></td><td>t d</td><td>c ɟ</td><td class="on">k ɡ</td></tr>
+          <tr><th scope="row">Nasal</th><td>m</td><td></td><td>n</td><td>ɲ</td><td>ŋ</td></tr>
+          <tr><th scope="row">Fricativa</th><td>ɸ β</td><td>θ ð</td><td>s z</td><td>ç ʝ</td><td>x ɣ</td></tr>
+          <tr><th scope="row">Vibrante</th><td></td><td></td><td>r</td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <section>
+    <h2>Qué puedes hacer, ordenado como una carta</h2>
+    <p class="lead">Cada fila es un área de la lingüística y cada columna, una tarea. Una celda rayada es algo que el sitio todavía no hace.</p>
+    <div class="chart">
+      <table>
+        <thead><tr><th scope="col">Área</th><th scope="col">Transcribir</th><th scope="col">Anotar</th><th scope="col">Medir</th><th scope="col">Comparar</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Fonética</th><td><a href="#">Transcriptor AFI</a><small>Español por reglas, inglés con CMUdict</small></td><td><a href="#">Visor de audio</a><small>Capas de intervalos, TextGrid</small></td><td><a href="#">Análisis acústico</a><small>F0 y formantes, validados con Praat</small></td><td class="empty"></td></tr>
+          <tr><th scope="row">Fonología</th><td><a href="#">Ortografía a AFI</a><small>Tus propias reglas, con rastro</small></td><td class="empty"></td><td class="empty"></td><td><a href="#">FonoLab</a><small>La carta completa, con audio</small></td></tr>
+          <tr><th scope="row">Sintaxis</th><td class="empty"></td><td><a href="#">ArborLab</a><small>Seis teorías, con sus reglas</small></td><td class="empty"></td><td class="empty"></td></tr>
+          <tr><th scope="row">Corpus</th><td class="empty"></td><td><a href="#">Análisis cualitativo</a><small>Códigos, segmentos, acuerdo</small></td><td><a href="#">Estación de texto</a><small>Frecuencias, n-gramas</small></td><td><a href="#">Comparar documentos</a><small>Palabras clave, log-likelihood</small></td></tr>
+          <tr><th scope="row">Estadística</th><td class="empty"></td><td class="empty"></td><td><a href="#">Estadística</a><small>Pruebas y efectos, validados con R</small></td><td><a href="#">Experimentos</a><small>Tareas con jsPsych</small></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Transcriptor AFI</h2>
+    <p class="lead">Así se ve una herramienta: a la izquierda lo que haces, a la derecha el resultado y por qué sale así.</p>
+    <div class="tool">
+      <div>
+        <label for="t">Texto</label>
+        <textarea id="t">El pingüino llegó a México</textarea>
+        <div class="choices"><label><input type="radio" name="v" checked /> Seseo</label><label><input type="radio" name="v" /> Distinción</label><label><input type="radio" name="n" checked /> Fonémico / /</label><label><input type="radio" name="n" /> Fonético [ ]</label></div>
+        <a class="btn" href="#">Transcribir</a>
+      </div>
+      <div>
+        <p class="out">el pin.ˈɡwi.no ʝe.ˈɡo a ˈme.xi.ko</p>
+        <p class="why"><b>Por qué «gwi»:</b> la diéresis de «güi» hace sonar la u, que se vuelve la deslizada [w] del diptongo. <b>Por qué «x» en México:</b> excepción ortográfica registrada. Reglas según Hualde (2013).</p>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

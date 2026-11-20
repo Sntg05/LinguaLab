@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Maqueta C · Glosa interlineal</title>
+<link rel="stylesheet" href="fonts.css" />
+<style>
+  :root {
+    --page: #ffffff;
+    --ink: #20232a;
+    --muted: #5b6170;
+    --green: #1f6b4f;
+    --green-soft: #e4f1eb;
+    --rule: #dfe3e8;
+    --hl: #ffe58a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 400 1.0625rem/1.6 "Noto", system-ui, sans-serif; }
+  a { color: var(--green); }
+  :focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+  .wrap { max-width: 68rem; margin: 0 auto; padding: 0 1.25rem; }
+  header.top { display: flex; justify-content: space-between; align-items: baseline; padding: 1.2rem 0; }
+  .brand { font: 700 1.3rem/1 "Atkinson", sans-serif; }
+  nav.top a { margin-left: 1.2rem; color: var(--ink); text-decoration: none; }
+
+  /* El rasgo memorable: la glosa interlineal de las Reglas de Leipzig. Las
+     columnas se alinean palabra por palabra, la segunda línea va en versalitas
+     para las categorías gramaticales y la tercera es la traducción libre. */
+  .gloss { display: flex; flex-wrap: wrap; gap: .2rem 1.6rem; margin: 0; }
+  .gloss .w { display: grid; grid-template-rows: auto auto; }
+  .gloss .w > span:first-child { font-size: inherit; }
+  .gloss .w > span:last-child { font-size: max(.5em, .85rem); font-weight: 400; color: var(--muted); font-variant: small-caps; letter-spacing: .02em; }
+  .free { color: var(--muted); font-style: italic; margin: .3rem 0 0; }
+
+  .hero { padding: 3rem 0 2.5rem; border-bottom: 1px solid var(--rule); }
+  .hero .gloss { font: 700 clamp(2rem, 5vw, 3.6rem)/1.15 "Atkinson", sans-serif; letter-spacing: -0.02em; }
+  .hero .gloss .w > span:last-child { font-weight: 400; letter-spacing: .04em; margin-top: .2rem; }
+  .hero .free { font-size: 1.2rem; }
+  .hero p.lead { max-width: 38rem; margin: 1.4rem 0 1.2rem; }
+  .btn { display: inline-block; padding: .7rem 1.1rem; background: var(--green); color: #fff; text-decoration: none; font-weight: 700; border-radius: 999px; }
+  .btn--plain { background: var(--green-soft); color: var(--green); margin-left: .4rem; }
+
+  section { padding: 2.6rem 0 0; }
+  section > .gloss { font: 700 1.6rem/1.2 "Atkinson", sans-serif; }
+  section > .free { margin-bottom: 1.2rem; }
+
+  /* El catálogo como un texto glosado: cada herramienta es una «palabra» del
+     oficio, con su categoría debajo y su función como traducción. */
+  .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.6rem 2.4rem; list-style: none; padding: 0; margin: 0; }
+  .tools li a { display: block; text-decoration: none; color: var(--ink); padding-left: .9rem; border-left: 3px solid var(--green-soft); }
+  .tools li a:hover { border-left-color: var(--green); }
+  .tools b { display: block; font: 700 1.15rem/1.3 "Atkinson", sans-serif; }
+  .tools .cat { display: block; font-variant: small-caps; color: var(--green); letter-spacing: .03em; }
+  .tools .fn { display: block; color: var(--muted); font-style: italic; font-size: .95rem; }
+
+  .tool { margin: 0 0 4rem; border-top: 3px solid var(--ink); padding-top: 1.2rem; }
+  .steps { list-style: none; counter-reset: s; padding: 0; margin: 0 0 1.2rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .steps li { counter-increment: s; background: var(--green-soft); padding: .8rem 1rem; border-radius: 8px; }
+  .steps li::before { content: counter(s); display: inline-grid; place-items: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--green); color: #fff; font-weight: 700; margin-right: .5rem; }
+  label { font-weight: 700; display: block; margin-bottom: .3rem; }
+  textarea { width: 100%; font: inherit; padding: .6rem; min-height: 4.5rem; border: 2px solid var(--rule); border-radius: 8px; }
+  .result { margin-top: 1.2rem; padding: 1rem 1.2rem; border: 2px solid var(--rule); border-radius: 8px; }
+  .result .gloss { font-size: 1.5rem; }
+  .result .gloss mark { background: var(--hl); }
+  .note { color: var(--muted); font-size: .95rem; margin: .8rem 0 0; }
+  @media (max-width: 52rem) { .tools, .steps { grid-template-columns: 1fr; } nav.top { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><div class="brand">LinguaLab</div><nav class="top" aria-label="Principal"><a href="#">Herramientas</a><a href="#">Bibliografía</a><a href="#">Glosario</a><a href="#">Acerca de</a></nav></header>
+
+  <div class="hero">
+    <p class="gloss" aria-label="Analiza la lengua en tu navegador, glosado">
+      <span class="w"><span>Analiz-a</span><span>analizar-imp.2sg</span></span>
+      <span class="w"><span>la</span><span>def.f.sg</span></span>
+      <span class="w"><span>lengua</span><span>lengua</span></span>
+      <span class="w"><span>en</span><span>en</span></span>
+      <span class="w"><span>tu</span><span>poss.2sg</span></span>
+      <span class="w"><span>navegador</span><span>navegador</span></span>
+    </p>
+    <p class="free">«Analiza la lengua en tu navegador.»</p>
+    <p class="lead">Herramientas para estudiantes de lenguas y de lingüística: transcribir, anotar, medir y comparar. Cada una dice qué hace, qué no hace y de qué teoría sale.</p>
+    <a class="btn" href="#">Empezar con un ejemplo</a><a class="btn btn--plain" href="#">Ver todas</a>
+  </div>
+
+  <section>
+    <p class="gloss"><span class="w"><span>Herramienta-s</span><span>herramienta-pl</span></span></p>
+    <p class="free">Cada una con su categoría y lo que te deja hacer.</p>
+    <ul class="tools">
+      <li><a href="#"><b>Transcriptor AFI</b><span class="cat">fonética</span><span class="fn">«pasa un texto al AFI»</span></a></li>
+      <li><a href="#"><b>FonoLab</b><span class="cat">fonética</span><span class="fn">«oye y ubica cada sonido»</span></a></li>
+      <li><a href="#"><b>Visor de audio</b><span class="cat">fonética</span><span class="fn">«segmenta una grabación»</span></a></li>
+      <li><a href="#"><b>ArborLab</b><span class="cat">sintaxis</span><span class="fn">«dibuja y revisa un árbol»</span></a></li>
+      <li><a href="#"><b>Análisis cualitativo</b><span class="cat">corpus</span><span class="fn">«codifica entrevistas»</span></a></li>
+      <li><a href="#"><b>Estadística</b><span class="cat">métodos</span><span class="fn">«elige y corre una prueba»</span></a></li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="gloss"><span class="w"><span>Transcrib-ir</span><span>transcribir-inf</span></span></p>
+    <p class="free">El transcriptor AFI, en tres pasos.</p>
+    <div class="tool">
+      <ol class="steps"><li>Escribe una frase</li><li>Elige variedad y nivel</li><li>Lee el resultado y su porqué</li></ol>
+      <label for="t">Frase</label>
+      <textarea id="t">El pingüino llegó a México</textarea>
+      <div class="result">
+        <p class="gloss">
+          <span class="w"><span>el</span><span>el</span></span>
+          <span class="w"><span>pin.ˈ<mark>ɡwi</mark>.no</span><span>pingüino</span></span>
+          <span class="w"><span>ʝe.ˈɡo</span><span>llegó</span></span>
+          <span class="w"><span>a</span><span>a</span></span>
+          <span class="w"><span>ˈme.<mark>x</mark>i.ko</span><span>México</span></span>
+        </p>
+        <p class="note">Resaltado lo que más se equivoca a mano: la «ü» suena [w], y la «x» de México es /x/. Reglas según Hualde (2013).</p>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>
