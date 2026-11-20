@@ -143,8 +143,8 @@ describe("bibliography", () => {
 });
 
 describe("tree examples", () => {
-  it("covers 23 tree types", () => {
-    expect(Object.keys(TREE_EXAMPLES)).toHaveLength(23);
+  it("covers the 15 tree types left after retiring eight formalisms (D3)", () => {
+    expect(Object.keys(TREE_EXAMPLES)).toHaveLength(15);
   });
 
   it("gives every example bilingual names", () => {

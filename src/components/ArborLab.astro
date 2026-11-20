@@ -6,7 +6,7 @@
  * controller from the type registry, because the input affordances differ
  * per type (notation, outline, number sequence or word list).
  */
-import { TREE_GROUPS } from "../data/trees/types";
+import { RETIRED_TREE_TYPES, TREE_GROUPS } from "../data/trees/types";
 import type { Locale } from "../i18n";
 
 interface Props {
@@ -55,6 +55,28 @@ const es = locale === "es";
             </div>
           ))
         }
+        <!-- Los formalismos retirados se nombran con su motivo (decisión D3):
+             desaparecer sin decir nada haría pensar que se olvidaron. -->
+        <details class="types__retired">
+          <summary>{es ? "Formalismos retirados y por qué" : "Retired formalisms, and why"}</summary>
+          <p>
+            {
+              es
+                ? "Estos formalismos estaban aquí dibujados como árboles de corchetes, que no es lo que son. Se retiraron hasta poder representarlos con su notación y comprobar sus reglas."
+                : "These formalisms were drawn here as bracketed trees, which is not what they are. They were withdrawn until they can be represented in their own notation, with their rules checked."
+            }
+          </p>
+          <dl>
+            {
+              RETIRED_TREE_TYPES.map((entry) => (
+                <>
+                  <dt>{es ? entry.name_es : entry.name_en}</dt>
+                  <dd>{es ? entry.reason_es : entry.reason_en}</dd>
+                </>
+              ))
+            }
+          </dl>
+        </details>
       </nav>
 
       <!-- ---------------- Workbench ---------------- -->
@@ -380,5 +402,26 @@ const es = locale === "es";
 
   .check--error {
     color: var(--warn);
+  }
+
+  .types__retired {
+    margin-block-start: var(--space-m);
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+  }
+
+  .types__retired summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .types__retired dt {
+    margin-block-start: var(--space-xs);
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .types__retired dd {
+    margin: 0;
   }
 </style>

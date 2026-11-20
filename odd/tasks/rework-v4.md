@@ -67,7 +67,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
   WebAssembly donde una medición lo justifique, lo que pide instalar Rust en esta máquina) o en un
   servidor propio (Go o Rust), que rompería la regla «los datos no salen del navegador» (ADR 0002).
 - **D2 (resuelta el 2026-11-10).** «déjalo en español e inglés no más entonces».
-- **D3 (T4).** Qué hacer con los formalismos que hoy son solo una etiqueta: rehacerlos con su notación
+- **D3 (T4, resuelta el 2026-11-20: «Validar 6, retirar resto»).** Qué hacer con los formalismos que hoy son solo una etiqueta: rehacerlos con su notación
   propia o retirarlos hasta hacerlos bien; y si las estructuras de datos (AVL, heap, trie…) siguen en un
   sitio para lingüistas.
 - **D4 (resuelta el 2026-11-17: «our own engine validated against R»).** Motor de estadística cuantitativa: R real en el navegador (webR) o un motor propio
@@ -82,7 +82,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T1 | S5, S6 | Modelo de referencias por herramienta en el núcleo; apartado en Acerca; bloque «¿De dónde sale esto?» en cada herramienta; prueba que exige teoría y al menos una referencia verificada por herramienta | inline | hecha | `bf93d89` y el commit siguiente. Rojo: la prueba del núcleo sin el módulo; mutación: una herramienta sin referencias hace fallar la regla. 22 obras verificadas en Crossref o en su página |
 | T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | hecha | `03ec0d8`: motores con rojo y verde. Commit siguiente: CMUdict empaquetado (`scripts/build-cmudict.mts`), adaptador `createNativePhonemizer` (rojo: suite sin módulo; verde: 9 pruebas), página conectada con variedad, nivel, palabras sin transcribir y variantes, y eSpeak retirado. `verify:all` y e2e completa en verde. Español: 96,6 % propio frente a 76,9 % de eSpeak |
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
-| T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
+| T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | inline (D3: validar 6, retirar 8) | hecha (L53) | commit de L53 |
 | T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline y delegada (5.3–5.7: escritores acotados, contexto y paralelismo) | hecha en código (L21–L32) | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26); 5.3 hecha (curvas sobre el espectrograma, L27); 5.6 y 5.7 hechas (`c9bf799`, `f19f6b6`, L30); 5.4 hecha (`9316dce`, L31); 5.5 hecha (`6726b4a`, L32). Pendiente humano: la persona que no conoce el visor y la captura junto a Praat |
 | T6 | S9 | Estadística cuantitativa, contrastada con R (D4: motor propio) | inline | hecha (L44–L49) | ver T6.1–T6.8 |
 | T6.3 | S9 | Distribuciones normal, t, χ², F (función de distribución y cuantiles) en `packages/core/src/stats/` | inline | hecha | commit de L45 |
@@ -605,3 +605,17 @@ Se preguntan de a una, al empezar la fase que las necesita.
   `pt`/`pf`/`pchisq` de R (se exige 1e-7) y lo que imprime `effectsize` 1.0.3 (1e-6, porque busca con
   Nelder–Mead). Las CDF no centrales coinciden con R a 1e-9. Rojo: la prueba sin módulo. La página
   `/estadistica` añade el intervalo a cada línea APA y marca «one-sided» los unilaterales.
+- **L53 (2026-11-20). D3 resuelta y T4 hecha.** Textual: «Validar 6, retirar resto». `src/scripts/trees/
+  theories.ts`: UD v2 (las 37 relaciones verificadas en universaldependencies.org, subtipos `base:sub`,
+  `root` si y solo si la cabeza es 0), Penn Treebank (cada palabra bajo su categoría, aviso), X-barra
+  (binaria, cada SX y X′ con núcleo de su categoría, Spec hijo de SX: errores), minimalismo (Ensamble
+  binario: error; X′ no primitiva: aviso), morfología (de a un afijo: aviso); movimiento conserva el
+  mando-c. Retirados del selector, con su motivo en la página: CCG, LFG, HPSG, gramática relacional,
+  semántica, TAG, Reed–Kellogg y cartografía; las estructuras de datos se quedan. Referencias nuevas
+  verificadas: `marcus1993` (ACL Anthology J93-2004) y `haspelmath2013` (Crossref, DOI
+  10.4324/9780203776506). **Jackendoff (1977) no se pudo verificar** (la página de MIT Press respondió 403):
+  X-barra se apoya en Chomsky (1981), ya verificado. Errores lingüísticos corregidos en los ejemplos: «la
+  cerca» era `obl` y es `obj`; el ejemplo «Arcos cruzados» no cruzaba ningún arco (ahora el clásico «A
+  hearing is scheduled on the issue today», con una prueba que exige el cruce); los tres de X-barra no
+  cumplían la teoría (Spec con DP y D dentro, IP con DP y N). Prueba nueva: todo ejemplo de un formalismo
+  validado pasa sus propias reglas sin errores. Rojo: `theories.test.ts`, 11 fallos.

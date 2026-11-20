@@ -405,6 +405,24 @@
       "source": "American Psychological Association",
       "url": "https://apastyle.apa.org/products/publication-manual-7th-edition",
       "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "marcus1993",
+      "authors": "Marcus, M. P., Santorini, B., & Marcinkiewicz, M. A.",
+      "year": 1993,
+      "title": "Building a Large Annotated Corpus of English: The Penn Treebank",
+      "source": "Computational Linguistics, 19(2), 313–330",
+      "url": "https://aclanthology.org/J93-2004/",
+      "verifiedOn": "2026-11-20"
+    },
+    {
+      "id": "haspelmath2013",
+      "authors": "Haspelmath, M., & Sims, A. D.",
+      "year": 2013,
+      "title": "Understanding Morphology",
+      "source": "Routledge",
+      "doi": "10.4324/9780203776506",
+      "verifiedOn": "2026-11-20"
     }
   ]
 }

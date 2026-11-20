@@ -19,9 +19,89 @@ export interface TreeType {
   blurb_en: string;
   hint_es: string;
   hint_en: string;
-  /** Extra checks to apply. */
-  opts?: { xbar?: boolean };
+  /**
+   * La teoría cuyas reglas de buena formación se comprueban
+   * (`src/scripts/trees/theories.ts`). Sin teoría, solo se dibuja.
+   */
+  theory?: TreeTheory;
 }
+
+/** Los formalismos con reglas propias comprobadas contra su fuente. */
+export type TreeTheory = "dependency" | "constituency" | "xbar" | "movement" | "minimalist" | "morphology";
+
+/**
+ * Formalismos que estuvieron en el selector y se retiraron (decisión D3 del
+ * dueño, 2026-11-20). Se dibujaban con el mismo analizador de corchetes que los
+ * árboles de constituyentes, y ninguno de ellos es un árbol de constituyentes:
+ * mostrarlos así era enseñar otra cosa con su nombre. Se nombran en la página,
+ * con el motivo, para que nadie crea que se olvidaron.
+ */
+export interface RetiredTreeType {
+  readonly id: string;
+  readonly name_es: string;
+  readonly name_en: string;
+  readonly reason_es: string;
+  readonly reason_en: string;
+}
+
+export const RETIRED_TREE_TYPES: readonly RetiredTreeType[] = [
+  {
+    id: "ccg",
+    name_es: "Gramática categorial combinatoria (CCG)",
+    name_en: "Combinatory Categorial Grammar (CCG)",
+    reason_es: "Una derivación de CCG combina categorías con reglas (aplicación, composición), y se dibuja como una prueba, no como un árbol de corchetes.",
+    reason_en: "A CCG derivation combines categories with rules (application, composition) and is drawn as a proof, not as a bracketed tree.",
+  },
+  {
+    id: "lfg",
+    name_es: "Gramática léxico-funcional (LFG)",
+    name_en: "Lexical-Functional Grammar (LFG)",
+    reason_es: "La LFG tiene dos estructuras a la vez, la de constituyentes y la funcional (una matriz de rasgos), unidas por una correspondencia que un solo árbol no muestra.",
+    reason_en: "LFG has two structures at once, constituent and functional (a feature matrix), linked by a correspondence a single tree cannot show.",
+  },
+  {
+    id: "hpsg",
+    name_es: "HPSG",
+    name_en: "HPSG",
+    reason_es: "La HPSG representa los signos como matrices de atributo y valor con estructura compartida, que no son nodos de un árbol de corchetes.",
+    reason_en: "HPSG represents signs as attribute-value matrices with structure sharing, which are not the nodes of a bracketed tree.",
+  },
+  {
+    id: "relational",
+    name_es: "Gramática relacional",
+    name_en: "Relational Grammar",
+    reason_es: "La gramática relacional describe estratos de relaciones gramaticales (1, 2, 3, chômeur) que se dibujan como redes de arcos por estrato, no como corchetes.",
+    reason_en: "Relational Grammar describes strata of grammatical relations (1, 2, 3, chômeur), drawn as stratal arc networks, not as brackets.",
+  },
+  {
+    id: "semantic",
+    name_es: "Semántica (forma lógica)",
+    name_en: "Semantics (logical form)",
+    reason_es: "Un árbol semántico necesita tipos y reglas de composición que se comprueben (e, t, ⟨e,t⟩); sin ellas, era solo un dibujo con etiquetas.",
+    reason_en: "A semantic tree needs types and composition rules that are checked (e, t, ⟨e,t⟩); without them it was only a drawing with labels.",
+  },
+  {
+    id: "tag",
+    name_es: "Gramática de adjunción de árboles (TAG)",
+    name_en: "Tree-Adjoining Grammar (TAG)",
+    reason_es: "La TAG combina árboles elementales por sustitución y adjunción; lo que importa es la derivación entre árboles, que aquí no se representaba.",
+    reason_en: "TAG combines elementary trees by substitution and adjunction; what matters is the derivation between trees, which was not represented here.",
+  },
+  {
+    id: "reedkellogg",
+    name_es: "Diagrama de Reed–Kellogg",
+    name_en: "Reed–Kellogg diagram",
+    reason_es: "El diagrama de Reed–Kellogg es un dibujo de líneas horizontales y diagonales con su propia convención, no un árbol: forzarlo a corchetes lo desfiguraba.",
+    reason_en: "A Reed–Kellogg diagram is a drawing of horizontal and slanted lines with its own convention, not a tree: forcing it into brackets distorted it.",
+  },
+  {
+    id: "cartography",
+    name_es: "Cartografía sintáctica",
+    name_en: "Syntactic cartography",
+    reason_es: "La cartografía depende de un orden fijo de proyecciones funcionales (Force, Top, Foc, Fin…) que había que comprobar; sin esa comprobación, el dibujo no enseñaba la teoría.",
+    reason_en: "Cartography depends on a fixed order of functional projections (Force, Top, Foc, Fin…) that would have to be checked; without that check, the drawing did not teach the theory.",
+  },
+];
 
 export const TREE_TYPES: readonly TreeType[] = [
   {
@@ -31,6 +111,7 @@ export const TREE_TYPES: readonly TreeType[] = [
     "name_es": "Dependencia (UD)",
     "name_en": "Dependency (UD)",
     "mode": "dep",
+    "theory": "dependency",
     "blurb_es": "Cada nodo es una palabra; los arcos van de la cabeza a su dependiente con la relación gramatical.",
     "blurb_en": "Every node is a word; arcs run from the head to its dependent, labelled with the relation.",
     "hint_es": "Cada línea: id palabra cabeza relación POS · o CoNLL-U completo.",
@@ -43,6 +124,7 @@ export const TREE_TYPES: readonly TreeType[] = [
     "name_es": "Constitución (frases)",
     "name_en": "Constituency (phrases)",
     "mode": "bracket",
+    "theory": "constituency",
     "blurb_es": "La frase se descompone en sintagmas anidados hasta llegar a las palabras.",
     "blurb_en": "The sentence splits into nested phrases down to the words.",
     "hint_es": "[S [SN [Det el] [N gato]]] o Penn (S (DT el) (NN gato)).",
@@ -55,9 +137,7 @@ export const TREE_TYPES: readonly TreeType[] = [
     "name_es": "X-bar",
     "name_en": "X-bar",
     "mode": "bracket",
-    "opts": {
-      "xbar": true
-    },
+    "theory": "xbar",
     "blurb_es": "Toda proyección tiene un núcleo (X) que proyecta X′ y SX. El complemento es hermano del núcleo, el adjunto se une a X′ y el especificador es hijo de SX; los tres son opcionales. Ramificación binaria.",
     "blurb_en": "Every projection has a head (X) that projects X′ and XP. The complement is the sister of the head, an adjunct attaches to X′ and the specifier is a daughter of XP; all three are optional. Binary branching.",
     "hint_es": "[NP [Spec [Det the]] [N' [N student] [PP of physics]]]",
@@ -70,6 +150,7 @@ export const TREE_TYPES: readonly TreeType[] = [
     "name_es": "Movimiento (GB)",
     "name_en": "Movement (GB)",
     "mode": "bracket",
+    "theory": "movement",
     "blurb_es": "D-estructura vs S-estructura: huellas {t}, PRO y flechas de movimiento con chequeo de c-command.",
     "blurb_en": "D-structure vs S-structure: traces {t}, PRO and movement arrows with c-command checking.",
     "hint_es": "Usa #id en nodos y  move: origen -> destino \"etiqueta\"",
@@ -82,106 +163,11 @@ export const TREE_TYPES: readonly TreeType[] = [
     "name_es": "Minimalista",
     "name_en": "Minimalist",
     "mode": "bracket",
+    "theory": "minimalist",
     "blurb_es": "Merge externo e interno: copias inferiores tachadas, edge de vP y fases.",
     "blurb_en": "External and internal Merge: lower copies struck through, vP edge and phases.",
     "hint_es": "Escribe copias como <palabra> para dibujarlas tachadas.",
     "hint_en": "Write copies as <word> to draw them struck through."
-  },
-  {
-    "id": "cartography",
-    "group_es": "Teoría sintáctica",
-    "group_en": "Syntactic theory",
-    "name_es": "Cartográfica",
-    "name_en": "Cartographic",
-    "mode": "bracket",
-    "blurb_es": "Split-CP y orden fino de adverbios: ForceP, TopP, FocP, FinP.",
-    "blurb_en": "Split-CP and fine adverb order: ForceP, TopP, FocP, FinP.",
-    "hint_es": "[ForceP [Force Ø] [TopP [Top that] [FinP ...]]]",
-    "hint_en": "[ForceP [Force Ø] [TopP [Top that] [FinP ...]]]"
-  },
-  {
-    "id": "ccg",
-    "group_es": "Teoría sintáctica",
-    "group_en": "Syntactic theory",
-    "name_es": "CCG (derivaciones)",
-    "name_en": "CCG (derivations)",
-    "mode": "bracket",
-    "blurb_es": "Categorías funcionales X/Y y X\\Y; derivaciones dibujadas de abajo arriba.",
-    "blurb_en": "Functional categories X/Y and X\\Y; derivations drawn bottom-up.",
-    "hint_es": "[S\\NP]/NP   ·   [conj [S/NP cooked] [S/NP ate]]",
-    "hint_en": "[S\\NP]/NP   ·   [conj [S/NP cooked] [S/NP ate]]"
-  },
-  {
-    "id": "lfg",
-    "group_es": "Teoría sintáctica",
-    "group_en": "Syntactic theory",
-    "name_es": "LFG (c/f-estructura)",
-    "name_en": "LFG (c/f-structure)",
-    "mode": "bracket",
-    "blurb_es": "Estructura de constituyentes y funciones gramaticales en paralelo.",
-    "blurb_en": "Constituency structure and grammatical functions in parallel.",
-    "hint_es": "[IP [NP María] [I' [I lee] [NP un libro]]]",
-    "hint_en": "[IP [NP Mary] [I' [I reads] [NP a book]]]"
-  },
-  {
-    "id": "hpsg",
-    "group_es": "Teoría sintáctica",
-    "group_en": "Syntactic theory",
-    "name_es": "HPSG (rasgos)",
-    "name_en": "HPSG (features)",
-    "mode": "bracket",
-    "blurb_es": "Matrices de atributo-valor con estructura compartida [1].",
-    "blurb_en": "Attribute-value matrices with structure sharing [1].",
-    "hint_es": "[Sign [HEAD verb] [SUBJ ⟨DP⟩]]",
-    "hint_en": "[Sign [HEAD verb] [SUBJ ⟨DP⟩]]"
-  },
-  {
-    "id": "relational",
-    "group_es": "Teoría sintáctica",
-    "group_en": "Syntactic theory",
-    "name_es": "Gramática relacional",
-    "name_en": "Relational Grammar",
-    "mode": "bracket",
-    "blurb_es": "Relaciones gramaticales por estratos: 1 sujeto, 2 objeto, 3 indirecto, Cho chômeur.",
-    "blurb_en": "Grammatical relations per stratum: 1 subject, 2 object, 3 indirect, Cho chômeur.",
-    "hint_es": "[Cláusula [1,2 libro] [2,1 leído]]",
-    "hint_en": "[Clause [1,2 book] [2,1 read]]"
-  },
-  {
-    "id": "semantic",
-    "group_es": "Otros formalismos",
-    "group_en": "Other formalisms",
-    "name_es": "Semántica (LF)",
-    "name_en": "Semantic (LF)",
-    "mode": "bracket",
-    "blurb_es": "Tipos e, t, ⟨e,t⟩ y elevación de cuantificadores.",
-    "blurb_en": "Types e, t, ⟨e,t⟩ and quantifier raising.",
-    "hint_es": "[VP sleeps [type ⟨e,t⟩]]",
-    "hint_en": "[VP sleeps [type ⟨e,t⟩]]"
-  },
-  {
-    "id": "tag",
-    "group_es": "Otros formalismos",
-    "group_en": "Other formalisms",
-    "name_es": "TAG (adición)",
-    "name_en": "TAG (adjoining)",
-    "mode": "bracket",
-    "blurb_es": "Árboles elementales iniciales (α) y auxiliares (β) con nodo pie *.",
-    "blurb_en": "Elementary initial (α) and auxiliary (β) trees with foot node *.",
-    "hint_es": "[β [S* [AdjP often] [S*]]]",
-    "hint_en": "[β [S* [AdjP often] [S*]]]"
-  },
-  {
-    "id": "reedkellogg",
-    "group_es": "Otros formalismos",
-    "group_en": "Other formalisms",
-    "name_es": "Reed–Kellogg",
-    "name_en": "Reed–Kellogg",
-    "mode": "bracket",
-    "blurb_es": "Diagramas clásicos de línea base: sujeto | predicado, complementos y modificadores.",
-    "blurb_en": "Classic baseline diagrams: subject | predicate, complements and modifiers.",
-    "hint_es": "[Línea [Suj gato] [Pred [V saltó] [O cerca]]]",
-    "hint_en": "[Line [Subj cat] [Pred [V jumped] [Obj fence]]]"
   },
   {
     "id": "morphology",
@@ -190,6 +176,7 @@ export const TREE_TYPES: readonly TreeType[] = [
     "name_es": "Estructura de palabra",
     "name_en": "Word structure",
     "mode": "bracket",
+    "theory": "morphology",
     "blurb_es": "Orden de afijación: prefijos, raíz y sufijos; ambigüedad léxica.",
     "blurb_en": "Affixation order: prefixes, root and suffixes; lexical ambiguity.",
     "hint_es": "[Palabra [Pref un-] [Base [Base lock] [Suf -able]]]",

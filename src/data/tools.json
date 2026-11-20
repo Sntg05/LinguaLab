@@ -42,17 +42,19 @@
         "en"
       ],
       "notes": {
-        "es": "Editor de árboles sintácticos y de estructuras de datos: 23 tipos, cuatro formatos de entrada y exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat.",
-        "en": "Syntax and data-structure tree editor: 23 types, four input formats, and export to SVG, PNG, JSON, Newick, CoNLL-U and Brat."
+        "es": "Editor de árboles sintácticos y de estructuras de datos: 15 tipos, seis formalismos lingüísticos con sus reglas comprobadas, cuatro formatos de entrada y exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat.",
+        "en": "Syntax and data-structure tree editor: 15 types, six linguistic formalisms with their rules checked, four input formats, and export to SVG, PNG, JSON, Newick, CoNLL-U and Brat."
       },
       "theory": {
-        "es": "Dibuja dos familias de análisis sintáctico: dependencias, donde cada palabra depende de otra con una relación (Universal Dependencies), y constituyentes, donde las palabras se agrupan en sintagmas (gramática generativa: Rección y Ligamiento, Programa Minimalista). La herramienta dibuja el análisis que escribes; no lo decide por ti.",
-        "en": "It draws two families of syntactic analysis: dependencies, where each word depends on another through a relation (Universal Dependencies), and constituency, where words group into phrases (generative grammar: Government and Binding, the Minimalist Program). The tool draws the analysis you write; it does not decide it for you."
+        "es": "Dibuja dos familias de análisis sintáctico: dependencias, donde cada palabra depende de otra con una relación (Universal Dependencies), y constituyentes, donde las palabras se agrupan en sintagmas (gramática generativa: Rección y Ligamiento, Programa Minimalista). Cada formalismo comprueba las reglas de su fuente (las 37 relaciones de UD v2, el esquema del Penn Treebank, X-barra, Ensamble binario) y explica cuál se rompe. La herramienta dibuja el análisis que escribes; no lo decide por ti.",
+        "en": "It draws two families of syntactic analysis: dependencies, where each word depends on another through a relation (Universal Dependencies), and constituency, where words group into phrases (generative grammar: Government and Binding, the Minimalist Program). Each formalism checks the rules of its source (the 37 UD v2 relations, the Penn Treebank scheme, X-bar, binary Merge) and explains which one breaks. The tool draws the analysis you write; it does not decide it for you."
       },
       "references": [
         "demarneffe2021",
+        "marcus1993",
         "chomsky1981",
-        "chomsky1995"
+        "chomsky1995",
+        "haspelmath2013"
       ]
     },
     {

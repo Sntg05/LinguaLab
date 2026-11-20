@@ -199,12 +199,12 @@ describe("constituency checks", () => {
     expect(results[0]!.message).toMatch(/binaria/);
   });
 
-  it("notes non-binary branching only under X-bar", () => {
+  it("reports non-binary branching as an error only under X-bar", () => {
     const tree = parseBrackets("[S [A a] [B b] [C c]]");
     const without = runChecks(tree, { locale: "es" });
-    const withXbar = runChecks(tree, { locale: "es", xbar: true });
-    expect(without.some((r) => /binarias/.test(r.message))).toBe(false);
-    expect(withXbar.some((r) => /binarias/.test(r.message))).toBe(true);
+    const withXbar = runChecks(tree, { locale: "es", theory: "xbar" });
+    expect(without.some((r) => /no binaria/.test(r.message))).toBe(false);
+    expect(withXbar.some((r) => r.level === "error" && /no binaria/.test(r.message))).toBe(true);
   });
 
   it("always reports size", () => {
