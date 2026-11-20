@@ -48,7 +48,7 @@ Estado al 2026-11-17 (tarde): T5, T9 y T11 en producción (PR #22 y #24). En la 
 
 ```bash
 git fetch && git checkout feat/rework-v4 && git pull --ff-only
-nvm use 22                       # Node 22.x; el proyecto fija >=22.13 (pdf.js lo pide)
+nvm use 22                       # Node 22.x; el proyecto fija >=22.23.4 (Astro 7.4.12 lo pide)
 npm install
 npx playwright install chromium  # una vez por máquina
 npm run doctor                   # rama frente a origin, Chromium, puerto 4331, documentos ODD
@@ -59,7 +59,7 @@ Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya es
 `~/.cargo/bin` (rustc 1.99.1, destino `wasm32-unknown-unknown`), **sin** tocar el `PATH`: se invoca como
 `~/.cargo/bin/cargo`. En otra máquina: `rustup` con `--profile minimal --target wasm32-unknown-unknown`.
 En el segundo equipo del dueño (CachyOS) **no hay Rust**, hay Go en `/usr/bin/go` (no se usa) y Node 26
-fuera de nvm; cumple el `>=22.13` del proyecto, pero `.nvmrc` pide 22: si algo difiere, `nvm use 22`.
+fuera de nvm; cumple el `>=22.23.4` del proyecto, pero `.nvmrc` pide 22: si algo difiere, `nvm use 22`.
 
 ### Las puertas, y cuándo correrlas
 
