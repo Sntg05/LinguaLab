@@ -72,7 +72,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
   sitio para lingüistas.
 - **D4 (resuelta el 2026-11-17: «our own engine validated against R»).** Motor de estadística cuantitativa: R real en el navegador (webR) o un motor propio
   validado contra R.
-- **D5 (T8).** Dirección de diseño, sobre maquetas.
+- **D5 (T8, resuelta el 2026-11-20: el diseño se queda como está).** Dirección de diseño, sobre maquetas.
 
 ## Tasks
 
@@ -92,7 +92,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T6.6 | S9 | Regresión lineal simple y múltiple | inline | hecha | commit de L48 |
 | T6.1, T6.7, T6.8 | S9, S6 | Datos CSV/TSV, gráficos SVG y página `/estadistica` con asistente e informe APA | inline | hecha | commit de L49 |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | hecha en lo pedido por S9; quedan unidades del plan del traspaso (L43) | `c1bed4f` motor contra `irr` de R; `b5e1707` página `/cualitativo` con e2e y axe (L39) |
-| T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
+| T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | — | cerrada sin aplicar: el dueño rechazó las tres maquetas y pidió dejar la página como está (L54) | `docs/design/maquetas` en el historial |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
 | T11 | S12 | Árboles sin errores y exportaciones válidas en todos los laboratorios | inline | hecha | `c48e142` árboles (L37); commit siguiente, `e2e/exports.spec.ts` (L38) |
 | T7b | S9 | Lo que falta del plan de T7: guardado, jerarquía, colores y memos, recuperar segmentos (`.qdc` fuera: esquema no verificable, L51) | inline | hecha | commit de L51 |
@@ -619,3 +619,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
   hearing is scheduled on the issue today», con una prueba que exige el cruce); los tres de X-barra no
   cumplían la teoría (Spec con DP y D dentro, IP con DP y N). Prueba nueva: todo ejemplo de un formalismo
   validado pasa sus propias reglas sin errores. Rojo: `theories.test.ts`, 11 fallos.
+- **L54 (2026-11-20).** El dueño, textual: «desactiva la revisión de gentle ai, y no me gusta ninguna de las
+  3 maquetas que me presentaste, sigue con las otras tareas y deja la página como está por ahora». Se corrió
+  `gentle-ai review mode disable` (queda `off` global). Las tres maquetas (Carta AFI, Espectrograma, Glosa
+  interlineal) se quitaron de `docs/design/maquetas/`; siguen en el historial de git. T8 no aplica cambios.

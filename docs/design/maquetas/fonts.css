@@ -1,9 +1,0 @@
-/* Las fuentes ya instaladas del sitio, cargadas desde node_modules para que las
-   maquetas se vean igual que se verían publicadas. Solo para revisión local. */
-@font-face { font-family: "Atkinson"; src: url("../../../node_modules/@fontsource-variable/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-wght-normal.woff2") format("woff2"); font-weight: 200 800; }
-@font-face { font-family: "Atkinson"; src: url("../../../node_modules/@fontsource-variable/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-ext-wght-normal.woff2") format("woff2"); font-weight: 200 800; unicode-range: U+0100-02FF, U+1E00-1EFF; }
-@font-face { font-family: "Bricolage"; src: url("../../../node_modules/@fontsource-variable/bricolage-grotesque/files/bricolage-grotesque-latin-wght-normal.woff2") format("woff2"); font-weight: 200 800; }
-@font-face { font-family: "Mono"; src: url("../../../node_modules/@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 800; }
-@font-face { font-family: "Noto"; src: url("../../../node_modules/@fontsource/noto-sans/files/noto-sans-latin-400-normal.woff2") format("woff2"); font-weight: 400; }
-@font-face { font-family: "Noto"; src: url("../../../node_modules/@fontsource/noto-sans/files/noto-sans-latin-ext-400-normal.woff2") format("woff2"); font-weight: 400; unicode-range: U+0100-02FF, U+1D00-1DBF, U+1E00-1EFF; }
-@font-face { font-family: "Noto"; src: url("../../../node_modules/@fontsource/noto-sans/files/noto-sans-latin-700-normal.woff2") format("woff2"); font-weight: 700; }
