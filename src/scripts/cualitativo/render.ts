@@ -8,9 +8,11 @@
 
 import {
   type AgreementReport,
+  type CodedSegment,
   type CodingSheet,
   type QualitativeCode,
   codeFrequencies,
+  codeTree,
   cooccurrenceMatrix,
 } from "@lingualab/core";
 import { describeAlpha, describeKappa, formatPercent } from "./rules";
@@ -43,28 +45,55 @@ const rowHeader = (text: string): HTMLTableCellElement => {
   return th;
 };
 
-/** El libro de códigos, con un botón para quitar cada código. */
+/**
+ * El libro en orden de árbol: cada hijo debajo de su padre y sangrado. El color
+ * va en una muestra al lado del nombre, nunca en lugar de él (WCAG 1.4.1). Se
+ * pinta con el CSSOM (`style.backgroundColor`), que la CSP permite; un atributo
+ * `style` escrito en el marcado no lo estaría.
+ */
 export const renderCodebook = (
   body: HTMLElement,
   codes: readonly QualitativeCode[],
   strings: QualitativeStrings,
-  onRemove: (index: number) => void,
+  onRemove: (name: string) => void,
 ): void => {
   body.replaceChildren(
-    ...codes.map((code, index) => {
+    ...codeTree(codes).map(({ code, depth }) => {
       const row = node("tr");
       const remove = node("button", strings.text("qual.remove"), "btn btn--quiet btn--sm");
       remove.type = "button";
       remove.setAttribute("aria-label", strings.format("qual.removeLabel", { code: code.name }));
-      remove.addEventListener("click", () => onRemove(index));
+      remove.addEventListener("click", () => onRemove(code.name));
       const actions = node("td");
       actions.append(remove);
       const rules = [code.include, code.exclude, code.example].filter((value) => value !== "");
       const definition = node("td");
       definition.append(node("span", code.definition));
       if (rules.length > 0) definition.append(node("span", rules.join(" · "), "qual-muted"));
-      row.append(rowHeader(code.name), definition, actions);
+      if (code.memo !== undefined) {
+        definition.append(node("span", `${strings.text("qual.memo")}: ${code.memo}`, "qual-muted"));
+      }
+      const header = rowHeader(code.name);
+      header.classList.add(`qual-depth-${Math.min(depth, 4)}`);
+      if (code.color !== undefined) {
+        const swatch = node("span", undefined, "qual-swatch");
+        swatch.setAttribute("aria-hidden", "true");
+        swatch.style.backgroundColor = code.color;
+        header.prepend(swatch);
+      }
+      row.append(header, definition, actions);
       return row;
+    }),
+  );
+};
+
+/** Los segmentos de un código, como lista numerada con su número de segmento. */
+export const renderRetrieved = (list: HTMLElement, segments: readonly CodedSegment[]): void => {
+  list.replaceChildren(
+    ...segments.map((segment) => {
+      const item = node("li", segment.text);
+      item.value = Number(segment.id);
+      return item;
     }),
   );
 };

@@ -211,3 +211,30 @@
   padding-inline-start: var(--space-m);
   font-size: var(--step--1);
 }
+
+/* Libro de códigos en árbol: cada nivel, un sangrado; la muestra de color va al
+   lado del nombre y no lo sustituye (WCAG 1.4.1). */
+.qual-depth-1 {
+  padding-inline-start: 1.5rem;
+}
+.qual-depth-2 {
+  padding-inline-start: 3rem;
+}
+.qual-depth-3,
+.qual-depth-4 {
+  padding-inline-start: 4.5rem;
+}
+.qual-swatch {
+  display: inline-block;
+  inline-size: 0.8em;
+  block-size: 0.8em;
+  margin-inline-end: 0.4em;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  vertical-align: baseline;
+}
+.qual-retrieved {
+  display: grid;
+  gap: var(--space-2xs);
+  padding-inline-start: 2.5rem;
+}

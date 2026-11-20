@@ -12,6 +12,21 @@
  * `data-qual-strings` (ADR 0004).
  */
 import { t, type Locale } from "../i18n";
+/**
+ * Colores con nombre en vez de un selector libre: el nombre se lee en voz alta y
+ * los seis se distinguen entre sí con contraste suficiente sobre el fondo claro
+ * y el oscuro. El color nunca es la única marca (WCAG 1.4.1): el nombre del
+ * código siempre está escrito al lado.
+ */
+const COLORS = [
+  { value: "", label: "qual.color.none" },
+  { value: "#1b6fb3", label: "qual.color.blue" },
+  { value: "#1b7f5a", label: "qual.color.green" },
+  { value: "#b35c1b", label: "qual.color.orange" },
+  { value: "#9b2c6b", label: "qual.color.magenta" },
+  { value: "#6b4bb3", label: "qual.color.purple" },
+  { value: "#8a7a12", label: "qual.color.olive" },
+] as const;
 import { QUALITATIVE_STRING_KEYS } from "../scripts/cualitativo/strings";
 import "../styles/features/qualitative.css";
 
@@ -42,7 +57,11 @@ const runtimeStrings = Object.fromEntries(
           {t(locale, "qual.example.button")}
         </button>
         <p class="qual-hint">{t(locale, "qual.example.note")}</p>
+        <button class="btn btn--quiet" type="button" data-qual-reset>
+          {t(locale, "qual.reset.button")}
+        </button>
       </div>
+      <p class="qual-hint">{t(locale, "qual.saved.note")}</p>
       <p class="qual-status" data-qual-status role="status" aria-live="polite" data-state="idle">
         {t(locale, "qual.status.ready")}
       </p>
@@ -72,6 +91,22 @@ const runtimeStrings = Object.fromEntries(
           <label class="qual-field">
             {t(locale, "qual.codebook.example")}
             <input name="example" type="text" autocomplete="off" />
+          </label>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.parent")}
+            <select name="parent" data-qual-parent>
+              <option value="">{t(locale, "qual.codebook.noParent")}</option>
+            </select>
+          </label>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.color")}
+            <select name="color">
+              {COLORS.map((color) => <option value={color.value}>{t(locale, color.label)}</option>)}
+            </select>
+          </label>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.memo")}
+            <textarea name="memo" rows="2"></textarea>
           </label>
           <div class="qual-row">
             <button class="btn btn--primary" type="submit">{t(locale, "qual.codebook.add")}</button>
@@ -182,6 +217,14 @@ const runtimeStrings = Object.fromEntries(
           <div class="table-scroll">
             <table class="qual-table" data-qual-cooccurrence aria-labelledby="qual-cooccurrence-title"></table>
           </div>
+          <h3 class="qual-panel__subtitle" id="qual-retrieve-title">{t(locale, "qual.retrieve.title")}</h3>
+          <p class="qual-hint">{t(locale, "qual.retrieve.note")}</p>
+          <label class="qual-field">
+            {t(locale, "qual.retrieve.label")}
+            <select data-qual-retrieve></select>
+          </label>
+          <p class="qual-hint" data-qual-retrieve-count role="status" aria-live="polite"></p>
+          <ol class="qual-retrieved" data-qual-retrieve-list aria-labelledby="qual-retrieve-title"></ol>
         </div>
         <div class="qual-row">
           <button class="btn btn--quiet" type="button" data-qual-export="frequencies" disabled>

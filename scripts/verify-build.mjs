@@ -256,7 +256,7 @@ function attributesWithAncestors(html) {
     for (const attr of attrs) {
       if (!attr.startsWith("data-")) continue;
       if (!found.has(attr)) found.set(attr, []);
-      found.get(attr).push(stack.map((frame) => frame.attrs).flat());
+      found.get(attr).push(stack.flatMap((frame) => frame.attrs));
     }
 
     if (!selfClosing && !VOID.has(lower)) stack.push({ name: lower, attrs });

@@ -95,7 +95,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
 | T11 | S12 | Árboles sin errores y exportaciones válidas en todos los laboratorios | inline | hecha | `c48e142` árboles (L37); commit siguiente, `e2e/exports.spec.ts` (L38) |
-| T7b | S9 | Lo que falta del plan de T7 (traspaso §6): guardado en IndexedDB, jerarquía, colores y memos de códigos, exportación REFI-QDA `.qdc`, recuperar los segmentos de un código | inline | pendiente | — |
+| T7b | S9 | Lo que falta del plan de T7: guardado, jerarquía, colores y memos, recuperar segmentos (`.qdc` fuera: esquema no verificable, L51) | inline | hecha | commit de L51 |
 | T12 | S13 | Lectura de documentos: puerto en el núcleo, .txt y .docx propios (ZIP + XML, sin dependencia) | inline | hecha | `eba3a16` (L42) |
 | T13 | S13 | PDF con pdf.js (dependencia nueva: riesgo 5), rechazo de PDF sin texto | inline + verificador | hecha; verificador sin bloqueos y revisión de Gentle AI aprobada (L43) | `a609b8c` (L42) |
 | T14 | S13 | Motor de comparación: frecuencia por 10 000, G² y p, log ratio, diversidad, vocabulario compartido; contrastado con R base | inline | hecha | `e49851f`, `d86fa57` (L42) |
@@ -581,4 +581,19 @@ Se preguntan de a una, al empezar la fase que las necesita.
   pregunta responde, un error dice por qué, el CSV de Excel en español se lee, el SVG es XML válido y
   axe no encuentra violaciones con resultados; accesibilidad de la página en los dos idiomas, temas y a
   320 px. **Sin cambio:** no hay Kruskal–Wallis ni modelos mixtos, ni intervalos de d, η² y V.
-
+- **L50 (2026-11-20).** El dueño, textual: «Lee el repositorio, los archivos que se quedaron de la última
+  versión trabajada y continúa con las tareas dejadas en el handoff, finalizalas todas las pendientes,
+  quiero terminar esta página ya». Había sin commitear Astro 7.4.12 y `@astrojs/sitemap` 3.7.5 fijado; la
+  máquina ya tiene Node 22.23.4. Se cierra P23 con `engines.node >=22.23.4` (`80576a6`).
+- **L51 (2026-11-20). T7b.** `packages/core/src/qualitative/`: el libro de códigos admite código padre,
+  color (`#rrggbb`) y memo, opcionales, en tres columnas nuevas del CSV (un CSV viejo se sigue leyendo);
+  `checkHierarchy` rechaza padres inexistentes y ciclos; `codeTree` ordena el árbol; `segmentsWithCode`
+  recupera los segmentos de un código. Página: campos de padre, color con nombre y memo; libro sangrado
+  con muestra de color al lado del nombre (no en su lugar); «Segmentos de un código»; el proyecto se
+  guarda en `localStorage` en los mismos CSV y se lee con los mismos lectores, con «Empezar de cero».
+  Rojo: `hierarchy.test.ts` y `persistence.test.ts` sin módulo; la e2e encontró un defecto real (un
+  proyecto vacío se guardaba y al recargar se anunciaba «se recuperó»), corregido. **No se hizo la
+  exportación REFI-QDA `.qdc`:** el esquema solo se publica tras un enlace de Tresorit que no se pudo leer
+  (`https://www.qdasoftware.org/codebook-implementation-files`), y la regla del proyecto es no escribir un
+  formato de memoria. Se usó `localStorage` y no IndexedDB: un proyecto de curso cabe de sobra y no
+  necesita el puerto de almacenamiento del visor.

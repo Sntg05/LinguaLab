@@ -87,7 +87,7 @@ test("el ejemplo se codifica, las frecuencias cuentan y la hoja descargada se re
 test("el libro de códigos descargado se reimporta igual", async ({ page }) => {
   const { name, text } = await downloadOf(page, page.locator('[data-qual-export="codebook"]'));
   expect(name).toBe("codebook.csv");
-  expect(text).toContain("code,definition,include,exclude,example");
+  expect(text).toContain("code,definition,include,exclude,example,parent,color,memo");
 
   await page.goto("/cualitativo");
   await page.locator("[data-qual-codebook-file]").setInputFiles(csvFile("codebook.csv", text));
@@ -184,4 +184,55 @@ test("con el ejemplo codificado y el acuerdo calculado, axe no encuentra violaci
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();
   expect(results.violations.map((violation) => violation.id)).toEqual([]);
+});
+
+test("lo codificado sigue ahí después de recargar, y «Empezar de cero» lo borra", async ({
+  page,
+}) => {
+  await mark(page, 5, 0).check();
+  await page.reload();
+
+  await expect(page.locator("[data-qual-status]")).toContainText("Se recuperó el trabajo guardado");
+  await expect(page.locator("[data-qual-coding] tbody tr")).toHaveCount(10);
+  await expect(mark(page, 5, 0)).toBeChecked();
+
+  await page.locator("[data-qual-reset]").click();
+  await expect(page.locator("[data-qual-coding-box]")).toBeHidden();
+  await page.reload();
+  await expect(page.locator("[data-qual-status]")).not.toContainText("Se recuperó");
+});
+
+test("se releen juntos los segmentos de un código", async ({ page }) => {
+  await mark(page, 5, 0).check();
+  await mark(page, 9, 0).check();
+
+  await page.locator("[data-qual-retrieve]").selectOption("Identidad");
+  await expect(page.locator("[data-qual-retrieve-count]")).toContainText("2 segmento(s)");
+  const items = page.locator("[data-qual-retrieve-list] li");
+  await expect(items).toHaveCount(2);
+  await expect(items.first()).toHaveAttribute("value", "6");
+});
+
+test("un código hijo se dibuja debajo de su padre, con su color y su memo", async ({ page }) => {
+  const form = page.locator("[data-qual-code-form]");
+  await form.locator('[name="name"]').fill("Identidad bilingüe");
+  await form.locator('[name="parent"]').selectOption("Identidad");
+  await form.locator('[name="color"]').selectOption({ label: "Verde" });
+  await form.locator('[name="memo"]').fill("Separar de Identidad si aparece más de tres veces");
+  await form.locator('button[type="submit"]').click();
+
+  const rows = page.locator("[data-qual-codebook] tr");
+  const names = await rows.locator("th").allInnerTexts();
+  const parent = names.findIndex((name) => name.trim() === "Identidad");
+  expect(names[parent + 1]?.trim()).toBe("Identidad bilingüe");
+  const child = rows.nth(parent + 1);
+  await expect(child.locator("th")).toHaveClass(/qual-depth-1/);
+  await expect(child.locator(".qual-swatch")).toHaveCount(1);
+  await expect(child).toContainText("Memo: Separar de Identidad");
+
+  const results = await new AxeBuilder({ page })
+    .include("[data-qual]")
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(results.violations).toEqual([]);
 });

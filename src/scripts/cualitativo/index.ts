@@ -21,6 +21,7 @@ import {
   frequenciesToCsv,
   parseCodebookCsv,
   parseCodingCsv,
+  segmentsWithCode,
   segmentText,
   setMark,
   withCodes,
@@ -33,7 +34,9 @@ import {
   renderCoding,
   renderCooccurrence,
   renderFrequencies,
+  renderRetrieved,
 } from "./render";
+import { browserStorage, clearProject, loadProject, saveProject } from "./persistence";
 import { alignNames, describeAgreementError, describeCsvError, mergeCodebook } from "./rules";
 import { createQualitativeStrings, parseQualitativeStrings } from "./strings";
 
@@ -88,6 +91,12 @@ export const initQualitativeLab = (): void => {
   const agreementBox = $<HTMLElement>("agreement-box");
   const agreementTable = $<HTMLTableElement>("agreement");
   const exportButtons = [...root.querySelectorAll<HTMLButtonElement>("[data-qual-export]")];
+  const parentSelect = $<HTMLSelectElement>("parent");
+  const retrieveSelect = $<HTMLSelectElement>("retrieve");
+  const retrieveList = $<HTMLElement>("retrieve-list");
+  const retrieveCount = $<HTMLElement>("retrieve-count");
+  const storage = browserStorage();
+  let warnedNotSaved = false;
 
   let codebook: readonly QualitativeCode[] = [];
   let sheet: CodingSheet | null = null;
@@ -99,6 +108,47 @@ export const initQualitativeLab = (): void => {
     status.dataset["state"] = state;
   };
 
+  const currentMode = (): SegmentMode =>
+    root.querySelector<HTMLInputElement>('input[name="qual-mode"]:checked')?.value === "paragraph"
+      ? "paragraph"
+      : "line";
+
+  /** Guarda en este navegador. Si no se puede, lo dice una vez y sigue. */
+  const persist = (): void => {
+    // Una página vacía no es un proyecto: guardarla haría que al recargar se
+    // anunciara «se recuperó el trabajo» sin que hubiera ninguno.
+    if (codebook.length === 0 && sheet === null && material.value.trim() === "") {
+      clearProject(storage);
+      return;
+    }
+    const saved = saveProject(storage, { codebook, material: material.value, mode: currentMode(), sheet });
+    if (!saved && !warnedNotSaved) {
+      warnedNotSaved = true;
+      say(strings.text("qual.status.notSaved"), "error");
+    }
+  };
+
+  /** Los segmentos del código elegido; la elección se conserva si el código sigue. */
+  const refreshRetrieval = (): void => {
+    if (sheet === null) return;
+    const previous = retrieveSelect.value;
+    retrieveSelect.replaceChildren(
+      ...sheet.codes.map((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        return option;
+      }),
+    );
+    if (sheet.codes.includes(previous)) retrieveSelect.value = previous;
+    const chosen = retrieveSelect.value;
+    const found = segmentsWithCode(sheet, chosen);
+    renderRetrieved(retrieveList, found);
+    retrieveCount.textContent =
+      chosen === "" ? "" : strings.format("qual.retrieve.count", { count: found.length, code: chosen });
+  };
+  retrieveSelect.addEventListener("change", refreshRetrieval);
+
   /** Lo que depende de las marcas: tablas de resultados y botones de descarga. */
   const refreshResults = (): void => {
     const ready = sheet !== null && sheet.codes.length > 0 && sheet.segments.length > 0;
@@ -107,6 +157,7 @@ export const initQualitativeLab = (): void => {
     if (ready && sheet !== null) {
       renderFrequencies(frequencyTable, sheet, locale, strings);
       renderCooccurrence(cooccurrenceTable, sheet, strings);
+      refreshRetrieval();
     }
     const available: Record<string, boolean> = {
       codebook: codebook.length > 0,
@@ -124,6 +175,21 @@ export const initQualitativeLab = (): void => {
     if (sheet === null) return;
     sheet = setMark(sheet, segment, code, checked);
     refreshResults();
+    persist();
+  };
+
+  /** El selector de padre ofrece los códigos que ya existen. */
+  const refreshParentOptions = (): void => {
+    const none = parentSelect.options[0];
+    parentSelect.replaceChildren(
+      ...(none === undefined ? [] : [none]),
+      ...codebook.map((code) => {
+        const option = document.createElement("option");
+        option.value = code.name;
+        option.textContent = code.name;
+        return option;
+      }),
+    );
   };
 
   /** Lo que depende del libro o de los segmentos: se reconstruye la hoja entera. */
@@ -136,18 +202,32 @@ export const initQualitativeLab = (): void => {
     codingBox.hidden = !ready;
     codingEmpty.hidden = ready;
     if (ready && sheet !== null) renderCoding(codingTable, sheet, codebook, strings, toggle);
+    refreshParentOptions();
     refreshResults();
+    persist();
   };
 
-  function removeCode(index: number): void {
-    const removed = codebook[index];
-    codebook = codebook.filter((_, at) => at !== index);
+  /** Quitar un código deja a sus hijos como códigos principales, no huérfanos. */
+  function removeCode(name: string): void {
+    codebook = codebook
+      .filter((code) => code.name !== name)
+      .map((code) => {
+        if (code.parent !== name) return code;
+        const { parent: _removed, ...rest } = code;
+        return rest;
+      });
     refreshAll();
-    if (removed !== undefined) say(strings.format("qual.status.codeRemoved", { code: removed.name }), "ok");
+    say(strings.format("qual.status.codeRemoved", { code: name }), "ok");
   }
 
   const field = (name: string): string =>
-    (codeForm.elements.namedItem(name) as HTMLInputElement | HTMLTextAreaElement | null)?.value ?? "";
+    (
+      codeForm.elements.namedItem(name) as
+        | HTMLInputElement
+        | HTMLTextAreaElement
+        | HTMLSelectElement
+        | null
+    )?.value ?? "";
 
   codeForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -164,6 +244,9 @@ export const initQualitativeLab = (): void => {
         include: field("include").trim(),
         exclude: field("exclude").trim(),
         example: field("example").trim(),
+        ...(field("parent") === "" ? {} : { parent: field("parent") }),
+        ...(field("color") === "" ? {} : { color: field("color") }),
+        ...(field("memo").trim() === "" ? {} : { memo: field("memo").trim() }),
       },
     ];
     codeForm.reset();
@@ -317,8 +400,33 @@ export const initQualitativeLab = (): void => {
     });
   }
 
+  // El material escrito a mano también se guarda, aunque todavía no se haya dividido.
+  material.addEventListener("input", persist);
+
+  $<HTMLButtonElement>("reset").addEventListener("click", () => {
+    clearProject(storage);
+    codebook = [];
+    sheet = null;
+    report = null;
+    others = [];
+    material.value = "";
+    agreementBox.hidden = true;
+    renderOthers();
+    refreshAll();
+    say(strings.text("qual.status.reset"), "ok");
+  });
+
+  // El trabajo guardado en este navegador vuelve al recargar.
+  const restored = loadProject(storage);
+  if (restored !== null) {
+    codebook = restored.codebook;
+    material.value = restored.material;
+    sheet = restored.sheet;
+    const mode = root.querySelector<HTMLInputElement>(`input[name="qual-mode"][value="${restored.mode}"]`);
+    if (mode !== null) mode.checked = true;
+  }
   refreshAll();
-  say(strings.text("qual.status.ready"), "idle");
+  say(strings.text(restored === null ? "qual.status.ready" : "qual.status.restored"), restored === null ? "idle" : "ok");
 };
 
 safeInit("qualitative", initQualitativeLab);

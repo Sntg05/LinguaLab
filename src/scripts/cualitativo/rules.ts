@@ -33,6 +33,12 @@ export const describeCsvError = (
       return strings.format("qual.csv.duplicateName", { row: error.row, name: error.name });
     case "empty":
       return strings.text("qual.csv.empty");
+    case "unknown-parent":
+      return strings.format("qual.csv.unknownParent", { row: error.row, name: error.name });
+    case "parent-cycle":
+      return strings.format("qual.csv.parentCycle", { name: error.name });
+    case "invalid-color":
+      return strings.format("qual.csv.invalidColor", { row: error.row, value: error.value });
     case "bad-header":
       return strings.text("qual.csv.badHeader");
     case "no-codes":
