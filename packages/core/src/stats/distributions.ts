@@ -268,6 +268,98 @@ export const fCdf = (f: number, d1: number, d2: number, options: TailOption = {}
 };
 
 /* ---------------------------------------------------------------
+   Distribuciones no centrales
+
+   Las necesitan los intervalos de confianza de los tamaños del efecto (d, η²,
+   V): bajo la hipótesis alternativa, el estadístico ya no sigue la t, la F o la
+   χ² centrales, sino su versión desplazada por un parámetro de no centralidad.
+   Se contrastan con `pt`, `pf` y `pchisq` de R (`intervals.test.ts`).
+   --------------------------------------------------------------- */
+
+/**
+ * Suma una mezcla de Poisson Σ w_j · term(j), con w_j = e^(−μ)μ^j/j!, empezando
+ * en la moda y avanzando hacia los dos lados hasta que los pesos no aportan. Es
+ * la forma estable de sumar cuando μ es grande y los primeros pesos son ~0.
+ */
+const poissonMixture = (mu: number, term: (j: number) => number): number => {
+  if (mu === 0) return term(0);
+  const mode = Math.floor(mu);
+  const logWeight = (j: number): number => -mu + j * Math.log(mu) - logGamma(j + 1);
+  let total = 0;
+  for (let j = mode; j <= mode + MAX_ITERATIONS; j += 1) {
+    const weight = Math.exp(logWeight(j));
+    total += weight * term(j);
+    if (weight < 1e-17 && j > mu) break;
+  }
+  for (let j = mode - 1; j >= 0; j -= 1) {
+    const weight = Math.exp(logWeight(j));
+    total += weight * term(j);
+    if (weight < 1e-17) break;
+  }
+  return total;
+};
+
+/** P(X ≤ x) para X ~ χ² no central con `df` grados de libertad y no centralidad λ. */
+export const noncentralChiSquareCdf = (x: number, df: number, ncp: number): number => {
+  if (invalid(x, df, ncp) || df <= 0 || ncp < 0) return Number.NaN;
+  if (x <= 0) return 0;
+  return Math.min(
+    1,
+    poissonMixture(ncp / 2, (j) => gammaRegularized(df / 2 + j, x / 2, false)),
+  );
+};
+
+/** P(X ≤ f) para X ~ F no central (d1, d2, λ). */
+export const noncentralFCdf = (f: number, d1: number, d2: number, ncp: number): number => {
+  if (invalid(f, d1, d2, ncp) || d1 <= 0 || d2 <= 0 || ncp < 0) return Number.NaN;
+  if (f <= 0) return 0;
+  const scaled = d1 * f;
+  const x = scaled / (scaled + d2);
+  const y = d2 / (scaled + d2);
+  return Math.min(
+    1,
+    poissonMixture(ncp / 2, (j) => betaRegularized(x, y, d1 / 2 + j, d2 / 2, false)),
+  );
+};
+
+/**
+ * P(T ≤ t) para T ~ t no central (ν, δ), por la serie de Lenth (1989, AS 243):
+ * Φ(−δ) más una mezcla de betas incompletas con pesos de Poisson en δ²/2. Para
+ * t < 0 se usa la simetría P(T ≤ t; ν, δ) = 1 − P(T ≤ −t; ν, −δ).
+ */
+export const noncentralTCdf = (t: number, df: number, ncp: number): number => {
+  if (invalid(t, df, ncp) || df <= 0) return Number.NaN;
+  if (ncp === 0) return studentTCdf(t, df);
+  if (t < 0) return 1 - noncentralTCdf(-t, df, -ncp);
+  const x = (t * t) / (t * t + df);
+  const y = df / (t * t + df);
+  const half = (ncp * ncp) / 2;
+  // Términos pares (j + 1/2) con pesos de Poisson; impares (j + 1) con pesos
+  // δ/√2 · e^(−δ²/2)(δ²/2)^j / Γ(j + 3/2).
+  const even = poissonMixture(half, (j) => betaRegularized(x, y, j + 0.5, df / 2, false));
+  const oddFactor = ncp / Math.SQRT2;
+  const odd = (() => {
+    const mode = Math.floor(half);
+    const logWeight = (j: number): number =>
+      -half + j * Math.log(Math.max(half, Number.MIN_VALUE)) - logGamma(j + 1.5);
+    let total = 0;
+    for (let j = mode; j <= mode + MAX_ITERATIONS; j += 1) {
+      const weight = Math.exp(logWeight(j));
+      total += weight * betaRegularized(x, y, j + 1, df / 2, false);
+      if (weight < 1e-17 && j > half) break;
+    }
+    for (let j = mode - 1; j >= 0; j -= 1) {
+      const weight = Math.exp(logWeight(j));
+      total += weight * betaRegularized(x, y, j + 1, df / 2, false);
+      if (weight < 1e-17) break;
+    }
+    return oddFactor * total;
+  })();
+  const p = normalCdf(-ncp) + 0.5 * (even + odd);
+  return Math.min(1, Math.max(0, p));
+};
+
+/* ---------------------------------------------------------------
    Cuantiles
    --------------------------------------------------------------- */
 

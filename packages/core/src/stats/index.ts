@@ -3,5 +3,6 @@ export * from "./dataset";
 export * from "./descriptive";
 export * from "./distributions";
 export * from "./effects";
+export * from "./intervals";
 export * from "./regression";
 export * from "./tests";

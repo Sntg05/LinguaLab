@@ -1,4 +1,4 @@
-import { mannWhitneyTest, parseDataset, tTestTwoSample } from "@lingualab/core";
+import { cohensDInterval, mannWhitneyTest, parseDataset, tTestTwoSample } from "@lingualab/core";
 import { describe, expect, it } from "vitest";
 import { runAnalysis } from "./analyses";
 import { apaBounded, apaDf, apaNumber, apaP } from "./apa";
@@ -50,6 +50,20 @@ describe("runAnalysis", () => {
     expect(result.value.tests[1]?.apa).toContain(`W = ${apaNumber(u.value.statistic, 1)}`);
     expect(result.value.tests[0]?.significant).toBe(t.value.p < 0.05);
     expect(result.value.chart.kind).toBe("boxplots");
+    // El tamaño del efecto va con su intervalo, el mismo que da el núcleo.
+    const ci = cohensDInterval(l1, l2);
+    if (!ci.ok) throw new Error("core");
+    expect(result.value.tests[0]?.apa).toContain(
+      `95% CI [${apaNumber(ci.value.low)}, ${apaNumber(ci.value.high)}]`,
+    );
+  });
+
+  it("gives η² and V their one-sided interval, and says so", () => {
+    const anova = runAnalysis(DATA, { question: "many-groups", outcome: "lectura_ms", group: "condicion" });
+    const chi = runAnalysis(DATA, { question: "association", outcome: "grupo", second: "respuesta" });
+    if (!anova.ok || !chi.ok) throw new Error("analysis");
+    expect(anova.value.tests[0]?.apa).toMatch(/η² = [^,]+, 95% CI \(one-sided\) \[[^\]]+, 1\.00\]/);
+    expect(chi.value.tests[0]?.apa).toMatch(/V = [^,]+, 95% CI \(one-sided\) \[[^\]]+, 1\.00\]/);
   });
 
   it("drops the row with a missing value instead of inventing it", () => {

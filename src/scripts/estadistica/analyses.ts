@@ -16,6 +16,11 @@ import {
   anovaOneWay,
   chiSquareIndependence,
   cohensD,
+  cohensDInterval,
+  cohensDOneSampleInterval,
+  cohensDPairedInterval,
+  cramersVInterval,
+  etaSquaredInterval,
   cohensDOneSample,
   cohensDPaired,
   cramersV,
@@ -140,6 +145,22 @@ const unwrap = <T>(result: { ok: true; value: T } | { ok: false; error: TestErro
 
 const line = (name: string, apa: string, p: number) => ({ name, apa, significant: p < ALPHA });
 
+/**
+ * El intervalo al 95 % de un tamaño del efecto, en APA. d lleva un intervalo
+ * bilateral; η² y V, el unilateral que da `effectsize` ([límite, 1]), y se dice
+ * «one-sided» para que nadie lo lea como bilateral. Si no se pudo calcular, no
+ * se escribe nada en vez de un intervalo inventado.
+ */
+const effectCi = (
+  interval: { readonly ok: boolean; readonly value?: { readonly low: number; readonly high: number } },
+  bounded: boolean,
+): string => {
+  if (!interval.ok || interval.value === undefined) return "";
+  const format = bounded ? apaBounded : apaNumber;
+  const kind = bounded ? "95% CI (one-sided)" : "95% CI";
+  return `, ${kind} [${format(interval.value.low)}, ${format(interval.value.high)}]`;
+};
+
 /* ---------------------------------------------------------------
    Cada pregunta
    --------------------------------------------------------------- */
@@ -160,7 +181,7 @@ const oneMean = (dataset: Dataset, request: AnalysisRequest): Outcome<AnalysisRe
     value: {
       question: "one-mean",
       tests: [
-        line("t", `t(${apaDf(t.value.df ?? 0)}) = ${apaNumber(t.value.statistic)}, ${apaP(t.value.p)}, d = ${apaNumber(d.value)}`, t.value.p),
+        line("t", `t(${apaDf(t.value.df ?? 0)}) = ${apaNumber(t.value.statistic)}, ${apaP(t.value.p)}, d = ${apaNumber(d.value)}${effectCi(cohensDOneSampleInterval(values, mu), false)}`, t.value.p),
         line("wilcoxon", `V = ${apaNumber(v.value.statistic, 1)}, ${apaP(v.value.p)}`, v.value.p),
       ],
       figures: [
@@ -195,7 +216,7 @@ const twoGroups = (dataset: Dataset, request: AnalysisRequest): Outcome<Analysis
     value: {
       question: "two-groups",
       tests: [
-        line("welch", `t(${apaDf(t.value.df ?? 0)}) = ${apaNumber(t.value.statistic)}, ${apaP(t.value.p)}, d = ${apaNumber(d.value)}`, t.value.p),
+        line("welch", `t(${apaDf(t.value.df ?? 0)}) = ${apaNumber(t.value.statistic)}, ${apaP(t.value.p)}, d = ${apaNumber(d.value)}${effectCi(cohensDInterval(a.values, b.values), false)}`, t.value.p),
         line("mann-whitney", `W = ${apaNumber(u.value.statistic, 1)}, ${apaP(u.value.p)}, r = ${apaBounded(r.value)}`, u.value.p),
       ],
       figures: [
@@ -228,7 +249,7 @@ const paired = (dataset: Dataset, request: AnalysisRequest): Outcome<AnalysisRep
     value: {
       question: "paired",
       tests: [
-        line("paired-t", `t(${apaDf(t.value.df ?? 0)}) = ${apaNumber(t.value.statistic)}, ${apaP(t.value.p)}, dz = ${apaNumber(d.value)}`, t.value.p),
+        line("paired-t", `t(${apaDf(t.value.df ?? 0)}) = ${apaNumber(t.value.statistic)}, ${apaP(t.value.p)}, dz = ${apaNumber(d.value)}${effectCi(cohensDPairedInterval(x, y), false)}`, t.value.p),
         line("wilcoxon", `V = ${apaNumber(v.value.statistic, 1)}, ${apaP(v.value.p)}`, v.value.p),
       ],
       figures: [
@@ -266,7 +287,7 @@ const manyGroups = (dataset: Dataset, request: AnalysisRequest): Outcome<Analysi
       tests: [
         line(
           "anova",
-          `F(${anova.value.df}, ${anova.value.df2}) = ${apaNumber(anova.value.statistic)}, ${apaP(anova.value.p)}, η² = ${apaBounded(effects.etaSquared)}, ω² = ${apaBounded(effects.omegaSquared)}`,
+          `F(${anova.value.df}, ${anova.value.df2}) = ${apaNumber(anova.value.statistic)}, ${apaP(anova.value.p)}, η² = ${apaBounded(effects.etaSquared)}${effectCi(etaSquaredInterval(anova.value.statistic, anova.value.df ?? 0, anova.value.df2), true)}, ω² = ${apaBounded(effects.omegaSquared)}`,
           anova.value.p,
         ),
       ],
@@ -344,7 +365,7 @@ const association = (dataset: Dataset, request: AnalysisRequest): Outcome<Analys
       tests: [
         line(
           "chi-square",
-          `χ²(${chi.value.df}, N = ${n}) = ${apaNumber(chi.value.statistic)}, ${apaP(chi.value.p)}, V = ${apaBounded(v.value)}`,
+          `χ²(${chi.value.df}, N = ${n}) = ${apaNumber(chi.value.statistic)}, ${apaP(chi.value.p)}, V = ${apaBounded(v.value)}${effectCi(cramersVInterval(table), true)}`,
           chi.value.p,
         ),
       ],

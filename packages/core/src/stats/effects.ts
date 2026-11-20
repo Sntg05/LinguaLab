@@ -15,8 +15,8 @@
  * - η² y ω² del ANOVA de un factor.
  * - r biserial de rangos para Mann–Whitney: 2U/(n₁n₂) − 1.
  *
- * Solo estimaciones puntuales: los intervalos de d, η² y V necesitan las
- * distribuciones t y χ² no centrales, que este motor todavía no tiene.
+ * Aquí van las estimaciones puntuales; los intervalos de d, η² y V están en
+ * `intervals.ts`, con las distribuciones no centrales.
  */
 import { err, ok, type Result } from "../result";
 import { logGamma } from "./distributions";

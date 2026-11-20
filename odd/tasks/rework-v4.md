@@ -88,7 +88,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T6.3 | S9 | Distribuciones normal, t, χ², F (función de distribución y cuantiles) en `packages/core/src/stats/` | inline | hecha | commit de L45 |
 | T6.2 | S9 | Descriptivos: n, media, mediana, moda, varianza, desviación, cuantiles tipo 7, rango, asimetría | inline | hecha | commit de L45 |
 | T6.4 | S9 | Pruebas: t (una muestra, Welch, pareada), χ² (independencia, bondad de ajuste), Pearson, Spearman, ANOVA de un factor, Mann–Whitney, Wilcoxon | inline | hecha | commit de L46 |
-| T6.5 | S9 | Tamaños del efecto e intervalos al 95 % | inline | hecha sin intervalos de d, η² y V (L47) | commit de L47 |
+| T6.5 | S9 | Tamaños del efecto e intervalos al 95 % | inline | hecha: intervalos de d, η² y V en L52 | commits de L47 y L52 |
 | T6.6 | S9 | Regresión lineal simple y múltiple | inline | hecha | commit de L48 |
 | T6.1, T6.7, T6.8 | S9, S6 | Datos CSV/TSV, gráficos SVG y página `/estadistica` con asistente e informe APA | inline | hecha | commit de L49 |
 | T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | hecha en lo pedido por S9; quedan unidades del plan del traspaso (L43) | `c1bed4f` motor contra `irr` de R; `b5e1707` página `/cualitativo` con e2e y axe (L39) |
@@ -597,3 +597,11 @@ Se preguntan de a una, al empezar la fase que las necesita.
   (`https://www.qdasoftware.org/codebook-implementation-files`), y la regla del proyecto es no escribir un
   formato de memoria. Se usó `localStorage` y no IndexedDB: un proyecto de curso cabe de sobra y no
   necesita el puerto de almacenamiento del visor.
+- **L52 (2026-11-20). T6.5 completa: intervalos de d, η² y V.** `distributions.ts` suma la t no central
+  (serie de Lenth 1989, AS 243), la χ² y la F no centrales (mezclas de Poisson sumadas desde la moda);
+  `intervals.ts` invierte esas CDF por bisección (método de la no centralidad, Steiger 2004), con las
+  mismas convenciones que `effectsize`: d bilateral al 95 %, η² y V unilaterales al 95 % ([límite, 1]).
+  `scripts/r/build-noncentral-reference.R` escribe dos referencias: la raíz exacta con `uniroot` sobre
+  `pt`/`pf`/`pchisq` de R (se exige 1e-7) y lo que imprime `effectsize` 1.0.3 (1e-6, porque busca con
+  Nelder–Mead). Las CDF no centrales coinciden con R a 1e-9. Rojo: la prueba sin módulo. La página
+  `/estadistica` añade el intervalo a cada línea APA y marca «one-sided» los unilaterales.
