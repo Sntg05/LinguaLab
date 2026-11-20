@@ -55,6 +55,9 @@ export const initPosLab = (): void => {
     run.disabled = false;
     if (!result.ok) {
       results.hidden = true;
+      // Lo que se descargue tiene que corresponder a lo que se ve.
+      rows = [];
+      exportButton.disabled = true;
       say(strings.text("pos.status.error"), "error");
       return;
     }

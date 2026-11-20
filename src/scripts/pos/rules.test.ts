@@ -43,3 +43,28 @@ describe("resultados", () => {
     expect(uposName("ZZZ", "es")).toBe("ZZZ");
   });
 });
+
+describe("regresiones del verificador (2026-11-20)", () => {
+  it("un apóstrofo o un guion dentro de una palabra no se repite como palabra fantasma", () => {
+    expect(splitForTagging("e-mail", "es").map((token) => token.text)).toEqual(["e-mail"]);
+  });
+
+  it("en inglés, las contracciones se separan como en EWT", () => {
+    expect(splitForTagging("I don't think John's car can't go", "en").map((token) => token.text)).toEqual([
+      "I", "do", "n't", "think", "John", "'s", "car", "ca", "n't", "go",
+    ]);
+  });
+
+  it("un número con coma o punto decimal es una sola palabra", () => {
+    expect(splitForTagging("pesa 3,5 kilos", "es").map((token) => token.text)).toEqual(["pesa", "3,5", "kilos"]);
+  });
+});
+
+it("un ordinal como «3rd» o «COVID-19» queda entero", () => {
+  expect(splitForTagging("the 3rd COVID-19 wave", "en").map((token) => token.text)).toEqual([
+    "the",
+    "3rd",
+    "COVID-19",
+    "wave",
+  ]);
+});

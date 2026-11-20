@@ -68,6 +68,9 @@ export function checkUdRelations(tree: TreeNode, locale: Locale): CheckResult[] 
 /** La categoría de una etiqueta: «NP» y «N'» → «N»; «Spec» no tiene. */
 export const categoryOf = (label: string): string | null => {
   const clean = label.trim();
+  // En español la proyección máxima se escribe al revés: SN, SV, SP, SAdj.
+  const spanish = SPANISH_PHRASE.exec(clean);
+  if (spanish?.[1] !== undefined) return spanish[1];
   const phrase = /^([A-Za-z]+?)P$/.exec(clean);
   if (phrase?.[1] !== undefined) return phrase[1];
   const barred = /^([A-Za-z]+?)['′]+$/.exec(clean);
@@ -75,7 +78,13 @@ export const categoryOf = (label: string): string | null => {
   return /^[A-Za-z]+$/.test(clean) && clean !== "Spec" ? clean : null;
 };
 
-const isPhrase = (label: string): boolean => /^[A-Za-z]+?P$/.test(label.trim());
+/** «SN», «SAdj»: S seguida de la categoría con mayúscula (no «S» sola ni «Spec»). */
+const SPANISH_PHRASE = /^S([A-Z][A-Za-z]*)$/;
+
+const isPhrase = (label: string): boolean => {
+  const clean = label.trim();
+  return SPANISH_PHRASE.test(clean) || /^[A-Za-z]+?P$/.test(clean);
+};
 const isBar = (label: string): boolean => /^[A-Za-z]+?['′]+$/.test(label.trim());
 
 const walk = (node: TreeNode, visit: (node: TreeNode, parent: TreeNode | null) => void, parent: TreeNode | null = null): void => {
@@ -130,7 +139,9 @@ export function checkXbar(tree: TreeNode, locale: Locale): CheckResult[] {
     const category = categoryOf(label);
     const projects = node.children.some((child) => {
       const childLabel = child.label.trim();
-      return !child.isLeaf && categoryOf(childLabel) === category && !isPhrase(childLabel);
+      // Un SX hijo de otro de la misma categoría es una adjunción a SX, que
+      // Rección y Ligamiento admite; cuenta como la proyección que continúa.
+      return !child.isLeaf && categoryOf(childLabel) === category && (!isPhrase(childLabel) || isPhrase(label));
     });
     if (!projects) headless.push(label);
   });

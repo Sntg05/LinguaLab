@@ -79,17 +79,18 @@ export const loadProject = (storage: ProjectStorage): QualitativeProject | null 
     return null;
   }
   if (!isStored(stored)) return null;
+  // Cada parte se recupera por separado: que una no se entienda (una hoja sin
+  // códigos, un padre que ya no existe) no puede llevarse puesto el material,
+  // que es lo que más cuesta volver a escribir.
   let codebook: readonly QualitativeCode[] = [];
   if (stored.codebookCsv !== "") {
     const parsed = parseCodebookCsv(stored.codebookCsv);
-    if (!parsed.ok) return null;
-    codebook = parsed.value;
+    if (parsed.ok) codebook = parsed.value;
   }
   let sheet: CodingSheet | null = null;
   if (stored.codingCsv !== null) {
     const parsed = parseCodingCsv(stored.codingCsv);
-    if (!parsed.ok) return null;
-    sheet = parsed.value;
+    if (parsed.ok) sheet = parsed.value;
   }
   return { codebook, material: stored.material, mode: stored.mode, sheet };
 };

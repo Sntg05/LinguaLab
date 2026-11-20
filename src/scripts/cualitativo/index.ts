@@ -14,6 +14,7 @@ import {
   agreementReport,
   agreementToCsv,
   checkCodeName,
+  codeKey,
   codebookToCsv,
   codingToCsv,
   cooccurrenceToCsv,
@@ -212,7 +213,8 @@ export const initQualitativeLab = (): void => {
     codebook = codebook
       .filter((code) => code.name !== name)
       .map((code) => {
-        if (code.parent !== name) return code;
+        // Mismo criterio que el libro: «Actitud» y «actitud» son el mismo código.
+        if (code.parent === undefined || codeKey(code.parent) !== codeKey(name)) return code;
         const { parent: _removed, ...rest } = code;
         return rest;
       });

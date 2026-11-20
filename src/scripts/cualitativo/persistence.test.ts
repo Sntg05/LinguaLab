@@ -61,3 +61,29 @@ describe("el proyecto cualitativo sobrevive a recargar la página", () => {
     expect(loadProject(storage)).toBeNull();
   });
 });
+
+describe("regresiones del verificador (2026-11-20)", () => {
+  it("dividir el material antes de crear códigos no hace perder el material al recargar", () => {
+    const storage = memoryStorage();
+    saveProject(storage, {
+      codebook: [],
+      material: "Ana: hola",
+      mode: "line",
+      sheet: createCodingSheet(["Ana: hola"], []),
+    });
+    const back = loadProject(storage);
+    expect(back?.material).toBe("Ana: hola");
+  });
+
+  it("si una de las partes guardadas no se entiende, se recupera el resto", () => {
+    const storage = memoryStorage();
+    storage.setItem(
+      PROJECT_KEY,
+      JSON.stringify({ version: 1, codebookCsv: "code\nA\n", codingCsv: "esto no es una hoja", material: "texto", mode: "line" }),
+    );
+    const back = loadProject(storage);
+    expect(back?.material).toBe("texto");
+    expect(back?.codebook.map((code) => code.name)).toEqual(["A"]);
+    expect(back?.sheet).toBeNull();
+  });
+});

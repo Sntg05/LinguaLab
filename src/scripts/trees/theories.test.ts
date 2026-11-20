@@ -98,3 +98,21 @@ describe("los formalismos retirados", () => {
     expect(theories.sort()).toEqual(["constituency", "dependency", "minimalist", "morphology", "movement", "xbar"]);
   });
 });
+
+describe("regresiones del verificador (2026-11-20)", () => {
+  it("las etiquetas en español (SN, SV, SP) se leen como proyecciones", () => {
+    expect(errors("xbar", "[SN [Spec [D el]] [N' [N gato]]]")).toEqual([]);
+    expect(errors("xbar", "[SP [P' [P de] [SN [N' [N Ana]]]]]")).toEqual([]);
+    expect(errors("xbar", "[SN [V' [V lee]]]").join(" ")).toMatch(/SN/);
+  });
+
+  it("la pista que se muestra al estudiante cumple las reglas de X-barra", () => {
+    const xbar = TREE_TYPES.find((type) => type.id === "xbar");
+    expect(errors("xbar", xbar?.hint_es ?? "")).toEqual([]);
+    expect(errors("xbar", xbar?.hint_en ?? "")).toEqual([]);
+  });
+
+  it("la adjunción a SX (un SX hijo de otro de la misma categoría) no es un error", () => {
+    expect(errors("xbar", "[VP [VP [V' [V lee]]] [AdvP [Adv' [Adv hoy]]]]")).toEqual([]);
+  });
+});

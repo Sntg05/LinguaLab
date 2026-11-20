@@ -1,34 +1,35 @@
 {
   "$comment": "Generado por `npm run status:measure`. No se edita a mano: los documentos citan este archivo en vez de copiar las cifras.",
   "version": "3.1.0",
-  "commit": "c9a8b1a (con cambios sin commitear)",
-  "measuredAt": "2026-11-12",
+  "commit": "9828758 (con cambios sin commitear)",
+  "measuredAt": "2026-11-20",
   "unitTests": {
-    "tests": 1313,
-    "passed": 1313,
-    "files": 95
+    "tests": 2153,
+    "passed": 2153,
+    "files": 131
   },
   "e2e": {
-    "tests": 184,
-    "files": 10
+    "tests": 259,
+    "files": 16
   },
   "hexagon": {
-    "modules": 323,
-    "dependencies": 757
+    "modules": 445,
+    "dependencies": 1078
   },
   "lint": {
     "errors": 0,
-    "warnings": 48
+    "warnings": 59
   },
   "build": {
-    "pages": 31,
-    "files": 147,
-    "bytes": 20642891,
-    "worstPageKbGz": 46.6,
-    "worstPage": "seguridad/index.html",
+    "pages": 35,
+    "files": 172,
+    "bytes": 27623517,
+    "worstPageKbGz": 43.2,
+    "worstPage": "visualizador/index.html",
     "enginesMb": {
       "pyodide": 13.04,
       "cmudict": 3.35,
+      "pos": 4.76,
       "praatfan": 0.69
     }
   }

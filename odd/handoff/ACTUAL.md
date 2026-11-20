@@ -1,6 +1,6 @@
 ---
 status: current
-updated: 2026-11-17
+updated: 2026-11-20
 ---
 
 # Traspaso vigente: rework v4
@@ -20,11 +20,14 @@ Pega esto como primera instrucción, o síguelo tal cual:
 > fusiones a `main` sin que el dueño lo pida. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
 > Háblale en español. Al terminar, reescribe este archivo.
 
-Estado al 2026-11-17 (tarde): T5, T9 y T11 en producción (PR #22 y #24). En la rama, sin fusionar: **T7**
-(análisis cualitativo, `/cualitativo`; Log L39) y **S13** (comparar 2 o 3 documentos .docx, PDF o .txt en
-`/tools`; tareas T12–T15, Log L41–L43). Lo siguiente sin bloqueo es **T7b** (lo que falta del plan de T7,
-§6). T4, T6 y T8 esperan D3, D4 y D5; para D4 el dueño ya recibió la comparación webR / motor propio
-(§8). La parte de POS/NER de la propuesta del dueño (Log L40) no está especificada todavía.
+Estado al 2026-11-20: **todas las tareas del rework están hechas o cerradas por decisión del dueño**, en
+la rama `feat/rework-v4` y **sin fusionar a `main`** (lo último en `main` es el PR #24). Lo nuevo desde
+`main`: T7 y T7b (análisis cualitativo), S13 (comparar documentos), T6 (estadística, con intervalos de
+efecto), T4 (árboles: seis teorías validadas, ocho retiradas), T16 (etiquetado POS) y Astro 7.4.12. D3,
+D4 y D5 resueltas (§8); el diseño se queda como está. **Queda pendiente:** NER (T17, falta un corpus con
+licencia abierta), la exportación `.qdc` (esquema no verificable, L51), la evidencia humana de
+`docs/HUMAN-EVIDENCE.md` y la decisión del dueño de fusionar. La revisión de gentle-ai está **apagada**
+por pedido del dueño (L54).
 
 ## 1. Qué se está haciendo y dónde
 
@@ -191,11 +194,13 @@ desde `public/`, regla 9 de §3. Si se puede escribir en menos de ~200 líneas p
 | T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | **hecha en código**: 5.1–5.8 (ver §4 y el Log L21–L32). Pendiente humano: la persona que no conoce el visor, y la captura del espectrograma junto a Praat | nada | — |
 | T9 Contrato único de herramienta | **hecha**: ningún componente pasa de 30 líneas de script (`src/lib/architecture.test.ts`); el contrato es `safeInit("x", initX)` con `initX` en `src/scripts/<área>/` | nada | — |
 | T11 Árboles y exportaciones (S12) | **hecha**: todos los ejemplos se dibujan (`src/scripts/trees/examples.test.ts`); cada formato de cada laboratorio se valida en `e2e/arbor.spec.ts` y `e2e/exports.spec.ts` | nada | — |
-| T7 Análisis cualitativo | sin empezar | nada | grande |
-| T4 Árboles | ficha corregida; falta lo demás | D3 | grande |
-| T6 Estadística cuantitativa | sin empezar | D4 | grande |
-| T8 Diseño | sin empezar | D5 | grande |
-| T10 Cierre | sin empezar | todas | pequeña |
+| T7 Análisis cualitativo | **hecha** (T7 + T7b; `.qdc` fuera, L51) | — | — |
+| T4 Árboles | **hecha** (L53) | — | — |
+| T6 Estadística cuantitativa | **hecha** (L44–L49, L52) | — | — |
+| T8 Diseño | **cerrada sin cambios**: el dueño rechazó las tres maquetas (L54) | — | — |
+| T16 Etiquetado POS | **hecha** (L56): 97,83 % es, 94,03 % en | — | — |
+| T17 NER | pendiente | un corpus con licencia abierta verificada | grande |
+| T10 Cierre | verificador independiente corrido el 2026-11-20 (L57); falta la decisión de fusionar | el dueño | pequeña |
 
 Cada tarea grande se parte en unidades de un commit. **Cada unidad:** prueba en rojo → código → puerta →
 commit → push → fila y Log del documento ODD.
@@ -498,26 +503,17 @@ Se le pregunta **una** cuando se llega a la tarea que la necesita, con la recome
 |---|---|---|
 | D1 Dónde corren los motores | **Resuelta:** navegador; Rust a WebAssembly solo donde se mida | — |
 | D2 Lenguas del transcriptor | **Resuelta:** solo español e inglés | — |
-| D3 Formalismos de árbol sin reglas propias, y estructuras de datos | Abierta | Validar seis de verdad; retirar con explicación el resto; estructuras de datos, fuera o aparte (§6, T4) |
-| D4 Motor de estadística | Abierta; el 2026-11-17 se le dio al dueño la comparación (webR ≈ 40 MB, necesita COEP `require-corp` para su canal rápido y paquetes de `repo.r-wasm.org` salvo que se alojen aquí; motor propio liviano pero limitado a lo que se escriba) | Motor propio en TypeScript validado contra R; webR solo si se piden modelos avanzados (§6, T6) |
-| D5 Dirección de diseño | Abierta | Se decide sobre tres maquetas (§6, T8) |
+| D3 Formalismos de árbol sin reglas propias, y estructuras de datos | **Resuelta (2026-11-20):** «Validar 6, retirar resto» | — |
+| D4 Motor de estadística | **Resuelta (2026-11-17):** motor propio validado contra R | — |
+| D5 Dirección de diseño | **Resuelta (2026-11-20):** ninguna de las tres maquetas; la página queda como está | — |
 | Portada: ¿motor nuevo o tabla de Ortografía? | Abierta, menor | Dejarla como está (§6, T9) |
 | Licencia: seguir en GPL-3.0-only | Abierta, menor | No tocarla: praatfan es GPL |
 
 ## 9. Asuntos abiertos fuera del código
 
-- **Revisión de gentle-ai: el 2026-11-17 está ENCENDIDA** (`gentle-ai review mode status`: «on, decided
-  by global»), aunque este traspaso decía que el dueño la apagó el 2026-11-14 (Log L29). Ningún agente la
-  encendió en esta sesión; el dueño aceptó dos consultas de revisión ese día (L43). No se toca el
-  interruptor sin que el dueño lo pida; si quiere volver a apagarla, `gentle-ai review mode disable`.
-  Una candidata grande (T7 + S13) no cabe en el presupuesto del revisor: se revisa por unidades, en un
-  worktree en el commit de la unidad (`git worktree add --detach … <commit>`) con
-  `gentle-ai review assess --base-ref <padre> --committed-only`.
-- **Revisión de gentle-ai (histórico).** El repositorio tiene activo el desarrollo guiado por recibos: al terminar un
-  turno con commits nuevos, un gancho pide correr `gentle-ai review start …` tal como lo entrega. Si
-  devuelve una consulta de consentimiento (`consent_required`), **se le traslada completa al dueño y no se
-  responde por él**. El dueño declinó la revisión del commit `69e7cbb`. Un agente que no sea Claude Code
-  no tiene ese gancho: puede ignorar este punto.
+- **Revisión de gentle-ai: APAGADA** desde el 2026-11-20 por pedido del dueño (`gentle-ai review mode
+  disable`, global; L54). No se vuelve a encender sin que el dueño lo pida. Con el interruptor apagado, el
+  gancho no pide revisiones.
 - **Memoria Engram:** en esta máquina las escrituras fallaron. El registro completo está en el
   repositorio, no en la memoria.
 - **Límite de uso del dueño:** trabaja con un plan con tope de cinco horas y otro semanal. Conviene
@@ -525,8 +521,8 @@ Se le pregunta **una** cuando se llega a la tarea que la necesita, con la recome
   y dejar este traspaso al día antes de agotar la sesión.
 - **CI sube los rastros de Playwright** (`playwright-traces`) cuando falla la e2e: así se encontró el cuelgue a 44,1 kHz (L35). Esta máquina decodifica a 48 kHz; un defecto que solo aparece a 44,1 kHz no se ve aquí sin forzarlo.
 - **Pendientes anteriores** que siguen en `docs/HUMAN-EVIDENCE.md`: descartar en GitHub siete alertas de
-  CodeQL justificadas, proteger `main` también para administradores, subir el piso de Node para Astro
-  7.4.2 (P23), etiquetas `v3.0.0` y `v3.1.0`.
+  CodeQL justificadas, proteger `main` también para administradores, etiquetas `v3.0.0` y `v3.1.0`. (P23 quedó resuelto el
+  2026-11-20.)
 
 ## 10. Dónde está cada cosa
 

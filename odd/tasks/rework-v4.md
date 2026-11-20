@@ -105,7 +105,7 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T15 | S13 | Sección «Comparar documentos» en la estación, exportaciones leídas de vuelta, e2e y axe | inline | hecha | commit siguiente (L42) |
 | T16 | S14 | Etiquetado POS (UPOS) en la estación: perceptrón promediado entrenado con UD AnCora (es) y EWT (en), medido con sus conjuntos de prueba; modelo servido bajo demanda | inline | hecha (L56) | commit de L56 |
 | T17 | S14 | NER | — | pendiente: falta un corpus de entidades con licencia abierta verificada | — |
-| T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
+| T10 | S1–S14 | Puerta completa, verificación independiente, traspaso | verificador | hecha (L57); falta la decisión del dueño de fusionar | commit de L57 |
 
 ## Log
 
@@ -646,3 +646,17 @@ Se preguntan de a una, al empezar la fase que las necesita.
   sin módulo; las del adaptador se escribieron junto con él. La e2e encontró un choque de atributos
   (`data-pos-example` en la sección y en el botón), corregido. **NER (T17) sigue pendiente:** hace falta un
   corpus de entidades en español e inglés con licencia abierta verificada.
+- **L57 (2026-11-20). T10: verificador independiente sobre `80576a6^..9828758`.** Astro y T6.5 pasan
+  (las referencias de R se recalcularon dígito por dígito; 174 casos extra de t, χ² y F no centrales a
+  menos de 1e-9). Tres bloqueos, corregidos en una tanda con su prueba en rojo: (1) cualitativo: dividir el
+  material antes de crear códigos guardaba una hoja sin códigos que al recargar no se leía, y la página
+  borraba el proyecto entero, material incluido; ahora cada parte se recupera por separado, y quitar un
+  código padre compara sin mayúsculas, como el libro. (2) Árboles: las etiquetas en español (SN, SV, SP,
+  SAdj) no se leían como proyecciones y la pista de X-barra que ve el estudiante fallaba sus propias reglas;
+  ahora se leen, la pista es válida en los dos idiomas y la adjunción a SX (SX hijo de SX) se admite, como
+  en Rección y Ligamiento. (3) POS: el tokenizador de la estación repetía apóstrofos y guiones internos
+  como palabras fantasma; el etiquetado tiene su propio tokenizador (decimales enteros, «3rd» y
+  «COVID-19» enteros) y separa los clíticos del inglés como EWT («do» + «n't», «John» + «'s»); tras un
+  fallo, el CSV ya no exporta resultados viejos. Avisos sin corregir: V de una tabla 2×2 con N = 2 da NaN
+  (ya pasaba antes); grupos casi constantes tardan ~7 s en el intervalo de d; «Al» con mayúscula se separa
+  aunque sea nombre propio; siglas como «O.N.U.» se parten. Puerta completa y e2e en verde después.

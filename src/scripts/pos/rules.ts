@@ -5,7 +5,6 @@
    las etiquetas, y cómo se llama cada categoría para un estudiante.
    ============================================================ */
 
-import { tokenizeDetailed } from "../tools/tokenize";
 
 export interface TaggableToken {
   readonly text: string;
@@ -23,14 +22,39 @@ const SPANISH_CONTRACTIONS: Readonly<Record<string, readonly [string, string]>> 
   al: ["a", "el"],
 };
 
+/**
+ * Una palabra (con apóstrofos y guiones internos), un número con su coma o
+ * punto decimal, o un signo suelto. Se tokeniza aquí y no con la estación,
+ * porque la estación cuenta palabras y aquí cada signo es una fila etiquetada:
+ * un apóstrofo interno no puede volver a salir como palabra aparte.
+ */
+const TOKEN = /\d+(?:[.,]\d+)+|[\p{L}\p{M}\p{N}]+(?:['’-][\p{L}\p{M}\p{N}]+)*|[^\s\p{L}\p{M}\p{N}]/gu;
+
+/**
+ * EWT separa los clíticos del inglés: «don't» → «do» + «n't», «can't» →
+ * «ca» + «n't», «John's» → «John» + «'s». El modelo aprendió así.
+ */
+const splitEnglishClitic = (word: string): string[] => {
+  const normal = word.replace("’", "'");
+  const negation = /^(.+)(n't)$/i.exec(normal);
+  if (negation?.[1] !== undefined && negation[2] !== undefined) return [negation[1], negation[2]];
+  const clitic = /^(.+)('(?:s|m|re|ve|ll|d))$/i.exec(normal);
+  if (clitic?.[1] !== undefined && clitic[2] !== undefined) return [clitic[1], clitic[2]];
+  return [word];
+};
+
 export const splitForTagging = (text: string, language: string): TaggableToken[] =>
-  tokenizeDetailed(text, { includeNonWords: true }).tokens.flatMap((token): TaggableToken[] => {
-    const parts = language === "es" ? SPANISH_CONTRACTIONS[token.text.toLowerCase()] : undefined;
-    if (parts === undefined) return [{ text: token.text }];
-    const first = /^\p{Lu}/u.test(token.text) ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : parts[0];
+  [...text.matchAll(TOKEN)].flatMap(([word]): TaggableToken[] => {
+    if (language === "en") {
+      const parts = splitEnglishClitic(word);
+      return parts.length === 1 ? [{ text: word }] : parts.map((part) => ({ text: part, contraction: word }));
+    }
+    const parts = language === "es" ? SPANISH_CONTRACTIONS[word.toLowerCase()] : undefined;
+    if (parts === undefined) return [{ text: word }];
+    const first = /^\p{Lu}/u.test(word) ? parts[0].charAt(0).toUpperCase() + parts[0].slice(1) : parts[0];
     return [
-      { text: first, contraction: token.text },
-      { text: parts[1], contraction: token.text },
+      { text: first, contraction: word },
+      { text: parts[1], contraction: word },
     ];
   });
 
