@@ -46,6 +46,9 @@ validar: **Praat 6.4.06** y **R 4.3.3**.
   labs». Hecho cuando: cada ejemplo de cada tipo de árbol se dibuja sin error; cada formato que ofrece
   cada laboratorio se descarga y su contenido se valida (o se reimporta) en una prueba; un formato que no
   es lo que su nombre promete se corrige o se quita.
+- **S14 (POS/NER).** Propuesta del dueño, textual (L40): «Is it possible to implement some POS tagging, NER
+  tagging, and other NLP tools in the text editor?». Hecho cuando: la estación etiqueta un texto en español o
+  inglés con UPOS, dice su precisión medida y lo que no sabe, y exporta el resultado.
 - **S13 (comparación de documentos, 2026-11-17).** «I think we could add a feature to the website that would
   allow users to upload 2 or, at most, 3 documents in docx or PDF format with extractable text and conduct
   comparative corpus analyses» y «start the document comparison first». Hecho cuando: en la estación de
@@ -100,6 +103,8 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T13 | S13 | PDF con pdf.js (dependencia nueva: riesgo 5), rechazo de PDF sin texto | inline + verificador | hecha; verificador sin bloqueos y revisión de Gentle AI aprobada (L43) | `a609b8c` (L42) |
 | T14 | S13 | Motor de comparación: frecuencia por 10 000, G² y p, log ratio, diversidad, vocabulario compartido; contrastado con R base | inline | hecha | `e49851f`, `d86fa57` (L42) |
 | T15 | S13 | Sección «Comparar documentos» en la estación, exportaciones leídas de vuelta, e2e y axe | inline | hecha | commit siguiente (L42) |
+| T16 | S14 | Etiquetado POS (UPOS) en la estación: perceptrón promediado entrenado con UD AnCora (es) y EWT (en), medido con sus conjuntos de prueba; modelo servido bajo demanda | inline | hecha (L56) | commit de L56 |
+| T17 | S14 | NER | — | pendiente: falta un corpus de entidades con licencia abierta verificada | — |
 | T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
 
 ## Log
@@ -623,3 +628,21 @@ Se preguntan de a una, al empezar la fase que las necesita.
   3 maquetas que me presentaste, sigue con las otras tareas y deja la página como está por ahora». Se corrió
   `gentle-ai review mode disable` (queda `off` global). Las tres maquetas (Carta AFI, Espectrograma, Glosa
   interlineal) se quitaron de `docs/design/maquetas/`; siguen en el historial de git. T8 no aplica cambios.
+- **L55 (2026-11-20). S14 (POS/NER), especificada desde L40.** Se empieza por POS: categorías UPOS de
+  Universal Dependencies, que es el inventario que ya usa ArborLab. Datos: `UD_Spanish-AnCora` @
+  `3ea1f74` (CC BY 4.0) y `UD_English-EWT` @ `491be06` (CC BY-SA 4.0: el modelo derivado se publica bajo
+  CC BY-SA 4.0, compatible con la GPL-3.0 del sitio). Método: perceptrón promediado (Collins 2002),
+  entrenado con `train` y medido con `test`, que el modelo nunca ve. NER queda para después de verificar
+  un corpus de entidades con licencia abierta.
+- **L56 (2026-11-20). T16: etiquetado POS en la estación.** `packages/core/src/pos/tagger.ts`: perceptrón
+  promediado (Collins 2002) con diccionario de palabras frecuentes no ambiguas; `scripts/train-pos.mts`
+  entrena con `train` y mide con `test` de cada treebank (commits fijos, sha256 comprobado). **Precisión
+  medida:** español (AnCora) 97,83 % de 53 622 palabras, 92,74 % en desconocidas; inglés (EWT) 94,03 % de
+  25 094, 78,26 % en desconocidas; la página la cita desde `src/data/pos-accuracy.json`. Modelos en
+  `public/pos/2026.11.20/` (motor registrado según la regla 9; 4,8 MB, ~0,8 MB comprimido cada uno, bajo
+  demanda); el presupuesto de motores sube de 19 a 24 MB. «del» y «al» se separan como en AnCora y la fila
+  lo dice. Puerto `PosTaggerPort` y adaptador `createPosTagger`. Referencias verificadas: `collins2002`
+  (Crossref), `taule2008` y `silveira2014` (ACL Anthology). Rojo: las pruebas del núcleo y de `rules.ts`
+  sin módulo; las del adaptador se escribieron junto con él. La e2e encontró un choque de atributos
+  (`data-pos-example` en la sección y en el botón), corregido. **NER (T17) sigue pendiente:** hace falta un
+  corpus de entidades en español e inglés con licencia abierta verificada.

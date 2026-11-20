@@ -31,6 +31,9 @@ describe("las versiones de los motores", () => {
     const cmudict = read(`public/cmudict/${ENGINE_VERSIONS.cmudict}/README.md`);
     expect(cmudict.split("\n")[0]).toBe(`# cmudict ${ENGINE_VERSIONS.cmudict}`);
     expect(read("scripts/build-cmudict.mts")).toContain(`const VERSION = "${ENGINE_VERSIONS.cmudict}";`);
+    // Los etiquetadores POS se entrenan con scripts/train-pos.mts, que fija su versión.
+    expect(read(`public/pos/${ENGINE_VERSIONS.pos}/README.md`).split("\n")[0]).toBe(`# pos ${ENGINE_VERSIONS.pos}`);
+    expect(read("scripts/train-pos.mts")).toContain(`const VERSION = "${ENGINE_VERSIONS.pos}";`);
     const provenance = read(`public/praatfan/${ENGINE_VERSIONS.praatfan}/PROVENANCE.txt`);
     expect(provenance.split("\n")[0]).toContain(`praatfan-gpl ${ENGINE_VERSIONS.praatfan}`);
   });

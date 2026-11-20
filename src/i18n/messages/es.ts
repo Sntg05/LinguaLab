@@ -9,6 +9,7 @@ import { elanEs } from "./features/elan.es";
 import { languagesEs } from "./features/languages.es";
 import { qualitativeEs } from "./features/qualitative.es";
 import { compareEs } from "./features/compare.es";
+import { posEs } from "./features/pos.es";
 import { statisticsEs } from "./features/statistics.es";
 import { acousticEs } from "./features/acoustic.es";
 
@@ -548,6 +549,7 @@ export const es = {
   ...elanEs,
   ...qualitativeEs,
   ...compareEs,
+  ...posEs,
   ...statisticsEs,
   ...languagesEs,
   ...acousticEs,

@@ -5,6 +5,8 @@ import { acousticEn } from "./messages/features/acoustic.en";
 import { acousticEs } from "./messages/features/acoustic.es";
 import { compareEn } from "./messages/features/compare.en";
 import { compareEs } from "./messages/features/compare.es";
+import { posEn } from "./messages/features/pos.en";
+import { posEs } from "./messages/features/pos.es";
 import { elanEn } from "./messages/features/elan.en";
 import { elanEs } from "./messages/features/elan.es";
 import { experimentsEn } from "./messages/features/experiments.en";
@@ -36,6 +38,7 @@ const MODULES = [
   { name: "acoustic", prefix: "acoustic.", es: acousticEs, en: acousticEn },
   { name: "qualitative", prefix: "qual.", es: qualitativeEs, en: qualitativeEn },
   { name: "compare", prefix: "cmp.", es: compareEs, en: compareEn },
+  { name: "pos", prefix: "pos.", es: posEs, en: posEn },
   { name: "statistics", prefix: "stats.", es: statisticsEs, en: statisticsEn },
 ] as const;
 

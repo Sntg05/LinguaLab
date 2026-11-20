@@ -46,3 +46,4 @@ export type {
 } from "./phone-recognition";
 export type { TextGridCodecPort, TextGridError } from "./textgrid-codec";
 export type { ToolFilter, ToolRegistryError, ToolRegistryPort } from "./tool-registry";
+export type { PosTaggerError, PosTaggerPort } from "./pos-tagger";

@@ -423,6 +423,33 @@
       "source": "Routledge",
       "doi": "10.4324/9780203776506",
       "verifiedOn": "2026-11-20"
+    },
+    {
+      "id": "collins2002",
+      "authors": "Collins, M.",
+      "year": 2002,
+      "title": "Discriminative training methods for hidden Markov models: Theory and experiments with perceptron algorithms",
+      "source": "Proceedings of the ACL-02 Conference on Empirical Methods in Natural Language Processing (EMNLP '02), 1–8",
+      "doi": "10.3115/1118693.1118694",
+      "verifiedOn": "2026-11-20"
+    },
+    {
+      "id": "taule2008",
+      "authors": "Taulé, M., Martí, M. A., & Recasens, M.",
+      "year": 2008,
+      "title": "AnCora: Multilevel Annotated Corpora for Catalan and Spanish",
+      "source": "Proceedings of the Sixth International Conference on Language Resources and Evaluation (LREC'08)",
+      "url": "https://aclanthology.org/L08-1222/",
+      "verifiedOn": "2026-11-20"
+    },
+    {
+      "id": "silveira2014",
+      "authors": "Silveira, N., Dozat, T., de Marneffe, M.-C., Bowman, S. R., Connor, M., Bauer, J., & Manning, C.",
+      "year": 2014,
+      "title": "A Gold Standard Dependency Corpus for English",
+      "source": "Proceedings of the Ninth International Conference on Language Resources and Evaluation (LREC'14)",
+      "url": "https://aclanthology.org/L14-1067/",
+      "verifiedOn": "2026-11-20"
     }
   ]
 }

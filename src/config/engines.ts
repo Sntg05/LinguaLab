@@ -26,6 +26,7 @@ export type EngineName = keyof typeof ENGINES;
 export const ENGINE_DIRS: Readonly<Record<EngineName, string>> = {
   pyodide: "pyodide",
   cmudict: "cmudict",
+  pos: "pos",
   praatfan: "praatfan",
 };
 

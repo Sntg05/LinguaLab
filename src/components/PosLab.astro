@@ -1,0 +1,147 @@
+---
+/**
+ * PosLab: etiquetado de categorías gramaticales (UPOS) en la estación de texto
+ * (S14). La estructura y lo que se explica se decide aquí; lo que depende del
+ * texto lo escribe `src/scripts/pos/`. El modelo se descarga al etiquetar.
+ */
+import ACCURACY from "../data/pos-accuracy.json";
+import { t, type Locale } from "../i18n";
+import { POS_STRING_KEYS } from "../scripts/pos/strings";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const runtimeStrings = Object.fromEntries(POS_STRING_KEYS.map((key) => [key, t(locale, key)]));
+const percent = (value: number): string =>
+  new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(value * 100);
+const limits = t(locale, "pos.limits")
+  .replace("{es}", percent(ACCURACY.es.accuracy))
+  .replace("{en}", percent(ACCURACY.en.accuracy));
+---
+
+<section
+  class="section"
+  data-pos
+  data-pos-strings={JSON.stringify(runtimeStrings)}
+  data-pos-example-text={t(locale, "pos.exampleText")}
+  data-pos-accuracy-es={String(ACCURACY.es.accuracy)}
+  data-pos-accuracy-en={String(ACCURACY.en.accuracy)}
+  aria-labelledby="pos-title"
+>
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{t(locale, "pos.eyebrow")}</span>
+      <h2 id="pos-title">{t(locale, "pos.title")}</h2>
+      <p class="u-lead">{t(locale, "pos.sub")}</p>
+      <p class="callout">{t(locale, "pos.local")}</p>
+      <p class="callout callout--warn">{limits}</p>
+    </div>
+
+    <div class="pos">
+      <label class="pos__field">
+        <span>{t(locale, "pos.text")}</span>
+        <textarea data-pos-text rows="4" spellcheck="false"></textarea>
+      </label>
+      <div class="cluster">
+        <label class="pos__inline">
+          <span>{t(locale, "pos.language")}</span>
+          <select data-pos-lang>
+            <option value="es" selected={locale === "es"}>Español</option>
+            <option value="en" selected={locale === "en"}>English</option>
+          </select>
+        </label>
+        <button class="btn btn--primary" type="button" data-pos-run>{t(locale, "pos.run")}</button>
+        <button class="btn btn--quiet" type="button" data-pos-example>{t(locale, "pos.example")}</button>
+      </div>
+      <p class="pos__status" data-pos-status role="status" aria-live="polite" data-state="idle"></p>
+
+      <div class="pos__results" data-pos-results hidden>
+        <div>
+          <h3 id="pos-tagged-title">{t(locale, "pos.tagged")}</h3>
+          <div class="table-scroll">
+            <table class="pos__table" aria-labelledby="pos-tagged-title">
+              <thead><tr><th scope="col">{t(locale, "pos.col.word")}</th><th scope="col">{t(locale, "pos.col.tag")}</th></tr></thead>
+              <tbody data-pos-tagged></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3 id="pos-summary-title">{t(locale, "pos.summary")}</h3>
+          <div class="table-scroll">
+            <table class="pos__table" aria-labelledby="pos-summary-title">
+              <thead><tr><th scope="col">{t(locale, "pos.col.tag")}</th><th scope="col">{t(locale, "pos.col.count")}</th><th scope="col">{t(locale, "pos.col.share")}</th></tr></thead>
+              <tbody data-pos-summary></tbody>
+            </table>
+          </div>
+          <button class="btn btn--quiet" type="button" data-pos-export disabled>{t(locale, "pos.exportCsv")}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import "../scripts/pos/index";
+</script>
+
+<style>
+  .pos {
+    display: grid;
+    gap: var(--space-s);
+    max-width: 62rem;
+  }
+
+  .pos__field,
+  .pos__inline {
+    display: grid;
+    gap: var(--space-2xs);
+    font-weight: 600;
+  }
+
+  .pos__inline {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+
+  .pos__status {
+    margin: 0;
+    min-height: 1.4em;
+    color: var(--ink-muted);
+  }
+
+  .pos__status[data-state="error"] {
+    color: var(--warn);
+  }
+
+  .pos__results {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  @media (width >= 60rem) {
+    .pos__results {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+  }
+
+  .pos__table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .pos__table th,
+  .pos__table td {
+    text-align: left;
+    padding: var(--space-3xs, 0.25rem) var(--space-2xs);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .pos__results h3 {
+    margin: 0 0 var(--space-2xs);
+    font-size: var(--step-0);
+  }
+</style>

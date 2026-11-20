@@ -1,0 +1,13 @@
+{
+  "version": "2026.11.20",
+  "es": {
+    "tokens": 53622,
+    "accuracy": 0.9783,
+    "unknownAccuracy": 0.9274
+  },
+  "en": {
+    "tokens": 25094,
+    "accuracy": 0.9403,
+    "unknownAccuracy": 0.7826
+  }
+}

@@ -43,6 +43,7 @@ import {
 import {
   type PersistenceStatus,
   createNativePhonemizer,
+  createPosTagger,
   createIndexedDbOrthographyRepository,
   createPraatfanAcousticAnalysis,
   createPyodideElanCodec,
@@ -104,6 +105,13 @@ const registry = createStaticToolRegistry(TOOLS);
 const phonemizer = createNativePhonemizer({
   dictionaryUrl: `${enginePath("cmudict")}/en-us.tsv`,
 });
+
+/**
+ * El etiquetador POS de la estacion de texto. Como el fonemizador, pide sus
+ * modelos (`public/pos/<version>/`, los genera `scripts/train-pos.mts`) al
+ * propio sitio y solo la primera vez que alguien etiqueta en esa lengua.
+ */
+const posTagger = createPosTagger({ baseUrl: enginePath("pos") });
 
 /**
  * El codec ELAN (Pyodide + pympi-ling) del conversor del segmento 9.
@@ -224,6 +232,8 @@ export interface LinguaLab {
    * `@lingualab/adapters`.
    */
   readonly phonemizer: ReturnType<typeof createNativePhonemizer>;
+  /** Categorias gramaticales (UPOS) de palabras ya separadas. */
+  readonly posTagger: ReturnType<typeof createPosTagger>;
   /**
    * El codec ELAN, y no solo su puerto.
    *
@@ -271,6 +281,7 @@ export const lingualab: LinguaLab = {
   listTools: createListTools({ registry }),
   phonemizeText,
   phonemizer,
+  posTagger,
   elan,
   acoustic,
   createExperimentRunner,

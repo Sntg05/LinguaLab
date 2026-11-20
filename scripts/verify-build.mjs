@@ -422,9 +422,9 @@ for (const copies of byDigest.values()) {
 // fetched only when a tool runs, so they never counted anywhere and could grow
 // without anyone seeing it. They get their own ceiling, a little above what
 // ships today: raising it is a decision, not a side effect.
-const ENGINE_BUDGET_BYTES = 19 * 1024 * 1024;
+const ENGINE_BUDGET_BYTES = 24 * 1024 * 1024;
 let engineBytes = 0;
-for (const engine of ["pyodide", "cmudict", "praatfan"]) {
+for (const engine of ["pyodide", "cmudict", "pos", "praatfan"]) {
   const dir = join(DIST, engine);
   if (!existsSync(dir)) continue;
   const bytes = allFiles(dir).reduce((sum, file) => sum + statSync(file).size, 0);
