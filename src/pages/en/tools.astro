@@ -1,6 +1,8 @@
 ---
 import TheoryNote from "../../components/TheoryNote.astro";
 import TextStation from "../../components/TextStation.astro";
+import DocumentCompare from "../../components/DocumentCompare.astro";
+import PosLab from "../../components/PosLab.astro";
 import Base from "../../layouts/Base.astro";
 ---
 
@@ -11,5 +13,7 @@ import Base from "../../layouts/Base.astro";
   description="Frequency, dispersion, collocations with log-Dice and PMI, KWIC concordances, lexical statistics and readability. All local, in your browser."
 >
   <TextStation locale="en" />
+  <DocumentCompare locale="en" />
+  <PosLab locale="en" />
   <TheoryNote locale="en" tools={["tools"]} />
 </Base>

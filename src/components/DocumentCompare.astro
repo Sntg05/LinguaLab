@@ -1,0 +1,140 @@
+---
+/**
+ * DocumentCompare: dos o tres documentos (.docx, PDF o .txt) comparados con
+ * las medidas de la estación textual (S13).
+ *
+ * Aquí se decide la estructura y lo que se explica de cada medida; lo que
+ * depende de los documentos lo escribe `src/scripts/comparar/` sobre los
+ * ganchos `data-cmp-*`, siempre como nodos de texto. El lector de documentos
+ * (y pdf.js, con el primer PDF) se descarga al cargar el primer archivo.
+ */
+import { t, type Locale } from "../i18n";
+import { COMPARE_STRING_KEYS } from "../scripts/comparar/strings";
+import "../styles/features/compare.css";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const runtimeStrings = Object.fromEntries(COMPARE_STRING_KEYS.map((key) => [key, t(locale, key)]));
+/** Niveles de significación, con el G² crítico de cada uno (qchisq(1 − α, 1) en R). */
+const ALPHAS = [
+  { value: "0.05", label: "0,05 · G² > 3,84" },
+  { value: "0.01", label: "0,01 · G² > 6,63" },
+  { value: "0.001", label: "0,001 · G² > 10,83" },
+  { value: "0.0001", label: "0,0001 · G² > 15,14" },
+];
+const alphaLabel = (label: string): string => (locale === "en" ? label.replaceAll(",", ".") : label);
+---
+
+<section class="section" data-cmp data-cmp-strings={JSON.stringify(runtimeStrings)} aria-labelledby="cmp-title">
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{t(locale, "cmp.eyebrow")}</span>
+      <h2 id="cmp-title">{t(locale, "cmp.title")}</h2>
+      <p class="u-lead">{t(locale, "cmp.sub")}</p>
+      <p class="callout">{t(locale, "cmp.local")}</p>
+      <p class="callout callout--warn">{t(locale, "cmp.limits")}</p>
+    </div>
+
+    <div class="cmp">
+      <section class="cmp-panel" aria-labelledby="cmp-load-title">
+        <h3 class="cmp-panel__title" id="cmp-load-title">{t(locale, "cmp.load.title")}</h3>
+        <label class="btn btn--primary u-file">
+          {t(locale, "cmp.load.label")}
+          <input
+            class="u-visually-hidden"
+            type="file"
+            multiple
+            accept=".docx,.pdf,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+            data-cmp-files
+          />
+        </label>
+        <p class="faint" data-cmp-empty>{t(locale, "cmp.load.empty")}</p>
+        <ul class="cmp-docs" data-cmp-list></ul>
+        <p class="cmp-status" data-cmp-status role="status" aria-live="polite" data-state="idle">
+          {t(locale, "cmp.status.ready")}
+        </p>
+      </section>
+
+      <section class="cmp-panel" aria-labelledby="cmp-settings-title">
+        <h3 class="cmp-panel__title" id="cmp-settings-title">{t(locale, "cmp.settings.title")}</h3>
+        <div class="cmp-row">
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "cmp.settings.stopwords")}</span>
+            <select data-cmp-stopwords>
+              <option value="es" selected={locale === "es"}>{t(locale, "cmp.settings.stopwords.es")}</option>
+              <option value="en" selected={locale === "en"}>{t(locale, "cmp.settings.stopwords.en")}</option>
+              <option value="both">{t(locale, "cmp.settings.stopwords.both")}</option>
+              <option value="none">{t(locale, "cmp.settings.stopwords.none")}</option>
+            </select>
+          </label>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "cmp.settings.minCount")}</span>
+            <input type="number" min="1" max="100" value="3" class="u-w-5" data-cmp-min />
+          </label>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "cmp.settings.alpha")}</span>
+            <select data-cmp-alpha>
+              {ALPHAS.map((alpha) => <option value={alpha.value}>{alphaLabel(alpha.label)}</option>)}
+            </select>
+          </label>
+          <button class="btn btn--primary" type="button" data-cmp-run disabled>{t(locale, "cmp.run")}</button>
+        </div>
+        <p class="faint">{t(locale, "cmp.settings.alphaNote")}</p>
+      </section>
+
+      <div class="cmp" data-cmp-results hidden>
+        <section class="cmp-panel" aria-labelledby="cmp-profile-title">
+          <h3 class="cmp-panel__title" id="cmp-profile-title">{t(locale, "cmp.profile.title")}</h3>
+          <p class="faint">{t(locale, "cmp.profile.note")}</p>
+          <div data-cmp-profile></div>
+        </section>
+
+        <section class="cmp-panel" aria-labelledby="cmp-keywords-title">
+          <h3 class="cmp-panel__title" id="cmp-keywords-title">{t(locale, "cmp.keywords.title")}</h3>
+          <p class="faint">{t(locale, "cmp.keywords.note")}</p>
+          <div class="cmp" data-cmp-keywords></div>
+        </section>
+
+        <section class="cmp-panel" aria-labelledby="cmp-vocabulary-title">
+          <h3 class="cmp-panel__title" id="cmp-vocabulary-title">{t(locale, "cmp.vocabulary.title")}</h3>
+          <p class="faint">{t(locale, "cmp.vocabulary.note")}</p>
+          <div class="cmp" data-cmp-vocabulary></div>
+        </section>
+
+        <section class="cmp-panel" aria-labelledby="cmp-frequency-title">
+          <h3 class="cmp-panel__title" id="cmp-frequency-title">{t(locale, "cmp.frequency.title")}</h3>
+          <p class="faint">{t(locale, "cmp.frequency.note")}</p>
+          <div data-cmp-frequency></div>
+        </section>
+
+        <section class="cmp-panel" aria-labelledby="cmp-kwic-title">
+          <h3 class="cmp-panel__title" id="cmp-kwic-title">{t(locale, "cmp.kwic.title")}</h3>
+          <form class="cmp-row" data-cmp-kwic>
+            <label class="field field--inline">
+              <span class="field__label">{t(locale, "cmp.kwic.label")}</span>
+              <input type="text" autocomplete="off" data-cmp-kwic-word />
+            </label>
+            <button class="btn btn--quiet" type="submit">{t(locale, "cmp.kwic.run")}</button>
+          </form>
+          <div class="cmp" data-cmp-kwic-results></div>
+        </section>
+
+        <section class="cmp-panel" aria-labelledby="cmp-export-title">
+          <h3 class="cmp-panel__title" id="cmp-export-title">{t(locale, "cmp.export.title")}</h3>
+          <div class="cmp-row">
+            <button class="btn btn--quiet" type="button" data-cmp-export="keywords" disabled>{t(locale, "cmp.export.keywords")}</button>
+            <button class="btn btn--quiet" type="button" data-cmp-export="frequency" disabled>{t(locale, "cmp.export.frequency")}</button>
+            <button class="btn btn--quiet" type="button" data-cmp-export="profile" disabled>{t(locale, "cmp.export.profile")}</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import "../scripts/comparar/index";
+</script>

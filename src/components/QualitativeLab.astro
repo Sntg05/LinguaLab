@@ -1,0 +1,287 @@
+---
+/**
+ * QualitativeLab: libro de códigos, codificación por segmentos, frecuencias,
+ * coocurrencias y acuerdo entre codificadores.
+ *
+ * Aquí se decide la estructura: los cinco pasos, los dos avisos (el material no
+ * sale del navegador; se codifican segmentos completos) y las explicaciones de
+ * cada cifra. Lo que depende del material lo escribe `src/scripts/cualitativo/`
+ * sobre los ganchos `data-qual-*`, siempre como nodos de texto.
+ *
+ * Las frases que solo existen en tiempo de ejecución viajan ya traducidas en
+ * `data-qual-strings` (ADR 0004).
+ */
+import { t, type Locale } from "../i18n";
+/**
+ * Colores con nombre en vez de un selector libre: el nombre se lee en voz alta y
+ * los seis se distinguen entre sí con contraste suficiente sobre el fondo claro
+ * y el oscuro. El color nunca es la única marca (WCAG 1.4.1): el nombre del
+ * código siempre está escrito al lado.
+ */
+const COLORS = [
+  { value: "", label: "qual.color.none" },
+  { value: "#1b6fb3", label: "qual.color.blue" },
+  { value: "#1b7f5a", label: "qual.color.green" },
+  { value: "#b35c1b", label: "qual.color.orange" },
+  { value: "#9b2c6b", label: "qual.color.magenta" },
+  { value: "#6b4bb3", label: "qual.color.purple" },
+  { value: "#8a7a12", label: "qual.color.olive" },
+] as const;
+import { QUALITATIVE_STRING_KEYS } from "../scripts/cualitativo/strings";
+import "../styles/features/qualitative.css";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+
+const runtimeStrings = Object.fromEntries(
+  QUALITATIVE_STRING_KEYS.map((key) => [key, t(locale, key)]),
+);
+---
+
+<section class="section" data-qual data-qual-strings={JSON.stringify(runtimeStrings)}>
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{t(locale, "qual.eyebrow")}</span>
+      <h1>{t(locale, "qual.title")}</h1>
+      <p class="u-lead">{t(locale, "qual.sub")}</p>
+      <p class="callout">{t(locale, "qual.local")}</p>
+      <p class="callout callout--warn">{t(locale, "qual.experimental")}</p>
+    </div>
+
+    <div class="qual">
+      <div class="qual-row">
+        <button class="btn btn--primary" type="button" data-qual-example>
+          {t(locale, "qual.example.button")}
+        </button>
+        <p class="qual-hint">{t(locale, "qual.example.note")}</p>
+        <button class="btn btn--quiet" type="button" data-qual-reset>
+          {t(locale, "qual.reset.button")}
+        </button>
+      </div>
+      <p class="qual-hint">{t(locale, "qual.saved.note")}</p>
+      <p class="qual-status" data-qual-status role="status" aria-live="polite" data-state="idle">
+        {t(locale, "qual.status.ready")}
+      </p>
+
+      <!-- -------------------------- 1. Libro de códigos -------------------------- -->
+      <section class="qual-panel" aria-labelledby="qual-codebook-title">
+        <h2 class="qual-panel__title" id="qual-codebook-title">{t(locale, "qual.codebook.title")}</h2>
+        <p class="qual-hint">{t(locale, "qual.codebook.note")}</p>
+
+        <form class="qual-form" data-qual-code-form novalidate>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.name")}
+            <input name="name" type="text" autocomplete="off" required />
+          </label>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.definition")}
+            <textarea name="definition" rows="2"></textarea>
+          </label>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.include")}
+            <input name="include" type="text" autocomplete="off" />
+          </label>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.exclude")}
+            <input name="exclude" type="text" autocomplete="off" />
+          </label>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.example")}
+            <input name="example" type="text" autocomplete="off" />
+          </label>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.parent")}
+            <select name="parent" data-qual-parent>
+              <option value="">{t(locale, "qual.codebook.noParent")}</option>
+            </select>
+          </label>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.color")}
+            <select name="color">
+              {COLORS.map((color) => <option value={color.value}>{t(locale, color.label)}</option>)}
+            </select>
+          </label>
+          <label class="qual-field">
+            {t(locale, "qual.codebook.memo")}
+            <textarea name="memo" rows="2"></textarea>
+          </label>
+          <div class="qual-row">
+            <button class="btn btn--primary" type="submit">{t(locale, "qual.codebook.add")}</button>
+          </div>
+        </form>
+
+        <p class="qual-hint" data-qual-codebook-empty>{t(locale, "qual.codebook.empty")}</p>
+        <div class="table-scroll" data-qual-codebook-box hidden>
+          <table class="qual-table">
+            <thead>
+              <tr>
+                <th scope="col">{t(locale, "qual.col.code")}</th>
+                <th scope="col">{t(locale, "qual.col.definition")}</th>
+                <th scope="col">{t(locale, "qual.col.actions")}</th>
+              </tr>
+            </thead>
+            <tbody data-qual-codebook></tbody>
+          </table>
+        </div>
+
+        <div class="qual-row">
+          <label class="btn btn--quiet u-file">
+            {t(locale, "qual.codebook.import")}
+            <input
+              class="u-visually-hidden"
+              type="file"
+              accept=".csv,text/csv"
+              data-qual-codebook-file
+            />
+          </label>
+          <button class="btn btn--quiet" type="button" data-qual-export="codebook" disabled>
+            {t(locale, "qual.codebook.export")}
+          </button>
+        </div>
+        <p class="qual-hint">
+          <strong>{t(locale, "qual.codebook.columns")}:</strong>
+          <span class="u-mono">code, definition, include, exclude, example</span>
+        </p>
+      </section>
+
+      <!-- ------------------------------ 2. Material ------------------------------ -->
+      <section class="qual-panel" aria-labelledby="qual-material-title">
+        <h2 class="qual-panel__title" id="qual-material-title">{t(locale, "qual.material.title")}</h2>
+        <p class="qual-hint">{t(locale, "qual.material.note")}</p>
+
+        <label class="qual-field" for="qual-material">{t(locale, "qual.material.paste")}</label>
+        <textarea
+          class="qual-material"
+          id="qual-material"
+          data-qual-material
+          rows="8"
+          dir="auto"
+          placeholder={t(locale, "qual.material.pasteHint")}></textarea>
+
+        <div class="qual-row">
+          <label class="btn btn--quiet u-file">
+            {t(locale, "qual.material.file")}
+            <input class="u-visually-hidden" type="file" accept=".txt,text/plain" data-qual-material-file />
+          </label>
+        </div>
+
+        <fieldset class="qual-fieldset">
+          <legend>{t(locale, "qual.material.mode")}</legend>
+          <label><input type="radio" name="qual-mode" value="line" checked /> {t(locale, "qual.material.line")}</label>
+          <label><input type="radio" name="qual-mode" value="paragraph" /> {t(locale, "qual.material.paragraph")}</label>
+        </fieldset>
+
+        <div class="qual-row">
+          <button class="btn btn--primary" type="button" data-qual-split>
+            {t(locale, "qual.material.split")}
+          </button>
+          <label class="btn btn--quiet u-file">
+            {t(locale, "qual.material.resume")}
+            <input class="u-visually-hidden" type="file" accept=".csv,text/csv" data-qual-resume />
+          </label>
+        </div>
+        <p class="qual-hint">{t(locale, "qual.material.resumeNote")}</p>
+      </section>
+
+      <!-- ------------------------------ 3. Codificar ----------------------------- -->
+      <section class="qual-panel" aria-labelledby="qual-coding-title">
+        <h2 class="qual-panel__title" id="qual-coding-title">{t(locale, "qual.coding.title")}</h2>
+        <p class="qual-hint">{t(locale, "qual.coding.note")}</p>
+        <p class="qual-hint" data-qual-coding-empty>{t(locale, "qual.coding.empty")}</p>
+        <div data-qual-coding-box hidden>
+          <div class="table-scroll">
+            <table class="qual-table" data-qual-coding aria-labelledby="qual-coding-title"></table>
+          </div>
+        </div>
+        <div class="qual-row">
+          <button class="btn btn--quiet" type="button" data-qual-export="coding" disabled>
+            {t(locale, "qual.coding.export")}
+          </button>
+        </div>
+      </section>
+
+      <!-- ----------------------- 4. Frecuencias y coocurrencias ------------------ -->
+      <section class="qual-panel" aria-labelledby="qual-results-title">
+        <h2 class="qual-panel__title" id="qual-results-title">{t(locale, "qual.results.title")}</h2>
+        <p class="qual-hint">{t(locale, "qual.results.note")}</p>
+        <p class="qual-hint" data-qual-results-empty>{t(locale, "qual.results.empty")}</p>
+        <div class="qual" data-qual-results-box hidden>
+          <h3 class="qual-panel__subtitle" id="qual-frequencies-title">{t(locale, "qual.results.frequencies")}</h3>
+          <div class="table-scroll">
+            <table class="qual-table" data-qual-frequencies aria-labelledby="qual-frequencies-title"></table>
+          </div>
+          <h3 class="qual-panel__subtitle" id="qual-cooccurrence-title">{t(locale, "qual.results.cooccurrence")}</h3>
+          <div class="table-scroll">
+            <table class="qual-table" data-qual-cooccurrence aria-labelledby="qual-cooccurrence-title"></table>
+          </div>
+          <h3 class="qual-panel__subtitle" id="qual-retrieve-title">{t(locale, "qual.retrieve.title")}</h3>
+          <p class="qual-hint">{t(locale, "qual.retrieve.note")}</p>
+          <label class="qual-field">
+            {t(locale, "qual.retrieve.label")}
+            <select data-qual-retrieve></select>
+          </label>
+          <p class="qual-hint" data-qual-retrieve-count role="status" aria-live="polite"></p>
+          <ol class="qual-retrieved" data-qual-retrieve-list aria-labelledby="qual-retrieve-title"></ol>
+        </div>
+        <div class="qual-row">
+          <button class="btn btn--quiet" type="button" data-qual-export="frequencies" disabled>
+            {t(locale, "qual.results.exportFrequencies")}
+          </button>
+          <button class="btn btn--quiet" type="button" data-qual-export="cooccurrence" disabled>
+            {t(locale, "qual.results.exportCooccurrence")}
+          </button>
+        </div>
+      </section>
+
+      <!-- ------------------------------- 5. Acuerdo ------------------------------ -->
+      <section class="qual-panel" aria-labelledby="qual-agreement-title">
+        <h2 class="qual-panel__title" id="qual-agreement-title">{t(locale, "qual.agreement.title")}</h2>
+        <p class="qual-hint">{t(locale, "qual.agreement.note")}</p>
+
+        <div class="qual-row">
+          <label class="btn btn--quiet u-file">
+            {t(locale, "qual.agreement.files")}
+            <input class="u-visually-hidden" type="file" accept=".csv,text/csv" multiple data-qual-others />
+          </label>
+          <button class="btn btn--quiet btn--sm" type="button" data-qual-clear-others>
+            {t(locale, "qual.agreement.clear")}
+          </button>
+        </div>
+        <ul class="qual-list" data-qual-others-list aria-live="polite"></ul>
+        <label class="qual-row">
+          <input type="checkbox" checked data-qual-include-mine />
+          {t(locale, "qual.agreement.includeMine")}
+        </label>
+        <div class="qual-row">
+          <button class="btn btn--primary" type="button" data-qual-agree>
+            {t(locale, "qual.agreement.run")}
+          </button>
+          <button class="btn btn--quiet" type="button" data-qual-export="agreement" disabled>
+            {t(locale, "qual.agreement.export")}
+          </button>
+        </div>
+
+        <div class="qual" data-qual-agreement-box hidden>
+          <div class="table-scroll">
+            <table class="qual-table" data-qual-agreement aria-labelledby="qual-agreement-title"></table>
+          </div>
+          <p class="qual-hint">{t(locale, "qual.notComputableNote")}</p>
+        </div>
+
+        <ul class="qual-list qual-hint">
+          <li>{t(locale, "qual.agreement.readPercent")}</li>
+          <li>{t(locale, "qual.agreement.readKappa")}</li>
+          <li>{t(locale, "qual.agreement.readAlpha")}</li>
+          <li>{t(locale, "qual.agreement.validated")}</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+</section>
+
+<script>
+  import "../scripts/cualitativo/index";
+</script>

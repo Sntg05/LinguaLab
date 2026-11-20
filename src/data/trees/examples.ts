@@ -22,18 +22,18 @@ export interface TreeExample {
   };
 }
 
-/** Keyed by ArborLab tree type id (23 types). */
+/** Keyed by ArborLab tree type id (15 types). */
 export const TREE_EXAMPLES: Readonly<Record<string, readonly TreeExample[]>> = {
   "dependency": [
     {
       "name_es": "Gato saltando (proyectivo)",
       "name_en": "Jumping cat (projective)",
-      "text": "1 El 2 det DET\n2 gato 3 nsubj NN\n3 saltó 0 root VBD\n4 la 5 det DT\n5 cerca 3 obl NN"
+      "text": "1 El 2 det DET\n2 gato 3 nsubj NN\n3 saltó 0 root VBD\n4 la 5 det DT\n5 cerca 3 obj NN"
     },
     {
-      "name_es": "Arcos cruzados",
-      "name_en": "Crossing arcs",
-      "text": "1 Una 2 det DT\n2 audiencia 4 nsubj NN\n3 hoy 4 advmod RB\n4 está 0 root VBD\n5 programada 4 acl VBN\n6 sobre 7 case IN\n7 el 8 det DT\n8 tema 5 obl NN"
+      "name_es": "Arcos cruzados (no proyectivo)",
+      "name_en": "Crossing arcs (non-projective)",
+      "text": "1 A 2 det DT\n2 hearing 4 nsubj:pass NN\n3 is 4 aux:pass VBZ\n4 scheduled 0 root VBN\n5 on 7 case IN\n6 the 7 det DT\n7 issue 2 nmod NN\n8 today 4 obl:tmod NN"
     },
     {
       "name_es": "Frase en inglés (UD)",
@@ -75,19 +75,19 @@ export const TREE_EXAMPLES: Readonly<Record<string, readonly TreeExample[]>> = {
   ],
   "xbar": [
     {
-      "name_es": "X-bar binario",
-      "name_en": "Binary X-bar",
-      "text": "[TP [Spec [DP the] [D student]] [T' [T Ø] [VP [V read] [CP [C Ø] [IP [DP a] [N book]]]]]]"
+      "name_es": "Sintagma nominal: especificador y núcleo",
+      "name_en": "Noun phrase: specifier and head",
+      "text": "[NP [Spec [D el]] [N' [N gato]]]"
     },
     {
-      "name_es": "Complemento vs adjunto",
-      "name_en": "Complement vs adjunct",
-      "text": "[NP [Spec [Det the]] [N' [N student] [N' [PP of physics] [PP with long hair]]]]"
+      "name_es": "Complemento (hermano de N) y adjunto (hermano de N′)",
+      "name_en": "Complement (sister of N) and adjunct (sister of N′)",
+      "text": "[NP [Spec [D the]] [N' [N' [N student] [PP [P' [P of] [NP [N' [N physics]]]]]] [PP [P' [P with] [NP [N' [N hair]]]]]]]"
     },
     {
-      "name_es": "Especificador y núcleo",
-      "name_en": "Specifier and head",
-      "text": "[VP [Spec [DP María]] [V' [V' [V lee] [DP un libro]] [AdvP often]]]"
+      "name_es": "Oración: TP con sujeto en el especificador",
+      "name_en": "Clause: TP with the subject in the specifier",
+      "text": "[TP [Spec [NP [N' [N María]]]] [T' [T Ø] [VP [V' [V' [V lee] [NP [N' [N novelas]]]] [AdvP [Adv' [Adv siempre]]]]]]]"
     }
   ],
   "movement": [
@@ -124,18 +124,6 @@ export const TREE_EXAMPLES: Readonly<Record<string, readonly TreeExample[]>> = {
       "text": "[CP [Spec what#high] [C' [C Ø] [TP [Spec you] [T' [T will] [vP [Spec t] [v' buy [DP what#low]]]]]]]\nmove: low -> high \"internal Merge\""
     }
   ],
-  "cartography": [
-    {
-      "name_es": "Periferia izquierda (Rizzi)",
-      "name_en": "Left periphery (Rizzi)",
-      "text": "[ForceP [Force Ø] [TopP [Top [DP that#top]] [FocP [Foc Ø] [FinP [Fin [TP ...]]]]]]"
-    },
-    {
-      "name_es": "Orden de adverbios (Cinque)",
-      "name_en": "Adverb order (Cinque)",
-      "text": "[AspP [Adv frankly] [AspP [Adv fortunately] [AspP [Adv probably] [VP ...]]]]"
-    }
-  ],
   "morphology": [
     {
       "name_es": "unlockable — lectura 1",
@@ -151,85 +139,6 @@ export const TREE_EXAMPLES: Readonly<Record<string, readonly TreeExample[]>> = {
       "name_es": "Compuesto español",
       "name_en": "Spanish compound",
       "text": "[Palabra [Base [N saca] [N mochas]] [Suf -s]]"
-    }
-  ],
-  "semantic": [
-    {
-      "name_es": "Tipos e,t",
-      "name_en": "Types e,t",
-      "text": "[S [NP every [type ⟨⟨e,t⟩,t⟩]] [VP sleeps [type ⟨e,t⟩]]]"
-    },
-    {
-      "name_es": "Elevación de cuantificador",
-      "name_en": "Quantifier raising",
-      "text": "[TP [DP every student#qr] [TP [DP t#tr] [T' [T Ø] [VP sleeps]]]]\nmove: tr -> qr \"QR\""
-    }
-  ],
-  "tag": [
-    {
-      "name_es": "Árbol inicial (α)",
-      "name_en": "Initial tree (α)",
-      "text": "[α [S [NP↓] [VP [V sleep]]]]"
-    },
-    {
-      "name_es": "Árbol auxiliar (β) con pie",
-      "name_en": "Auxiliary tree (β) with foot",
-      "text": "[β [S* [AdjP often] [S*]]]"
-    }
-  ],
-  "lfg": [
-    {
-      "name_es": "c-estructura",
-      "name_en": "c-structure",
-      "text": "[IP [NP María] [I' [I Ø] [VP [V lee] [NP un libro]]]]"
-    },
-    {
-      "name_es": "f-estructura compartida",
-      "name_en": "Shared f-structure",
-      "text": "[IP [NP Sara] [I' [I wants] [CP [IP [NP PRO] [I' [I to] [VP leave]]]]]]"
-    }
-  ],
-  "hpsg": [
-    {
-      "name_es": "Entrada léxica",
-      "name_en": "Lexical entry",
-      "text": "[Sign [PHON read] [HEAD verb] [SUBJ ⟨[SPEC ⟨DP⟩]]⟩ [COMPS ⟨[NP obj]⟩]]"
-    },
-    {
-      "name_es": "Principio de rasgos de cabeza",
-      "name_en": "Head Feature Principle",
-      "text": "[S [HEAD [1]] [ daughters [HEAD [1]] ]]"
-    }
-  ],
-  "ccg": [
-    {
-      "name_es": "Derivación con coordinación",
-      "name_en": "Coordination derivation",
-      "text": "[conj [S/NP cooked Ali] [conj [S/NP ate Sara]]]"
-    }
-  ],
-  "reedkellogg": [
-    {
-      "name_es": "Sujeto y predicado",
-      "name_en": "Subject and predicate",
-      "text": "[Línea [Suj gato] [Pred [V saltó] [O cerca]]]"
-    },
-    {
-      "name_es": "Sujeto compuesto",
-      "name_en": "Compound subject",
-      "text": "[Línea [Suj [y gato perro]] [Pred [V corrió]]]"
-    }
-  ],
-  "relational": [
-    {
-      "name_es": "Pasiva por estratos",
-      "name_en": "Passive by strata",
-      "text": "[Cláusula [1,2 libro] [2,1 leído] [P leyó]]"
-    },
-    {
-      "name_es": "Dativo (dative shift)",
-      "name_en": "Dative shift",
-      "text": "[Cláusula [3,2 hermano] [2,1 libro] [P dio]]"
     }
   ],
   "general": [

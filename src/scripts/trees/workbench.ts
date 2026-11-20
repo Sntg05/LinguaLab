@@ -107,7 +107,7 @@ const renderChecks = (tree: TreeNode, type: TreeType): void => {
 
   const results = runChecks(tree, {
     locale: locale(),
-    xbar: type.opts?.xbar === true,
+    ...(type.theory === undefined ? {} : { theory: type.theory }),
     directives: state.arrows,
   });
 

@@ -189,6 +189,267 @@
       "source": "Carnegie Mellon University, Speech Group",
       "url": "https://github.com/cmusphinx/cmudict",
       "verifiedOn": "2026-11-10"
+    },
+    {
+      "id": "cohen1960",
+      "authors": "Cohen, J.",
+      "year": 1960,
+      "title": "A coefficient of agreement for nominal scales",
+      "source": "Educational and Psychological Measurement, 20(1), 37–46",
+      "doi": "10.1177/001316446002000104",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "hayes2007",
+      "authors": "Hayes, A. F., & Krippendorff, K.",
+      "year": 2007,
+      "title": "Answering the call for a standard reliability measure for coding data",
+      "source": "Communication Methods and Measures, 1(1), 77–89",
+      "doi": "10.1080/19312450709336664",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "krippendorff2019",
+      "authors": "Krippendorff, K.",
+      "year": 2019,
+      "title": "Content analysis: An introduction to its methodology (4th ed.)",
+      "source": "SAGE",
+      "doi": "10.4135/9781071878781",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "landis1977",
+      "authors": "Landis, J. R., & Koch, G. G.",
+      "year": 1977,
+      "title": "The measurement of observer agreement for categorical data",
+      "source": "Biometrics, 33(1), 159–174",
+      "doi": "10.2307/2529310",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "macqueen1998",
+      "authors": "MacQueen, K. M., McLellan, E., Kay, K., & Milstein, B.",
+      "year": 1998,
+      "title": "Codebook development for team-based qualitative analysis",
+      "source": "Cultural Anthropology Methods, 10(2), 31–36",
+      "doi": "10.1177/1525822X980100020301",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "oconnor2020",
+      "authors": "O'Connor, C., & Joffe, H.",
+      "year": 2020,
+      "title": "Intercoder reliability in qualitative research: Debates and practical guidelines",
+      "source": "International Journal of Qualitative Methods, 19",
+      "doi": "10.1177/1609406919899220",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "gamer2026irr",
+      "authors": "Gamer, M., Lemon, J., Fellows, I., & Singh, P.",
+      "year": 2026,
+      "title": "irr: Various coefficients of interrater reliability and agreement (R package version 0.85)",
+      "source": "Comprehensive R Archive Network",
+      "url": "https://CRAN.R-project.org/package=irr",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "rayson2000",
+      "authors": "Rayson, P., & Garside, R.",
+      "year": 2000,
+      "title": "Comparing corpora using frequency profiling",
+      "source": "Proceedings of the Workshop on Comparing Corpora, 1–6. Association for Computational Linguistics",
+      "url": "https://aclanthology.org/W00-0901/",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "hardie2014",
+      "authors": "Hardie, A.",
+      "year": 2014,
+      "title": "Log Ratio – an informal introduction",
+      "source": "ESRC Centre for Corpus Approaches to Social Science (CASS), Lancaster University",
+      "url": "https://cass.lancs.ac.uk/log-ratio-an-informal-introduction/",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "cody1969",
+      "authors": "Cody, W. J.",
+      "year": 1969,
+      "title": "Rational Chebyshev approximations for the error function",
+      "source": "Mathematics of Computation, 23(107), 631–637",
+      "doi": "10.1090/S0025-5718-1969-0247736-4",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "welch1947",
+      "authors": "Welch, B. L.",
+      "year": 1947,
+      "title": "The generalization of ‘Student's’ problem when several different population variances are involved",
+      "source": "Biometrika, 34(1–2), 28–35",
+      "doi": "10.1093/biomet/34.1-2.28",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "mann1947",
+      "authors": "Mann, H. B., & Whitney, D. R.",
+      "year": 1947,
+      "title": "On a test of whether one of two random variables is stochastically larger than the other",
+      "source": "The Annals of Mathematical Statistics, 18(1), 50–60",
+      "doi": "10.1214/aoms/1177730491",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "wilcoxon1945",
+      "authors": "Wilcoxon, F.",
+      "year": 1945,
+      "title": "Individual comparisons by ranking methods",
+      "source": "Biometrics Bulletin, 1(6), 80–83",
+      "doi": "10.2307/3001968",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "spearman1904",
+      "authors": "Spearman, C.",
+      "year": 1904,
+      "title": "The proof and measurement of association between two things",
+      "source": "The American Journal of Psychology, 15(1), 72–101",
+      "doi": "10.2307/1412159",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "hyndman1996",
+      "authors": "Hyndman, R. J., & Fan, Y.",
+      "year": 1996,
+      "title": "Sample quantiles in statistical packages",
+      "source": "The American Statistician, 50(4), 361–365",
+      "doi": "10.1080/00031305.1996.10473566",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "joanes1998",
+      "authors": "Joanes, D. N., & Gill, C. A.",
+      "year": 1998,
+      "title": "Comparing measures of sample skewness and kurtosis",
+      "source": "Journal of the Royal Statistical Society: Series D (The Statistician), 47(1), 183–189",
+      "doi": "10.1111/1467-9884.00122",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "cohen2013",
+      "authors": "Cohen, J.",
+      "year": 2013,
+      "title": "Statistical power analysis for the behavioral sciences (2nd ed.)",
+      "source": "Routledge (original work published 1988)",
+      "doi": "10.4324/9780203771587",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "bergsma2013",
+      "authors": "Bergsma, W.",
+      "year": 2013,
+      "title": "A bias-correction for Cramér's V and Tschuprow's T",
+      "source": "Journal of the Korean Statistical Society, 42(3), 323–328",
+      "doi": "10.1016/j.jkss.2012.10.002",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "sturges1926",
+      "authors": "Sturges, H. A.",
+      "year": 1926,
+      "title": "The choice of a class interval",
+      "source": "Journal of the American Statistical Association, 21(153), 65–66",
+      "doi": "10.1080/01621459.1926.10502161",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "mcgill1978",
+      "authors": "McGill, R., Tukey, J. W., & Larsen, W. A.",
+      "year": 1978,
+      "title": "Variations of box plots",
+      "source": "The American Statistician, 32(1), 12–16",
+      "doi": "10.1080/00031305.1978.10479236",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "lanczos1964",
+      "authors": "Lanczos, C.",
+      "year": 1964,
+      "title": "A precision approximation of the gamma function",
+      "source": "Journal of the Society for Industrial and Applied Mathematics, Series B: Numerical Analysis, 1(1), 86–96",
+      "doi": "10.1137/0701008",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "benshachar2020",
+      "authors": "Ben-Shachar, M. S., Lüdecke, D., & Makowski, D.",
+      "year": 2020,
+      "title": "effectsize: Estimation of effect size indices and standardized parameters",
+      "source": "Journal of Open Source Software, 5(56), 2815",
+      "doi": "10.21105/joss.02815",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "rcore",
+      "authors": "R Core Team",
+      "year": 2025,
+      "title": "R: A language and environment for statistical computing (version 4.5.2)",
+      "source": "R Foundation for Statistical Computing",
+      "url": "https://www.R-project.org/",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "apa2020",
+      "authors": "American Psychological Association",
+      "year": 2020,
+      "title": "Publication manual of the American Psychological Association (7th ed.)",
+      "source": "American Psychological Association",
+      "url": "https://apastyle.apa.org/products/publication-manual-7th-edition",
+      "verifiedOn": "2026-11-17"
+    },
+    {
+      "id": "marcus1993",
+      "authors": "Marcus, M. P., Santorini, B., & Marcinkiewicz, M. A.",
+      "year": 1993,
+      "title": "Building a Large Annotated Corpus of English: The Penn Treebank",
+      "source": "Computational Linguistics, 19(2), 313–330",
+      "url": "https://aclanthology.org/J93-2004/",
+      "verifiedOn": "2026-11-20"
+    },
+    {
+      "id": "haspelmath2013",
+      "authors": "Haspelmath, M., & Sims, A. D.",
+      "year": 2013,
+      "title": "Understanding Morphology",
+      "source": "Routledge",
+      "doi": "10.4324/9780203776506",
+      "verifiedOn": "2026-11-20"
+    },
+    {
+      "id": "collins2002",
+      "authors": "Collins, M.",
+      "year": 2002,
+      "title": "Discriminative training methods for hidden Markov models: Theory and experiments with perceptron algorithms",
+      "source": "Proceedings of the ACL-02 Conference on Empirical Methods in Natural Language Processing (EMNLP '02), 1–8",
+      "doi": "10.3115/1118693.1118694",
+      "verifiedOn": "2026-11-20"
+    },
+    {
+      "id": "taule2008",
+      "authors": "Taulé, M., Martí, M. A., & Recasens, M.",
+      "year": 2008,
+      "title": "AnCora: Multilevel Annotated Corpora for Catalan and Spanish",
+      "source": "Proceedings of the Sixth International Conference on Language Resources and Evaluation (LREC'08)",
+      "url": "https://aclanthology.org/L08-1222/",
+      "verifiedOn": "2026-11-20"
+    },
+    {
+      "id": "silveira2014",
+      "authors": "Silveira, N., Dozat, T., de Marneffe, M.-C., Bowman, S. R., Connor, M., Bauer, J., & Manning, C.",
+      "year": 2014,
+      "title": "A Gold Standard Dependency Corpus for English",
+      "source": "Proceedings of the Ninth International Conference on Language Resources and Evaluation (LREC'14)",
+      "url": "https://aclanthology.org/L14-1067/",
+      "verifiedOn": "2026-11-20"
     }
   ]
 }

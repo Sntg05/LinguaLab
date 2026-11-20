@@ -106,6 +106,7 @@ const metrics = {
     enginesMb: {
       pyodide: engineMb("pyodide"),
       cmudict: engineMb("cmudict"),
+      pos: engineMb("pos"),
       praatfan: engineMb("praatfan"),
     },
   },

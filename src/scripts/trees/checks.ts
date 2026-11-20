@@ -11,13 +11,17 @@
 import type { Locale } from "../../i18n";
 import { countNodes, maxDepth } from "./layout";
 import type { TreeNode } from "./parse";
+import type { TreeTheory } from "../../data/trees/types";
+import {
+  checkMinimalist,
+  checkMorphology,
+  checkPreterminals,
+  checkUdRelations,
+  checkXbar,
+} from "./theories";
 
-export type CheckLevel = "error" | "note" | "ok";
-
-export interface CheckResult {
-  level: CheckLevel;
-  message: string;
-}
+export type { CheckLevel, CheckResult } from "./check-result";
+import type { CheckResult } from "./check-result";
 
 export interface MovementDirective {
   from: string;
@@ -27,8 +31,8 @@ export interface MovementDirective {
 
 export interface CheckOptions {
   locale: Locale;
-  /** Apply X-bar specific rules. */
-  xbar?: boolean;
+  /** La teoría cuyas reglas se comprueban (`theories.ts`). */
+  theory?: TreeTheory;
   directives?: readonly MovementDirective[];
 }
 
@@ -377,9 +381,22 @@ export function checkMovement(
    --------------------------------------------------------------- */
 
 export function runChecks(tree: TreeNode, options: CheckOptions): CheckResult[] {
+  const { locale, theory } = options;
   const out = isDependencyTree(tree)
-    ? checkDependency(tree, options.locale)
-    : checkConstituency(tree, options.locale, { xbar: options.xbar });
+    ? (() => {
+        // Si las relaciones no son de UD, el árbol no es válido aunque su forma
+        // lo sea: no se dice «válido» al lado de un error.
+        const ud = checkUdRelations(tree, locale);
+        const shape = checkDependency(tree, locale);
+        return ud.length > 0 ? [...ud, ...shape.filter((result) => result.level !== "ok")] : shape;
+      })()
+    : [
+        ...(theory === "xbar" ? checkXbar(tree, locale) : []),
+        ...(theory === "minimalist" ? checkMinimalist(tree, locale) : []),
+        ...(theory === "morphology" ? checkMorphology(tree, locale) : []),
+        ...(theory === "constituency" || theory === "movement" ? checkPreterminals(tree, locale) : []),
+        ...checkConstituency(tree, locale),
+      ];
 
   if (options.directives && options.directives.length > 0) {
     out.push(...checkMovement(tree, options.directives, options.locale));

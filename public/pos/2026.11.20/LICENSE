@@ -1,0 +1,10 @@
+Modelos derivados de treebanks de Universal Dependencies.
+
+es.tsv: entrenado con UD_Spanish-AnCora (commit 3ea1f747220979d91787a6d04b85734a42bf22a4),
+  licencia Creative Commons Attribution 4.0 International (CC BY 4.0).
+en.tsv: entrenado con UD_English-EWT (commit 491be069d36e378f67c29f183699eea88308ea42),
+  licencia Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0).
+  Como obra derivada, en.tsv se distribuye bajo CC BY-SA 4.0.
+
+https://creativecommons.org/licenses/by/4.0/legalcode
+https://creativecommons.org/licenses/by-sa/4.0/legalcode

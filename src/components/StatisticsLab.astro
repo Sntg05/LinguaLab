@@ -1,0 +1,124 @@
+---
+/**
+ * StatisticsLab: datos, descripción y un asistente que lleva de la pregunta a
+ * la prueba (T6). El motor vive en `packages/core/src/stats/` y se contrasta
+ * con R; aquí solo hay estructura, explicaciones y los supuestos de cada
+ * pregunta, que se muestran antes del resultado.
+ */
+import { t, type Locale } from "../i18n";
+import { STATISTICS_STRING_KEYS } from "../scripts/estadistica/strings";
+import "../styles/features/statistics.css";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const runtimeStrings = Object.fromEntries(STATISTICS_STRING_KEYS.map((key) => [key, t(locale, key)]));
+
+const QUESTIONS = ["two-groups", "paired", "many-groups", "correlation", "association", "one-mean", "regression"] as const;
+const FIELDS = [
+  { id: "outcome", label: "stats.field.outcome" },
+  { id: "group", label: "stats.field.group" },
+  { id: "second", label: "stats.field.second" },
+  { id: "categoryA", label: "stats.field.categoryA" },
+  { id: "categoryB", label: "stats.field.categoryB" },
+] as const;
+---
+
+<section class="section" data-stats data-stats-strings={JSON.stringify(runtimeStrings)}>
+  <div class="shell">
+    <div class="u-section-head">
+      <span class="eyebrow">{t(locale, "stats.eyebrow")}</span>
+      <h1>{t(locale, "stats.title")}</h1>
+      <p class="u-lead">{t(locale, "stats.sub")}</p>
+      <p class="callout">{t(locale, "stats.local")} {t(locale, "stats.validated")}</p>
+    </div>
+
+    <div class="stats">
+      <section class="stats-panel" aria-labelledby="stats-data-title">
+        <h2 class="stats-panel__title" id="stats-data-title">{t(locale, "stats.data.title")}</h2>
+        <p class="stats-hint">{t(locale, "stats.data.note")}</p>
+        <label class="stats-field" for="stats-input">{t(locale, "stats.data.paste")}</label>
+        <textarea class="stats-input" id="stats-input" rows="7" spellcheck="false" data-stats-input></textarea>
+        <div class="stats-row">
+          <button class="btn btn--primary" type="button" data-stats-read>{t(locale, "stats.data.read")}</button>
+          <label class="btn btn--quiet u-file">
+            {t(locale, "stats.data.file")}
+            <input class="u-visually-hidden" type="file" accept=".csv,.tsv,.txt,text/csv,text/plain" data-stats-file />
+          </label>
+          <button class="btn btn--quiet" type="button" data-stats-example>{t(locale, "stats.data.example")}</button>
+        </div>
+        <p class="stats-hint">{t(locale, "stats.data.exampleNote")}</p>
+        <p class="stats-status" data-stats-status role="status" aria-live="polite" data-state="idle">
+          {t(locale, "stats.status.ready")}
+        </p>
+      </section>
+
+      <div class="stats" data-stats-work hidden>
+        <section class="stats-panel" aria-labelledby="stats-variables-title">
+          <h2 class="stats-panel__title" id="stats-variables-title">{t(locale, "stats.variables.title")}</h2>
+          <p class="stats-hint">{t(locale, "stats.variables.note")}</p>
+          <div data-stats-variables></div>
+        </section>
+
+        <section class="stats-panel" aria-labelledby="stats-describe-title">
+          <h2 class="stats-panel__title" id="stats-describe-title">{t(locale, "stats.describe.title")}</h2>
+          <label class="field field--inline">
+            <span class="field__label">{t(locale, "stats.describe.label")}</span>
+            <select data-stats-describe></select>
+          </label>
+          <div class="stats-result" data-stats-description></div>
+        </section>
+
+        <section class="stats-panel" aria-labelledby="stats-test-title">
+          <h2 class="stats-panel__title" id="stats-test-title">{t(locale, "stats.test.title")}</h2>
+          <p class="stats-hint">{t(locale, "stats.test.note")}</p>
+          <fieldset class="stats-questions">
+            <legend>{t(locale, "stats.question")}</legend>
+            {
+              QUESTIONS.map((question, index) => (
+                <label>
+                  <input type="radio" name="stats-question" value={question} checked={index === 0} />
+                  {t(locale, `stats.q.${question}`)}
+                </label>
+              ))
+            }
+          </fieldset>
+          <div class="stats-row">
+            {
+              FIELDS.map((field) => (
+                <label class="field field--inline" data-stats-for={field.id}>
+                  <span class="field__label">{t(locale, field.label)}</span>
+                  <select data-stats-field={field.id} />
+                </label>
+              ))
+            }
+            <label class="field field--inline" data-stats-for="mu">
+              <span class="field__label">{t(locale, "stats.field.mu")}</span>
+              <input type="text" inputmode="decimal" value="0" class="u-w-5" data-stats-field="mu" />
+            </label>
+            <label class="field field--inline" data-stats-for="predictors">
+              <span class="field__label">{t(locale, "stats.field.predictors")}</span>
+              <select multiple size="4" data-stats-field="predictors"></select>
+            </label>
+          </div>
+          {QUESTIONS.map((question) => <p class="stats-hint stats-assume" data-stats-assume={question}>{t(locale, `stats.assume.${question}`)}</p>)}
+          <div class="stats-row">
+            <button class="btn btn--primary" type="button" data-stats-run>{t(locale, "stats.run")}</button>
+            <button class="btn btn--quiet" type="button" data-stats-copy disabled>{t(locale, "stats.copy")}</button>
+            <button class="btn btn--quiet" type="button" data-stats-svg disabled>{t(locale, "stats.downloadChart")}</button>
+          </div>
+          <p class="stats-hint">{t(locale, "stats.alpha")} {t(locale, "stats.apaNote")}</p>
+          <div class="stats-result" data-stats-report></div>
+          <div class="stats-result" data-stats-chart></div>
+        </section>
+      </div>
+      <p class="stats-hint">{t(locale, "stats.limits")}</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import "../scripts/estadistica/index";
+</script>

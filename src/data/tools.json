@@ -42,17 +42,19 @@
         "en"
       ],
       "notes": {
-        "es": "Editor de árboles sintácticos y de estructuras de datos: 23 tipos, cuatro formatos de entrada y exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat.",
-        "en": "Syntax and data-structure tree editor: 23 types, four input formats, and export to SVG, PNG, JSON, Newick, CoNLL-U and Brat."
+        "es": "Editor de árboles sintácticos y de estructuras de datos: 15 tipos, seis formalismos lingüísticos con sus reglas comprobadas, cuatro formatos de entrada y exportación a SVG, PNG, JSON, Newick, CoNLL-U y Brat.",
+        "en": "Syntax and data-structure tree editor: 15 types, six linguistic formalisms with their rules checked, four input formats, and export to SVG, PNG, JSON, Newick, CoNLL-U and Brat."
       },
       "theory": {
-        "es": "Dibuja dos familias de análisis sintáctico: dependencias, donde cada palabra depende de otra con una relación (Universal Dependencies), y constituyentes, donde las palabras se agrupan en sintagmas (gramática generativa: Rección y Ligamiento, Programa Minimalista). La herramienta dibuja el análisis que escribes; no lo decide por ti.",
-        "en": "It draws two families of syntactic analysis: dependencies, where each word depends on another through a relation (Universal Dependencies), and constituency, where words group into phrases (generative grammar: Government and Binding, the Minimalist Program). The tool draws the analysis you write; it does not decide it for you."
+        "es": "Dibuja dos familias de análisis sintáctico: dependencias, donde cada palabra depende de otra con una relación (Universal Dependencies), y constituyentes, donde las palabras se agrupan en sintagmas (gramática generativa: Rección y Ligamiento, Programa Minimalista). Cada formalismo comprueba las reglas de su fuente (las 37 relaciones de UD v2, el esquema del Penn Treebank, X-barra, Ensamble binario) y explica cuál se rompe. La herramienta dibuja el análisis que escribes; no lo decide por ti.",
+        "en": "It draws two families of syntactic analysis: dependencies, where each word depends on another through a relation (Universal Dependencies), and constituency, where words group into phrases (generative grammar: Government and Binding, the Minimalist Program). Each formalism checks the rules of its source (the 37 UD v2 relations, the Penn Treebank scheme, X-bar, binary Merge) and explains which one breaks. The tool draws the analysis you write; it does not decide it for you."
       },
       "references": [
         "demarneffe2021",
+        "marcus1993",
         "chomsky1981",
-        "chomsky1995"
+        "chomsky1995",
+        "haspelmath2013"
       ]
     },
     {
@@ -69,12 +71,12 @@
         "en"
       ],
       "notes": {
-        "es": "Análisis de corpus: frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad. No hay lematización.",
-        "en": "Corpus analysis: frequency with dispersion, collocations with log-Dice and PMI, KWIC concordances, lexical statistics and readability. There is no lemmatisation."
+        "es": "Análisis de corpus: frecuencia con dispersión, colocaciones con log-Dice y PMI, concordancias KWIC, estadísticas léxicas y legibilidad. No hay lematización. Compara además dos o tres documentos (.docx, PDF con texto o .txt): palabras clave con G² y log ratio contrastados con R, vocabulario compartido, diversidad léxica y concordancias por documento.",
+        "en": "Corpus analysis: frequency with dispersion, collocations with log-Dice and PMI, KWIC concordances, lexical statistics and readability. There is no lemmatisation. It also compares two or three documents (.docx, PDF with text or .txt): keywords with G² and log ratio checked against R, shared vocabulary, lexical diversity and concordances by document."
       },
       "theory": {
-        "es": "Aplica medidas de la lingüística de corpus: asociación entre palabras (información mutua, razón de verosimilitud G², log-Dice), dispersión de una palabra a lo largo del texto e índices de legibilidad (Flesch para el inglés; la escala INFLESZ y sus antecesoras para el español). Sin lematizar, cada forma flexionada cuenta por separado.",
-        "en": "It applies corpus-linguistics measures: word association (mutual information, the G² likelihood ratio, log-Dice), dispersion of a word across the text, and readability indices (Flesch for English; the INFLESZ scale and its predecessors for Spanish). Without lemmatisation, each inflected form counts separately."
+        "es": "Aplica medidas de la lingüística de corpus: asociación entre palabras (información mutua, razón de verosimilitud G², log-Dice), dispersión de una palabra a lo largo del texto e índices de legibilidad (Flesch para el inglés; la escala INFLESZ y sus antecesoras para el español). Sin lematizar, cada forma flexionada cuenta por separado. La comparación de dos o tres documentos busca las palabras clave de cada uno frente a los demás con la razón de verosimilitud G² (Dunning, 1993), como en el perfil de frecuencias de Rayson y Garside (2000), y mide el tamaño de la diferencia con el log ratio de Hardie (2014); los valores p usan la aproximación de Cody (1969) a la cola normal. El etiquetado de categorías usa un perceptrón promediado (Collins 2002) entrenado con los treebanks de Universal Dependencies AnCora (español) y EWT (inglés), y dice su precisión medida en sus conjuntos de prueba.",
+        "en": "It applies corpus-linguistics measures: word association (mutual information, the G² likelihood ratio, log-Dice), dispersion of a word across the text, and readability indices (Flesch for English; the INFLESZ scale and its predecessors for Spanish). Without lemmatisation, each inflected form counts separately. The comparison of two or three documents finds the keywords of each one against the others with the log-likelihood ratio G² (Dunning, 1993), as in Rayson and Garside's (2000) frequency profiling, and measures the size of the difference with Hardie's (2014) log ratio; p values use Cody's (1969) approximation to the normal tail. Part-of-speech tagging uses an averaged perceptron (Collins 2002) trained on the Universal Dependencies treebanks AnCora (Spanish) and EWT (English), and states its accuracy measured on their test sets."
       },
       "references": [
         "church1990",
@@ -82,7 +84,14 @@
         "rychly2008",
         "gries2008",
         "flesch1948",
-        "barrio2008"
+        "barrio2008",
+        "rayson2000",
+        "hardie2014",
+        "cody1969",
+        "collins2002",
+        "taule2008",
+        "silveira2014",
+        "demarneffe2021"
       ]
     },
     {
@@ -423,6 +432,71 @@
         "es": "Previsto: corpus paralelos y modelos de traducción para wayuunaiki, arhuaco, inga y nasa. No se pudo verificar una URL pública estable el 25 de octubre de 2026, y este catálogo no publica enlaces sin abrirlos antes: queda como previsto hasta que la fuente confirme su dirección.",
         "en": "Planned: parallel corpora and translation models for Wayuunaiki, Arhuaco, Inga and Nasa. No stable public URL could be verified on 25 October 2026, and this catalogue does not publish links it has not opened first: it stays planned until the source confirms its address."
       }
+    },
+    {
+      "id": "qualitative-coding",
+      "name": {
+        "es": "Análisis cualitativo",
+        "en": "Qualitative analysis"
+      },
+      "area": "documentacion",
+      "integration": "embedded",
+      "status": "experimental",
+      "languages": [],
+      "notes": {
+        "es": "Codificación de entrevistas, transcripciones o textos por segmentos (líneas o párrafos) con un libro de códigos propio: frecuencias, coocurrencias entre códigos y acuerdo entre codificadores (acuerdo porcentual, kappa de Cohen y alfa de Krippendorff), con las cifras contrastadas con el paquete irr de R. Todo se guarda y se comparte como CSV; nada sale del navegador. **Límite declarado**: se codifican segmentos completos, no fragmentos libres dentro de un segmento.",
+        "en": "Coding of interviews, transcripts or texts by segment (lines or paragraphs) with your own codebook: frequencies, co-occurrences between codes and intercoder agreement (percent agreement, Cohen's kappa and Krippendorff's alpha), with the figures checked against the R package irr. Everything is saved and shared as CSV; nothing leaves the browser. **Declared limit**: whole segments are coded, not free spans inside a segment."
+      },
+      "citation": "MacQueen, K. M., McLellan, E., Kay, K., & Milstein, B. (1998). Codebook development for team-based qualitative analysis. Cultural Anthropology Methods, 10(2), 31–36.",
+      "theory": {
+        "es": "Sigue el análisis de contenido y la codificación con libro de códigos en equipo (MacQueen y colaboradores, 1998; Krippendorff, 2019). La fiabilidad entre codificadores se mide con la kappa de Cohen (1960), leída con las bandas de Landis y Koch (1977), y con la alfa de Krippendorff (Hayes y Krippendorff, 2007), que admite más de dos personas y datos faltantes. Cuándo y para qué medir el acuerdo en investigación cualitativa lo discuten O'Connor y Joffe (2020).",
+        "en": "It follows content analysis and team-based codebook coding (MacQueen and colleagues, 1998; Krippendorff, 2019). Intercoder reliability is measured with Cohen's kappa (1960), read with Landis and Koch's (1977) bands, and with Krippendorff's alpha (Hayes and Krippendorff, 2007), which admits more than two people and missing data. When and why to measure agreement in qualitative research is discussed by O'Connor and Joffe (2020)."
+      },
+      "references": [
+        "macqueen1998",
+        "krippendorff2019",
+        "cohen1960",
+        "landis1977",
+        "hayes2007",
+        "oconnor2020",
+        "gamer2026irr"
+      ]
+    },
+    {
+      "id": "statistics",
+      "name": {
+        "es": "Estadística",
+        "en": "Statistics"
+      },
+      "area": "documentacion",
+      "integration": "embedded",
+      "status": "experimental",
+      "languages": [],
+      "notes": {
+        "es": "Datos por CSV o TSV (también el de Excel en español), descriptivos, gráficos y un asistente que lleva de la pregunta a la prueba: t (una muestra, Welch, pareada), Mann–Whitney y Wilcoxon, ANOVA de un factor, Pearson y Spearman, χ² y regresión lineal, siempre con tamaño del efecto, supuestos y una frase en formato APA. El motor es propio y cada cifra se contrasta con R. Todo corre en el navegador. **Límite declarado**: sin modelos mixtos ni intervalos de d, η² y V.",
+        "en": "Data from CSV or TSV (Spanish-locale Excel too), descriptives, charts and an assistant that goes from the question to the test: t (one-sample, Welch, paired), Mann–Whitney and Wilcoxon, one-way ANOVA, Pearson and Spearman, χ² and linear regression, always with effect size, assumptions and an APA-style sentence. The engine is this site's own and every figure is checked against R. Everything runs in the browser. **Declared limit**: no mixed models and no intervals for d, η² and V."
+      },
+      "citation": "R Core Team (2025). R: A language and environment for statistical computing. R Foundation for Statistical Computing.",
+      "theory": {
+        "es": "Implementa la estadística inferencial clásica que se enseña en ciencias sociales: la t de Welch (1947), las pruebas de rangos de Wilcoxon (1945) y de Mann y Whitney (1947), la correlación de Spearman (1904), el ANOVA, χ² y la regresión por mínimos cuadrados, con los tamaños del efecto de Cohen (1988/2013) y la corrección de Bergsma (2013) para la V de Cramér. Los cuantiles siguen a Hyndman y Fan (1996), la asimetría a Joanes y Gill (1998), los histogramas a Sturges (1926) y los gráficos de caja a McGill, Tukey y Larsen (1978); la función gamma, a Lanczos (1964). Cada resultado se contrasta con R (R Core Team) y con el paquete effectsize (Ben-Shachar y colaboradores, 2020), y las frases siguen el manual de la APA (2020).",
+        "en": "It implements the classical inferential statistics taught in the social sciences: Welch's (1947) t, the rank tests of Wilcoxon (1945) and of Mann and Whitney (1947), Spearman's (1904) correlation, ANOVA, χ² and least-squares regression, with Cohen's (1988/2013) effect sizes and Bergsma's (2013) correction for Cramér's V. Quantiles follow Hyndman and Fan (1996), skewness Joanes and Gill (1998), histograms Sturges (1926) and box plots McGill, Tukey and Larsen (1978); the gamma function, Lanczos (1964). Every result is checked against R (R Core Team) and the effectsize package (Ben-Shachar and colleagues, 2020), and the sentences follow the APA manual (2020)."
+      },
+      "references": [
+        "welch1947",
+        "wilcoxon1945",
+        "mann1947",
+        "spearman1904",
+        "cohen2013",
+        "bergsma2013",
+        "hyndman1996",
+        "joanes1998",
+        "sturges1926",
+        "mcgill1978",
+        "lanczos1964",
+        "rcore",
+        "benshachar2020",
+        "apa2020"
+      ]
     }
   ]
 }

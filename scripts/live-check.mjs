@@ -110,6 +110,7 @@ try {
   const probes = {
     [`/pyodide/${engines.pyodide}/pyodide-lock.json`]: "pyodide",
     [`/cmudict/${engines.cmudict}/en-us.tsv`]: "CMUdict",
+    [`/pos/${engines.pos}/es.tsv`]: "POS",
     [`/praatfan/${engines.praatfan}/PROVENANCE.txt`]: "praatfan",
   };
   for (const [path, name] of Object.entries(probes)) {

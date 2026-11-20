@@ -17,6 +17,7 @@ export type {
 export type { AnnotationStorageError, AnnotationStoragePort } from "./annotation-storage";
 export type { AudioDecoderError, AudioDecoderPort, DecodedAudio } from "./audio-decoder";
 export type { ClockPort } from "./clock";
+export type { DocumentReaderPort } from "./document-reader";
 export type { ElanCodecPort, ElanError, ElanLossReport } from "./elan-codec";
 export type {
   ExperimentError,
@@ -45,3 +46,4 @@ export type {
 } from "./phone-recognition";
 export type { TextGridCodecPort, TextGridError } from "./textgrid-codec";
 export type { ToolFilter, ToolRegistryError, ToolRegistryPort } from "./tool-registry";
+export type { PosTaggerError, PosTaggerPort } from "./pos-tagger";

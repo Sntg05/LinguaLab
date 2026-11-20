@@ -7,6 +7,10 @@
 import { experimentsEs } from "./features/experiments.es";
 import { elanEs } from "./features/elan.es";
 import { languagesEs } from "./features/languages.es";
+import { qualitativeEs } from "./features/qualitative.es";
+import { compareEs } from "./features/compare.es";
+import { posEs } from "./features/pos.es";
+import { statisticsEs } from "./features/statistics.es";
 import { acousticEs } from "./features/acoustic.es";
 
 export const es = {
@@ -18,6 +22,8 @@ export const es = {
   "nav.languages": "Lenguas de Colombia",
   "nav.elan": "ELAN ↔ TextGrid",
   "nav.experiments": "Experimentos",
+  "nav.qualitative": "Análisis cualitativo",
+  "nav.statistics": "Estadística",
   "nav.ipa": "FonoLab",
   "nav.trees": "ArborLab",
   "nav.resources": "Bibliografía",
@@ -541,6 +547,10 @@ export const es = {
   "audio.projects.clearFailed": "No se pudieron borrar todos los proyectos: {detail}",
   ...experimentsEs,
   ...elanEs,
+  ...qualitativeEs,
+  ...compareEs,
+  ...posEs,
+  ...statisticsEs,
   ...languagesEs,
   ...acousticEs,
 } as const;

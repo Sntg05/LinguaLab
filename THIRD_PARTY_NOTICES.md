@@ -36,6 +36,7 @@ Reglas de esta tabla:
 | [jspsych](https://www.npmjs.com/package/jspsych) | 8.3.0 | MIT | Motor de experimentos conductuales del constructor de experimentos. Se importa con `import()` al pulsar «Ejecutar», no con la página |
 | [@jspsych/plugin-instructions](https://www.npmjs.com/package/@jspsych/plugin-instructions) | 2.1.0 | MIT | Pantalla de instrucciones de jsPsych |
 | [@jspsych/plugin-survey-likert](https://www.npmjs.com/package/@jspsych/plugin-survey-likert) | 2.2.0 | MIT | Escala de 1 a 7 de los juicios de aceptabilidad |
+| [pdfjs-dist](https://www.npmjs.com/package/pdfjs-dist) | 6.5.438 | Apache-2.0 | Texto de los PDF en la comparación de documentos (Mozilla pdf.js). Se importa con su worker al cargar el primer PDF, no con la página; solo se lee el texto, nada se dibuja |
 | [@jspsych/plugin-html-button-response](https://www.npmjs.com/package/@jspsych/plugin-html-button-response) | 2.1.0 | MIT | Elección forzada (2AFC) y decisión léxica por botones |
 | [@jspsych/plugin-html-keyboard-response](https://www.npmjs.com/package/@jspsych/plugin-html-keyboard-response) | 2.2.0 | MIT | Respuestas por teclado |
 | [@jspsych/plugin-audio-keyboard-response](https://www.npmjs.com/package/@jspsych/plugin-audio-keyboard-response) | 2.2.0 | MIT | Estímulo de audio con respuesta por teclado |

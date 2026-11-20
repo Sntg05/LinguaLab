@@ -20,7 +20,7 @@ const baseTool = () => ({
 
 describe("parseToolCatalog", () => {
   it("carga el catalogo del sitio sin perdidas", () => {
-    expect(TOOLS).toHaveLength(20);
+    expect(TOOLS).toHaveLength(22);
     expect(new Set(TOOLS.map((tool) => tool.id)).size).toBe(TOOLS.length);
   });
 

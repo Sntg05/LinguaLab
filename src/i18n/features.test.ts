@@ -3,12 +3,20 @@ import { en } from "./messages/en";
 import { es } from "./messages/es";
 import { acousticEn } from "./messages/features/acoustic.en";
 import { acousticEs } from "./messages/features/acoustic.es";
+import { compareEn } from "./messages/features/compare.en";
+import { compareEs } from "./messages/features/compare.es";
+import { posEn } from "./messages/features/pos.en";
+import { posEs } from "./messages/features/pos.es";
 import { elanEn } from "./messages/features/elan.en";
 import { elanEs } from "./messages/features/elan.es";
 import { experimentsEn } from "./messages/features/experiments.en";
 import { experimentsEs } from "./messages/features/experiments.es";
 import { languagesEn } from "./messages/features/languages.en";
 import { languagesEs } from "./messages/features/languages.es";
+import { statisticsEn } from "./messages/features/statistics.en";
+import { statisticsEs } from "./messages/features/statistics.es";
+import { qualitativeEn } from "./messages/features/qualitative.en";
+import { qualitativeEs } from "./messages/features/qualitative.es";
 
 /**
  * Los módulos de mensajes por herramienta, con su invariante.
@@ -28,6 +36,10 @@ const MODULES = [
   { name: "elan", prefix: "elan.", es: elanEs, en: elanEn },
   { name: "languages", prefix: "map.", es: languagesEs, en: languagesEn },
   { name: "acoustic", prefix: "acoustic.", es: acousticEs, en: acousticEn },
+  { name: "qualitative", prefix: "qual.", es: qualitativeEs, en: qualitativeEn },
+  { name: "compare", prefix: "cmp.", es: compareEs, en: compareEn },
+  { name: "pos", prefix: "pos.", es: posEs, en: posEn },
+  { name: "statistics", prefix: "stats.", es: statisticsEs, en: statisticsEn },
 ] as const;
 
 describe("los mensajes de cada herramienta", () => {

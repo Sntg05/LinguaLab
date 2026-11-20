@@ -1,6 +1,6 @@
 ---
 status: current
-updated: 2026-11-17
+updated: 2026-11-20
 ---
 
 # Traspaso vigente: rework v4
@@ -20,8 +20,14 @@ Pega esto como primera instrucción, o síguelo tal cual:
 > fusiones a `main` sin que el dueño lo pida. Si una tarea necesita una decisión del dueño (§8), pregúntale **una sola** y espera.
 > Háblale en español. Al terminar, reescribe este archivo.
 
-Estado al 2026-11-17: T5 y T9 hechas (Log L33–L34) y fusionadas a `main`. La siguiente sin bloqueo es **T7** (análisis cualitativo); T4, T6 y T8 esperan D3, D4 y D5. Orden recomendado de trabajo: **T5 → T9 → T7 → T4 → T6 → T8 → T10**. T5, T9 y T7 no esperan ninguna
-decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
+Estado al 2026-11-20: **todas las tareas del rework están hechas o cerradas por decisión del dueño**, en
+la rama `feat/rework-v4` y **sin fusionar a `main`** (lo último en `main` es el PR #24). Lo nuevo desde
+`main`: T7 y T7b (análisis cualitativo), S13 (comparar documentos), T6 (estadística, con intervalos de
+efecto), T4 (árboles: seis teorías validadas, ocho retiradas), T16 (etiquetado POS) y Astro 7.4.12. D3,
+D4 y D5 resueltas (§8); el diseño se queda como está. **Queda pendiente:** NER (T17, falta un corpus con
+licencia abierta), la exportación `.qdc` (esquema no verificable, L51), la evidencia humana de
+`docs/HUMAN-EVIDENCE.md` y la decisión del dueño de fusionar. La revisión de gentle-ai está **apagada**
+por pedido del dueño (L54).
 
 ## 1. Qué se está haciendo y dónde
 
@@ -45,7 +51,7 @@ decisión del dueño; T4, T6 y T8 sí (D3, D4, D5).
 
 ```bash
 git fetch && git checkout feat/rework-v4 && git pull --ff-only
-nvm use 22                       # Node 22.x; el proyecto fija >=22.12
+nvm use 22                       # Node 22.x; el proyecto fija >=22.23.4 (Astro 7.4.12 lo pide)
 npm install
 npx playwright install chromium  # una vez por máquina
 npm run doctor                   # rama frente a origin, Chromium, puerto 4331, documentos ODD
@@ -56,7 +62,7 @@ Rust solo hace falta para la tarea T5 (ver §6). En la máquina del dueño ya es
 `~/.cargo/bin` (rustc 1.99.1, destino `wasm32-unknown-unknown`), **sin** tocar el `PATH`: se invoca como
 `~/.cargo/bin/cargo`. En otra máquina: `rustup` con `--profile minimal --target wasm32-unknown-unknown`.
 En el segundo equipo del dueño (CachyOS) **no hay Rust**, hay Go en `/usr/bin/go` (no se usa) y Node 26
-fuera de nvm; cumple el `>=22.12` del proyecto, pero `.nvmrc` pide 22: si algo difiere, `nvm use 22`.
+fuera de nvm; cumple el `>=22.23.4` del proyecto, pero `.nvmrc` pide 22: si algo difiere, `nvm use 22`.
 
 ### Las puertas, y cuándo correrlas
 
@@ -132,6 +138,11 @@ fuera de nvm; cumple el `>=22.12` del proyecto, pero `.nvmrc` pide 22: si algo d
 | (commit de 5.5) | **T5, 5.5:** consultas «Obtener tono / F1 / F2 / intensidad» con las teclas de Praat; e2e de la tabla y del teclado contra las referencias |
 | `d45b8e9`, `4417cac`, `e56b84a`, `c565ee5` | **T9:** tope de 30 líneas de script por componente; PhonemizerLab, FonoLab, Glosario, Bibliografía, ArborLab (con `e2e/arbor.spec.ts`) y la estación de texto con sus reglas en `src/scripts/<área>/` |
 | `4d8d32b` | **T5, 5.2:** FFT rellenada a 1024, eje en Hz, espectrograma nítido en pantallas de doble densidad y guardado entre cuadros |
+| `c48e142`, `377f45d` | **T11:** árboles que se dibujan sin error y cada exportación de cada laboratorio leída de vuelta (en `main`) |
+| `c1bed4f`, `b5e1707` | **T7:** motor cualitativo (`packages/core/src/qualitative/`) contra `irr` de R (`scripts/r/build-agreement-reference.R`) y página `/cualitativo` |
+| `eba3a16`, `a609b8c` | **S13, T12–T13:** lectura de .docx propia y de PDF con pdf.js 6.5.438 (`packages/adapters/src/document/`, fixtures con `scripts/build-document-fixtures.sh`) |
+| `e49851f`, `6991aac` | **S13, T14–T15:** G², p y log ratio contra R base (`scripts/r/build-keyness-reference.R`) y la sección «Compara dos o tres documentos» en `/tools` |
+| (commit de L43) | Correcciones del verificador independiente y de la revisión de Gentle AI (Log L43) |
 
 Puerta completa y e2e en verde en el último commit de código.
 
@@ -149,7 +160,7 @@ Puerta completa y e2e en verde en el último commit de código.
 | Calidad | Biome 2.6.3, dependency-cruiser, commitlint, Husky + lint-staged | |
 | Motores servidos | Pyodide 314.0.7 (conversor ELAN), praatfan 0.1.13 (acústica), CMUdict 2025.10.24 | En `public/<motor>/<versión>/`, inmutables |
 | Despliegue | Vercel, solo estático; cabeceras en `vercel.json` | CSP `default-src 'self'`: ningún CDN |
-| En la máquina del dueño | Node 22.23.3, Praat 6.4.49, R 4.3.3, ffmpeg, Rust 1.99.1 (`~/.cargo/bin`, destino wasm32), sin Go | |
+| En la máquina del dueño | Node 22.23.3, Praat 6.4.49, R 4.5.2 (este traspaso decía 4.3.3; `irr` no está instalado en el sistema: se instala en una biblioteca temporal con `R_LIBS_USER`), pandoc, xelatex, poppler, ffmpeg, Rust 1.99.1 (`~/.cargo/bin`, destino wasm32), sin Go | |
 
 ### Lo que se propone, por tarea
 
@@ -182,11 +193,14 @@ desde `public/`, regla 9 de §3. Si se puede escribir en menos de ~200 líneas p
 |---|---|---|---|
 | T5 Visor acústico estilo Praat, **incluida la segmentación sencilla (5.8)** | **hecha en código**: 5.1–5.8 (ver §4 y el Log L21–L32). Pendiente humano: la persona que no conoce el visor, y la captura del espectrograma junto a Praat | nada | — |
 | T9 Contrato único de herramienta | **hecha**: ningún componente pasa de 30 líneas de script (`src/lib/architecture.test.ts`); el contrato es `safeInit("x", initX)` con `initX` en `src/scripts/<área>/` | nada | — |
-| T7 Análisis cualitativo | sin empezar | nada | grande |
-| T4 Árboles | ficha corregida; falta lo demás | D3 | grande |
-| T6 Estadística cuantitativa | sin empezar | D4 | grande |
-| T8 Diseño | sin empezar | D5 | grande |
-| T10 Cierre | sin empezar | todas | pequeña |
+| T11 Árboles y exportaciones (S12) | **hecha**: todos los ejemplos se dibujan (`src/scripts/trees/examples.test.ts`); cada formato de cada laboratorio se valida en `e2e/arbor.spec.ts` y `e2e/exports.spec.ts` | nada | — |
+| T7 Análisis cualitativo | **hecha** (T7 + T7b; `.qdc` fuera, L51) | — | — |
+| T4 Árboles | **hecha** (L53) | — | — |
+| T6 Estadística cuantitativa | **hecha** (L44–L49, L52) | — | — |
+| T8 Diseño | **cerrada sin cambios**: el dueño rechazó las tres maquetas (L54) | — | — |
+| T16 Etiquetado POS | **hecha** (L56): 97,83 % es, 94,03 % en | — | — |
+| T17 NER | pendiente | un corpus con licencia abierta verificada | grande |
+| T10 Cierre | verificador independiente corrido el 2026-11-20 (L57); falta la decisión de fusionar | el dueño | pequeña |
 
 Cada tarea grande se parte en unidades de un commit. **Cada unidad:** prueba en rojo → código → puerta →
 commit → push → fila y Log del documento ODD.
@@ -336,6 +350,12 @@ puerta y la e2e siguen en verde; el peso por página no sube.
 
 ### T7 — Análisis cualitativo (S9)
 
+**Estado (2026-11-17):** hecho lo que pide S9, con la decisión del dueño de codificar **segmentos** (línea o
+párrafo) y no tramos libres (Log L39): libro de códigos, codificación, frecuencias, coocurrencias, acuerdo
+(porcentual, κ, α) contra `irr` de R, CSV de ida y vuelta. Del plan de abajo **falta (T7b)**: guardado en
+IndexedDB (7.6), jerarquía, colores y memos (7.1–7.2), exportación `.qdc` (7.2) y recuperar los segmentos de
+un código (7.4). 7.3 cambia por la decisión de segmentos: no hay selección libre.
+
 **Pedido textual:** «una herramienta de estadística para ciencias sociales, ya sea a nivel cualitativo o
 cuantitativo, has la diferenciación».
 
@@ -352,6 +372,16 @@ cuantitativo, has la diferenciación».
 
 **Límites que la interfaz debe decir:** no codifica sola ni «encuentra temas»; el acuerdo solo vale si los
 dos codificadores trabajaron sobre las mismas unidades; es para corpus de tamaño de trabajo de curso.
+
+### S13 — Comparar documentos (T12–T15) — hecho en la rama
+
+Pedido en Log L40–L41. `packages/core/src/domain/document.ts` (formato por contenido, tope de 10 MB) y el
+puerto `DocumentReaderPort`; el adaptador `@lingualab/adapters/document` (ZIP propio con tope contado,
+.docx, PDF con pdf.js y su worker, cargado con el primer PDF); `src/scripts/tools/keyness.ts` y
+`compare.ts`; la página en `src/components/DocumentCompare.astro` y `src/scripts/comparar/`. Verificador
+independiente sin bloqueos y revisión de Gentle AI de `a609b8c` aprobada (L43). **Queda de la propuesta del
+dueño:** etiquetado POS/NER y reorganizar la interfaz de la estación. Para POS/NER, elegir el motor por
+exactitud medida sobre los conjuntos de prueba de Universal Dependencies (AnCora, EWT) antes de escribirlo.
 
 ### T4 — Árboles sintácticos fieles a su teoría (S4) — espera D3
 
@@ -473,30 +503,26 @@ Se le pregunta **una** cuando se llega a la tarea que la necesita, con la recome
 |---|---|---|
 | D1 Dónde corren los motores | **Resuelta:** navegador; Rust a WebAssembly solo donde se mida | — |
 | D2 Lenguas del transcriptor | **Resuelta:** solo español e inglés | — |
-| D3 Formalismos de árbol sin reglas propias, y estructuras de datos | Abierta | Validar seis de verdad; retirar con explicación el resto; estructuras de datos, fuera o aparte (§6, T4) |
-| D4 Motor de estadística | Abierta | Motor propio en TypeScript validado contra R; webR solo si se piden modelos avanzados (§6, T6) |
-| D5 Dirección de diseño | Abierta | Se decide sobre tres maquetas (§6, T8) |
+| D3 Formalismos de árbol sin reglas propias, y estructuras de datos | **Resuelta (2026-11-20):** «Validar 6, retirar resto» | — |
+| D4 Motor de estadística | **Resuelta (2026-11-17):** motor propio validado contra R | — |
+| D5 Dirección de diseño | **Resuelta (2026-11-20):** ninguna de las tres maquetas; la página queda como está | — |
 | Portada: ¿motor nuevo o tabla de Ortografía? | Abierta, menor | Dejarla como está (§6, T9) |
 | Licencia: seguir en GPL-3.0-only | Abierta, menor | No tocarla: praatfan es GPL |
 
 ## 9. Asuntos abiertos fuera del código
 
-- **Revisión de gentle-ai: APAGADA desde el 2026-11-14** por pedido del dueño (`gentle-ai review mode
-  disable`, ámbito global; Log L29). No se enciende sin que el dueño lo pida. Lo que sigue describe cómo
-  funcionaba.
-- **Revisión de gentle-ai (histórico).** El repositorio tiene activo el desarrollo guiado por recibos: al terminar un
-  turno con commits nuevos, un gancho pide correr `gentle-ai review start …` tal como lo entrega. Si
-  devuelve una consulta de consentimiento (`consent_required`), **se le traslada completa al dueño y no se
-  responde por él**. El dueño declinó la revisión del commit `69e7cbb`. Un agente que no sea Claude Code
-  no tiene ese gancho: puede ignorar este punto.
+- **Revisión de gentle-ai: APAGADA** desde el 2026-11-20 por pedido del dueño (`gentle-ai review mode
+  disable`, global; L54). No se vuelve a encender sin que el dueño lo pida. Con el interruptor apagado, el
+  gancho no pide revisiones.
 - **Memoria Engram:** en esta máquina las escrituras fallaron. El registro completo está en el
   repositorio, no en la memoria.
 - **Límite de uso del dueño:** trabaja con un plan con tope de cinco horas y otro semanal. Conviene
   commitear seguido, no releer archivos ya leídos, limitar la salida de los comandos (`| tail`, `| grep`)
   y dejar este traspaso al día antes de agotar la sesión.
-- **Pendientes anteriores** que siguen en `docs/HUMAN-EVIDENCE.md`: descartar en GitHub siete alertas de
-  CodeQL justificadas, proteger `main` también para administradores, subir el piso de Node para Astro
-  7.4.2 (P23), etiquetas `v3.0.0` y `v3.1.0`.
+- **CI sube los rastros de Playwright** (`playwright-traces`) cuando falla la e2e: así se encontró el cuelgue a 44,1 kHz (L35). Esta máquina decodifica a 48 kHz; un defecto que solo aparece a 44,1 kHz no se ve aquí sin forzarlo.
+- **Pendientes anteriores** que siguen en `docs/HUMAN-EVIDENCE.md`: descartar en GitHub ocho alertas de
+  CodeQL justificadas, proteger `main` también para administradores, etiquetas `v3.0.0` y `v3.1.0`. (P23 quedó resuelto el
+  2026-11-20.)
 
 ## 10. Dónde está cada cosa
 

@@ -57,7 +57,7 @@ Lo que solo puede cerrar una persona con un programa, una comunidad o una decisi
 | P20 | Borrar un proyecto y no todo el almacén | abierta | Decisión de producto |
 | P21 | «Análisis acústico» anunciado sin existir | cerrada | — |
 | P22 | La tabla de mediciones acústicas no entra | abierta | Nada: el paso exacto está escrito |
-| P23 | Astro 7.4.2 exige Node 22.23.4 | abierta | Decisión: subir el piso de Node |
+| P23 | Astro 7.4.2 exige Node 22.23.4 | resuelta | Piso de Node en 22.23.4 y Astro 7.4.12 |
 
 Las cifras del día no viven aquí: están en [`docs/metrics.json`](metrics.json). Las que aparecen dentro de
 cada entrada son mediciones con su fecha, y se dejan como historia.
@@ -979,7 +979,9 @@ entra, la puerta ya no debería necesitarlo.
 
 ## P23 — Astro 7.4.2 exige Node 22.23.4
 
-**Estado: abierta, a la espera de una decisión.**
+**Estado: resuelta.** El 2026-11-20. La máquina de trabajo pasó a Node 22.23.4, `engines.node` pide
+`>=22.23.4` y Astro subió a 7.4.12 (con `@astrojs/sitemap` 3.7.5 fijado exacto); `npm run verify:all` en
+verde. Lo que sigue es el registro histórico.
 
 **Síntoma.** El PR #12 de Dependabot subía Astro de 7.4.1 a 7.4.2 junto con Biome. Con 7.4.2,
 `astro check` se niega a correr en Node 22.23.3 —«Node.js v22.23.3 is not supported by Astro! Please

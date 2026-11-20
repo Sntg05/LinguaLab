@@ -28,6 +28,8 @@ export {
   type StaticToolRegistry,
 } from "./tool-registry/static-tool-registry";
 
+export { createPosTagger, type PosTaggerOptions } from "./pos/pos-tagger";
+
 export {
   createNativePhonemizer,
   type NativePhonemizerOptions,

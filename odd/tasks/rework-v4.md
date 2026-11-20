@@ -46,6 +46,18 @@ validar: **Praat 6.4.06** y **R 4.3.3**.
   labs». Hecho cuando: cada ejemplo de cada tipo de árbol se dibuja sin error; cada formato que ofrece
   cada laboratorio se descarga y su contenido se valida (o se reimporta) en una prueba; un formato que no
   es lo que su nombre promete se corrige o se quita.
+- **S14 (POS/NER).** Propuesta del dueño, textual (L40): «Is it possible to implement some POS tagging, NER
+  tagging, and other NLP tools in the text editor?». Hecho cuando: la estación etiqueta un texto en español o
+  inglés con UPOS, dice su precisión medida y lo que no sabe, y exporta el resultado.
+- **S13 (comparación de documentos, 2026-11-17).** «I think we could add a feature to the website that would
+  allow users to upload 2 or, at most, 3 documents in docx or PDF format with extractable text and conduct
+  comparative corpus analyses» y «start the document comparison first». Hecho cuando: en la estación de
+  texto se cargan de 2 a 3 documentos .docx, PDF con texto extraíble (o .txt); un PDF sin texto se rechaza
+  diciéndolo; se comparan frecuencias normalizadas, palabras clave de cada documento frente al resto
+  (log-likelihood y log ratio, con cifras contrastadas con R), diversidad léxica, vocabulario compartido y
+  propio, y concordancias por documento; los resultados se descargan y se leen de vuelta en una prueba.
+  Supuesto, sin pedir: la comparación entra como una sección nueva de la estación; la reorganización
+  completa de su interfaz y el etiquetado POS/NER de la misma propuesta (L40) quedan para después.
 - **S11 (diseño).** «me gusta mucho el front pero puedes hacerlo mejor, revisa páginas parecidas y copia
   diseños o escanea repositorios de diseño para que sea más llamativa, intuitiva y útil para los
   estudiantes».
@@ -58,12 +70,12 @@ Se preguntan de a una, al empezar la fase que las necesita.
   WebAssembly donde una medición lo justifique, lo que pide instalar Rust en esta máquina) o en un
   servidor propio (Go o Rust), que rompería la regla «los datos no salen del navegador» (ADR 0002).
 - **D2 (resuelta el 2026-11-10).** «déjalo en español e inglés no más entonces».
-- **D3 (T4).** Qué hacer con los formalismos que hoy son solo una etiqueta: rehacerlos con su notación
+- **D3 (T4, resuelta el 2026-11-20: «Validar 6, retirar resto»).** Qué hacer con los formalismos que hoy son solo una etiqueta: rehacerlos con su notación
   propia o retirarlos hasta hacerlos bien; y si las estructuras de datos (AVL, heap, trie…) siguen en un
   sitio para lingüistas.
-- **D4 (T6).** Motor de estadística cuantitativa: R real en el navegador (webR) o un motor propio
+- **D4 (resuelta el 2026-11-17: «our own engine validated against R»).** Motor de estadística cuantitativa: R real en el navegador (webR) o un motor propio
   validado contra R.
-- **D5 (T8).** Dirección de diseño, sobre maquetas.
+- **D5 (T8, resuelta el 2026-11-20: el diseño se queda como está).** Dirección de diseño, sobre maquetas.
 
 ## Tasks
 
@@ -73,14 +85,27 @@ Se preguntan de a una, al empezar la fase que las necesita.
 | T1 | S5, S6 | Modelo de referencias por herramienta en el núcleo; apartado en Acerca; bloque «¿De dónde sale esto?» en cada herramienta; prueba que exige teoría y al menos una referencia verificada por herramienta | inline | hecha | `bf93d89` y el commit siguiente. Rojo: la prueba del núcleo sin el módulo; mutación: una herramienta sin referencias hace fallar la regla. 22 obras verificadas en Crossref o en su página |
 | T2 | S1, S2 | Transcriptor propio: reglas para el español y CMUdict para el inglés, en lugar de eSpeak | inline (TypeScript: no hay nada que medir que pida Rust) | hecha | `03ec0d8`: motores con rojo y verde. Commit siguiente: CMUdict empaquetado (`scripts/build-cmudict.mts`), adaptador `createNativePhonemizer` (rojo: suite sin módulo; verde: 9 pruebas), página conectada con variedad, nivel, palabras sin transcribir y variantes, y eSpeak retirado. `verify:all` y e2e completa en verde. Español: 96,6 % propio frente a 76,9 % de eSpeak |
 | T3 | S3 | Lenguas nuevas | — | fuera de alcance por decisión del dueño (D2) | — |
-| T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | por decidir (D3) | pendiente | — |
+| T4 | S4, S5 | Árboles: validador y notación por teoría, o retiro declarado | inline (D3: validar 6, retirar 8) | hecha (L53) | commit de L53 |
 | T5 | S1, S7 | Visor acústico al estilo de Praat; contraste numérico contra Praat (cierra P17) | inline y delegada (5.3–5.7: escritores acotados, contexto y paralelismo) | hecha en código (L21–L32) | `0b514b7`: F0, F1 y F2 iguales a Praat 6.4.49 en tres vocales (rojo: la prueba exige `passed` y antes daba `missing-fixtures`). 5.1 hecha (editor de una pantalla, L21); 5.8 hecha en código (L23–L25; falta la evidencia humana); 5.2 hecha salvo la captura con Praat (L26); 5.3 hecha (curvas sobre el espectrograma, L27); 5.6 y 5.7 hechas (`c9bf799`, `f19f6b6`, L30); 5.4 hecha (`9316dce`, L31); 5.5 hecha (`6726b4a`, L32). Pendiente humano: la persona que no conoce el visor y la captura junto a Praat |
-| T6 | S9 | Estadística cuantitativa, contrastada con R 4.3.3 | por decidir (D4) | pendiente | — |
-| T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | pendiente | — |
-| T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | por decidir (D5) | pendiente | — |
+| T6 | S9 | Estadística cuantitativa, contrastada con R (D4: motor propio) | inline | hecha (L44–L49) | ver T6.1–T6.8 |
+| T6.3 | S9 | Distribuciones normal, t, χ², F (función de distribución y cuantiles) en `packages/core/src/stats/` | inline | hecha | commit de L45 |
+| T6.2 | S9 | Descriptivos: n, media, mediana, moda, varianza, desviación, cuantiles tipo 7, rango, asimetría | inline | hecha | commit de L45 |
+| T6.4 | S9 | Pruebas: t (una muestra, Welch, pareada), χ² (independencia, bondad de ajuste), Pearson, Spearman, ANOVA de un factor, Mann–Whitney, Wilcoxon | inline | hecha | commit de L46 |
+| T6.5 | S9 | Tamaños del efecto e intervalos al 95 % | inline | hecha: intervalos de d, η² y V en L52 | commits de L47 y L52 |
+| T6.6 | S9 | Regresión lineal simple y múltiple | inline | hecha | commit de L48 |
+| T6.1, T6.7, T6.8 | S9, S6 | Datos CSV/TSV, gráficos SVG y página `/estadistica` con asistente e informe APA | inline | hecha | commit de L49 |
+| T7 | S9 | Análisis cualitativo: codificación, libro de códigos, coocurrencias, acuerdo entre codificadores | inline | hecha en lo pedido por S9; quedan unidades del plan del traspaso (L43) | `c1bed4f` motor contra `irr` de R; `b5e1707` página `/cualitativo` con e2e y axe (L39) |
+| T8 | S6, S11 | Diseño: referencias, maquetas, aplicación | — | cerrada sin aplicar: el dueño rechazó las tres maquetas y pidió dejar la página como está (L54) | `docs/design/maquetas` en el historial |
 | T9 | S1 | Contrato único de herramienta y carga bajo demanda en todas | inline | hecha | `0b514b7`: FonoLab usa el transcriptor del sitio. Inventario y trinquete (L33); `d45b8e9` PhonemizerLab; `4417cac` FonoLab, Glosario y Bibliografía; `e56b84a` ArborLab, con su primera e2e funcional; `c565ee5` TextStation. Ningún componente pasa de 30 líneas de script (L34) |
 | T11 | S12 | Árboles sin errores y exportaciones válidas en todos los laboratorios | inline | hecha | `c48e142` árboles (L37); commit siguiente, `e2e/exports.spec.ts` (L38) |
-| T10 | S1–S11 | Puerta completa, verificación independiente, traspaso | verificador | pendiente | — |
+| T7b | S9 | Lo que falta del plan de T7: guardado, jerarquía, colores y memos, recuperar segmentos (`.qdc` fuera: esquema no verificable, L51) | inline | hecha | commit de L51 |
+| T12 | S13 | Lectura de documentos: puerto en el núcleo, .txt y .docx propios (ZIP + XML, sin dependencia) | inline | hecha | `eba3a16` (L42) |
+| T13 | S13 | PDF con pdf.js (dependencia nueva: riesgo 5), rechazo de PDF sin texto | inline + verificador | hecha; verificador sin bloqueos y revisión de Gentle AI aprobada (L43) | `a609b8c` (L42) |
+| T14 | S13 | Motor de comparación: frecuencia por 10 000, G² y p, log ratio, diversidad, vocabulario compartido; contrastado con R base | inline | hecha | `e49851f`, `d86fa57` (L42) |
+| T15 | S13 | Sección «Comparar documentos» en la estación, exportaciones leídas de vuelta, e2e y axe | inline | hecha | commit siguiente (L42) |
+| T16 | S14 | Etiquetado POS (UPOS) en la estación: perceptrón promediado entrenado con UD AnCora (es) y EWT (en), medido con sus conjuntos de prueba; modelo servido bajo demanda | inline | hecha (L56) | commit de L56 |
+| T17 | S14 | NER | — | pendiente: falta un corpus de entidades con licencia abierta verificada | — |
+| T10 | S1–S14 | Puerta completa, verificación independiente, traspaso | verificador | hecha (L57); falta la decisión del dueño de fusionar | commit de L57 |
 
 ## Log
 
@@ -428,4 +453,210 @@ Se preguntan de a una, al empezar la fase que las necesita.
   texto y de la tabla ortográfica. Aviso, sin cambio: los CSV no neutralizan celdas que empiezan con
   `=`, `+`, `-` o `@`; hacerlo alteraría datos lingüísticos legítimos (sufijos «-s», clíticos «=lo»), y los
   datos son de la propia persona. Verde: `verify:all` y 222 e2e.
-
+- **L39 (2026-11-17). T7: análisis cualitativo.** Decisión del dueño, preguntada antes de empezar: la unidad
+  que se codifica son **segmentos** (línea o párrafo), no tramos libres; con tramos libres el acuerdo
+  pediría la alfa de unitización. Motor en `packages/core/src/qualitative/`: libro de códigos (MacQueen y
+  colaboradores, 1998), hoja de codificación en CSV ancho (`segment,text,<códigos>`, 1/0/vacío = no
+  codificado), frecuencias, coocurrencias, acuerdo porcentual, kappa de Cohen y alfa nominal de
+  Krippendorff. Validación: `scripts/r/build-agreement-reference.R` corre `irr` 0.85 sobre cinco
+  matrices (entre ellas el ejemplo de Krippendorff, α = 0,743) y versiona el resultado; las pruebas
+  exigen las mismas cifras a 1e-12, y mutar el peso de la alfa o el azar de la kappa las rompe. La R de
+  esta máquina es la 4.5.2, no la 4.3.3 que dice la cabecera; `irr` se instaló en una biblioteca temporal,
+  no en la del sistema. Diferencia declarada con R: sin variación la alfa es indefinida (`null`); `irr`
+  da 1. Página `/cualitativo` (área «documentación», estado experimental), con ejemplo inventado en
+  cada idioma, siete referencias verificadas en Crossref o en CRAN y cinco descargas leídas de vuelta en
+  `e2e/qualitative.spec.ts`. axe encontró dos defectos propios antes del commit, ya corregidos: una
+  tabla vacía con cabecera (th-has-data-cells) y botones que no partían su rótulo a 320 px. Se añadió
+  una prueba con axe sobre la página con datos, porque las tablas que construye el navegador no existen
+  cuando `accessibility.spec.ts` mide la página vacía. De paso, el README ya no anuncia la exportación
+  Brat que T11 quitó.
+- **L40 (2026-11-17). Propuesta del dueño, sin decidir todavía.** Textual: «Is it possible to implement
+  some POS tagging, NER tagging, and other NLP tools in the text editor? To complement and reorganize the
+  entire interface of this lab—since it’s the simplest one—I think we could add a feature to the website
+  that would allow users to upload 2 or, at most, 3 documents in docx or PDF format with extractable
+  text and conduct comparative corpus analyses. What do you think?». Respuesta dada: viable; primero la
+  comparación de 2–3 documentos (.docx/PDF con pdf.js, frecuencia normalizada, keyness con log-likelihood
+  y log ratio, diversidad léxica, n-gramas compartidos, KWIC, contrastado con R); después POS y NER,
+  eligiendo el motor por exactitud medida en los conjuntos de prueba de Universal Dependencies (AnCora,
+  EWT). Queda como S13 cuando el dueño lo confirme.
+- **L41 (2026-11-17). S13 empieza.** Pedido textual: «start the document comparison first, and give me the
+  differences between webR and our own engine for maths». Plan: T12 a T15. Fixtures reales: .docx con
+  pandoc y PDF con pandoc + xelatex, versionados con el script que los genera. Las cifras de palabras
+  clave se contrastan con R base (devianza de un modelo de Poisson de independencia sobre la tabla 2×2 =
+  G²; `pchisq` para p), sin paquetes. Para D4 se dio la comparación webR / motor propio (ver respuesta
+  del 2026-11-17); D4 sigue abierta.
+- **L42 (2026-11-17). S13: comparación de documentos (T12 a T15).** Lectura propia de .docx (directorio
+  central del ZIP, `DecompressionStream` con tope contado contra bombas, `w:t`/`w:tab`/`w:br`, sin texto
+  borrado ni copias `mc:Fallback`); PDF con pdf.js 6.5.438 (Apache-2.0, exacta, anotada) cargado con su
+  worker al leer el primer PDF, `isEvalSupported: false`. Fixtures reales con pandoc y xelatex; la
+  extracción del PDF coincide palabra por palabra con `pdftotext`. Motor: G² de Dunning sobre la tabla
+  2×2, p con la cola normal de Cody y log ratio, contrastados con R base (G² = devianza de `glm`
+  Poisson; `pchisq`), ocho casos hasta p = 1e-88 a 1e-10; mutar una celda rompe 11 pruebas. Tres
+  afirmaciones mías no se sostenían al verificarlas y se corrigieron antes de publicarlas: (1) que el 0,5
+  del log ratio fuera la convención de Hardie (su entrada no lo dice; es el ajuste de quanteda); (2) que
+  Rayson y Garside (2000) propusieran G² ≥ 15,13 (no lo dicen; se cita lo que sí dicen, Kilgarriff 1996);
+  (3) mis recuentos a mano de palabras en la e2e (30, no 26). Seis constantes de Cody escritas de
+  memoria quedan cubiertas por la comparación con R. El linter marcó que esas constantes tenían más
+  dígitos de los que un double guarda: se escriben en su forma exacta, y la referencia que genera R lleva
+  una exención explicada. Página: sección «Compara dos o tres documentos» bajo la estación, con
+  perfil, palabras clave, vocabulario, frecuencias, concordancias y tres CSV. e2e con los tres formatos,
+  un PDF escaneado, un cuarto documento, uno repetido, y axe con resultados. La reorganización completa
+  de la estación y POS/NER (L40) siguen sin empezar.
+- **L43 (2026-11-17). Cierre de S13: verificación independiente, revisión y correcciones.** El verificador
+  independiente (riesgo 5, dependencia nueva) no encontró bloqueos y dio PASS a cada cláusula de S13 y a
+  las comprobaciones de la dependencia (versión exacta, licencia compatible, pdf.js solo por import
+  dinámico, nada de otro origen, el worker permitido por `script-src 'self'`). Revisión de Gentle AI: la
+  candidata entera (T7 + S13) pasaba del presupuesto de contexto del revisor; el dueño eligió revisar solo
+  la unidad de riesgo, `a609b8c`, en un worktree aparte, con las lentes de riesgo y resiliencia: aprobada y
+  acusada (`review-89ad239830174cae`), con tres avisos no bloqueantes. Correcciones, cada una con prueba:
+  (1) **mi segunda atribución del 0,5 también era falsa**: `textstat_keyness` de quanteda no tiene log
+  ratio; ahora se dice que es una práctica habitual sin fuente primaria encontrada; (2) la prueba de p
+  aceptaba cualquier p por debajo de 1e-9 (un verificador cambió una constante de Cody y pasó): ahora se
+  compara por error relativo y p se evalúa en el G² de R, porque el de `glm` es iterativo y difiere 1e-12
+  del cerrado, error que p multiplica por G²/2; (3) **la forma de exp en dos productos que quité en T14
+  sí importaba**: con ella `normalUpperTail` reproduce `pnorm` exactamente en y = 8,3 a 37,5, sin ella se
+  desvía hasta 1,2e-14; vuelve, con una prueba que lo exige; (4) una entidad XML fuera de Unicode en un
+  .docx hacía lanzar a `read()`: ahora queda escrita como venía; (5) cambiar las palabras vacías después
+  de comparar hacía que dos descargas no coincidieran con la pantalla: ahora usan las de la comparación;
+  (6) avisos de la revisión: un fallo al descargar el lector ya no se guarda para siempre (se reintenta
+  con el siguiente archivo) y se nombra (`reader-unavailable`, con su frase); (7) `engines.node` sube a
+  `>=22.13.0`, el mínimo de pdf.js. Pendiente, sin cambio: `@napi-rs/canvas` (dependencia opcional de
+  pdf.js, solo para Node) suma binarios nativos al lockfile; el texto de la licencia Apache de pdf.js no
+  viaja con el bundle minificado, igual que con las demás dependencias; las celdas CSV no neutralizan `=`
+  (decisión de L38).
+  **T7 frente al plan del traspaso:** lo hecho cubre S9 (libro de códigos, codificación, coocurrencias,
+  acuerdo contra R), pero el plan de `odd/handoff/ACTUAL.md` §6 pedía además guardar en IndexedDB (recargar
+  y que siga ahí), jerarquía, colores y memos de códigos, exportación REFI-QDA `.qdc` y «recuperar todos los
+  segmentos de un código». No se hicieron; quedan como T7b, sin decisión pendiente. El traspaso no se leyó
+  al empezar esta sesión (se trabajó desde la tabla de tareas): por eso T7 se dio por hecha de más.
+- **L44 (2026-11-17). D4 resuelta.** Textual: «our own engine validated against R». T6 se parte en las
+  unidades del plan del traspaso (§6): primero las distribuciones (6.3) y los descriptivos (6.2), en
+  `packages/core/src/stats/`, contrastados con R por `scripts/r/build-stats-reference.R`. La cola normal de
+  Cody que hoy vive en `src/scripts/tools/keyness.ts` pasa al núcleo para que haya una sola.
+- **L45 (2026-11-17). T6.3 y T6.2.** `packages/core/src/stats/`: normal (Cody, en el mismo orden que
+  `pnorm`), t, χ² y F por beta y gamma incompletas regularizadas (Numerical Recipes, Lanczos), con cola
+  superior calculada sin restar; cuantiles por bisección logarítmica sobre la cola precisa. Descriptivos:
+  media, mediana, modas, varianza y desviación (n − 1), cuantiles tipo 7, rango, IQR y asimetría G1;
+  una muestra vacía o con un valor no finito es un `Result` con error, no NaN. Validación:
+  `scripts/r/build-stats-reference.R` (R base; iris, mtcars, ToothGrowth) escribe 330 casos de
+  distribución y 5 muestras; todo coincide a 1e-10 relativo (1e-12 los descriptivos). Mutar un coeficiente
+  de Lanczos, la fracción de la beta o la serie de la gamma rompe 63, 149 y 15 pruebas. **R se equivoca en
+  `qf` con p muy pequeño:** `qf(1e-8, 1, 1)` da 2,22e-16 (el épsilon de la máquina) y `pf` de ese valor
+  da 9,49e-9; la referencia usa `qbeta`, que coincide con la forma cerrada tan²(πp/2) de F(1, 1). La cola
+  normal de Cody que tenía la estación pasa al núcleo: una sola implementación.
+- **L46 (2026-11-17). T6.4.** `packages/core/src/stats/tests.ts`: t de una muestra, pareada, de Welch y de
+  Student (con intervalo al 95 % y las tres alternativas), χ² de independencia (Yates solo en 2×2, una sola
+  corrección para toda la tabla, como R) y de bondad de ajuste, Pearson (intervalo por z de Fisher),
+  Spearman (aproximación t), ANOVA de un factor, Mann–Whitney y Wilcoxon pareada (exactas sin empates y con
+  menos de 50 valores; si no, normal con corrección de continuidad y de empates). Cada fallo esperado
+  (pocos datos, sin variación, tabla o proporciones inválidas) es un `Result` con nombre.
+  `scripts/r/build-tests-reference.R` escribe 24 casos con datos de R (mtcars, sleep, iris y los ejemplos
+  de `wilcox.test`); todos coinciden a 1e-10. Mi primera versión de Spearman tomaba `q − 1` en una rama:
+  falló contra R por un 2 %, y el código de `cor.test.default` mostró que esa corrección es solo de la
+  rama exacta. Mutar Yates, los grados de libertad de Welch o la decisión de usar la distribución exacta
+  rompe 1, 3 y 3 pruebas.
+- **L47 (2026-11-17). T6.5.** `packages/core/src/stats/effects.ts`: d de Cohen (combinada, una muestra y
+  d_z pareada), g de Hedges con la corrección exacta por funciones gamma, V de Cramér con y sin la
+  corrección de Bergsma (la que `effectsize` da por defecto), η², ω² y r biserial de rangos. Contrastados
+  con el paquete **`effectsize` 1.0.3** de R, una implementación independiente de estas fórmulas
+  (`scripts/r/build-effects-reference.R`; se instala en una biblioteca temporal): coinciden a 1e-10.
+  Cambiar la corrección exacta de Hedges por la aproximación 1 − 3/(4gl − 1), o quitar la de Bergsma,
+  rompe una prueba cada una. **Sin intervalos** para d, η² y V: necesitan las distribuciones t y χ² no
+  centrales, que el motor no tiene; los intervalos de las diferencias de medias (T6.4) y de r (Fisher)
+  sí están.
+- **L48 (2026-11-17). T6.6.** `packages/core/src/stats/regression.ts`: regresión lineal con intercepto por QR
+  de Householder (no por ecuaciones normales), con coeficientes, errores estándar, t, p, σ residual, R², R²
+  ajustado, F con su p, residuos y ajustados; predictores colineales, pocos datos, largos distintos o una
+  respuesta constante son errores con nombre. `scripts/r/build-regression-reference.R` corre `lm` y
+  `summary.lm` sobre cuatro modelos (mtcars simple y con tres predictores, iris, ToothGrowth): todo coincide
+  a 1e-9. Usar n en vez de n − p en la varianza residual rompe cuatro. Con esto el motor de T6 (6.2 a 6.6)
+  está completo; faltan los datos (6.1), los gráficos (6.7) y la página (6.8). T6.5 se commiteó sin
+  `verify:all` (solo pruebas, lint y tipos del núcleo); la puerta completa corrió aquí, en verde.
+- **L49 (2026-11-17). T6.1, T6.7 y T6.8: la página `/estadistica`.** Datos: `packages/core/src/stats/dataset.ts`
+  detecta el separador (coma, punto y coma o tabulador), acepta la coma decimal cuando el separador lo
+  permite, cuenta los faltantes (vacío, «NA», «N/A») sin rellenarlos y clasifica numérica o nominal; la
+  ordinal la marca la persona. El lector de CSV del núcleo (de T7) ganó el separador como parámetro en vez
+  de escribirse otro. Página: datos con un ejemplo **inventado** (40 participantes ficticios, semilla fija,
+  dicho en la página), tabla de variables con su tipo, descripción con tabla y gráfico, y un asistente de
+  siete preguntas que muestra los supuestos antes del resultado, propone la prueba paramétrica y su
+  alternativa por rangos, da siempre el tamaño del efecto, el umbral α = .05 a la vista y la frase en
+  formato APA (punto decimal, sin cero inicial, signo menos), con gráficos SVG propios (histograma de
+  Sturges, cajas de Tukey, dispersión con recta, barras) descargables. Catorce referencias verificadas
+  en Crossref o en su página. e2e: la frase de la página es la del motor para los mismos datos, cada
+  pregunta responde, un error dice por qué, el CSV de Excel en español se lee, el SVG es XML válido y
+  axe no encuentra violaciones con resultados; accesibilidad de la página en los dos idiomas, temas y a
+  320 px. **Sin cambio:** no hay Kruskal–Wallis ni modelos mixtos, ni intervalos de d, η² y V.
+- **L50 (2026-11-20).** El dueño, textual: «Lee el repositorio, los archivos que se quedaron de la última
+  versión trabajada y continúa con las tareas dejadas en el handoff, finalizalas todas las pendientes,
+  quiero terminar esta página ya». Había sin commitear Astro 7.4.12 y `@astrojs/sitemap` 3.7.5 fijado; la
+  máquina ya tiene Node 22.23.4. Se cierra P23 con `engines.node >=22.23.4` (`80576a6`).
+- **L51 (2026-11-20). T7b.** `packages/core/src/qualitative/`: el libro de códigos admite código padre,
+  color (`#rrggbb`) y memo, opcionales, en tres columnas nuevas del CSV (un CSV viejo se sigue leyendo);
+  `checkHierarchy` rechaza padres inexistentes y ciclos; `codeTree` ordena el árbol; `segmentsWithCode`
+  recupera los segmentos de un código. Página: campos de padre, color con nombre y memo; libro sangrado
+  con muestra de color al lado del nombre (no en su lugar); «Segmentos de un código»; el proyecto se
+  guarda en `localStorage` en los mismos CSV y se lee con los mismos lectores, con «Empezar de cero».
+  Rojo: `hierarchy.test.ts` y `persistence.test.ts` sin módulo; la e2e encontró un defecto real (un
+  proyecto vacío se guardaba y al recargar se anunciaba «se recuperó»), corregido. **No se hizo la
+  exportación REFI-QDA `.qdc`:** el esquema solo se publica tras un enlace de Tresorit que no se pudo leer
+  (`https://www.qdasoftware.org/codebook-implementation-files`), y la regla del proyecto es no escribir un
+  formato de memoria. Se usó `localStorage` y no IndexedDB: un proyecto de curso cabe de sobra y no
+  necesita el puerto de almacenamiento del visor.
+- **L52 (2026-11-20). T6.5 completa: intervalos de d, η² y V.** `distributions.ts` suma la t no central
+  (serie de Lenth 1989, AS 243), la χ² y la F no centrales (mezclas de Poisson sumadas desde la moda);
+  `intervals.ts` invierte esas CDF por bisección (método de la no centralidad, Steiger 2004), con las
+  mismas convenciones que `effectsize`: d bilateral al 95 %, η² y V unilaterales al 95 % ([límite, 1]).
+  `scripts/r/build-noncentral-reference.R` escribe dos referencias: la raíz exacta con `uniroot` sobre
+  `pt`/`pf`/`pchisq` de R (se exige 1e-7) y lo que imprime `effectsize` 1.0.3 (1e-6, porque busca con
+  Nelder–Mead). Las CDF no centrales coinciden con R a 1e-9. Rojo: la prueba sin módulo. La página
+  `/estadistica` añade el intervalo a cada línea APA y marca «one-sided» los unilaterales.
+- **L53 (2026-11-20). D3 resuelta y T4 hecha.** Textual: «Validar 6, retirar resto». `src/scripts/trees/
+  theories.ts`: UD v2 (las 37 relaciones verificadas en universaldependencies.org, subtipos `base:sub`,
+  `root` si y solo si la cabeza es 0), Penn Treebank (cada palabra bajo su categoría, aviso), X-barra
+  (binaria, cada SX y X′ con núcleo de su categoría, Spec hijo de SX: errores), minimalismo (Ensamble
+  binario: error; X′ no primitiva: aviso), morfología (de a un afijo: aviso); movimiento conserva el
+  mando-c. Retirados del selector, con su motivo en la página: CCG, LFG, HPSG, gramática relacional,
+  semántica, TAG, Reed–Kellogg y cartografía; las estructuras de datos se quedan. Referencias nuevas
+  verificadas: `marcus1993` (ACL Anthology J93-2004) y `haspelmath2013` (Crossref, DOI
+  10.4324/9780203776506). **Jackendoff (1977) no se pudo verificar** (la página de MIT Press respondió 403):
+  X-barra se apoya en Chomsky (1981), ya verificado. Errores lingüísticos corregidos en los ejemplos: «la
+  cerca» era `obl` y es `obj`; el ejemplo «Arcos cruzados» no cruzaba ningún arco (ahora el clásico «A
+  hearing is scheduled on the issue today», con una prueba que exige el cruce); los tres de X-barra no
+  cumplían la teoría (Spec con DP y D dentro, IP con DP y N). Prueba nueva: todo ejemplo de un formalismo
+  validado pasa sus propias reglas sin errores. Rojo: `theories.test.ts`, 11 fallos.
+- **L54 (2026-11-20).** El dueño, textual: «desactiva la revisión de gentle ai, y no me gusta ninguna de las
+  3 maquetas que me presentaste, sigue con las otras tareas y deja la página como está por ahora». Se corrió
+  `gentle-ai review mode disable` (queda `off` global). Las tres maquetas (Carta AFI, Espectrograma, Glosa
+  interlineal) se quitaron de `docs/design/maquetas/`; siguen en el historial de git. T8 no aplica cambios.
+- **L55 (2026-11-20). S14 (POS/NER), especificada desde L40.** Se empieza por POS: categorías UPOS de
+  Universal Dependencies, que es el inventario que ya usa ArborLab. Datos: `UD_Spanish-AnCora` @
+  `3ea1f74` (CC BY 4.0) y `UD_English-EWT` @ `491be06` (CC BY-SA 4.0: el modelo derivado se publica bajo
+  CC BY-SA 4.0, compatible con la GPL-3.0 del sitio). Método: perceptrón promediado (Collins 2002),
+  entrenado con `train` y medido con `test`, que el modelo nunca ve. NER queda para después de verificar
+  un corpus de entidades con licencia abierta.
+- **L56 (2026-11-20). T16: etiquetado POS en la estación.** `packages/core/src/pos/tagger.ts`: perceptrón
+  promediado (Collins 2002) con diccionario de palabras frecuentes no ambiguas; `scripts/train-pos.mts`
+  entrena con `train` y mide con `test` de cada treebank (commits fijos, sha256 comprobado). **Precisión
+  medida:** español (AnCora) 97,83 % de 53 622 palabras, 92,74 % en desconocidas; inglés (EWT) 94,03 % de
+  25 094, 78,26 % en desconocidas; la página la cita desde `src/data/pos-accuracy.json`. Modelos en
+  `public/pos/2026.11.20/` (motor registrado según la regla 9; 4,8 MB, ~0,8 MB comprimido cada uno, bajo
+  demanda); el presupuesto de motores sube de 19 a 24 MB. «del» y «al» se separan como en AnCora y la fila
+  lo dice. Puerto `PosTaggerPort` y adaptador `createPosTagger`. Referencias verificadas: `collins2002`
+  (Crossref), `taule2008` y `silveira2014` (ACL Anthology). Rojo: las pruebas del núcleo y de `rules.ts`
+  sin módulo; las del adaptador se escribieron junto con él. La e2e encontró un choque de atributos
+  (`data-pos-example` en la sección y en el botón), corregido. **NER (T17) sigue pendiente:** hace falta un
+  corpus de entidades en español e inglés con licencia abierta verificada.
+- **L57 (2026-11-20). T10: verificador independiente sobre `80576a6^..9828758`.** Astro y T6.5 pasan
+  (las referencias de R se recalcularon dígito por dígito; 174 casos extra de t, χ² y F no centrales a
+  menos de 1e-9). Tres bloqueos, corregidos en una tanda con su prueba en rojo: (1) cualitativo: dividir el
+  material antes de crear códigos guardaba una hoja sin códigos que al recargar no se leía, y la página
+  borraba el proyecto entero, material incluido; ahora cada parte se recupera por separado, y quitar un
+  código padre compara sin mayúsculas, como el libro. (2) Árboles: las etiquetas en español (SN, SV, SP,
+  SAdj) no se leían como proyecciones y la pista de X-barra que ve el estudiante fallaba sus propias reglas;
+  ahora se leen, la pista es válida en los dos idiomas y la adjunción a SX (SX hijo de SX) se admite, como
+  en Rección y Ligamiento. (3) POS: el tokenizador de la estación repetía apóstrofos y guiones internos
+  como palabras fantasma; el etiquetado tiene su propio tokenizador (decimales enteros, «3rd» y
+  «COVID-19» enteros) y separa los clíticos del inglés como EWT («do» + «n't», «John» + «'s»); tras un
+  fallo, el CSV ya no exporta resultados viejos. Avisos sin corregir: V de una tabla 2×2 con N = 2 da NaN
+  (ya pasaba antes); grupos casi constantes tardan ~7 s en el intervalo de d; «Al» con mayúscula se separa
+  aunque sea nombre propio; siglas como «O.N.U.» se parten. Puerta completa y e2e en verde después.

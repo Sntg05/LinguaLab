@@ -29,6 +29,7 @@
 
 import {
   type ClockPort,
+  type DocumentReaderPort,
   type IdGeneratorPort,
   createConvertOrthographyToIpa,
   createExportOrthographyTable,
@@ -42,6 +43,7 @@ import {
 import {
   type PersistenceStatus,
   createNativePhonemizer,
+  createPosTagger,
   createIndexedDbOrthographyRepository,
   createPraatfanAcousticAnalysis,
   createPyodideElanCodec,
@@ -105,6 +107,13 @@ const phonemizer = createNativePhonemizer({
 });
 
 /**
+ * El etiquetador POS de la estacion de texto. Como el fonemizador, pide sus
+ * modelos (`public/pos/<version>/`, los genera `scripts/train-pos.mts`) al
+ * propio sitio y solo la primera vez que alguien etiqueta en esa lengua.
+ */
+const posTagger = createPosTagger({ baseUrl: enginePath("pos") });
+
+/**
  * El codec ELAN (Pyodide + pympi-ling) del conversor del segmento 9.
  *
  * La base es `public/pyodide/<version>/` por la misma razon que la del fonemizador: la CSP
@@ -163,6 +172,28 @@ const createExperimentRunner: CreateExperimentRunner = async (
   return { runner, abort: () => engine?.abort() };
 };
 
+/**
+ * Lectura de documentos para la comparación de corpus (S13), construida al leer
+ * el primer archivo: el adaptador vive en su propio subpath y pdf.js, dentro de
+ * él, solo se descarga con el primer PDF. Mismo motivo que el ejecutor de
+ * experimentos para que el `import()` viva aquí y no en un componente.
+ */
+let documentReader: Promise<DocumentReaderPort> | null = null;
+const readDocument: DocumentReaderPort["read"] = async (name, bytes) => {
+  documentReader ??= import("@lingualab/adapters/document")
+    .then((module) => module.createBrowserDocumentReader())
+    .catch((error: unknown) => {
+      // Un fallo de red no se guarda para siempre: el próximo archivo reintenta.
+      documentReader = null;
+      throw error;
+    });
+  try {
+    return await (await documentReader).read(name, bytes);
+  } catch {
+    return { ok: false, error: { code: "reader-unavailable" } };
+  }
+};
+
 /** El caso de uso solo traduce el texto a AFI; no decide que se muestra. */
 const phonemizeText = createPhonemizeText({ phonemizer });
 
@@ -201,6 +232,8 @@ export interface LinguaLab {
    * `@lingualab/adapters`.
    */
   readonly phonemizer: ReturnType<typeof createNativePhonemizer>;
+  /** Categorias gramaticales (UPOS) de palabras ya separadas. */
+  readonly posTagger: ReturnType<typeof createPosTagger>;
   /**
    * El codec ELAN, y no solo su puerto.
    *
@@ -227,6 +260,8 @@ export interface LinguaLab {
    * el comentario de la constante, arriba.
    */
   readonly createExperimentRunner: CreateExperimentRunner;
+  /** Bytes de un .txt, .docx o PDF → su texto, o el fallo con nombre (S13). */
+  readonly readDocument: DocumentReaderPort["read"];
   /**
    * Which store is actually holding the tables right now, and why it degraded
    * if it did. It is exposed because the editor must tell the truth about
@@ -246,9 +281,11 @@ export const lingualab: LinguaLab = {
   listTools: createListTools({ registry }),
   phonemizeText,
   phonemizer,
+  posTagger,
   elan,
   acoustic,
   createExperimentRunner,
+  readDocument,
   // `persistence` does not depend on `this`, so passing the reference is exact
   // and avoids a wrapper that would only add a stack frame.
   persistence: tables.persistence,
