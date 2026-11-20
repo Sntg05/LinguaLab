@@ -181,6 +181,7 @@ propósito mismo de un script de desarrollo y se descartan con su motivo.
 | 21 | `file-system-race` | `scripts/build-cmudict.mts` | **Corregida.** Se lee la caché sin comprobar antes si existe |
 | 22 | `http-to-file-access` | `scripts/build-cmudict.mts` | **Corregida.** El hash se comprueba antes de escribir la descarga |
 | 23, 24 | `http-to-file-access` | `scripts/build-cmudict.mts` | **Se descartan: es el propósito del script.** Escribe en disco el diccionario que se sirve, solo después de comprobar el `sha256` fijado de la descarga; lo corre una persona y no el sitio |
+| 26 | `http-to-file-access` | `scripts/train-pos.mts` | **Se descarta por lo mismo (PR 26).** Guarda en la caché los treebanks de UD descargados de commits fijos, solo después de comprobar su `sha256`; lo corre una persona y no el sitio |
 
 El análisis del PR #13 encontró dos alertas más en el propio arreglo: **#16** (`incomplete-multi-character-sanitization`, la expresión regular de `strip` seguía siendo la que CodeQL rechaza) y **#17** (`file-system-race`, `verify-build` medía un archivo y lo leía después). Las dos se corrigieron en la misma rama: `strip` recorre el texto contando la profundidad de las etiquetas, sin expresiones regulares, y `verify-build` lee una sola vez y mide lo leído.
 

@@ -520,7 +520,7 @@ Se le pregunta **una** cuando se llega a la tarea que la necesita, con la recome
   commitear seguido, no releer archivos ya leídos, limitar la salida de los comandos (`| tail`, `| grep`)
   y dejar este traspaso al día antes de agotar la sesión.
 - **CI sube los rastros de Playwright** (`playwright-traces`) cuando falla la e2e: así se encontró el cuelgue a 44,1 kHz (L35). Esta máquina decodifica a 48 kHz; un defecto que solo aparece a 44,1 kHz no se ve aquí sin forzarlo.
-- **Pendientes anteriores** que siguen en `docs/HUMAN-EVIDENCE.md`: descartar en GitHub siete alertas de
+- **Pendientes anteriores** que siguen en `docs/HUMAN-EVIDENCE.md`: descartar en GitHub ocho alertas de
   CodeQL justificadas, proteger `main` también para administradores, etiquetas `v3.0.0` y `v3.1.0`. (P23 quedó resuelto el
   2026-11-20.)
 
