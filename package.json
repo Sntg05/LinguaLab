@@ -55,22 +55,22 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
-    "@astrojs/sitemap": "3.7.5",
+    "@astrojs/sitemap": "3.7.6",
     "@axe-core/playwright": "4.14.0",
-    "@biomejs/biome": "2.6.3",
+    "@biomejs/biome": "2.6.8",
     "@commitlint/cli": "21.2.4",
     "@commitlint/config-conventional": "21.2.4",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource/noto-sans": "^5.3.0",
-    "@playwright/test": "1.64.1",
-    "astro": "7.4.12",
-    "dependency-cruiser": "18.7.0",
+    "@playwright/test": "1.65.1",
+    "astro": "7.4.13",
+    "dependency-cruiser": "18.9.0",
     "happy-dom": "21.0.4",
     "husky": "9.1.7",
-    "lint-staged": "17.6.0",
-    "pyodide": "314.0.7",
+    "lint-staged": "17.6.2",
+    "pyodide": "314.0.8",
     "typescript": "6.0.3",
-    "vitest": "5.0.5"
+    "vitest": "5.1.1"
   },
   "allowScripts": {
     "esbuild@0.28.2": true
